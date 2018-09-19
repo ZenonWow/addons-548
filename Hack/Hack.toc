@@ -1,0 +1,16 @@
+## Interface: 50400
+## Title: Hack
+## Version: release_v1.4.4
+## Notes: Notebook / coding framework.
+## Author: Mud, aka Eric Tetz <erictetz@gmail.com>
+## X-Maintainer: Vandesdelca32
+## SavedVariables: HackDB
+## X-Curse-Packaged-Version: release_v1.4.4
+## X-Curse-Project-Name: Hack
+## X-Curse-Project-ID: hack
+## X-Curse-Repository-ID: wow/hack/mainline
+
+HackExamples.lua
+Hack.lua
+Hack.xml
+Indent.lua

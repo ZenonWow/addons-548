@@ -1,0 +1,48 @@
+if (GetLocale()~="ptBR") then return end
+local _, me = ...
+local L = me.L
+
+L["addtofav"] = "Adicionar aos favoritos"
+L["alt"] = "ALT"
+L["autoloot"] = "Captura automática"
+L["bothfactions"] = "Mostrar CDs e skills de ambas as facções"
+L["cds"] = "Cooldowns"
+L["ctrl"] = "CTRL"
+L["databaseempty"] = "Banco de dados vazio"
+L["deletechartooltip"] = "|cffff0000Attention:|r Limpa todas as configurações desse personagem!"
+L["favorites"] = "Favoritos"
+L["filter"] = "Ocultar skills"
+L["infight"] = "Você está em combate!"
+L["knowallrecipes"] = "|cffffcf00Todas as receitas aprendidas|r"
+L["leftclick"] = "Clique com botão esquerdo"
+L["linktome"] = "Linkar para mim"
+L["linktoother"] = "Linkar no chat"
+L["nocds"] = "Tudo pronto"
+L["nofavorites"] = [=[Sem favoritos criados!
+Abra a janela de skill e clique com o botão direito em
+seus skills para criar favoritos.]=]
+L["nomats"] = "Sem materiais"
+L["openLastProfessionWindow"] = "Abrir a última janela de profissão"
+L["openmenu"] = "Abre o menu"
+L["otherchar"] = "outros Personagens"
+L["pandaria_research"] = "pesquisar Pandaria"
+L["professions"] = "Profissões"
+L["quicklaunch"] = "Combinação de teclas (Acesso rápido)"
+L["quicklauncher"] = "criar separados quicklaunchers"
+L["relog"] = "É necessário relogar"
+L["removefromfav"] = "Remover dos favoritos"
+L["resetcds"] = "Resetar CDs"
+L["rightclick"] = "Clique com o botão direito"
+L["settings"] = "Configurações"
+L["shift"] = "Shift"
+L["ShowAllTooltips"] = "Mostrar todas as dicas"
+L["showbuttons"] = "Botões"
+L["showcds"] = "Cooldows"
+L["showfavorites"] = "Mostrar favoritos"
+L["ShowIfYouCanCraftThisInItemTooltips"] = "Mostrar nas dicas de itens, se você pode criar isso."
+L["tooltips"] = "Dicas"
+L["trainer"] = "Treinador"
+L["trainerdisabled"] = "desabilitar janela de treinador"
+L["transmute"] = "transmutar"
+L["visityourtrainer"] = "Visite seu |cff00ff00%s|r treinador"
+

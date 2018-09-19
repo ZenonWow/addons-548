@@ -1,0 +1,2 @@
+Ressy:
+	- Ticket 1 - High Society Top Hat recipe never made it in game - the hat itself drops Blingtron

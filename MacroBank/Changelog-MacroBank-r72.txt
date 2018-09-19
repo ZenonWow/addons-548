@@ -1,0 +1,14 @@
+------------------------------------------------------------------------
+r72 | oscarucb | 2013-12-09 09:41:06 +0000 (Mon, 09 Dec 2013) | 2 lines
+Changed paths:
+   M /trunk/MacroBank.lua
+
+re-apply r68 to prevent a trailing control character from appearing in received macro bodies
+
+------------------------------------------------------------------------
+r71 | Odlaw | 2012-09-03 23:36:55 +0000 (Mon, 03 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/MacroBank.lua
+
+Fix error when it builds icon table
+------------------------------------------------------------------------

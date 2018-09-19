@@ -1,0 +1,12 @@
+## Interface: 35100
+## Title: T-Suggestions
+## Notes: Suggert where to level up
+## Author: Totoo
+## Version: 1.0.0
+## Dependencies: 
+## OptionalDeps:
+## DefaultState: enabled
+## SavedVariables: 
+
+
+t-suggestions.lua

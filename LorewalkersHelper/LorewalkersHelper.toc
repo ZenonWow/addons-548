@@ -1,0 +1,31 @@
+## Interface: 50400
+## Title: Lorewalkers Helper
+## Notes: Helps the player at reaching exalted reputation with the Lorewalkers, and get the Disc of the Red Flying Cloud.
+## Notes-itIT: Aiuta il giocatore a raggiungere la reputazione di Osannato con i Raminghi della Sapienza, e ottenere il Disco della Nuvoletta Rossa.
+## Author: Claudio "Elder" Bertoli
+## Version: 0.1
+## X-Icon: Interface\Icons\achievement_faction_lorewalkers
+## OptionalDeps: LibStub, CallbackHandler-1.0., AceAddon-3.0, AceConsole-3.0, AceLocale-3.0, AceEvent-3.0, Astrolabe
+## SavedVariables: LWH_Settings
+## X-Curse-Packaged-Version: v1.2.4
+## X-Curse-Project-Name: Lorewalkers Helper
+## X-Curse-Project-ID: lorewalkers-helper
+## X-Curse-Repository-ID: wow/lorewalkers-helper/mainline
+
+#@no-lib-strip@
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+libs\AceAddon-3.0\AceAddon-3.0.lua
+libs\AceConsole-3.0\AceConsole-3.0.lua
+libs\AceDB-3.0\AceDB-3.0.lua
+libs\AceLocale-3.0\AceLocale-3.0.lua
+libs\AceEvent-3.0\AceEvent-3.0.lua
+#@end-no-lib-strip@
+libs\Astrolabe\Load.xml
+libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+
+LH-enUS.lua
+LH-itIT.lua
+LH-frFR.lua
+
+LorewalkersHelper.lua

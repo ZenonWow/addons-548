@@ -1,0 +1,28 @@
+﻿## Interface: 40000
+## Title: HandyNotes_FlightMasters
+## Notes: Database of FlightMaster locations for HandyNotes
+## Notes-frFR: Base de données des positions des maîtres de vol pour HandyNotes.
+## Author: Xinhuan
+## Version: 1.0.4
+## DefaultState: enabled
+## X-Category: Map
+## X-eMail: xinhuan @ gmail DOT com
+## SavedVariables: HandyNotes_FlightMastersDB
+## RequiredDeps: HandyNotes
+## X-Curse-Packaged-Version: r88
+## X-Curse-Project-Name: HandyNotes_FlightMasters
+## X-Curse-Project-ID: handy-notes_flight-masters
+## X-Curse-Repository-ID: wow/handy-notes_flight-masters/mainline
+
+Locales\Locale-enUS.lua
+Locales\Locale-deDE.lua
+Locales\Locale-esES.lua
+Locales\Locale-frFR.lua
+Locales\Locale-koKR.lua
+Locales\Locale-ruRU.lua
+Locales\Locale-zhCN.lua
+Locales\Locale-zhTW.lua
+
+#libs\Astrolabe\Load.xml
+
+HandyNotes_FlightMasters.lua

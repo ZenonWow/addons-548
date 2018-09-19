@@ -1,0 +1,11 @@
+tag v1.2.4
+63de5ea662742b793c617eeab1b924bcdc2299ff
+Xadras <xadras@none.com>
+2013-12-23 12:24:14 +0100
+
+
+
+--------------------
+
+Xadras:
+	- Updated interface version

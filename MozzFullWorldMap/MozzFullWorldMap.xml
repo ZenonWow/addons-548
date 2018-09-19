@@ -1,0 +1,677 @@
+<!--
+
+MozzFullWorldMap.xml
+MozzFullWorldMap (Fan's Update)
+
+-->
+
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/FrameXML/UI.xsd">
+
+	<Frame name="MFWM" hidden="false" toplevel="true" frameStrata="LOW" enableMouse="false" parent="WorldFrame">
+		<Anchor point="TOPLEFT">
+			<Offset>
+				<AbsDimension x="0" y="0"/>
+			</Offset>
+		</Anchor>
+		<Size>
+			<AbsDimension x="1" y="1"/>
+		</Size>
+	</Frame>
+
+	<ColorSelect name="MFWM_OptionsFrame" toplevel="true" parent="UIParent" frameStrata="DIALOG" hidden="true" enableMouse="true">
+		<Size>
+			<AbsDimension x="260" y="280"/>
+		</Size>
+		<Anchors>
+			<Anchor point="CENTER"/>
+		</Anchors>
+		<Frames>
+			<CheckButton name="MFWM_OptionsFrame_ShowMapCheckButton" inherits="OptionsCheckButtonTemplate">
+				<HitRectInsets>
+					<AbsInset left="0" right="-125" top="0" bottom="0"/>
+				</HitRectInsets>
+				<Size>
+					<AbsDimension x="24" y="25"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+						<Offset>
+							<AbsDimension x="335" y="-10" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="MFWM_OptionsFrame_ShowMapLabel" inherits="GameFontNormalSmall" justifyH="LEFT" text="">
+							<Anchors>
+								<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT">
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</CheckButton>
+			<CheckButton name="MFWM_OptionsFrame_ShowKnownDataCheckButton" inherits="OptionsCheckButtonTemplate">
+				<HitRectInsets>
+					<AbsInset left="0" right="-125" top="0" bottom="0"/>
+				</HitRectInsets>
+				<Size>
+					<AbsDimension x="24" y="25"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="MFWM_OptionsFrame_ShowMapCheckButton" relativePoint="BOTTOM">
+						<Offset>
+							<AbsDimension x="0" y="0" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="MFWM_OptionsFrame_ShowKnownDataLabel" inherits="GameFontNormalSmall" justifyH="LEFT" text="">
+							<Anchors>
+								<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT">
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</CheckButton>
+			<CheckButton name="MFWM_OptionsFrame_SaveMapDataCheckButton" inherits="OptionsCheckButtonTemplate">
+				<HitRectInsets>
+					<AbsInset left="0" right="-125" top="0" bottom="0"/>
+				</HitRectInsets>
+				<Size>
+					<AbsDimension x="24" y="25"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="MFWM_OptionsFrame_ShowKnownDataCheckButton" relativePoint="BOTTOM">
+						<Offset>
+							<AbsDimension x="0" y="0" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="MFWM_OptionsFrame_SaveMapDataLabel" inherits="GameFontNormalSmall" justifyH="LEFT" text="">
+							<Anchors>
+								<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT">
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</CheckButton>
+			<CheckButton name="MFWM_OptionsFrame_DebugCheckButton" inherits="OptionsCheckButtonTemplate">
+				<HitRectInsets>
+					<AbsInset left="0" right="-125" top="0" bottom="0"/>
+				</HitRectInsets>
+				<Size>
+					<AbsDimension x="24" y="25"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="MFWM_OptionsFrame_SaveMapDataCheckButton" relativePoint="BOTTOM">
+						<Offset>
+							<AbsDimension x="0" y="0" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="MFWM_OptionsFrame_DebugLabel" inherits="GameFontNormalSmall" justifyH="LEFT" text="">
+							<Anchors>
+								<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT">
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</CheckButton>
+			<CheckButton name="MFWM_OptionsFrame_LabelPanelsCheckButton" inherits="OptionsCheckButtonTemplate">
+				<HitRectInsets>
+					<AbsInset left="0" right="-125" top="0" bottom="0"/>
+				</HitRectInsets>
+				<Size>
+					<AbsDimension x="24" y="25"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="MFWM_OptionsFrame_DebugCheckButton" relativePoint="BOTTOM">
+						<Offset>
+							<AbsDimension x="0" y="0" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="MFWM_OptionsFrame_LabelPanelsLabel" inherits="GameFontNormalSmall" justifyH="LEFT" text="">
+							<Anchors>
+								<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT">
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</CheckButton>
+			<CheckButton name="MFWM_OptionsFrame_UseNormalTintCheckButton" inherits="OptionsCheckButtonTemplate">
+				<HitRectInsets>
+					<AbsInset left="0" right="-125" top="0" bottom="0"/>
+				</HitRectInsets>
+				<Size>
+					<AbsDimension x="24" y="20"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="MFWM_OptionsFrame_LabelPanelsCheckButton" relativePoint="BOTTOM">
+						<Offset>
+							<AbsDimension x="0" y="-25" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="MFWM_OptionsFrame_UseNormalTintLabel" inherits="GameFontNormalSmall" justifyH="LEFT" text="">
+							<Anchors>
+								<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT">
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</CheckButton>
+			<CheckButton name="MFWM_OptionsFrame_UseBlueTintCheckButton" inherits="OptionsCheckButtonTemplate">
+				<HitRectInsets>
+					<AbsInset left="0" right="-125" top="0" bottom="0"/>
+				</HitRectInsets>
+				<Size>
+					<AbsDimension x="24" y="25"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="MFWM_OptionsFrame_UseNormalTintCheckButton" relativePoint="BOTTOM">
+						<Offset>
+							<AbsDimension x="0" y="0" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="MFWM_OptionsFrame_UseBlueTintLabel" inherits="GameFontNormalSmall" justifyH="LEFT" text="">
+							<Anchors>
+								<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT">
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</CheckButton>
+			<CheckButton name="MFWM_OptionsFrame_UseCustomTintCheckButton" inherits="OptionsCheckButtonTemplate">
+				<HitRectInsets>
+					<AbsInset left="0" right="-125" top="0" bottom="0"/>
+				</HitRectInsets>
+				<Size>
+					<AbsDimension x="24" y="25"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="MFWM_OptionsFrame_UseBlueTintCheckButton" relativePoint="BOTTOM">
+						<Offset>
+							<AbsDimension x="0" y="0" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="MFWM_OptionsFrame_UseCustomTintLabel" inherits="GameFontNormalSmall" justifyH="LEFT" text="">
+							<Anchors>
+								<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT">
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</CheckButton>
+			<Slider name="MFWM_OptionsFrame_OpacitySliderFrame" orientation="HORIZONTAL" minValue="0" maxValue="1" valueStep="0.01" defaultValue="1">
+				<Size>
+					<AbsDimension x="256" y="16"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="MFWM_OptionsFrame_UseCustomTintCheckButton" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-25"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Backdrop bgFile="Interface\Buttons\UI-SliderBar-Background" edgeFile="Interface\Buttons\UI-SliderBar-Border" tile="true">
+					<EdgeSize>
+						<AbsValue val="8"/>
+					</EdgeSize>
+					<TileSize>
+						<AbsValue val="8"/>
+					</TileSize>
+					<BackgroundInsets>
+						<AbsInset left="3" right="3" top="6" bottom="6"/>
+					</BackgroundInsets>
+				</Backdrop>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="MFWM_OptionsFrame_OpacitySliderLabel" inherits="GameFontNormalSmall">
+							<Anchors>
+								<Anchor point="BOTTOM" relativePoint="TOP"/>
+							</Anchors>
+						</FontString>
+						<FontString name="MFWM_OptionsFrame_OpacitySliderValue" inherits="GameFontNormalSmall">
+							<Anchors>
+								<Anchor point="TOP" relativePoint="BOTTOM"/>
+							</Anchors>
+							<Color r="1" g="1" b="1" />
+						</FontString>
+						<FontString name="$parentLess" inherits="GameFontNormalHuge" text="-">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT">
+									<Offset>
+										<AbsDimension x="0" y="2"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<Color r="1" g="1" b="1" />
+						</FontString>
+						<FontString name="$parentMore" inherits="GameFontNormalHuge" text="+">
+							<Anchors>
+								<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT">
+									<Offset>
+										<AbsDimension x="0" y="2"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<Color r="1" g="1" b="1" />
+						</FontString>
+					</Layer>
+				</Layers>
+				<ThumbTexture file="Interface\Buttons\UI-SliderBar-Button-Horizontal">
+					<Size>
+						<AbsDimension x="32" y="32"/>
+					</Size>
+				</ThumbTexture>
+			</Slider>
+			<Slider name="MFWM_OptionsFrame_RedSliderFrame" orientation="HORIZONTAL" minValue="0" maxValue="1" valueStep="0.01" defaultValue="1">
+				<Size>
+					<AbsDimension x="256" y="16"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="MFWM_OptionsFrame_OpacitySliderFrame" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-178"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Backdrop bgFile="Interface\Buttons\UI-SliderBar-Background" edgeFile="Interface\Buttons\UI-SliderBar-Border" tile="true">
+					<EdgeSize>
+						<AbsValue val="8"/>
+					</EdgeSize>
+					<TileSize>
+						<AbsValue val="8"/>
+					</TileSize>
+					<BackgroundInsets>
+						<AbsInset left="3" right="3" top="6" bottom="6"/>
+					</BackgroundInsets>
+				</Backdrop>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="MFWM_OptionsFrame_RedSliderLabel" inherits="GameFontNormalSmall">
+							<Anchors>
+								<Anchor point="BOTTOM" relativePoint="TOP"/>
+							</Anchors>
+						</FontString>
+						<FontString name="MFWM_OptionsFrame_RedSliderValue" inherits="GameFontNormalSmall">
+							<Anchors>
+								<Anchor point="TOP" relativePoint="BOTTOM"/>
+							</Anchors>
+							<Color r="1" g="1" b="1" />
+						</FontString>
+						<FontString name="$parentLess" inherits="GameFontNormalHuge" text="-">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT">
+									<Offset>
+										<AbsDimension x="0" y="2"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<Color r="1" g="1" b="1" />
+						</FontString>
+						<FontString name="$parentMore" inherits="GameFontNormalHuge" text="+">
+							<Anchors>
+								<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT">
+									<Offset>
+										<AbsDimension x="0" y="2"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<Color r="1" g="1" b="1" />
+						</FontString>
+					</Layer>
+				</Layers>
+				<ThumbTexture file="Interface\Buttons\UI-SliderBar-Button-Horizontal">
+					<Size>
+						<AbsDimension x="32" y="32"/>
+					</Size>
+				</ThumbTexture>
+			</Slider>
+			<Slider name="MFWM_OptionsFrame_GreenSliderFrame" orientation="HORIZONTAL" minValue="0" maxValue="1" valueStep="0.01" defaultValue="1">
+				<Size>
+					<AbsDimension x="256" y="16"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="MFWM_OptionsFrame_RedSliderFrame" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-25"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Backdrop bgFile="Interface\Buttons\UI-SliderBar-Background" edgeFile="Interface\Buttons\UI-SliderBar-Border" tile="true">
+					<EdgeSize>
+						<AbsValue val="8"/>
+					</EdgeSize>
+					<TileSize>
+						<AbsValue val="8"/>
+					</TileSize>
+					<BackgroundInsets>
+						<AbsInset left="3" right="3" top="6" bottom="6"/>
+					</BackgroundInsets>
+				</Backdrop>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="MFWM_OptionsFrame_GreenSliderLabel" inherits="GameFontNormalSmall">
+							<Anchors>
+								<Anchor point="BOTTOM" relativePoint="TOP"/>
+							</Anchors>
+						</FontString>
+						<FontString name="MFWM_OptionsFrame_GreenSliderValue" inherits="GameFontNormalSmall">
+							<Anchors>
+								<Anchor point="TOP" relativePoint="BOTTOM"/>
+							</Anchors>
+							<Color r="1" g="1" b="1" />
+						</FontString>
+						<FontString name="$parentLess" inherits="GameFontNormalHuge" text="-">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT">
+									<Offset>
+										<AbsDimension x="0" y="2"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<Color r="1" g="1" b="1" />
+						</FontString>
+						<FontString name="$parentMore" inherits="GameFontNormalHuge" text="+">
+							<Anchors>
+								<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT">
+									<Offset>
+										<AbsDimension x="0" y="2"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<Color r="1" g="1" b="1" />
+						</FontString>
+					</Layer>
+				</Layers>
+				<ThumbTexture file="Interface\Buttons\UI-SliderBar-Button-Horizontal">
+					<Size>
+						<AbsDimension x="32" y="32"/>
+					</Size>
+				</ThumbTexture>
+			</Slider>
+			<Slider name="MFWM_OptionsFrame_BlueSliderFrame" orientation="HORIZONTAL" minValue="0" maxValue="1" valueStep="0.01" defaultValue="1">
+				<Size>
+					<AbsDimension x="256" y="16"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="MFWM_OptionsFrame_GreenSliderFrame" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-25"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Backdrop bgFile="Interface\Buttons\UI-SliderBar-Background" edgeFile="Interface\Buttons\UI-SliderBar-Border" tile="true">
+					<EdgeSize>
+						<AbsValue val="8"/>
+					</EdgeSize>
+					<TileSize>
+						<AbsValue val="8"/>
+					</TileSize>
+					<BackgroundInsets>
+						<AbsInset left="3" right="3" top="6" bottom="6"/>
+					</BackgroundInsets>
+				</Backdrop>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="MFWM_OptionsFrame_BlueSliderLabel" inherits="GameFontNormalSmall">
+							<Anchors>
+								<Anchor point="BOTTOM" relativePoint="TOP"/>
+							</Anchors>
+						</FontString>
+						<FontString name="MFWM_OptionsFrame_BlueSliderValue" inherits="GameFontNormalSmall">
+							<Anchors>
+								<Anchor point="TOP" relativePoint="BOTTOM"/>
+							</Anchors>
+							<Color r="1" g="1" b="1" />
+						</FontString>
+						<FontString name="$parentLess" inherits="GameFontNormalHuge" text="-">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT">
+									<Offset>
+										<AbsDimension x="0" y="2"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<Color r="1" g="1" b="1" />
+						</FontString>
+						<FontString name="$parentMore" inherits="GameFontNormalHuge" text="+">
+							<Anchors>
+								<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT">
+									<Offset>
+										<AbsDimension x="0" y="2"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<Color r="1" g="1" b="1" />
+						</FontString>
+					</Layer>
+				</Layers>
+				<ThumbTexture file="Interface\Buttons\UI-SliderBar-Button-Horizontal">
+					<Size>
+						<AbsDimension x="32" y="32"/>
+					</Size>
+				</ThumbTexture>
+			</Slider>
+			<Frame name="MFWM_OptionsFrame_SampleMapFrame">
+				<Size>
+					<AbsDimension x="550" y="683"/>
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="15" y="10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Backdrop edgeFile="Interface\Buttons\UI-SliderBar-Border" tile="true">
+					<EdgeSize>
+						<AbsValue val="15"/>
+					</EdgeSize>
+					<TileSize>
+						<AbsValue val="15"/>
+					</TileSize>
+					<BackgroundInsets>
+						<AbsInset left="3" right="3" top="6" bottom="6"/>
+					</BackgroundInsets>
+				</Backdrop>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture file="Interface\WorldMap\Nagrand\Nagrand4">
+							<Anchors>
+								<Anchor point="TOPLEFT">
+									<Offset>
+										<AbsDimension x="4" y="-8"/>
+									</Offset>
+								</Anchor>
+								<Anchor point="BOTTOMRIGHT">
+									<Offset>
+										<AbsDimension x="-4" y="8"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.1" right="0.8" top="0.25" bottom="0.75" />
+						</Texture>
+					</Layer>
+					<Layer level="ARTWORK">
+						<Texture name="MFWM_OptionsFrame_ColorSwatch1" file="Interface\WorldMap\CrystalsongForest\ForlornWoods1">
+							<Size>
+								<AbsDimension x="262" y="256"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT">
+									<Offset>
+										<AbsDimension x="4" y="-8"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0" right="1" top="0" bottom="1" />
+						</Texture>
+						<Texture name="MFWM_OptionsFrame_ColorSwatch2" file="Interface\WorldMap\CrystalsongForest\ForlornWoods2">
+							<Size>
+								<AbsDimension x="256" y="256"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="MFWM_OptionsFrame_ColorSwatch1" relativePoint="TOPRIGHT" />
+							</Anchors>
+							<TexCoords left="0" right="1" top="0" bottom="1" />
+						</Texture>
+						<Texture name="MFWM_OptionsFrame_ColorSwatch3" file="Interface\WorldMap\CrystalsongForest\ForlornWoods3">
+							<Size>
+								<AbsDimension x="32" y="256"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="MFWM_OptionsFrame_ColorSwatch2" relativePoint="TOPRIGHT" />
+							</Anchors>
+							<TexCoords left="0" right="1" top="0" bottom="1" />
+						</Texture>
+						<Texture name="MFWM_OptionsFrame_ColorSwatch4" file="Interface\WorldMap\CrystalsongForest\ForlornWoods4">
+							<Size>
+								<AbsDimension x="256" y="256"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="MFWM_OptionsFrame_ColorSwatch1" relativePoint="BOTTOMLEFT" />
+							</Anchors>
+							<TexCoords left="0" right="1" top="0" bottom="1" />
+						</Texture>
+						<Texture name="MFWM_OptionsFrame_ColorSwatch5" file="Interface\WorldMap\CrystalsongForest\ForlornWoods5">
+							<Size>
+								<AbsDimension x="256" y="256"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="MFWM_OptionsFrame_ColorSwatch4" relativePoint="TOPRIGHT" />
+							</Anchors>
+							<TexCoords left="0" right="1" top="0" bottom="1" />
+						</Texture>
+						<Texture name="MFWM_OptionsFrame_ColorSwatch6" file="Interface\WorldMap\CrystalsongForest\ForlornWoods6">
+							<Size>
+								<AbsDimension x="32" y="256"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="MFWM_OptionsFrame_ColorSwatch5" relativePoint="TOPRIGHT" />
+							</Anchors>
+							<TexCoords left="0" right="1" top="0" bottom="1" />
+						</Texture>
+						<Texture name="MFWM_OptionsFrame_ColorSwatch7" file="Interface\WorldMap\CrystalsongForest\ForlornWoods7">
+							<Size>
+								<AbsDimension x="256" y="156"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="MFWM_OptionsFrame_ColorSwatch4" relativePoint="BOTTOMLEFT" />
+							</Anchors>
+							<TexCoords left="0" right="1" top="0" bottom="0.609375" />
+						</Texture>
+						<Texture name="MFWM_OptionsFrame_ColorSwatch8" file="Interface\WorldMap\CrystalsongForest\ForlornWoods8">
+							<Size>
+								<AbsDimension x="256" y="156"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="MFWM_OptionsFrame_ColorSwatch7" relativePoint="TOPRIGHT" />
+							</Anchors>
+							<TexCoords left="0" right="1" top="0" bottom="0.609375" />
+						</Texture>
+						<Texture name="MFWM_OptionsFrame_ColorSwatch9" file="Interface\WorldMap\CrystalsongForest\ForlornWoods9">
+							<Size>
+								<AbsDimension x="32" y="156"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="MFWM_OptionsFrame_ColorSwatch8" relativePoint="TOPRIGHT" />
+							</Anchors>
+							<TexCoords left="0" right="1" top="0" bottom="0.609375" />
+						</Texture>
+					</Layer>
+				</Layers>
+			</Frame>
+		</Frames>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="MFWM_OptionsFrame_Message" inherits="GameFontNormal" justifyH="LEFT" justifyV="TOP" text="">
+					<Size>
+						<AbsDimension x="285" y="170"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="MFWM_OptionsFrame" relativePoint="TOPLEFT">
+							<Offset>
+								<AbsDimension x="10" y="-15"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<ColorWheelTexture name="MFWM_OptionsFrame_ColorPickerWheel">
+			<Size>
+				<AbsDimension x="128" y="128"/>
+			</Size>
+			<Anchors>
+				<Anchor point="TOP" relativeTo="MFWM_OptionsFrame_OpacitySliderFrame" relativePoint="BOTTOM">
+					<Offset>
+						<AbsDimension x="0" y="-30"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</ColorWheelTexture>
+		<ColorWheelThumbTexture name="MFWM_OptionsFrame_ColorPickerThumb" file="Interface\Buttons\UI-ColorPicker-Buttons">
+			<Size>
+				<AbsDimension x="10" y="10"/>
+			</Size>
+			<TexCoords left="0" right="0.15625" top="0" bottom="0.625"/>
+		</ColorWheelThumbTexture>
+	</ColorSelect>
+	
+	<CheckButton name="MozzWorldMapShowAllCheckButton" hidden="false" inherits="OptionsCheckButtonTemplate" parent="WorldMapPositioningGuide">
+		<HitRectInsets>
+			<AbsInset left="0" right="-125" top="0" bottom="0"/>
+		</HitRectInsets>
+		<Size>
+			<AbsDimension x="24" y="20"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<FontString name="MozzWorldMapShowAllLabel" inherits="GameFontNormalSmall" justifyH="LEFT" text="">
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="MozzWorldMapShowAllCheckButton" relativePoint="RIGHT">
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</CheckButton>
+
+	<Script file="localisation.en.lua"/>
+	<Script file="localisation.de.lua"/>
+	<Script file="localisation.fr.lua"/>
+	<Script file="localisation.es.lua"/>
+	<Script file="localisation.it.lua"/>
+	<Script file="localisation.pt.lua"/>
+	<Script file="localisation.tw.lua"/>
+	<Script file="MozzFullWorldMap.lua"/>
+	<Script file="MapData.lua"/>
+	<Script file="InterfaceOptions.lua"/>
+
+</Ui>

@@ -1,0 +1,13 @@
+tag 5.1v6release
+5ff560a42501e06b28e876d88c50805f3dc6c7d7
+ckaotik <ckaotik@gmail.com>
+2013-02-14 23:40:38 +0100
+
+Tagging as 5.1v6
+
+
+--------------------
+
+ckaotik:
+	- Fixed invalid items getting deleted by SHIFT-clicking
+	- Clarified tooltip reason texts a little bit

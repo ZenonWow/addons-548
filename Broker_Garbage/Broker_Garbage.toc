@@ -1,0 +1,61 @@
+## Interface: 50100
+## Dependencies:
+## OptionalDeps: LibPeriodicTable-3.1, Auctionator, AuctionLite, Auc-Advanced, Enchantrix, WOWEcon_PriceMod, Auctional, ArkInventoryRules, Bagnon
+## SavedVariables: BG_GlobalDB
+## SavedVariablesPerCharacter: BG_LocalDB
+## X-Curse-Packaged-Version: 5.1v6release
+## X-Curse-Project-Name: Broker_Garbage
+## X-Curse-Project-ID: broker_garbage
+## X-Curse-Repository-ID: wow/broker_garbage/mainline
+
+## Title: Broker_Garbage
+## Author: ckaotik
+## Version: 5.1v6release
+## Notes: Full bags no more! Distinguish between junk and treasure, find items to drop quickly.
+## Notes-deDE: Unterscheide Trödel von Schätzen und finde billigen Müll zum Platzschaffen.
+
+## Notes-frFR: Full bags no more! Distinguish between junk and treasure, find items to drop quickly.
+## Notes-itIT: Full bags no more! Distinguish between junk and treasure, find items to drop quickly.
+## Notes-koKR: Full bags no more! Distinguish between junk and treasure, find items to drop quickly.
+## Notes-esMX: Full bags no more! Distinguish between junk and treasure, find items to drop quickly.
+## Notes-ruRU: Full bags no more! Distinguish between junk and treasure, find items to drop quickly.
+## Notes-zhCN: Full bags no more! Distinguish between junk and treasure, find items to drop quickly.
+## Notes-esES: Full bags no more! Distinguish between junk and treasure, find items to drop quickly.
+## Notes-zhTW: 不再背包過滿！區別垃圾與寶物，並且找到物品以快速丟棄。
+## Notes-ptBR: Full bags no more! Distinguish between junk and treasure, find items to drop quickly.
+
+## LoadManagers: AddonLoader, Addon Control Panel
+## X-LoadOn-Always: delayed
+## X-Version: 2
+
+## X-Website: http://wow.curseforge.com/addons/broker_garbage/
+## X-RelSite-WoWI: 15531
+## X-Category: Inventory
+## X-Localizations: enUS, deDE, zhTW
+## X-Credits: GarbageFu, tekkub, Mirroar
+## X-License: BSD
+
+# libraries
+#@no-lib-strip@
+libs\LibDataBroker-1.1.lua
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+libs\LibQTip-1.0\LibQTip-1.0.lua
+libs\Unfit-1.0\Unfit-1.0.lua
+#@end-no-lib-strip@
+
+# localization files
+locale\enUS.lua
+locale\deDE.lua
+locale\curse.lua
+
+# main files
+constants.lua
+util.lua
+display.lua
+item.lua
+inventory.lua
+restack.lua
+vendor.lua
+core.lua
+externals.lua

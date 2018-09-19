@@ -1,0 +1,40 @@
+## Interface: 50100
+## Dependencies: Broker_Garbage
+## SavedVariables: BGLM_GlobalDB
+## SavedVariablesPerCharacter: BGLM_LocalDB
+## X-Curse-Packaged-Version: 5.1v6release
+## X-Curse-Project-Name: Broker_Garbage
+## X-Curse-Project-ID: broker_garbage
+## X-Curse-Repository-ID: wow/broker_garbage/mainline
+
+## Title: Broker_Garbage-LootManager
+## Author: ckaotik
+## Version: 5.1v6release
+## Notes: Plugin for Broker_Garbage. Selective looting and more!
+## Notes-deDE: Plugin für Broker_Garbage. Selektives Plündern und mehr!
+
+## Notes-frFR: Plugin for Broker_Garbage. Selective looting and more!
+## Notes-itIT: Plugin for Broker_Garbage. Selective looting and more!
+## Notes-koKR: Plugin for Broker_Garbage. Selective looting and more!
+## Notes-esMX: Plugin for Broker_Garbage. Selective looting and more!
+## Notes-ruRU: Plugin for Broker_Garbage. Selective looting and more!
+## Notes-zhCN: Plugin for Broker_Garbage. Selective looting and more!
+## Notes-esES: Plugin for Broker_Garbage. Selective looting and more!
+## Notes-zhTW: Broker_Garbage的掛件，選擇性拾取與更多功能！
+## Notes-ptBR: Plugin for Broker_Garbage. Selective looting and more!
+
+## LoadManagers: AddonLoader, Addon Control Panel
+## LoadWith: Broker_Garbage, Broker_Garbage-Config
+
+## X-Category: Inventory
+## X-Credits: KarniCrap(Karnifex)
+
+# localization files
+locale\enUS.lua
+locale\deDE.lua
+locale\curse.lua
+
+# code files
+util.lua
+core.lua
+options.lua

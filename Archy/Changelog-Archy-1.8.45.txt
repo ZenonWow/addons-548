@@ -1,0 +1,12 @@
+tag 1.8.45
+0602b3c432a1fba2dbff0ae9bfd81bc73906c66f
+James D. Callahan III <jcallahan@curse.com>
+2014-10-24 19:12:55 -0500
+
+
+
+--------------------
+
+James D. Callahan III:
+	- Account for changes to return values for GetMapContinents() and GetMapZones().
+	- Whitespace/formatting fixes, and removed some commented-out code.

@@ -1,0 +1,47 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+	<Button name="DominosAuraTemplate" inherits="SecureActionButtonTemplate" virtual="true">
+		<Size x="30" y="30"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="$parentIcon" parentKey="tex" setAllPoints="true"/>
+			</Layer>
+			<Layer level="OVERLAY">
+				<FontString parentKey="txt" inherits="GameFontNormal" setAllPoints="true"/>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Cooldown  name="$parentCooldown" parentKey="cd" setAllPoints="true" reverse="true" drawEdge="true" hidden="true"/>
+		</Frames>
+		<Attributes>
+			<Attribute name="type" value="cancelaura"/>
+		</Attributes>
+		<Scripts>
+			<OnLoad>
+				self:RegisterForClicks("RightButtonUp");
+			</OnLoad>
+			<OnShow>
+				if not self.skinned then
+					self.skinned = true
+					Dominos:Masque("Auras", self)
+				end
+			</OnShow>
+			<OnUpdate>
+				if ( GameTooltip:IsOwned(self) ) then
+					if self:GetParent():GetAttribute("filter") =="HELPFUL" then
+						GameTooltip:SetUnitAura(self:GetParent():GetAttribute("unit"), self:GetID());
+					else
+						GameTooltip:SetUnitDebuff(self:GetParent():GetAttribute("unit"), self:GetID());
+					end
+				end
+			</OnUpdate>
+			<OnEnter>
+				GameTooltip:SetOwner(self,"ANCHOR_DEFAULT");
+				GameTooltip:SetFrameLevel(self:GetFrameLevel() + 2);
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+			</OnLeave>
+		</Scripts>
+	</Button>
+</Ui>

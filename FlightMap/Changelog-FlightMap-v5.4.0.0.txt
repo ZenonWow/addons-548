@@ -1,0 +1,15 @@
+------------------------------------------------------------------------
+r36 | moncai | 2013-10-30 22:21:36 +0000 (Wed, 30 Oct 2013) | 1 line
+Changed paths:
+   A /tags/v5.4.0.0 (from /trunk:35)
+
+Tagging as v5.4.0.0
+------------------------------------------------------------------------
+r35 | moncai | 2013-10-30 22:21:03 +0000 (Wed, 30 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/FlightMap.lua
+   M /trunk/FlightMap.toc
+   M /trunk/FlightMapUtil.lua
+
+5.4.1 Compatibility fix and TOC update
+------------------------------------------------------------------------

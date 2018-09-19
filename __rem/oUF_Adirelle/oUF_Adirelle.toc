@@ -1,0 +1,89 @@
+## Interface: 50400
+## Author: Adirelle
+## Version: 1.13.1
+## Title: oUF_Adirelle - core
+## Notes: Adirelle's unit frames, based on haste's oUF.
+## OptionalDeps: LibSharedMedia-3.0, LibMovable-1.0, LibPlayerSpells-1.0, LibDispellable-1.0, Ace3, SharedMedia, LibDataBroker-1.1, LibDBIcon-1.0, SharedMedia_MyMedia, !SurfaceControl, !ClassColors, DRData-1.0, LibDualSpec-1.0, AdiDebug, AdiProfiler, BigWigs
+## SavedVariables: oUF_Adirelle_DB, oUF_Adirelle_Layout, oUF_Adirelle_Theme
+## LoadOnDemand: 1
+## X-Curse-Packaged-Version: 1.13.1
+## X-Curse-Project-Name: oUF_Adirelle
+## X-Curse-Project-ID: ouf_adirelle
+## X-Curse-Repository-ID: wow/ouf_adirelle/mainline
+
+## X-DiminishingReturns-Callback: oUF_Adirelle:RegisterDiminishingReturns()
+
+# Libraries
+#@no-lib-strip@
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+libs\BugGrabber\load.xml
+libs\AceDB-3.0\AceDB-3.0.xml
+libs\LibDualSpec-1.0\LibDualSpec-1.0.lua
+libs\LibSharedMedia-3.0\lib.xml
+libs\DRData-1.0\DRData-1.0.xml
+libs\LibDispellable-1.0\LibDispellable-1.0.lua
+#@end-no-lib-strip@
+libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+#@no-lib-strip@
+libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
+libs\LibPlayerSpells-1.0\lib.xml
+#@end-no-lib-strip@
+
+# Embedded oUF
+oUF\oUF.xml
+
+# Setup namespace
+oUF_Adirelle.lua
+
+# Internal messaging system
+support\Messages.lua
+
+# Handling of saved variable
+support\SavedVariables.lua
+
+# LibMovable integration
+libs\LibMovable-1.0\LibMovable-1.0.lua
+support\Movable.lua
+
+# Texture and font helper
+support\StatusBarTexture.lua
+support\Fonts.lua
+
+# Color helper
+support\Colors.lua
+
+# Icon helper
+support\CreateIcon.lua
+
+# Player role detection
+support\PlayerRole.lua
+
+# Tooltip handler
+support\UnitTooltip.lua
+
+# Common code to handle heal prediction overlays
+support\HealPrediction.lua
+
+# Our elements
+elements\AuraIcons.lua
+elements\Border.lua
+elements\CustomClick.lua
+elements\Dragon.lua
+elements\Experience.lua
+elements\LowHealth.lua
+elements\Powers.lua
+elements\PvPTimer.lua
+elements\RoleOrIcon.lua
+elements\RuneBar.lua
+elements\SmartThreat.lua
+elements\StatusIcon.lua
+elements\TargetIcon.lua
+elements\ThreatBar.lua
+elements\TotemBar.lua
+elements\WarningIcon.lua
+elements\XRange.lua
+
+#@debug@
+# ## Version: DEV
+#@end-debug@

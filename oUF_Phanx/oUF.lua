@@ -1,0 +1,3 @@
+local addonName, ns = ...
+_G.oUF = ns.oUF or oUF
+assert(oUF, addonName .." requires oUF")

@@ -1,0 +1,12 @@
+## Interface: 50400
+## Title: MySpeed
+## Notes: LDB Mini speed and pitch
+## Author: Axilea, Nemesis(it)
+## Version: 1.0-2013091001
+
+libs\LibStub.lua
+libs\CallbackHandler-1.0.lua
+libs\LibDataBroker-1.1.lua
+
+core.lua
+

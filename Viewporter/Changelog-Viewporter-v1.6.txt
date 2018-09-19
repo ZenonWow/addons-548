@@ -1,0 +1,12 @@
+tag v1.6
+06675eec3624a5f11628d2b68e7dad20cc552ac5
+Peter SZTANOJEV <sztanpet@gmail.com>
+2010-10-13 10:49:32 +0200
+
+Tagging as v1.6 - cata compat toc
+
+
+--------------------
+
+Peter SZTANOJEV:
+	- bump toc

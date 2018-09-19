@@ -1,0 +1,15 @@
+tag v1.6.16
+ee977bf07824e20a4d3bab7ab814e933d2d3de1a
+Adirelle <adirelle@gmail.com>
+2014-08-09 11:49:22 +0200
+
+Tagging as v1.6.16.
+
+
+--------------------
+
+Adirelle:
+	- Added an option to hide the anchoring corner.
+	- Money: added an option to display a small money frame.
+	- Localization updated.
+	- Consider the socket window as an interacting window.

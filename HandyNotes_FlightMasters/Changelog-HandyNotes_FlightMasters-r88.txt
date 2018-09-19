@@ -1,0 +1,37 @@
+------------------------------------------------------------------------
+r88 | xinhuan | 2011-01-20 15:01:42 +0000 (Thu, 20 Jan 2011) | 1 line
+Changed paths:
+   M /trunk/HandyNotes_FlightMasters.lua
+
+Clone some FP data to account for zone phasing.
+------------------------------------------------------------------------
+r87 | xinhuan | 2011-01-05 16:58:44 +0000 (Wed, 05 Jan 2011) | 1 line
+Changed paths:
+   M /trunk/HandyNotes_FlightMasters.lua
+
+Update alliance data for Kalimdor.
+------------------------------------------------------------------------
+r86 | xinhuan | 2011-01-03 10:39:51 +0000 (Mon, 03 Jan 2011) | 1 line
+Changed paths:
+   M /trunk/HandyNotes_FlightMasters.lua
+
+Update alliance data for Eastern Kingdoms.
+------------------------------------------------------------------------
+r85 | xinhuan | 2011-01-01 03:28:03 +0000 (Sat, 01 Jan 2011) | 1 line
+Changed paths:
+   M /trunk/HandyNotes_FlightMasters.lua
+
+Flightmaster icons now show properly again on the "World" map.
+------------------------------------------------------------------------
+r84 | xinhuan | 2011-01-01 00:18:07 +0000 (Sat, 01 Jan 2011) | 1 line
+Changed paths:
+   M /trunk/HandyNotes_FlightMasters.lua
+
+Now works correctly for Dalaran and Orgrimmar which has multiple map floors.
+------------------------------------------------------------------------
+r83 | xinhuan | 2010-12-31 22:48:55 +0000 (Fri, 31 Dec 2010) | 1 line
+Changed paths:
+   M /trunk/HandyNotes_FlightMasters.lua
+
+Get most of the addon working first. No flight data updated yet.
+------------------------------------------------------------------------

@@ -1,0 +1,18 @@
+## Interface: 60000
+## Title: Extended Vendor UI |cffffffffv1.5.4
+## Notes: Extends the merchant interface for easier browsing.
+## Author: Germbread
+## Version: 1.5.4
+## SavedVariables: EXTVENDOR_DATA
+## X-Email: germbread@gmail.com
+
+lib\LibStub.lua
+lib\AceLocale-3.0.lua
+
+locale\enUS.lua
+
+ExtVendor.xml
+SellJunkPopup.xml
+QuickVendorConfig\QuickVendorConfig.xml
+config\Config.xml
+config\about.xml

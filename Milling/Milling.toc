@@ -1,0 +1,6 @@
+## Interface: 50400
+## Title: Milling
+## Notes: Addon for Milling Herbs
+## Version: 1.2
+Milling.lua
+Milling.xml

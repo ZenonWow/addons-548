@@ -1,0 +1,25 @@
+------------------------------------------------------------------------
+r283 | xodiv | 2013-09-30 14:09:27 +0000 (Mon, 30 Sep 2013) | 1 line
+Changed paths:
+   A /tags/5.4.1 (from /trunk:282)
+
+Fix Vash'jir mount bug due to wow 5.4 changes.
+------------------------------------------------------------------------
+r282 | xodiv | 2013-09-30 13:38:22 +0000 (Mon, 30 Sep 2013) | 5 lines
+Changed paths:
+   M /trunk/Location.lua
+   M /trunk/SpellInfo.lua
+
+Fix up Vash'jir mount selection.
+
+Bronze Drake can now swim (boo) so testing for it is no longer enough
+to see whether we are at underwater or on the surface.
+
+------------------------------------------------------------------------
+r280 | xodiv | 2013-09-07 03:31:52 +0000 (Sat, 07 Sep 2013) | 2 lines
+Changed paths:
+   M /trunk/LiteMount.toc
+
+Update ToC for WoW 5.4
+
+------------------------------------------------------------------------

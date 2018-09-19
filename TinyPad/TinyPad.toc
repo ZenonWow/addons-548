@@ -1,0 +1,8 @@
+## Interface: 50400
+## Title: TinyPad
+## Notes: A notepad mod.
+## Author: Gello
+## Version: 2.0.1
+## SavedVariables: TinyPadPages, TinyPadSettings
+TinyPad.xml
+TinyPad.lua

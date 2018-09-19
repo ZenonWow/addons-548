@@ -1,0 +1,8 @@
+## Interface: 50400
+## Title: Lose Control option Fix
+## Notes: Tiny addon for adding options the Lose Control interface. Move, Scale, Hide decorations, Configure screen alert separately from Actionbars, (optionally) output to chat.
+## Author: Driizt at Bronzebeard(EU)
+## Version: 1.2
+## SavedVariablesPerCharacter: LoseControlFixDB
+
+core.lua

@@ -1,0 +1,17 @@
+## Interface: 50400
+## Author: Adirelle
+## Version: 1.0
+## Title: oUF_Adirelle - boss unit frames
+## Notes: Unit frames for bosses.
+## RequiredDeps: oUF_Adirelle
+## X-Curse-Packaged-Version: 1.13.1
+## X-Curse-Project-Name: oUF_Adirelle
+## X-Curse-Project-ID: ouf_adirelle
+## X-Curse-Repository-ID: wow/ouf_adirelle/mainline
+
+..\oUF_Adirelle\modules\single\style.xml
+..\oUF_Adirelle\modules\boss\module.xml
+
+#@debug@
+# ## Version: DEV
+#@end-debug@

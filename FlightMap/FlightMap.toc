@@ -1,0 +1,21 @@
+## Interface: 50400
+## Title: Flight Map and Time
+## Notes: Provides and records all information you need about flight paths and times.
+## SavedVariables: FlightMap
+## OptionalDeps: myAddOns
+## Author: Moncai
+## Version: 5.4.0.0
+## X-Date: $Date: 2013-10-30 22:21:03 +0000 (Wed, 30 Oct 2013) $
+## X-Revision: $Rev: 35 $
+## X-Localizations: enUS, deDE, frFR, esES, esMX, itIT, ruRU, zhTW, zhCN, koKR
+## X-Website: http://wow.curse.com/downloads/wow-addons/details/flight-map.aspx
+## X-Curse-Packaged-Version: v5.4.0.0
+## X-Curse-Project-Name: Flight Map and Time
+## X-Curse-Project-ID: flight-map
+## X-Curse-Repository-ID: wow/flight-map/mainline
+MagicBabble.lua
+locale.xml
+FlightMapUtil.lua
+FlightMap.xml
+FlightMapTimes.xml
+FlightMapTaxi.xml

@@ -1,0 +1,2 @@
+Ressy:
+	- Remove IDs from NPCs which obviously aren't First Aid Trainers

@@ -1,0 +1,77 @@
+﻿local L = LibStub("AceLocale-3.0"):NewLocale("HandyNotes_Trainers", "zhCN")
+if not L then return end
+
+--
+-- DO NOT MODIFY!
+--
+-- These localizations are generated automatically from WowAce Localization Tool
+-- Please use this URL to edit:
+--
+-- http://www.wowace.com/addons/handy-notes_trainers/localization/zhCN/
+--
+
+L["Alchemy"] = "炼金术"
+L["Archaeology"] = "考古学"
+L["Blacksmithing"] = "锻造"
+L["Close"] = "关闭"
+L["Cold Weather Flying Trainer"] = "寒冷气候飞行训练师"
+L["Cold Weather Flying Trainer - Female"] = "寒冷气候飞行训练师"
+L["Cooking"] = "烹饪"
+L["Create waypoint"] = "建立路径点"
+L["Deathknight Trainer"] = "死亡骑士训练师"
+L["Deathknight Trainer - Female"] = "死亡骑士训练师"
+L["Delete trainer"] = "删除训练师"
+L["Demon Trainer"] = "恶魔训练师"
+L["Druid Trainer"] = "德鲁伊训练师"
+L["Druid Trainer - Female"] = "德鲁伊训练师"
+L["Enchanting"] = "附魔"
+L["Engineering"] = "工程学"
+L["Filters"] = "过滤器"
+L["First Aid"] = "急救"
+L["Fishing"] = "钓鱼"
+L["Goblin Engineering Trainer"] = "哥布尔工程学训练师"
+L["Goblin Engineering Trainer - Female"] = "哥布尔工程学训练师"
+L["HandyNotes - Trainers"] = "HandyNotes - 训练师"
+L["Herbalism"] = "草药学"
+L["Hunter Trainer"] = "猎人训练师"
+L["Hunter Trainer - Female"] = "猎人训练师"
+L["Icon Alpha"] = "图示透明度"
+L["Icon Scale"] = "图示比例"
+L["Inscription"] = "铭文学"
+L["Jewelcrafting"] = "珠宝设计"
+L["Leatherworking"] = "制皮"
+L["Mage Trainer"] = "法师训练师"
+L["Mage Trainer - Female"] = "法师训练师"
+L["Mechanostrider Pilot"] = "机械陆行鸟驾驶员"
+L["Mechanostrider Pilot - Female"] = "机械陆行鸟驾驶员"
+L["Minimap Filter"] = "小地图过滤"
+L["Mining"] = "采矿"
+L["Paladin Trainer"] = "圣骑士训练师"
+L["Paladin Trainer - Female"] = "圣骑士训练师"
+L["Pet Trainer"] = "宠物训练师"
+L["Pet Trainer - Female"] = "宠物训练师"
+L["Portal Trainer"] = "传送门训练师"
+L["Portal Trainer - Female"] = "传送门训练师"
+L["Priest Trainer"] = "牧师训练师"
+L["Priest Trainer - Female"] = "牧师训练师"
+L["Riding Trainer"] = "骑术训练师"
+L["Riding Trainer - Female"] = "骑术训练师"
+L["Rogue Trainer"] = "潜行者训练师"
+L["Rogue Trainer - Female"] = "盗贼训练师"
+L["Shaman Trainer"] = "萨满祭司训练师"
+L["Shaman Trainer - Female"] = "萨满训练师"
+L["Skinning"] = "剥皮"
+L["Tailoring"] = "裁缝"
+L["The alpha transparency of the icons"] = "图示的透明程度"
+L["The scale of the icons"] = "图示的比例"
+L["These settings control the look and feel of the Trainers icons."] = "这些设定控制训练师图示的外观和风格。"
+L["Trainer"] = "训练师"
+L["Warlock Trainer"] = "术士训练师"
+L["Warlock Trainer - Female"] = "术士训练师"
+L["Warrior Trainer"] = "战士训练师"
+L["Warrior Trainer - Female"] = "战士训练师"
+L["Weapon Master"] = "武器大师"
+L["Weapon Master - Female"] = "武器大师"
+L["World Map Filter"] = "世界地图过滤"
+
+

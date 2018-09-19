@@ -1,0 +1,10 @@
+## Interface: 30300
+## Title: T-TauriVendor
+## Notes: Megadja a Tauri Vendor helyzetet
+## Author: Totoo
+## Version: 2.0.0
+## Dependencies:
+## OptionalDeps:
+## DefaultState: enabled
+
+t-taurivendor.lua

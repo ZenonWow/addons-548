@@ -1,0 +1,8 @@
+<Bindings>	
+	<Binding name="CLICK MountQBtn:LeftButton" header="MOUNTQ">
+		-- MountQ:CallRandom()
+	</Binding>
+	<Binding name="CLICK MountQFav:LeftButton">
+		-- MountQ:CallFavorite()
+	</Binding>
+</Bindings>

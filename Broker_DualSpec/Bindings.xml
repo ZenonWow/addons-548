@@ -1,0 +1,13 @@
+﻿<Bindings>
+    <Binding name="BROKERDUALSPECSWITCH" header="BROKERDUALSPEC">
+        BrokerDualSpecGlobal:SwitchSpec();
+    </Binding>
+
+    <Binding name="BROKERDUALSPEC1" header="BROKERDUALSPEC">
+        SetActiveSpecGroup(1);
+    </Binding>
+
+    <Binding name="BROKERDUALSPEC2" header="BROKERDUALSPEC">
+        SetActiveSpecGroup(2);
+    </Binding>
+</Bindings>

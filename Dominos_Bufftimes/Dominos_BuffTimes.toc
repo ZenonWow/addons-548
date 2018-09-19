@@ -1,0 +1,14 @@
+## Interface: 50400
+##- Interface: 50300
+## Title: Dominos Buff Times
+## Title-zhCN: |cFF0099FF[Dominos]|r BuffTimes
+## Notes: Adds a cooldown timer on action buttons for the duration of buffs and debuffs cast on your target
+## SavedVariables: Dominos_BuffTimesDB
+## Author: Tuller/Starslayer
+## X-Curse-Packaged-Version: v1.2.59
+## X-Curse-Project-Name: Dominos_BuffTimes
+## X-Curse-Project-ID: dominos_bufftimes
+## X-Curse-Repository-ID: wow/dominos_bufftimes/mainline
+embeds.xml
+main.lua
+config.lua

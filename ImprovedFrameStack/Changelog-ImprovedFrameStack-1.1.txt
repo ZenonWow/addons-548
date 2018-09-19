@@ -1,0 +1,15 @@
+tag 1.1
+60672d6a8c5bab0e88859f7765eee4b051baf37f
+Andrew Scott <ascott18@gmail.com>
+2014-05-05 19:25:01 -0700
+
+Tagging as 1.1
+
+
+--------------------
+
+Andrew Scott:
+	- Please, Mr. Packager, won't you be so kind and package my fucking tags?
+	- Made a meaningless change since the CF packager has decided that it will not package my repo - Deciding to skip git repository: wow/improved-framestack/mainline, as not updated.
+	- Added recursive searching for a child frame in a parent's tables to attempt to resolve things more consistently. The max depths of this search can be set in global variable IFS_MaxDepth, and defaults to 3.
+	- Initial commit.

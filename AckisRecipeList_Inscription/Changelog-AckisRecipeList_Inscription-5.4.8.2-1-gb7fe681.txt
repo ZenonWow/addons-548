@@ -1,0 +1,2 @@
+Ressy:
+	- Fix Ticket 1634 - Glyph of Enduring Deceit BoP not BoE

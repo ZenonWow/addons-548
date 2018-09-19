@@ -1,0 +1,8 @@
+## Interface: 50400
+## Title: Dominos Quest
+## Version: 3.01
+## Notes: A movable and sizable Quest Tracker For Dominos. Reuses all of the default Quest Tracker.
+## Author: Goranaws
+## Dependencies: Dominos
+
+embeds.xml

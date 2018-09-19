@@ -1,0 +1,10 @@
+## Interface: 50001
+## Title: Astrolabe |cff224477(lib)
+## Notes: A library for drawing icons on the Minimap and World Maps.
+## Version: 1.0
+## Author: Esamynn (James Carrothers)
+## X-Curse-Packaged-Version: v1.2.4
+## X-Curse-Project-Name: Lorewalkers Helper
+## X-Curse-Project-ID: lorewalkers-helper
+## X-Curse-Repository-ID: wow/lorewalkers-helper/mainline
+Load.xml

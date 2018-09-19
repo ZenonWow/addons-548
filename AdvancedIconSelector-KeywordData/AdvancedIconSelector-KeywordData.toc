@@ -1,0 +1,32 @@
+## Title: AdvancedIconSelector |cff68ccf0[Keyword Data]|r
+## Notes: Keyword data for the Advanced Icon Selector (not loaded until needed)
+## Version: 1.0.7
+## Author: Darthyl of Bronzebeard-US
+## Interface: 50200
+## OptionalDeps: Ace3
+## X-Curse-Packaged-Version: 1.0.7
+## X-Curse-Project-Name: AdvancedIconSelector
+## X-Curse-Project-ID: advancediconselector
+## X-Curse-Repository-ID: wow/advancediconselector/mainline
+
+## X-Part-Of: AdvancedIconSelector
+## X-Category: Miscellaneous
+## X-Website: http://www.curse.com/addons/wow/advancediconselector
+## X-Donate: http://www.curse.com/addons/wow/advancediconselector
+## X-Feedback: http://www.curse.com/addons/wow/advancediconselector
+## X-Date: March 12, 2013
+## X-Email: darthyl@hotmail.com
+## X-Localizations: enUS
+## X-License: MIT
+## X-Credits: Darthyl of Bronzebeard-US
+
+### Embedded libraries
+#@no-lib-strip@
+Libs\LibStub\LibStub.lua
+#@end-no-lib-strip@
+
+## X-Revision: 12
+## LoadOnDemand: 1
+
+### Main file
+AdvancedIconSelector-KeywordData.lua

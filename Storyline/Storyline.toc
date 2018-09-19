@@ -1,0 +1,12 @@
+## Interface: 50400
+##- Interface: 70100
+## Title: Storyline
+## Author: Telkostrasz & Ellypse
+## Version: 2.0.3
+## Notes: Enhanced quest storytelling
+## URL: http://storyline-addon.com/
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## SavedVariables: Storyline_Data
+
+ui.xml

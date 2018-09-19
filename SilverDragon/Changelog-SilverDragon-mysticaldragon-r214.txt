@@ -1,0 +1,16 @@
+------------------------------------------------------------------------
+r214 | MysticalOS | 2014-07-19 02:15:12 +0000 (Sat, 19 Jul 2014) | 2 lines
+Changed paths:
+   M /trunk/core.lua
+   M /trunk/outputs/sync.lua
+
+fix sync cpu wasting
+Add 6.0 GUID support
+------------------------------------------------------------------------
+r213 | MysticalOS | 2014-02-19 03:39:46 +0000 (Wed, 19 Feb 2014) | 1 line
+Changed paths:
+   M /trunk/outputs/sync.lua
+   M /trunk/scan/vignettes.lua
+
+Fix syncing for 5.4.7
+------------------------------------------------------------------------

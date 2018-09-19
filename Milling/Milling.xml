@@ -1,0 +1,837 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" 
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ xsi:schemaLocation="http://www.blizzard.com/wow/ui/ 
+ ..\..\FrameXML\UI.xsd">
+	<Script File="Milling.lua"/>
+ 	<Button name="MillingFrameButtonTemplate" hidden="false" virtual="true">
+		<Size x="293" y="16"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<FontString name="$parentSubText" inherits="GameFontNormalSmall" justifyH="LEFT"/>
+			</Layer>
+			<Layer level="OVERLAY">
+				<FontString name="$parentCount" inherits="GameFontNormal" parentKey="count">
+					<Size x="0" y="13"/>
+					<Anchors>
+						<Anchor point="LEFT" x="0" y="0"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="$parentNumSkillUps" parentKey="skillup" hidden="true">
+				<Size x="26" y="16"/>
+				<Anchors>
+					<Anchor point="RIGHT" x="-2" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture name="$parentIcon" file="Interface\TradeSkillFrame\UI-TradeSkill-Multiskill" parentKey="icon">
+							<Size x="16" y="16"/>
+							<Anchors>
+								<Anchor point="RIGHT" x="0" y="-1"/>
+							</Anchors>
+						</Texture>
+						<FontString name="$parentText" inherits="GameFontNormal" parentKey="countText">
+							<Size x="0" y="13"/>
+							<Anchors>
+								<Anchor point="RIGHT" relativeTo="$parentIcon" relativePoint="LEFT" x="0" y="1"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick>
+						self:GetParent():Click(button);
+					</OnClick>
+					<OnEnter>
+						<!-- GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+						GameTooltip:AddLine(string.format(SKILLUP_TOOLTIP, self.countText:GetText()), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1, 1);
+						GameTooltip:Show(); -->
+						MillingFrameEntryButton_OnEnter(self:GetParent());
+					</OnEnter>
+					<OnLeave>
+						<!-- GameTooltip:Hide(); -->
+						MillingFrameEntryButton_OnLeave(self:GetParent());
+					</OnLeave>
+				</Scripts>
+			</Button>
+			<StatusBar name="$parentSubSkillRankBar" parentKey="SubSkillRankBar" drawLayer="BACKGROUND" minValue="0" maxValue="1" defaultValue="1">
+				<Size x="58" y="14"/>
+				<Anchors>
+					<Anchor point="RIGHT" x="0" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture parentKey="BorderLeft" file="Interface\PaperDollInfoFrame\UI-Character-Skills-BarBorder">
+							<Size x="9" y="18"/>
+							<TexCoords left="0.007843" right="0.043137" top="0.193548" bottom="0.774193"/>
+							<Anchors>
+								<Anchor point="LEFT" x="-2" y="0"/>
+							</Anchors>
+						</Texture>
+						<Texture parentKey="BorderRight" file="Interface\PaperDollInfoFrame\UI-Character-Skills-BarBorder">
+							<Size x="9" y="18"/>
+							<TexCoords left="0.043137" right="0.007843" top="0.193548" bottom="0.774193"/>
+							<Anchors>
+								<Anchor point="RIGHT" x="2" y="0"/>
+							</Anchors>
+						</Texture>
+						<Texture parentKey="BorderMid" file="Interface\PaperDollInfoFrame\UI-Character-Skills-BarBorder">
+							<TexCoords left="0.113726" right="0.1490196" top="0.193548" bottom="0.774193"/>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeKey="$parent.BorderLeft" relativePoint="TOPRIGHT"/>
+								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BorderRight" relativePoint="BOTTOMLEFT"/>
+							</Anchors>
+						</Texture>
+						<FontString parentKey="Rank" inherits="GameFontHighlightSmall">
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<BarTexture file="Interface\PaperDollInfoFrame\UI-Character-Skills-Bar"/>
+				<BarColor r=".25" g=".25" b=".75"/>
+			</StatusBar>
+		</Frames>
+		<Scripts>
+			<OnClick>
+				MillingFrameEntry_OnClick(self, button);
+			</OnClick>
+			<OnLoad>
+				_G[self:GetName().."Count"]:SetPoint("LEFT", self:GetName().."Text", "RIGHT", 2, 0);
+			</OnLoad>
+			<OnEnter>
+				MillingFrameEntryButton_OnEnter(self);
+			</OnEnter>
+			<OnLeave>
+				MillingFrameEntryButton_OnLeave(self);
+			</OnLeave>
+		</Scripts>
+		<NormalTexture file="Interface\Buttons\UI-MinusButton-UP">
+			<Size x="16" y="16"/>
+			<Anchors>
+				<Anchor point="LEFT" x="3" y="0"/>
+			</Anchors>
+		</NormalTexture>
+		<HighlightTexture name="$parentHighlight" file="Interface\Buttons\UI-PlusButton-Hilight" alphaMode="ADD">
+			<Size x="16" y="16"/>
+			<Anchors>
+				<Anchor point="LEFT" x="3" y="0"/>
+			</Anchors>
+		</HighlightTexture>
+		<DisabledTexture file="Interface\Buttons\UI-PlusButton-Disabled">
+			<Size x="16" y="16"/>
+			<Anchors>
+				<Anchor point="LEFT" x="3" y="0"/>
+			</Anchors>
+		</DisabledTexture>
+		<ButtonText name="$parentText" parentKey="text" wordwrap="false">
+			<Size x="270" y="13"/>
+			<Anchors>
+				<Anchor point="LEFT" relativeTo="$parentHighlight" relativePoint="RIGHT" x="2" y="1"/>
+			</Anchors>
+		</ButtonText>
+		<NormalFont style="GameFontHighlightLeft"/>
+	</Button>
+	<Button name="MillingFrameItemTemplate" inherits="QuestItemTemplate" virtual="true">
+		<Scripts>
+			<OnEnter>
+				GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT");
+				GameTooltip:SetItemByID(self:GetID());
+				CursorUpdate(self);
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+				ResetCursor();
+			</OnLeave>
+			<OnUpdate>
+				CursorOnUpdate(self, elapsed);
+			</OnUpdate>
+<!-- 			<OnClick>
+				HandleModifiedItemClick(GetTradeSkillReagentItemLink(TradeSkillFrame.selectedSkill, self:GetID()));
+			</OnClick> -->
+			<OnLoad>
+				-- Uses in Korean to fix Bug ID: 244689
+			</OnLoad>
+		</Scripts>
+	</Button>
+	
+	<Frame name="MillingFrame" inherits="ButtonFrameTemplate" toplevel="true" movable="true" 
+	  parent="UIParent" enableMouse="true" hidden="true">
+		<Anchors>
+			<Anchor point="TOPLEFT" x="20" y="-104"/>
+		</Anchors>	
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="$parentTabardBackground" file="Interface\GuildFrame\GuildFrame">
+					<Size x="62" y="62"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-6" y="7"/>
+					</Anchors>
+					<TexCoords left="0.63183594" right="0.69238281" top="0.61914063" bottom="0.74023438"/>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK" textureSubLevel="1">
+				<Texture name="$parentTabardEmblem" file="Interface\GuildFrame\GuildEmblemsLG_01">
+					<Size x="64" y="64"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-8" y="9"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK" textureSubLevel="2">
+				<Texture name="$parentTabardBorder" file="Interface\GuildFrame\GuildFrame">
+					<Size x="61" y="60"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-6" y="7"/>
+					</Anchors>
+					<TexCoords left="0.63183594" right="0.69238281" top="0.74414063" bottom="0.86523438"/>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<Texture name="MillingFrameHorizontalBarLeft" file="Interface\ClassTrainerFrame\UI-ClassTrainer-HorizontalBar">
+					<Size x="256" y="16"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="2" y="-208"/>
+						<Anchor point="RIGHT" x="-80" y="0"/>
+					</Anchors>
+					<TexCoords left="0" right="1.0" top="0" bottom="0.25"/>
+				</Texture>
+				<Texture file="Interface\ClassTrainerFrame\UI-ClassTrainer-HorizontalBar">
+					<Size x="75" y="16"/>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="MillingFrameHorizontalBarLeft" relativePoint="RIGHT" x="0" y="0"/>
+					</Anchors>
+					<TexCoords left="0" right="0.29296875" top="0.25" bottom="0.5"/>
+				</Texture>
+				<FontString name="$parentDummyString" inherits="GameFontNormal" hidden="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="0" y="0"/>
+					</Anchors>
+					<Size x="0" y="0"/>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="$parentMillAllButton" inherits="MagicButtonTemplate" text="Mill All">
+				<Size x="80" y="22"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						MillingFrameMillAllButton_OnClick();
+						MillingFrameInputBox:ClearFocus();
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentCancelButton" inherits="MagicButtonTemplate" text="Exit">
+				<Size x="80" y="22"/>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT"/>
+				</Anchors>
+				<Scripts>
+					<OnClick function="HideParentPanel"/>
+				</Scripts>
+			</Button>
+			<Button name="$parentMillButton" inherits="MagicButtonTemplate,SecureActionButtonTemplate" text="Mill" >
+				<Size x="80" y="22"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeTo="$parentCancelButton" relativePoint="TOPLEFT" />
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="Left" file="Interface\Buttons\UI-Panel-Button-Up">
+							<Size x="12" y="22"/>
+							<Anchors>
+								<Anchor point="TOPLEFT"/>
+								<Anchor point="BOTTOMLEFT"/>
+							</Anchors>
+							<TexCoords left="0" right="0.09375" top="0" bottom="0.6875"/>
+						</Texture>
+						<Texture parentKey="Right" file="Interface\Buttons\UI-Panel-Button-Up">
+							<Size x="12" y="22"/>
+							<Anchors>
+								<Anchor point="TOPRIGHT"/>
+								<Anchor point="BOTTOMRIGHT"/>
+							</Anchors>
+							<TexCoords left="0.53125" right="0.625" top="0" bottom="0.6875"/>
+						</Texture>
+						<Texture parentKey="Middle" file="Interface\Buttons\UI-Panel-Button-Up">
+							<Size x="12" y="22"/>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeKey="$parent.Left" relativePoint="TOPRIGHT"/>
+								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Right" relativePoint="BOTTOMLEFT"/>
+							</Anchors>
+							<TexCoords left="0.09375" right="0.53125" top="0" bottom="0.6875"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<PreClick>
+						MillingFrameMillButton_PreClick();
+						MillingFrameInputBox:ClearFocus();
+					</PreClick>
+				<!--<PostClick>
+						MillingFrameMillButton_PostClick();
+					</PostClick> -->
+				</Scripts> 
+			</Button>
+			<Button name="$parentDecrementButton">
+				<Size x="23" y="22"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentMillAllButton" relativePoint="RIGHT" x="3" y="0"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						MillingFrameDecrement_OnClick();
+						MillingFrameInputBox:ClearFocus();
+					</OnClick>
+				</Scripts>
+				<NormalTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Up"/>
+				<PushedTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Down"/>
+				<DisabledTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Disabled"/>
+				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+			</Button>
+			<EditBox name="$parentInputBox" letters="3" numeric="true" autoFocus="false">
+				<Size x="31" y="20"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentDecrementButton" relativePoint="RIGHT" x="4" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="$parentLeft" file="Interface\Common\Common-Input-Border">
+							<Size x="8" y="20"/>
+							<Anchors>
+								<Anchor point="TOPLEFT" x="-5" y="0"/>
+							</Anchors>
+							<TexCoords left="0" right="0.0625" top="0" bottom="0.625"/>
+						</Texture>
+						<Texture name="$parentRight" file="Interface\Common\Common-Input-Border">
+							<Size x="8" y="20"/>
+							<Anchors>
+								<Anchor point="RIGHT" x="0" y="0"/>
+							</Anchors>
+							<TexCoords left="0.9375" right="1.0" top="0" bottom="0.625"/>
+						</Texture>
+						<Texture name="$parentMiddle" file="Interface\Common\Common-Input-Border">
+							<Size x="10" y="20"/>
+							<Anchors>
+								<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
+								<Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"/>
+							</Anchors>
+							<TexCoords left="0.0625" right="0.9375" top="0" bottom="0.625"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEnterPressed function="EditBox_ClearFocus"/>
+					<OnEscapePressed function="EditBox_ClearFocus"/>
+					<OnTextChanged>
+						--if ( self:GetText() == "0" ) then
+							self:SetText("1");
+						--end
+					</OnTextChanged> 
+					<OnEditFocusLost function="EditBox_ClearHighlight"/>
+					<OnEditFocusGained function="EditBox_HighlightText"/>
+				</Scripts>
+				<FontString inherits="ChatFontNormal"/>
+			</EditBox>
+			<Button name="$parentIncrementButton">
+				<Size x="23" y="22"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parentMillButton" relativePoint="LEFT" x="-3" y="0"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						MillingFrameIncrement_OnClick();
+						MillingFrameInputBox:ClearFocus();
+					</OnClick>
+				</Scripts>
+				<NormalTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up"/>
+				<PushedTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Down"/>
+				<DisabledTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Disabled"/>
+				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+			</Button>
+
+			<Frame name="$parentExpandButtonFrame">
+				<Size x="54" y="32"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="2" y="-58"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="MillingFrameExpandTabLeft" file="Interface\ClassTrainerFrame\UI-ClassTrainer-ExpandTab-Left">
+							<Size x="8" y="32"/>
+							<Anchors>
+								<Anchor point="TOPLEFT"/>
+							</Anchors>
+						</Texture>
+						<Texture name="MillingFrameExpandTabMiddle" file="Interface\QuestFrame\UI-QuestLogSortTab-Middle">
+							<Size x="50" y="32"/>
+							<Anchors>
+								<Anchor point="LEFT" relativeTo="MillingFrameExpandTabLeft" relativePoint="RIGHT" x="0" y="6"/>
+							</Anchors>
+						</Texture>
+						<Texture name="MillingFrameExpandTabRight" file="Interface\QuestFrame\UI-QuestLogSortTab-Right">
+							<Size x="8" y="32"/>
+							<Anchors>
+								<Anchor point="LEFT" relativeTo="MillingFrameExpandTabMiddle" relativePoint="RIGHT"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Frames>
+					<Button name="$parentCollapseAllButton" hidden="true">
+						<Size x="40" y="22"/>
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="MillingFrameExpandTabLeft" relativePoint="RIGHT" x="0" y="3"/>
+						</Anchors>
+						<Layers>
+							<Layer level="BACKGROUND">
+								<FontString name="$parentSubText" inherits="GameFontNormalSmall" justifyH="LEFT"/>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<!-- <OnLoad>
+								_G[self:GetName()]:SetText(ALL);
+							</OnLoad>
+							<OnClick function="TradeSkillCollapseAllButton_OnClick"/>
+							<OnEnter>
+								_G[self:GetName().."SubText"]:SetTextColor(HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b);
+							</OnEnter>
+							<OnLeave>
+								_G[self:GetName().."SubText"]:SetTextColor(self.r, self.g, self.b);
+							</OnLeave> -->
+						</Scripts>
+						<NormalTexture file="Interface\Buttons\UI-MinusButton-UP">
+							<Size x="16" y="16"/>
+							<Anchors>
+								<Anchor point="LEFT" x="3" y="0"/>
+							</Anchors>
+						</NormalTexture>
+						<HighlightTexture name="$parentHighlight" file="Interface\Buttons\UI-PlusButton-Hilight" alphaMode="ADD">
+							<Size x="16" y="16"/>
+							<Anchors>
+								<Anchor point="LEFT" x="3" y="0"/>
+							</Anchors>
+						</HighlightTexture>
+						<DisabledTexture file="Interface\Buttons\UI-PlusButton-Disabled">
+							<Size x="16" y="16"/>
+							<Anchors>
+								<Anchor point="LEFT" x="3" y="0"/>
+							</Anchors>
+						</DisabledTexture>
+						<ButtonText name="$parentText">
+							<Size x="270" y="13"/>
+							<Anchors>
+								<Anchor point="LEFT" relativeTo="$parentHighlight" relativePoint="RIGHT" x="2" y="1"/>
+							</Anchors>
+						</ButtonText>
+						<NormalFont style="GameFontNormalLeft"/>
+						<HighlightFont style="GameFontHighlightLeft"/>
+						<DisabledFont style="GameFontDisableLeft"/>
+					</Button>
+				</Frames>
+			</Frame>
+			<!-- This states what filters are applied -->
+			<Frame name="$parentFilterBar" hidden="true">
+				<Size x="293" y="16"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="MillingFrameExpandButtonFrame" relativePoint="BOTTOMLEFT" x="8" y="5"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture file="Interface\Buttons\UI-Listbox-Highlight2">							
+							<Color r="0.6" g="0.75" b="1.0" a="0.5" />
+						</Texture>	
+						<FontString name="$parentText" inherits="GameFontHighlightSmall" justifyH="LEFT">
+							<Size x="260" y="13"/>
+							<Anchors>
+								<Anchor point="LEFT" x="5" y="0"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>	
+				<Frames>
+					<Button name="$parentExitButton">
+						<Size x="17" y="17"/>
+						<Anchors>
+							<Anchor point="RIGHT" x="-2" y="0"/>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture file="Interface\FriendsFrame\ClearBroadcastIcon" alpha="0.5" parentKey="texture">
+									<Size x="17" y="17"/>
+									<Anchors>
+										<Anchor point="TOPLEFT" x="0" y="0"/>
+									</Anchors>
+								</Texture>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnEnter>
+								self.texture:SetAlpha(1.0);                                         
+							</OnEnter>
+							<OnLeave>
+								self.texture:SetAlpha(0.5);
+							</OnLeave>
+							<OnMouseDown>
+								self.texture:SetPoint("TOPLEFT", 1, -1);
+							</OnMouseDown>
+							<OnMouseUp>
+								self.texture:SetPoint("TOPLEFT", 0, 0);
+							</OnMouseUp>
+							<OnClick>
+								MillingFrameFilterHaveMats = false;
+								MillingFrameUpdateFilterBar();
+								CloseDropDownMenus();
+							</OnClick>
+						</Scripts>
+					</Button>
+				</Frames>
+			</Frame>
+			<Frame name="$parentHighlightFrame" hidden="true">
+				<Size x="293" y="16"/>
+				<Anchors>
+					<Anchor point="TOPLEFT"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture name="$parentHighlight" file="Interface\Buttons\UI-Listbox-Highlight2"/>
+					</Layer>
+				</Layers>
+			</Frame>
+
+			<ScrollFrame name="$parentListScrollFrame" inherits="ListScrollFrameTemplate">
+				<Size x="296" y="130"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeTo="MillingFrame" relativePoint="TOPRIGHT" x="-34" y="-83"/>
+				</Anchors>
+				<Scripts>
+					<OnVerticalScroll>
+						FauxScrollFrame_OnVerticalScroll(self, offset, 16, MillingFrame_Update);
+					</OnVerticalScroll>
+				</Scripts>
+			</ScrollFrame>
+			<ScrollFrame name="$parentDetailScrollFrame" inherits="UIPanelScrollFrameTemplate">
+				<Size x="297" y="174"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeTo="MillingFrameListScrollFrame" relativePoint="BOTTOMRIGHT" x="0" y="-8"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="$parentTop" file="Interface\ClassTrainerFrame\UI-ClassTrainer-ScrollBar">
+							<Size x="30" y="123"/>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="-2" y="5"/>
+							</Anchors>
+							<TexCoords left="0" right="0.46875" top="0" bottom="0.9609375"/>
+						</Texture>
+						<Texture name="$parentBottom" file="Interface\ClassTrainerFrame\UI-ClassTrainer-ScrollBar">
+							<Size x="30" y="123"/>
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="-2" y="-1"/>
+							</Anchors>
+							<TexCoords left="0.53125" right="1.0" top="0.03125" bottom="1.0"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						ScrollFrame_OnLoad(self);
+						self.scrollBarHideable = 1;
+					</OnLoad>
+				</Scripts>
+				<ScrollChild>
+					<Frame name="MillingFrameDetailScrollChildFrame">
+						<Size x="297" y="150"/>
+						<Layers>
+							<Layer level="BACKGROUND">
+								<FontString name="MillingFrameSkillName" inherits="GameFontNormal" text="Herb Name" justifyH="LEFT">
+									<Size x="244" y="0"/>
+									<Anchors>
+										<Anchor point="TOPLEFT" x="50" y="-5"/>
+									</Anchors>
+								</FontString>
+								<FontString name="MillingFrameRequirementLabel" inherits="GameFontHighlightSmall" text="">
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeTo="MillingFrameSkillName" relativePoint="BOTTOMLEFT" x="0" y="0"/>
+									</Anchors>
+								</FontString>
+								<FontString name="MillingFrameRequirementText" inherits="GameFontHighlightSmall" justifyV="TOP" justifyH="LEFT">
+									<Size x="180" y="0"/>
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeTo="MillingFrameRequirementLabel" relativePoint="TOPRIGHT" x="4" y="0"/>
+									</Anchors>
+								</FontString>
+								<FontString name="TMillingFrameSkillCooldown" inherits="GameFontRedSmall">
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeTo="MillingFrameRequirementLabel" relativePoint="BOTTOMLEFT" x="0" y="0"/>
+									</Anchors>
+								</FontString>
+								<Texture name="MillingFrameDetailHeaderLeft" file="Interface\ClassTrainerFrame\UI-ClassTrainer-DetailHeaderLeft">
+									<Size x="256" y="64"/>
+									<Anchors>
+										<Anchor point="TOPLEFT" x="0" y="3"/>
+									</Anchors>
+								</Texture>
+								<Texture file="Interface\ClassTrainerFrame\UI-ClassTrainer-DetailHeaderRight">
+									<Size x="64" y="64"/>
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeTo="MillingFrameDetailHeaderLeft" relativePoint="TOPRIGHT" x="0" y="0"/>
+									</Anchors>
+								</Texture>
+								<FontString name="MillingFrameDescription" inherits="GameFontNormalSmall" justifyH="LEFT" text="Mills into:">
+									<Size x="290" y="0"/>
+									<Anchors>
+										<Anchor point="TOPLEFT" x="5" y="-50"/>
+									</Anchors>
+								</FontString>
+								<FontString name="MillingFrameReagentLabel" inherits="GameFontHighlightSmall" text="Common">
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeTo="MillingFrameDescription" relativePoint="BOTTOMLEFT" x="0" y="-5"/>
+									</Anchors>
+								</FontString>
+								<FontString name="MillingFrameReagentLabel2" inherits="GameFontHighlightSmall" text="Rare">
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeTo="MillingFrameDescription" relativePoint="BOTTOMLEFT" x="145" y="-5"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Frames>
+							<Button name="MillingFrameSkillIcon">
+								<Size x="37" y="37"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" x="8" y="-3"/>
+								</Anchors>
+								<Layers>
+									<Layer level="ARTWORK">
+										<FontString name="MillingFrameSkillIconCount" inherits="NumberFontNormal" justifyH="RIGHT" hidden="false" text="count">
+											<Anchors>
+												<Anchor point="BOTTOMRIGHT" x="-5" y="2"/>
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+								<Scripts>
+									<OnLoad>
+										self.hasItem = 1;
+									</OnLoad>
+									<OnEnter>
+										GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT");
+										GameTooltip:SetItemByID(self:GetID());
+										CursorUpdate(self);
+									</OnEnter>
+									<OnLeave>
+										GameTooltip:Hide();
+										ResetCursor();
+									</OnLeave>
+									<OnUpdate>
+										CursorOnUpdate(self, elapsed);
+									</OnUpdate>
+<!-- 									<OnClick>
+										HandleModifiedItemClick(GetTradeSkillItemLink(TradeSkillFrame.selectedSkill));
+									</OnClick> -->
+								</Scripts>
+							</Button>
+							<Button name="MillingFrameReagent1" inherits="MillingFrameItemTemplate" id="1">
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="MillingFrameReagentLabel" relativePoint="BOTTOMLEFT" x="-2" y="-3"/>
+								</Anchors>
+							</Button>
+							<Button name="MillingFrameReagent2" inherits="MillingFrameItemTemplate" id="2">
+								<Anchors>
+									<Anchor point="LEFT" relativeTo="MillingFrameReagent1" relativePoint="RIGHT" x="0" y="0"/>
+								</Anchors>
+							</Button>
+							<Button name="MillingFrameReagent3" inherits="MillingFrameItemTemplate" id="3">
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="MillingFrameReagent1" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
+								</Anchors>
+							</Button>
+							<Button name="MillingFrameReagent4" inherits="MillingFrameItemTemplate" id="4">
+								<Anchors>
+									<Anchor point="LEFT" relativeTo="MillingFrameReagent3" relativePoint="RIGHT" x="0" y="0"/>
+								</Anchors>
+							</Button>
+							<Button name="MillingFrameReagent5" inherits="MillingFrameItemTemplate" id="5">
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="MillingFrameReagent3" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
+								</Anchors>
+							</Button>
+							<Button name="MillingFrameReagent6" inherits="MillingFrameItemTemplate" id="6">
+								<Anchors>
+									<Anchor point="LEFT" relativeTo="MillingFrameReagent5" relativePoint="RIGHT" x="0" y="0"/>
+								</Anchors>
+							</Button>
+							<Button name="MillingFrameReagent7" inherits="MillingFrameItemTemplate" id="7">
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="MillingFrameReagent6" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
+								</Anchors>
+							</Button>
+							<Button name="MillingFrameReagent8" inherits="MillingFrameItemTemplate" id="8">
+								<Anchors>
+									<Anchor point="LEFT" relativeTo="MillingFrameReagent7" relativePoint="RIGHT" x="0" y="0"/>
+								</Anchors>
+							</Button>
+						</Frames>
+					</Frame>
+				</ScrollChild>
+			</ScrollFrame>			
+			<StatusBar name="$parentRankFrame" drawLayer="BACKGROUND" minValue="0" maxValue="1" defaultValue="0" enableMouse="false">
+				<Size x="236" y="14"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="66" y="-33"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="$parentSkillRank" inherits="GameFontHighlightSmall" justifyH="CENTER">
+							<Size x="0" y="9"/>
+							<Anchors>
+								<Anchor point="CENTER" relativeTo="MillingFrameRankFrame" x="0" y="0"/>
+							</Anchors>
+						</FontString>
+						<Texture name="$parentBorder" file="Interface\PaperDollInfoFrame\UI-Character-Skills-BarBorder">
+							<Size x="245" y="27"/>
+							<Anchors>
+								<Anchor point="LEFT" x="-5" y="0"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+					<Layer level="BACKGROUND">
+						<Texture name="$parentBackground">
+							<Color r="1.0" g="1.0" b="1.0" a="0.2"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self:RegisterEvent("SKILL_LINES_CHANGED");
+					</OnLoad>
+					<!-- <OnEvent function="MillingFrame_Update"/> -->
+				</Scripts>
+				<BarTexture name="$parentBar" file="Interface\PaperDollInfoFrame\UI-Character-Skills-Bar" />
+				<BarColor r="0.25" g="0.25" b="0.75" />
+			</StatusBar>
+			<EditBox name="$parentSearchBox" autoFocus="false">
+				<Size x="180" y="20"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="MillingFrameRankFrame" relativePoint="BOTTOMLEFT" x="8" y="-9"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="$parentLeft" file="Interface\Common\Common-Input-Border">
+							<Size x="8" y="20"/>
+							<Anchors>
+								<Anchor point="TOPLEFT" x="-5" y="0"/>
+							</Anchors>
+							<TexCoords left="0" right="0.0625" top="0" bottom="0.625"/>
+						</Texture>
+						<Texture name="$parentRight" file="Interface\Common\Common-Input-Border">
+							<Size x="8" y="20"/>
+							<Anchors>
+								<Anchor point="RIGHT" x="0" y="0"/>
+							</Anchors>
+							<TexCoords left="0.9375" right="1.0" top="0" bottom="0.625"/>
+						</Texture>
+						<Texture name="$parentMiddle" file="Interface\Common\Common-Input-Border">
+							<Size x="0" y="20"/>
+							<Anchors>
+								<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
+								<Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"/>
+							</Anchors>
+							<TexCoords left="0.0625" right="0.9375" top="0" bottom="0.625"/>
+						</Texture>
+					</Layer>
+					<Layer level="OVERLAY">
+						<Texture name="$parentSearchIcon" file="Interface\Common\UI-Searchbox-Icon">
+							<Size x="14" y="14"/>
+							<Anchors>
+								<Anchor point="LEFT" y="-2"/>
+							</Anchors>
+							<Color r="0.7" g="0.7" b="0.7" />
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnShow>
+						self:SetText(SEARCH);
+						self:SetFontObject("GameFontDisable");
+						MillingFrameSearchBoxSearchIcon:SetVertexColor(0.6, 0.6, 0.6);
+						self:SetTextInsets(16, 0, 0, 0);
+					</OnShow>
+					<OnEnterPressed function="EditBox_ClearFocus"/>
+					<OnEscapePressed function="EditBox_ClearFocus"/>
+					<OnTextChanged function="MillingFrameSearch_OnTextChanged"/>
+					<OnEditFocusLost>
+						self:HighlightText(0, 0);
+						if ( self:GetText() == "" ) then
+							self:SetText(SEARCH);
+							self:SetFontObject("GameFontDisable");
+							MillingFrameSearchBoxSearchIcon:SetVertexColor(0.6, 0.6, 0.6);
+						end
+					</OnEditFocusLost>
+					<OnEditFocusGained>
+						self:HighlightText();
+						if ( self:GetText() == SEARCH ) then
+							--self:SetText("");
+							self:SetFontObject("ChatFontSmall");
+							MillingFrameSearchBoxSearchIcon:SetVertexColor(1.0, 1.0, 1.0);
+						end
+					</OnEditFocusGained>
+				</Scripts>
+				<FontString inherits="ChatFontSmall"/>
+			</EditBox>
+			<Frame name="$parentFilterFrame" >
+				<Size x="1" y="1"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="MillingFrameSearchBox" relativePoint="RIGHT" x="7" y="0"/>
+				</Anchors>
+				<Frames>
+					<Button name="MillingFrameFilterButton"  inherits="UIMenuButtonStretchTemplate" text="FILTER">
+						<Size x="70" y="22"/>
+						<Anchors>
+							<Anchor point="LEFT"/>
+						</Anchors>
+						<Scripts>
+							<OnClick> 
+								ToggleDropDownMenu(1, nil, MillingFrameFilterDropDown, "MillingFrameFilterButton", 74, 15);
+							</OnClick>	
+							<!-- <OnLoad>
+								TradeSkillFilterButtonRightArrow:Show();
+							</OnLoad> -->
+						</Scripts>						
+					</Button>
+					<Frame name="MillingFrameFilterDropDown" inherits="UIDropDownMenuTemplate">
+						<Scripts>
+							<OnLoad function="MillingFrameFilterDropDown_OnLoad"/>
+						</Scripts>
+					</Frame>
+				</Frames>
+			</Frame>
+			
+		</Frames>
+		<Scripts>
+			<OnLoad>			
+				<!-- self.filterTbl = {hasMaterials = false, hasSkillUp = false, subClassValue = -1, slotValue = -1 };
+				MillingFrameSetFilter(-1, -1); -->
+				MillingFrameInset:SetPoint("TOPLEFT", 4, -81);
+				self:RegisterEvent("PLAYER_ENTERING_WORLD");
+				MillingFrame_OnLoad();
+			</OnLoad>
+			<OnEvent function="MillingFrame_OnEvent"/>
+			<OnShow>
+				MillingFrame_OnShow();
+				MillingFrameInputBox:SetNumber(1);                
+				PlaySound("igCharacterInfoOpen");	
+			</OnShow>
+			<OnHide>
+				PlaySound("igCharacterInfoClose");
+			</OnHide>
+		</Scripts>
+	</Frame>
+</Ui> 

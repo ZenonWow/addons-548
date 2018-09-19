@@ -1,0 +1,85 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
+
+	<Include file="libs\libs.xml" />
+	<Include file="localizations\localizations.xml" />
+	<Script file="shared.lua" />
+	<Script file="temp.lua" />
+	<Include file="modules\modules.xml" />
+	<Script file="optionspanel.lua" />
+	<Script file="chatcommand.lua" />
+	<Script file="core.lua"/>
+
+	<Frame name="BE_SecureFrame" hidden="hidden" virtual="true">
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="" hidden="true" alphamode="ADD" file="interface\friendsframe\ui-friendsframe-highlightbar" >
+					<Anchors>
+						<Anchor point="TOPLEFT" x="0" y="0" />
+						<Anchor point="BOTTOMRIGHT" x="0" y="0" />
+					</Anchors>
+					<Color a="1" r="1" g="0" b="0" />
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnEnter>
+				self.highlight:Show()
+			</OnEnter>
+			<OnLeave>
+				self.highlight:Hide()
+			</OnLeave>
+		</Scripts>
+		<Frames>
+			<Button name="$parentButton" inherits="SecureActionButtonTemplate" parentKey="button">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="0" y="0" />
+					<Anchor point="BOTTOMRIGHT" x="0" y="0" />
+				</Anchors>
+				<HighlightTexture alphamode="ADD" file="interface\friendsframe\ui-friendsframe-highlightbar-blue" />
+			</Button>
+		</Frames>
+	</Frame>
+
+	<Button name="BE_SecureWrapper" hidden="hidden" virtual="true">
+		<HighlightTexture alphamode="ADD" file="interface\friendsframe\ui-friendsframe-highlightbar" />
+		<Frames>
+			<Button name="$parentButton" inherits="SecureActionButtonTemplate" parentKey="button">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="0" y="0" />
+					<Anchor point="BOTTOMRIGHT" x="0" y="0" />
+				</Anchors>
+				<HighlightTexture alphamode="ADD" file="interface\friendsframe\ui-friendsframe-highlightbar-blue" />
+			</Button>
+		</Frames>
+	</Button>
+
+	<Button name="BEOptionsAddonButtonTemplate" virtual="true">
+		<Size x="0" y="40" />
+		<Anchors>
+			<Anchor point="LEFT"/>
+			<Anchor point="RIGHT"/>
+		</Anchors>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString parentKey="Name" inherits="GameFontNormal">
+					<Anchors>
+						<Anchor point="LEFT" />
+					</Anchors>
+				</FontString>
+				<FontString parentKey="Status" inherits="GameFontNormalSmall">
+					
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Checkbox parentKey="StatusToggle" inherits="">
+				<Size x="20" y="20" />
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.Status" relativePoint="LEFT" y="-5" />
+				</Anchors>
+			</Checkbox>
+		</Frames>
+	</Button>
+
+</Ui>

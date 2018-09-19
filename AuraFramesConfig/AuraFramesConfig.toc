@@ -1,0 +1,44 @@
+## Interface: 50400
+## Title: Aura Frames Options (Load on Demand)
+## Notes: Options for AuraFrames
+## Author: Alex <Beautiuz> Elderson
+## Version: 1.2
+## Dependencies: AuraFrames
+## LoadOnDemand: 1
+## X-Curse-Packaged-Version: 1.3.6-Release
+## X-Curse-Project-Name: Aura Frames
+## X-Curse-Project-ID: aura-frames
+## X-Curse-Repository-ID: wow/aura-frames/mainline
+
+Embeds.xml
+
+AuraFramesConfig.lua
+Config.lua
+UnlockContainers.lua
+ListEditor.lua
+Export.lua
+Import.lua
+
+ContentGeneral.lua
+ContentGeneralSettings.lua
+ContentSpellCooldowns.lua
+ContentInternalCooldowns.lua
+ContentCancelCombatAura.lua
+ContentContainers.lua
+ContentContainer.lua
+ContentSources.lua
+ContentOrder.lua
+ContentFilter.lua
+ContentFilterBuilder.lua
+ContentProfiles.lua
+ContentColors.lua
+ContentVisibility.lua
+ContentAnimations.lua
+
+AuraDefinitionHelp.lua
+
+AceGUIContainer-AuraFramesWindow.lua
+AceGUI-3.0-Spell-EditBox-Fix.lua
+AceGUIWidget-MultiSelect.lua
+
+Modules.xml

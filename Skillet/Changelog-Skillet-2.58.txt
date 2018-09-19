@@ -1,0 +1,62 @@
+------------------------------------------------------------------------
+r370 | yossa | 2014-10-10 19:13:48 +0000 (Fri, 10 Oct 2014) | 1 line
+Changed paths:
+   A /tags/2.58 (from /trunk:369)
+
+Tagging as 2.58
+------------------------------------------------------------------------
+r369 | bsmorgan | 2014-10-09 16:35:47 +0000 (Thu, 09 Oct 2014) | 2 lines
+Changed paths:
+   M /trunk/Skillet.toc
+   M /trunk/UI/MainFrame.lua
+
+Skillet:
+- Disable text wrap to fix long recipe names in a narrow frame
+------------------------------------------------------------------------
+r368 | bsmorgan | 2014-10-08 18:35:05 +0000 (Wed, 08 Oct 2014) | 3 lines
+Changed paths:
+   M /trunk/Skillet.lua
+   M /trunk/Skillet.toc
+   M /trunk/UI/MainFrame.lua
+   M /trunk/UI/MainFrame.xml
+
+Skillet:
+- Add filter for Altoholic item count.
+- Fix width calculation for optional filtered counts.
+------------------------------------------------------------------------
+r367 | bsmorgan | 2014-10-08 17:12:32 +0000 (Wed, 08 Oct 2014) | 2 lines
+Changed paths:
+   M /trunk/Plugins/BeanCounter.lua
+
+Skillet:
+- Fix BeanCounter plugin initialization
+------------------------------------------------------------------------
+r365 | bsmorgan | 2014-09-28 15:17:12 +0000 (Sun, 28 Sep 2014) | 3 lines
+Changed paths:
+   A /trunk/DeepCopy.lua
+   M /trunk/RecipeGroups.lua
+   M /trunk/Skillet.lua
+   M /trunk/Skillet.toc
+   M /trunk/SkilletData.lua
+   M /trunk/UI/MainFrame.lua
+
+Skillet:
+- Fix bug reported on WoWInterface. Clicking on reagents would crash if the tradeskill for the reagent had not been displayed.
+- Prevent displaying a tradeskill of a non-current player (5.4 issue)
+------------------------------------------------------------------------
+r364 | bsmorgan | 2014-09-26 23:41:17 +0000 (Fri, 26 Sep 2014) | 3 lines
+Changed paths:
+   M /trunk/Skillet.lua
+   M /trunk/Skillet.toc
+
+Skillet:
+- Update version to 2.57
+- remove obsolete code, rearrange initializa, and add initializing missing global variable.
+------------------------------------------------------------------------
+r363 | ethancentaurai | 2014-08-22 21:11:32 +0000 (Fri, 22 Aug 2014) | 2 lines
+Changed paths:
+   M /trunk/UI/MainFrame.lua
+
+Skillet:
+- Fixed an error when opening the Skillet window on Warlords of Draenor beta realms. Should still work on Mists of Pandaria realms.
+------------------------------------------------------------------------

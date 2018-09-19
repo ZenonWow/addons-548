@@ -1,0 +1,17 @@
+## Interface: 50200
+## X-Curse-Packaged-Version: 1.11
+## X-Curse-Project-Name: ArkAutoLootBoP
+## X-Curse-Project-ID: arkautolootbop
+## X-Curse-Repository-ID: wow/arkautolootbop/mainline
+
+## Title: ArkAutoLootBoP
+## Notes: Allows you to loot BoP items without prompting when not in a group or raid
+## Author: Arkayenro
+## Version: 11100
+## DefaultState: Enabled
+## LoadOnDemand: 0
+
+## LoadManagers: AddonLoader
+## X-LoadOn-Always:delayed
+
+ArkAutoLootBoP.lua

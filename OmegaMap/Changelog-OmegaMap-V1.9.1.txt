@@ -1,0 +1,12 @@
+tag V1.9.1
+ba62ce0d6823c4efacba6d1a4d9f622280c8e0b9
+SLOKnightfall <SLOKnightfall@gmail.com>
+2014-10-04 14:35:04 -0700
+
+Tagging Changes
+
+
+--------------------
+
+SLOKnightfall:
+	- Added fix to prevent Vuhdo from changing the map when OmegaMap is open

@@ -1,0 +1,5 @@
+<Bindings>
+	<Binding name="CLICK LevelFlightButton:LeftButton" header="LEVELFLIGHT">
+		LevelFlight_FlyLevel()
+	</Binding>
+</Bindings>

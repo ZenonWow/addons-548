@@ -1,0 +1,21 @@
+﻿## Interface: 50400
+## Title: SilverDragon (Data)
+## Notes: Default set of rares for SilverDragon
+## Version: r214
+## Author: Kemayo
+## eMail: kemayo at gmail dot com
+## X-Category: Interface Enhancements
+## X-Donate: PayPal:kemayo AT gmail DOT com
+## Dependencies: SilverDragon
+## LoadOnDemand: 1
+## X-Curse-Packaged-Version: v2.6.3-15-g29420cc
+## X-Curse-Project-Name: SilverDragon
+## X-Curse-Project-ID: silver-dragon
+## X-Curse-Repository-ID: wow/silver-dragon/mainline
+## X-Curse-Packaged-Version: r214
+## X-Curse-Project-Name: SilverDragon
+## X-Curse-Project-ID: silver-dragon
+## X-Curse-Repository-ID: wow/silver-dragon/mysticaldragon
+
+module.xml
+

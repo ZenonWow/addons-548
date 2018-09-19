@@ -1,0 +1,52 @@
+## Interface: 50100
+## Dependencies: Broker_Garbage
+## OptionalDeps: Broker_Garbage-LootManager
+## X-Curse-Packaged-Version: 5.1v6release
+## X-Curse-Project-Name: Broker_Garbage
+## X-Curse-Project-ID: broker_garbage
+## X-Curse-Repository-ID: wow/broker_garbage/mainline
+
+## Title: Broker_Garbage-Config
+## Author: ckaotik
+## Version: 5.1v6release
+
+## Notes: Configuration panels for Broker_Garbage and its plugins
+## Notes-deDE: Konfiguration für Broker_Garbage und seine Plugins
+
+## Notes-frFR: Configuration panels for Broker_Garbage and its plugins
+## Notes-itIT: Configuration panels for Broker_Garbage and its plugins
+## Notes-koKR: Configuration panels for Broker_Garbage and its plugins
+## Notes-esMX: Configuration panels for Broker_Garbage and its plugins
+## Notes-ruRU: Configuration panels for Broker_Garbage and its plugins
+## Notes-zhCN: Configuration panels for Broker_Garbage and its plugins
+## Notes-esES: Configuration panels for Broker_Garbage and its plugins
+## Notes-zhTW: Broker_Garbage的設置面板與它的掛件
+## Notes-ptBR: Configuration panels for Broker_Garbage and its plugins
+
+## LoadManagers: AddonLoader, Addon Control Panel
+## X-LoadOn-InterfaceOptions: Broker_Garbage
+## X-LoadOn-Slash: /garbage, /garb, /junk
+
+## X-Website: http://www.wowinterface.com/downloads/info15531-Broker_Garbage.html
+## X-RelSite-WoWI: 15531
+## X-Category: Inventory
+## X-Localizations: enUS, deDE. Works in any language. You can help!
+## X-Credits: tekKonfig
+## X-License: BSD
+
+# libraries
+libs\tekKonfig\tekKonfig.xml
+
+# locale
+locale\enUS.lua
+locale\deDE.lua
+locale\curse.lua
+
+# main files
+util.lua
+options_main.lua
+options_statistics.lua
+options_lists.lua
+options_slash.lua
+category_test.lua
+core.lua

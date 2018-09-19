@@ -1,0 +1,8 @@
+Hendrik Leppkes:
+	- Revert "fix 6.0 lua errors"
+	This reverts commit aac47b1572f6273f6227dc8819a7fb78dffd3109.
+	
+	Check if there is a WoD branch before doing random commits, kthx.
+oscarucb:
+	- fix 6.0 lua errors
+	caused by the new return format for GetMapContinents()

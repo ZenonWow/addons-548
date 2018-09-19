@@ -1,0 +1,12 @@
+tag v1.19
+16b3086d15e8c6fa5652b3d98f5ce30e6a338b22
+iceeagle <ciprianmihai.coman@gmail.com>
+2014-08-11 06:59:31 +0300
+
+Tag as v1.19
+
+
+--------------------
+
+iceeagle:
+	- update for 5.4.8; update libs
