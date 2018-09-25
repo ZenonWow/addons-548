@@ -106,26 +106,15 @@ end
 
 --[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
 
-ns.modules[name].ontooltip = function(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
-
+local function addFactionGoldInfo(tt,faction)
 	local totalGold = 0
-	local diff_money
-
-	current_money = GetMoney()
-	goldDB[faction][ns.realm][ns.player.name] = {current_money,ns.player.class}
-
-	tt:Clear()
-
-	tt:AddHeader(C("dkyellow",L["Gold information"]))
-	tt:AddSeparator()
 
 	for k,v in ns.pairsByKeys(goldDB[faction][ns.realm]) do
 		if type(v)~="table" then v = {v,"white"} end
 		local line, column = tt:AddLine(C(v[2],ns.scm(k)), ns.GetCoinColorOrTextureString(name,v[1]))
 		if (k~=ns.player.name) then
 		tt:SetLineScript(line, "OnMouseUp", function(self,x,button)
-			if button == "RightButton" then
+			if button == "RightButton" and IsShiftKeyPressed() then
 				goldDB[faction][ns.realm][k] = nil
 				tt:Clear()
 				ns.modules[name].ontooltip(tt)
@@ -137,7 +126,29 @@ ns.modules[name].ontooltip = function(tt)
 		totalGold = totalGold + v[1]
 		line, column = nil, nil
 	end
+	
+	return totalGold
+end
 
+ns.modules[name].ontooltip = function(tt)
+	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+
+	local totalGold = 0
+	local diff_money
+
+	current_money = GetMoney()
+	goldDB[faction][ns.realm][ns.player.name] = {current_money,ns.player.class}
+
+	tt:Clear()
+	tt:AddHeader(C("dkyellow",L["Gold"] .." ".. C("ltgreen", faction)))
+	tt:AddSeparator()
+  totalGold= addFactionGoldInfo(tt, faction)
+  for  otherFaction,_  in  pairs(goldDB)  do  if  otherFaction ~= faction  then
+    tt:AddSeparator()
+    tt:AddHeader(C("ltgreen", otherFaction))
+    totalGold= totalGold + addFactionGoldInfo(tt, otherFaction)
+  end end
+  
 	tt:AddSeparator()
 	tt:AddLine(L["Total Gold"], ns.GetCoinColorOrTextureString(name,totalGold))
 	tt:AddSeparator(3,0,0,0,0)
