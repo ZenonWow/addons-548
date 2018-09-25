@@ -106,9 +106,10 @@ local function collectData() -- collect currency data
 	local collapsed = {};
 	local indexes = {};
 	local num = GetCurrencyListSize();
-	local invertI = num+1;
-	for i=1, GetCurrencyListSize() do
-		invertI = invertI-1;
+	local invertI = num;
+	--for i=1, GetCurrencyListSize() do
+	--for invertI=num, 1 do
+	while (0 < invertI) do
 		itemname, isHeader, isExpanded, isUnused, isWatched, count, icon = GetCurrencyListInfo(invertI)
 		if (isHeader) then
 			collapsed[itemname]=(not isExpanded);
@@ -117,10 +118,11 @@ local function collectData() -- collect currency data
 				ExpandCurrencyList(invertI,1);
 			end
 		end
+		invertI = invertI-1;
 	end
 
 	local expanded;
-	for i=1, GetCurrencyListSize() do
+	for i=1, num do
 		itemname, isHeader, isExpanded, isUnused, isWatched, count, icon = GetCurrencyListInfo(i)
 		currencyId = currency.id[itemname]
 
@@ -150,14 +152,13 @@ local function collectData() -- collect currency data
 		end
 	end
 
-	num = GetCurrencyListSize();
-	invertI = num+1;
-	for i=1, num do
-		invertI = invertI-1;
+	invertI = num;
+	while (0 < invertI) do
 		itemname, isHeader, isExpanded, isUnused, isWatched, count, icon = GetCurrencyListInfo(invertI)
 		if (isHeader) and (collapsed[itemname]==true) then
 			ExpandCurrencyList(invertI,0);
 		end
+		invertI = invertI-1;
 	end
 	UPDATE_LOCK = false;
 end
