@@ -1,0 +1,10 @@
+## Interface: 30300
+## Name: Combuctor: Equipment Sets
+## Notes: Creates a Combuctor sub-set to the Equipment tab for items saved via the Blizzard Equipment Manager.
+## Version: 1.1
+## Author: Seerah
+## Dependencies: Combuctor
+## OptionalDeps: Combuctor_Sets
+## SavedVariables: CESDB
+
+CES.lua

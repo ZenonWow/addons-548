@@ -1,0 +1,9 @@
+﻿## Interface: 50402
+## Title: Combuctor BindToAccount
+## Author: kageneko
+## Notes: Requires Combuctor
+## Dependencies: Combuctor
+## OptionalDeps: Combuctor_Sets
+## Version: 1.00
+
+Combuctor_BindToAccount.lua
