@@ -238,6 +238,23 @@ function private:UpdateTopLabel()
 	private.frame.topLabel:SetText(table.concat(parts, " "))
 end
 
+--[[
+local SubjectPatterns = {  -- copied from Postal/Postal.lua
+	AHCancelled = gsub(AUCTION_REMOVED_MAIL_SUBJECT, "%%s", ".*"),
+	AHExpired = gsub(AUCTION_EXPIRED_MAIL_SUBJECT, "%%s", ".*"),
+	AHOutbid = gsub(AUCTION_OUTBID_MAIL_SUBJECT, "%%s", ".*"),
+	AHSuccess = gsub(AUCTION_SOLD_MAIL_SUBJECT, "%%s", ".*"),
+	AHWon = gsub(AUCTION_WON_MAIL_SUBJECT, "%%s", ".*"),
+}
+--]]
+local SubjectPatterns = {  -- same value as in Postal/Postal.lua
+	AHCancelled = format(AUCTION_REMOVED_MAIL_SUBJECT, ".*"),
+	AHExpired = format(AUCTION_EXPIRED_MAIL_SUBJECT, '.*'),
+	AHOutbid = format(AUCTION_OUTBID_MAIL_SUBJECT, ".*"),
+	AHSuccess = format(AUCTION_SOLD_MAIL_SUBJECT, ".*"),
+	AHWon = format(AUCTION_WON_MAIL_SUBJECT, ".*"),
+}
+
 function private:InboxUpdate()
 	if not private.frame or not private.frame:IsVisible() then return end
 	TSMAPI:CancelFrame("inboxLootTextDelay")
@@ -261,10 +278,26 @@ function private:InboxUpdate()
 				mailInfo[i] = format(L["Sale: %s (%d) | %s | %s"], itemName, quantity, TSMAPI:FormatTextMoney(bid - ahcut, greenColor), FormatDaysLeft(daysLeft, i))
 			end
 		elseif hasItem then
-			local itemLink
-			local quantity = 0
+			--local itemLink
+			local items = {}
+			--local count = 0
+			--local quantity = 0
 			for j = 1, hasItem do
 				local link = GetInboxItemLink(i, j)
+				--if  link  then  count = count + 1  end
+				local name = TSMAPI:GetItemString(link)
+				local itemInfo = items[name]
+				if  name  and  not itemInfo  then
+					itemInfo = { c = 0, q = 0, l = link }
+					table.insert(items, itemInfo)
+					itemInfo.idx = #itemInfo
+					items[name] = itemInfo
+				end
+				if  itemInfo  then
+					itemInfo.c = itemInfo.c + 1
+					itemInfo.q = itemInfo.q + select(3, GetInboxItem(i, j))
+				end
+				--[[
 				itemLink = itemLink or link
 				quantity = quantity + select(3, GetInboxItem(i, j))
 				if TSMAPI:GetItemString(itemLink) ~= TSMAPI:GetItemString(link) then
@@ -272,10 +305,21 @@ function private:InboxUpdate()
 					quantity = -1
 					break
 				end
+				--]]
 			end
+			local itemInfo = items[1]
+			local itemDesc = "---"
+			if  itemInfo  then
+				itemDesc = itemInfo.l
+			  if  1 < itemInfo.q  then  itemDesc = format("%s (%d)", itemDesc, itemInfo.q)  end
+				if  1 < #items  then  itemDesc = hasItem .. ' items: '.. itemDesc ..', ...'  end
+			end
+			--[[
 			local itemDesc = (quantity > 0 and format("%s (%d)", itemLink, quantity)) or (quantity == -1 and L["Multiple Items"]) or "---"
-
-			if hasItem == 1 and itemLink and strfind(subject, "^" .. TSMAPI:StrEscape(format(AUCTION_EXPIRED_MAIL_SUBJECT, TSMAPI:GetSafeItemInfo(itemLink)))) then
+/run ChatFrame1:AddMessage(GetInboxItemLink(1,1))
+			--]]
+			--if hasItem == 1 and itemLink and strfind(subject, "^" .. TSMAPI:StrEscape(format(AUCTION_EXPIRED_MAIL_SUBJECT, TSMAPI:GetSafeItemInfo(itemLink)))) then 
+			if hasItem == 1 and itemLink and strfind(subject, SubjectPatterns.AHExpired) then
 				mailInfo[i] = format(L["Expired: %s | %s"], itemDesc, FormatDaysLeft(daysLeft, i))
 			elseif cod > 0 then
 				mailInfo[i] = format(L["COD: %s | %s | %s | %s"], itemDesc, TSMAPI:FormatTextMoney(cod, redColor), sender or "---", FormatDaysLeft(daysLeft, i))
@@ -360,7 +404,8 @@ function private:ShouldOpenMail(index)
 			if itemLink then
 				local itemName = TSMAPI:GetSafeItemInfo(itemLink)
 				local quantity = select(3, GetInboxItem(index, 1))
-				if quantity and quantity > 0 and (subject == format(AUCTION_REMOVED_MAIL_SUBJECT.." (%d)", itemName, quantity) or subject == format(AUCTION_REMOVED_MAIL_SUBJECT, itemName)) then
+				--if quantity and quantity > 0 and (subject == format(AUCTION_REMOVED_MAIL_SUBJECT.." (%d)", itemName, quantity) or subject == format(AUCTION_REMOVED_MAIL_SUBJECT, itemName)) then
+				if quantity and quantity > 0 and strfind(subject, SubjectPatterns.AHCancelled) then
 					return true
 				end
 			end
@@ -370,7 +415,8 @@ function private:ShouldOpenMail(index)
 		local subject, _, _, _, hasItem = select(4, GetInboxHeaderInfo(index))
 		if not isInvoice and hasItem == 1 then
 			local itemLink = GetInboxItemLink(index, 1)
-			if itemLink and strfind(subject, "^" .. TSMAPI:StrEscape(format(AUCTION_EXPIRED_MAIL_SUBJECT, TSMAPI:GetSafeItemInfo(itemLink)))) then
+			--if itemLink and strfind(subject, "^" .. TSMAPI:StrEscape(format(AUCTION_EXPIRED_MAIL_SUBJECT, TSMAPI:GetSafeItemInfo(itemLink)))) then
+			if itemLink and strfind(subject, SubjectPatterns.AHExpired) then
 				return true
 			end
 		end
