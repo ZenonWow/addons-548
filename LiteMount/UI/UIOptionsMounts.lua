@@ -204,6 +204,7 @@ function LiteMountOptionsScrollFrame_OnSizeChanged(self, w, h)
     self.update = LiteMountOptions_UpdateMountList
 end
 
+
 function LiteMountOptionsMounts_OnLoad(self)
 
     LiteMount_Frame_AutoLocalize(self)
@@ -211,8 +212,12 @@ function LiteMountOptionsMounts_OnLoad(self)
     -- Because we're the wrong size at the moment we'll only have 1 button
     CreateMoreButtons(self.scrollFrame)
 
+    LiteMountOptions= LiteMountOptionsMounts
+    self.name = "LiteMount"
+    --[[
     self.parent = LiteMountOptions.name
     self.name = MOUNTS
+    --]]
     self.title:SetText("LiteMount : " .. self.name)
     self.default = function ()
             for _,m in LiteMount:GetAllMounts() do

@@ -33,10 +33,21 @@ function LiteMount_Frame_AutoLocalize(f)
 end
 
 function LiteMount_OpenOptionsPanel()
-    local f = LiteMountOptions
-    if not f.CurrentOptionsPanel then
-        f.CurrentOptionsPanel = LiteMountOptionsMounts
+    local panel = LiteMountOptions.CurrentOptionsPanel  or  LiteMountOptionsMounts
+    if  not panel:IsVisible()  then
+        InterfaceOptionspanel_OpenToCategory(panel)
+        InterfaceOptionspanel_OpenToCategory(panel)
+    else
+        InterfaceOptionsFrame:Hide()
     end
-    InterfaceOptionsFrame_OpenToCategory(f.CurrentOptionsPanel)
+end
+
+function LiteMount_ToggleMountsPanel()
+    if  not LiteMountOptionsMounts:IsVisible()  then
+        InterfaceOptionsFrame_OpenToCategory(LiteMountOptionsMounts)
+        InterfaceOptionsFrame_OpenToCategory(LiteMountOptionsMounts)
+    else
+        InterfaceOptionsFrame:Hide()
+    end
 end
 

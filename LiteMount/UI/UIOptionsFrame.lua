@@ -8,7 +8,7 @@
 
 ----------------------------------------------------------------------------]]--
 
-function LiteMountOptions_OnLoad(self)
+function LiteMountOptionsAbout_OnLoad(self)
     LiteMount_Frame_AutoLocalize(self)
 
     local version = GetAddOnMetadata("LiteMount", "Version")
@@ -18,7 +18,7 @@ function LiteMountOptions_OnLoad(self)
 
     local author = GetAddOnMetadata("LiteMount", "Author")
 
-    self.name = "LiteMount"
+    self.name = "About"
 
     self.title:SetText("LiteMount")
     self.version:SetText(version)
@@ -27,7 +27,7 @@ function LiteMountOptions_OnLoad(self)
     InterfaceOptions_AddCategory(self)
 end
 
-function LiteMountOptions_OnShow(self)
+function LiteMountOptionsAbout_OnShow(self)
     LiteMountOptions.CurrentOptionsPanel = self
 end
 

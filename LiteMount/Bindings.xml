@@ -16,4 +16,10 @@
         -- Magic name causes it to click the LiteMount button with right mouse
     </Binding>
 
+    <Binding name="LITEMOUNT_MOUNTS">
+        if  IsShiftKeyDown()  then  TogglePetJournal(1)
+        else  LiteMount_ToggleMountsPanel()
+        end
+    </Binding>
+
 </Bindings> 

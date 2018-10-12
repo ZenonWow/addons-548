@@ -42,6 +42,6 @@ function LiteMount_SlashCommandFunc(argstr)
         end
     end
 
-    return LiteMount_OpenOptionsPanel()
+    return LiteMount_ToggleMountsPanel()
 end
 

@@ -87,6 +87,7 @@ function LiteMount:Initialize()
     SlashCmdList["LiteMount"] = LiteMount_SlashCommandFunc
     SLASH_LiteMount1 = "/litemount"
     SLASH_LiteMount2 = "/lmt"
+    SLASH_LiteMount3 = "/lm"
 
     self.playerClass = select(2, UnitClass("player"))
 

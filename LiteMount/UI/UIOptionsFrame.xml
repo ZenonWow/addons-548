@@ -2,7 +2,7 @@
 
 <!-- Copyright 2011-2013 Mike Battersby -->
 
-<Frame name="LiteMountOptions" hidden="true">
+<Frame name="LiteMountOptionsAbout" hidden="true">
     <Layers>
         <Layer level="ARTWORK">
             <FontString name="$parentTitle" inherits="GameFontNormalLarge" parentKey="title">
@@ -45,8 +45,8 @@
         </Layer>
     </Layers>
     <Scripts>
-        <OnLoad function="LiteMountOptions_OnLoad" />
-        <OnShow function="LiteMountOptions_OnShow" />
+        <OnLoad function="LiteMountOptionsAbout_OnLoad" />
+        <OnShow function="LiteMountOptionsAbout_OnShow" />
     </Scripts>
 </Frame>
 
