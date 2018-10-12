@@ -388,7 +388,8 @@ Elephant.defaultConf.savedconfdefaults.events = {
     register_with_prat = true,
     desc = LOOT_METHOD,
     channels = {
-      [Elephant.defaultConf.defaultindexes.loot] = -1,
+      --[Elephant.defaultConf.defaultindexes.loot] = -1,
+      [Elephant.defaultConf.defaultindexes.loot] = 1,
       [Elephant.defaultConf.defaultindexes.party] = 0,
       [Elephant.defaultConf.defaultindexes.raid] = 0
     }
