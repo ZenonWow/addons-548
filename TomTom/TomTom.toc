@@ -8,6 +8,7 @@
 ## Notes-zhCN:一个简单的导航助手。
 ## Notes-ruRU: Удобный портативный навигатор по игровой карте
 ## Author: Cladhaire
+## OptionalDeps: _AceLibs
 ## SavedVariables: TomTomDB, TomTomWaypoints, TomTomWaypointsMF
 ## X-Curse-Packaged-Version: v50400-1.0.0
 ## X-Curse-Project-Name: TomTom
@@ -18,14 +19,14 @@
 ## X-CompatibleLocales: enUS, enGB, deDE, frFR, esES, esMX, zhCN, zhTW, koKR, ruRU
 
 libs\Astrolabe\Load.xml
-libs\LibStub\LibStub.lua
-libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
-libs\AceGUI-3.0\AceGUI-3.0.xml
-libs\AceConfig-3.0\AceConfig-3.0.xml
-libs\AceEvent-3.0\AceEvent-3.0.xml
-libs\AceDB-3.0\AceDB-3.0.xml
+# libs\LibStub\LibStub.lua
+# libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+# libs\AceGUI-3.0\AceGUI-3.0.xml
+# libs\AceConfig-3.0\AceConfig-3.0.xml
+# libs\AceEvent-3.0\AceEvent-3.0.xml
+# libs\AceDB-3.0\AceDB-3.0.xml
 libs\AceDBOptions-3.0\AceDBOptions-3.0.xml
-libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+# libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 libs\LibMapData-1.0\library.lua
 
 AddonCore.lua
