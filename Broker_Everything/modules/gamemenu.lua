@@ -249,7 +249,7 @@ end
 --[[ ns.modules[name].onmousewheel = function(self, direction) end ]]
 
 ns.modules[name].ontooltip = function(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+	--if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
 
 	local line, column
 	local section, secHide = 1, false

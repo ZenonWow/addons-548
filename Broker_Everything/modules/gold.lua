@@ -106,26 +106,28 @@ end
 
 --[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
 
+local function addCharGoldInfo(tt,k,v)
+		if type(v)~="table" then v = {v,"white"} end
+		return  tt:AddLine(C(v[2],ns.scm(k)), ns.GetCoinColorOrTextureString(name,v[1]))
+end
+
+
 local function addFactionGoldInfo(tt,faction)
 	local totalGold = 0
 
-	for k,v in ns.pairsByKeys(goldDB[faction][ns.realm]) do
-		if type(v)~="table" then v = {v,"white"} end
-		local line, column = tt:AddLine(C(v[2],ns.scm(k)), ns.GetCoinColorOrTextureString(name,v[1]))
-		if (k~=ns.player.name) then
-		tt:SetLineScript(line, "OnMouseUp", function(self,x,button)
-			if button == "RightButton" and IsShiftKeyPressed() then
+	for k,v in ns.pairsByKeys(goldDB[faction][ns.realm]) do  if  k ~= ns.player.name  then
+		local line, column = addCharGoldInfo(tt,k,v)
+		ns.highlightOnMouseover(tt, line)
+		tt:SetLineScript(line, "OnMouseUp", function(self,button)
+			if button == "RightButton" and IsShiftKeyDown() then
 				goldDB[faction][ns.realm][k] = nil
 				tt:Clear()
 				ns.modules[name].ontooltip(tt)
 			end 
 		end)
-		tt:SetLineScript(line, "OnEnter", function(self) tt:SetLineColor(line, 1,192/255, 90/255, 0.3) end )
-		tt:SetLineScript(line, "OnLeave", function(self) tt:SetLineColor(line, 0,0,0,0) mButton=nil end)
-		end
 		totalGold = totalGold + v[1]
 		line, column = nil, nil
-	end
+	end end
 	
 	return totalGold
 end
@@ -137,12 +139,17 @@ ns.modules[name].ontooltip = function(tt)
 	local diff_money
 
 	current_money = GetMoney()
-	goldDB[faction][ns.realm][ns.player.name] = {current_money,ns.player.class}
+	local playerMoney = {current_money,ns.player.class}
+	goldDB[faction][ns.realm][ns.player.name] = playerMoney
 
 	tt:Clear()
-	tt:AddHeader(C("dkyellow",L["Gold"] .." ".. C("ltgreen", faction)))
-	tt:AddSeparator()
-  totalGold= addFactionGoldInfo(tt, faction)
+	--tt:AddHeader(C("dkyellow",L["Gold information"])
+	--tt:AddSeparator()
+	tt:AddHeader(C("ltgreen", faction))
+	addCharGoldInfo(tt, ns.player.name, playerMoney)
+	totalGold = playerMoney[1]
+  
+	totalGold = totalGold + addFactionGoldInfo(tt, faction)
   for  otherFaction,_  in  pairs(goldDB)  do  if  otherFaction ~= faction  then
     tt:AddSeparator()
     tt:AddHeader(C("ltgreen", otherFaction))
@@ -166,7 +173,7 @@ ns.modules[name].ontooltip = function(tt)
 	if Broker_EverythingDB.showHints then
 		tt:AddSeparator(3,0,0,0,0)
 		line, column = tt:AddLine()
-		tt:SetCell(line, 1, C("ltblue",L["Right-click"]).." || "..C("green",L["Remove entry"]), nil, nil, 2)
+		tt:SetCell(line, 1, C("ltblue",L["Shift-RightClick"]).." || "..C("green",L["Remove entry"]), nil, nil, 2)
 		line, column = tt:AddLine()
 		tt:SetCell(line, 1, C("copper",L["Click"]).." || "..C("green",L["Open currency pane"]), nil, nil, 2)
 	end

@@ -158,3 +158,9 @@ ns.moduleInit = function(name)
 	end
 end
 
+
+function ns.highlightOnMouseover(tt, line)
+	tt:SetLineScript(line, "OnEnter", function(self) tt:SetLineColor(line, 1,192/255, 90/255, 0.3) end )
+	tt:SetLineScript(line, "OnLeave", function(self) tt:SetLineColor(line, 0,0,0,0) end)
+end
+
