@@ -150,7 +150,7 @@ function TSM:OnInitialize()
 		TSM.db.factionrealm.numPagesCache = nil
 	end
 	
-	TSM:RegisterEvent("BLACK_MARKET_ITEM_UPDATE", "ScanBMAH")
+	--TSM:RegisterEvent("BLACK_MARKET_ITEM_UPDATE", "ScanBMAH")
 	
 	-- Prepare the TradeSkillMasterAppDB database
 	-- We're not using AceDB here on purpose due to bugs in AceDB, but are emulating the parts of it that we need.
@@ -714,7 +714,7 @@ function TSM:GetAuctionPlayer(player, player_full)
 end
 
 function TSM:ScanBMAH()
-	TSM.appDB.factionrealm.bmah = nil
+	TSM.db.factionrealm.bmah = nil
 	local items = {}
 	for i=1, C_BlackMarket.GetNumItems() do
 		local quantity, minBid, minIncr, currBid, numBids, itemLink, bmId = TSMAPI:Select({3, 9, 10, 11, 13, 15, 16}, C_BlackMarket.GetItemInfoByIndex(i))
@@ -731,5 +731,5 @@ function TSM:ScanBMAH()
 			end
 		end
 	end
-	TSM.appDB.factionrealm.blackMarket = {lastUpdate=time(), items=items, version=1}
+	TSM.db.factionrealm.blackMarket = {lastUpdate=time(), items=items, version=1}
 end
