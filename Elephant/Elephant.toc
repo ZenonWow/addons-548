@@ -21,7 +21,7 @@
 ## X-Curse-Project-ID: elephant
 ## X-Curse-Repository-ID: wow/elephant/mainline
 
-embeds.xml
+# embeds.xml
 
 Locales\Locale-enUS.lua
 Locales\Locale-frFR.lua
