@@ -67,7 +67,7 @@ local function OnMouseWheel(self, value, ...)
 end
 
 local function OnDragStart(self)
-	local frameToMove = self.frameToMove
+	local frameToMove = self.frameToMove or self
 	local settings = frameToMove.settings
 	if settings and not settings.default then -- set defaults 
 		settings.default = {}
@@ -82,7 +82,7 @@ local function OnDragStart(self)
 end
 
 local function OnDragStop(self)
-	local frameToMove = self.frameToMove
+	local frameToMove = self.frameToMove or self
 	local settings = frameToMove.settings
 	frameToMove:StopMovingOrSizing()
 	frameToMove.isMoving = false
@@ -90,6 +90,16 @@ local function OnDragStop(self)
 			settings.point, settings.relativeTo, settings.relativePoint, settings.xOfs, settings.yOfs = frameToMove:GetPoint()
 	end
 end
+
+
+local function OnModifiedDragStart(frameToMove)
+	if  IsControlKeyDown()  then  OnDragStart(frameToMove)  end
+end
+
+local function OnModifiedDragStop(frameToMove)
+	OnDragStop(frameToMove)
+end
+
 
 local function OnMouseUp(self, ...)
 	local frameToMove = self.frameToMove
@@ -141,6 +151,11 @@ local function SetMoveHandler(frameToMove, handler)
 	
 	handler:SetScript("OnDragStart", OnDragStart)
 	handler:SetScript("OnDragStop", OnDragStop)
+	
+	if  handler ~= frameToMove  then
+    frameToMove:SetScript("OnDragStart", OnModifiedDragStart)
+    frameToMove:SetScript("OnDragStop", OnModifiedDragStop)
+	end
 
 	--override frame position according to settings when shown
 	frameToMove:HookScript("OnShow", OnShow)			
@@ -263,6 +278,8 @@ local function OnEvent(self, event, arg1, arg2)
 		SetMoveHandler(KeyBindingFrame)
 	elseif arg1 == "Blizzard_AuctionUI" then
 		SetMoveHandler(AuctionFrame)
+	elseif arg1 == "Blizzard_BlackMarketUI" then
+		SetMoveHandler(BlackMarketFrame)
 	elseif arg1 == "Blizzard_GuildUI" then
 		SetMoveHandler(GuildFrame, GuildFrame.TitleMouseover)
 	elseif arg1 == "Blizzard_LookingForGuildUI" then
