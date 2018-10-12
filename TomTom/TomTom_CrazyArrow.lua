@@ -6,6 +6,11 @@
 --    with the artwork.)
 ----------------------------------------------------------------------------]]
 
+--[[
+To open arrow configuration copy to chat:
+/run InterfaceOptionsFrame_OpenToCategory("Waypoint Arrow")
+--]]
+
 local sformat = string.format
 local L = TomTomLocals
 local ldb = LibStub("LibDataBroker-1.1")
@@ -55,7 +60,7 @@ wayframe.status:SetPoint("TOP", wayframe.title, "BOTTOM", 0, 0)
 wayframe.tta:SetPoint("TOP", wayframe.status, "BOTTOM", 0, 0)
 
 local function OnDragStart(self, button)
-	if not TomTom.db.profile.arrow.lock then
+	if not TomTom.db.profile.arrow.lock or IsControlKeyDown() then
 		self:StartMoving()
 	end
 end
@@ -295,11 +300,6 @@ local dropdown_info = {
 	-- Define level one elements here
 	[1] = {
 		{
-			-- Title
-			text = L["TomTom Waypoint Arrow"],
-			isTitle = 1,
-		},
-		{
 			-- Clear waypoint from crazy arrow
 			text = L["Clear waypoint from crazy arrow"],
 			func = function()
@@ -347,6 +347,38 @@ local dropdown_info = {
 					return
 				end
 			end,
+		},
+		{
+			-- Separator
+			text = "--------",
+		},
+		{
+			-- Automatically set waypoint arrow
+			text = L["Automatically set waypoint arrow"],
+			checked = function()  return TomTom.db.profile.arrow.lock  end,
+			func = function()
+				TomTom.db.profile.arrow.lock= not TomTom.db.profile.arrow.lock
+			end,
+		},
+		{
+			-- Lock waypoint arrow
+			text = L["Lock waypoint arrow"],
+			checked = function()  return TomTom.db.profile.arrow.autoqueue  end,
+			func = function()
+				TomTom.db.profile.arrow.autoqueue= not TomTom.db.profile.arrow.autoqueue
+			end,
+		},
+		{
+			-- Configuration
+			text = L["Configuration..."],
+			func = function()
+				InterfaceOptionsFrame_OpenToCategory("Waypoint Arrow")
+			end,
+		},
+		{
+			-- Title
+			text = L["TomTom Waypoint Arrow"],
+			isTitle = 1,
 		},
 	}
 }
