@@ -28,7 +28,19 @@ random(time()); random(); random(time())
 local x = addon.engine
 
 -- Store my frames
-x.frames = { }
+x.frames = {
+	["general"]		= false
+	["outgoing"]	= false
+	["critical"]	= false
+	["damage"]		= false
+	["healing"]		= false
+	["power"]		= false
+	["class"]		= false
+	["procs"]		= false
+	["loot"]		= false
+	["lossofcontrol"] = _G.LossOfControlFrame,
+	["errors"] = _G.UIErrorsFrame,
+}
 
 -- Static frame lookup
 local frameIndex = {
@@ -41,6 +53,8 @@ local frameIndex = {
 	[7] = "procs",
 	[8] = "loot",
 	--[9] = "class",	-- this is not used by redirection
+	"lossofcontrol",  -- "LossOfControlFrame"
+	"errors",  -- "UIErrorsFrame"
 }
 
 -- Static Title Lookup
@@ -54,6 +68,8 @@ local frameTitles = {
 	["class"]		= "Combo",						-- COMBAT_TEXT_SHOW_COMBO_POINTS_TEXT,
 	["procs"]		= "Special Effects (Procs)",	-- COMBAT_TEXT_SHOW_REACTIVES_TEXT,
 	["loot"]		= "Loot & Money",				-- LOOT,
+	["lossofcontrol"] = "Loss Of Control",
+	["errors"] = "Error Messages",
 }
 
 local function autoClearFrame_OnUpdate(self, elasped)
@@ -111,52 +127,71 @@ end
 function x:UpdateFrames(specificFrame)
 
 	-- Update Head Numbers and FCT Font Settings
+	if specificFrame then 
+		self:UpdateFrame(specificFrame)
+		-- Send a Test message
+		specificFrame:SetScript("OnUpdate", Frame_SendTestMessage_OnUpdate)
+		return
+	end
+	
+	x:UpdateBlizzardFCT()
+	
+	-- Update the frames
+	--for framename, settings in pairs(x.db.profile.frames) do
+	for framename, f in pairs(x.frames) do
+		self:UpdateFrame(framename)
+	end
+end
+	
+function x:UpdateFrame(framename)
+
+	-- Update Head Numbers and FCT Font Settings
 	if not specificFrame then x:UpdateBlizzardFCT() end
 	
 	-- Update the frames
-	for framename, settings in pairs(x.db.profile.frames) do
-		if specificFrame and specificFrame == framename or not specificFrame then
-			local f = nil
+	local settings = x.db.profile.frames[framename]
 
-			-- Create the frame (or retrieve it)
-			if x.frames[framename] then
-				f = x.frames[framename]
-			else
-				f = CreateFrame("ScrollingMessageFrame", "xCT_Plus"..framename.."Frame", UIParent)
-				f:SetSpacing(2)
-				f:ClearAllPoints()
-				f:SetMovable(true)
-				f:SetResizable(true)
-				f:SetMinResize(64, 32)
-				f:SetMaxResize(768, 768)
-				f:SetClampedToScreen(true)
-				f:SetShadowColor(0, 0, 0, 0)
-				
-				-- Special Cases
-				if framename == "class" then
-					f:SetMaxLines(1)
-					f:SetFading(false)
-				end
-				
-				
-				f.sizing = CreateFrame("Frame", "xCT_Plus"..framename.."SizingFrame", f)
-				f.sizing.parent = f
-				f.sizing:SetHeight(16)
-				f.sizing:SetWidth(16)
-				f.sizing:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -1, 1)
-				f.sizing:Hide()
-				
-				f.moving = CreateFrame("Frame", "xCT_Plus"..framename.."MovingFrame", f)
-				f.moving.parent = f
-				f.moving:SetPoint("TOPLEFT", f, "TOPLEFT", 1, -1)
-				f.moving:SetPoint("TOPRIGHT", f, "TOPRIGHT", -1, -21)
-				f.moving:SetHeight(20)
-				f.moving:Hide()
-
-				x.frames[framename] = f
-			end
-			
-			f.frameName = framename
+	-- Retrieve frame
+	local f = x.frames[framename]
+	if  not f  then
+		-- Create the frame
+		f = CreateFrame("ScrollingMessageFrame", "xCT_Plus"..framename.."Frame", UIParent)
+		f.frameName = framename
+		f:SetSpacing(2)
+		f:ClearAllPoints()
+		f:SetMovable(true)
+		f:SetResizable(true)
+		f:SetMinResize(64, 32)
+		f:SetMaxResize(768, 768)
+		f:SetClampedToScreen(true)
+		f:SetShadowColor(0, 0, 0, 0)
+		x.frames[framename] = f
+		
+		-- Special Cases
+		if framename == "class" then
+			f:SetMaxLines(1)
+			f:SetFading(false)
+		end
+	end
+	
+	if  not f.sizing  then
+		f.sizing = CreateFrame("Frame", "xCT_Plus"..framename.."SizingFrame", f)
+		f.sizing.parent = f
+		f.sizing:SetHeight(16)
+		f.sizing:SetWidth(16)
+		f.sizing:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -1, 1)
+		f.sizing:Hide()
+	end
+	if  not f.moving  then
+		f.moving = CreateFrame("Frame", "xCT_Plus"..framename.."MovingFrame", f)
+		f.moving.parent = f
+		f.moving:SetPoint("TOPLEFT", f, "TOPLEFT", 1, -1)
+		f.moving:SetPoint("TOPRIGHT", f, "TOPRIGHT", -1, -21)
+		f.moving:SetHeight(20)
+		f.moving:Hide()
+	end
+	
+	if  settings  then
 			f.settings = settings
 
 			-- Frame Strata
@@ -208,14 +243,8 @@ function x:UpdateFrames(specificFrame)
 				f:SetFading(true)
 				f:SetTimeVisible(3)
 			end
-			
-			-- Send a Test message
-			if specificFrame then
-				f:SetScript("OnUpdate", Frame_SendTestMessage_OnUpdate)
-			end
-
-		end
 	end
+	
 end
 
 -- =====================================================
@@ -622,9 +651,11 @@ end
 function x.StartConfigMode()
 	x.configuring = true
 
-	for framename, settings in pairs(x.db.profile.frames) do
-		if settings.enabledFrame then
-			local f = x.frames[framename]
+	--for framename, settings in pairs(x.db.profile.frames) do
+	for framename, f in pairs(x.frames) do
+		local settings = x.db.profile.frames[framename]
+		if  not settings  or  settings.enabledFrame  then
+			--local f = x.frames[framename]
 			f:SetBackdrop( {
 					bgFile	 	= "Interface/Tooltips/UI-Tooltip-Background",
 					edgeFile 	= "Interface/Tooltips/UI-Tooltip-Border",
@@ -716,6 +747,7 @@ function x.StartConfigMode()
 				f.sizing:Hide()
 			end
 			
+			if  not settings  then  f.restoreStrata = f:GetFrameStrata()  end
 			f:SetFrameStrata("FULLSCREEN_DIALOG")
 			
 		end
@@ -726,8 +758,10 @@ function x.EndConfigMode()
 	x.configuring = false
 	if x.AlignGrid then x.AlignGrid:Hide() end
 	
-	for framename, settings in pairs(x.db.profile.frames) do
-		local f = x.frames[framename]
+	--for framename, settings in pairs(x.db.profile.frames) do
+	for framename, f in pairs(x.frames) do
+		--local settings = x.db.profile.frames[framename]
+		--local f = x.frames[framename]
 		
 		f:SetBackdrop(nil)
 		
@@ -787,7 +821,7 @@ function x.EndConfigMode()
 		f.moving:Hide()
 		
 		-- Set the Frame Strata
-		f:SetFrameStrata(ssub(x.db.profile.frameSettings.frameStrata, 2))
+		f:SetFrameStrata(f.restoreStrata  or  ssub(x.db.profile.frameSettings.frameStrata, 2))
 	end
 	
 	collectgarbage()
