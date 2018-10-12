@@ -40,7 +40,8 @@
 -- @class file
 -- @name AceDB-3.0.lua
 -- @release $Id: AceDB-3.0.lua 1115 2014-09-21 11:52:35Z kaelten $
-local ACEDB_MAJOR, ACEDB_MINOR = "AceDB-3.0", 25
+-- @patch $Id: AceDB-3.0.lua 1115.1 2018-09-26
+local ACEDB_MAJOR, ACEDB_MINOR = "AceDB-3.0", 29  -- MINOR = 25 in release 1115
 local AceDB, oldminor = LibStub:NewLibrary(ACEDB_MAJOR, ACEDB_MINOR)
 
 if not AceDB then return end -- No upgrade needed
@@ -272,23 +273,38 @@ local function initdb(sv, defaults, defaultProfile, olddb, parent)
 
 	-- map "true" to our "Default" profile
 	if defaultProfile == true then defaultProfile = "Default" end
+	-- default profileKey set in savedvariables takes precedence
+	if  sv.profileKeys and sv.profileKeys.default  then  defaultProfile = sv.profileKeys.default  end
 
 	local profileKey
 	if not parent then
 		-- Make a container for profile keys
-		if not sv.profileKeys then sv.profileKeys = {} end
+		--if not sv.profileKeys then sv.profileKeys = {} end
 
-		-- Try to get the profile selected from the char db
-		profileKey = sv.profileKeys[charKey] or defaultProfile or charKey
+		-- Get the profileKey from the profileKeys mapping if it was changed by the user
+		profileKey = sv.profileKeys and sv.profileKeys[charKey]
 
+		if  profileKey  then
+			-- profileKey explicitly set, nothing to do
+		elseif  sv.profiles  and  sv.profiles[charKey]  then
+			-- implicit profileKey is the charKey if such profile exists
+			profileKey = charKey
+		elseif  defaultProfile  then
+			-- if no character specific profile exists then use the defaultProfile 
+			profileKey = defaultProfile
+		else
+			-- if not having a defaultProfile then yet again make a character specific profile
+			profileKey = charKey
+		end
+		
 		-- save the selected profile for later
-		sv.profileKeys[charKey] = profileKey
+		--sv.profileKeys[charKey] = profileKey
 	else
 		-- Use the profile of the parents DB
 		profileKey = parent.keys.profile or defaultProfile or charKey
 
 		-- clear the profileKeys in the DB, namespaces don't need to store them
-		sv.profileKeys = nil
+		--sv.profileKeys = nil
 	end
 
 	-- This table contains keys that enable the dynamic creation
@@ -303,7 +319,8 @@ local function initdb(sv, defaults, defaultProfile, olddb, parent)
 		["factionrealm"] = factionrealmKey,
 		["factionrealmregion"] = factionrealmregionKey,
 		["profile"] = profileKey,
-        ["locale"] = localeKey,
+		["defaultProfile"] = defaultProfile,
+		["locale"] = localeKey,
 		["global"] = true,
 		["profiles"] = true,
 	}
@@ -448,10 +465,21 @@ function DBObjectLib:SetProfile(name)
 	self.profile = nil
 	self.keys["profile"] = name
 
-	-- if the storage exists, save the new profile
-	-- this won't exist on namespaces.
-	if self.sv.profileKeys then
+	--[[
+	If the profile name is charKey then the profileKey mapping is implicit.
+	If the profile name is defaultProfile and there is no character-specific profile then the mapping is implicit too.
+	--]]
+	local implicitProfileKey = (name == charKey) or (name == self.keys.defaultProfile and not self.sv.profiles[charKey])
+	if not implicitProfileKey then
+		-- save profileKey mapping
+		self.sv.profileKeys = self.sv.profileKeys or {}
 		self.sv.profileKeys[charKey] = name
+	else
+		-- remove profileKey mapping
+		if self.sv.profileKeys then
+			self.sv.profileKeys[charKey] = nil
+			if not next(self.sv.profileKeys) then self.sv.profileKeys = nil end
+		end
 	end
 
 	-- populate to child namespaces
