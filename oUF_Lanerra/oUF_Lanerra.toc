@@ -1,0 +1,25 @@
+## Interface: 50400
+## Version: 1.5.4
+## X-Curse-Packaged-Version: 1.5.4
+## X-Curse-Project-Name: oUF_Lanerra
+## X-Curse-Project-ID: ouf_lanerra
+## X-Curse-Repository-ID: wow/ouf_lanerra/mainline
+
+## Title: oUF_Lanerra
+## Notes: oUF layout by Lanerra
+## Author: Lanerra
+## X-Copyright: Copyright © 2014 Lanerra.
+## X-License: See LICENSE file for license terms.
+## RequiredDeps: oUF
+## OptionalDeps: oUF_DebuffHighlight, oUF_RuneBar
+
+
+modules\Smooth.lua
+modules\DispellableDebuffs.lua
+modules\Threat.lua
+
+oUF_Lanerra_Config.lua
+oUF_Lanerra.lua
+AuraFilter.lua
+Borders.lua
+Tags.lua

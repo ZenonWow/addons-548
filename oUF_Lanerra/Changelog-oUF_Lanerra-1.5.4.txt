@@ -1,0 +1,18 @@
+tag 1.5.4
+7467688d81dcf5b003a2929bcb7dae58d65897ff
+Lanerra <MariusNocturnum@gmail.com>
+2014-07-11 15:47:06 -0700
+
+- Version bump to 1.5.4
+- Fix a couple of taint issues
+- Code cleanup
+- Added party buffs/debuffs option (still needs tuning)
+- Fixed non-healer layout for raid
+- Fixed predictive healing display for raid frames
+- Remove Dismiss Pet option from pet frame, since all it does is throw errors and taint. Sadly, this can't be avoided due to an issue on Blizzard's side of the code. You must dismiss your pet, if a hunter, via the spellbook, or a button in your action bars.
+
+
+--------------------
+
+Lanerra:
+	- - Version bump to 1.5.4 - Fix a couple of taint issues - Code cleanup - Added party buffs/debuffs option (still needs tuning) - Fixed non-healer layout for raid - Fixed predictive healing display for raid frames - Remove Dismiss Pet option from pet frame, since all it does is throw errors and taint. Sadly, this can't be avoided due to an issue on Blizzard's side of the code. You must dismiss your pet, if a hunter, via the spellbook, or a button in your action bars.
