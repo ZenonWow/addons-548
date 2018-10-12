@@ -34,6 +34,7 @@ function tinypad:PLAYER_LOGIN()
 	SlashCmdList["TINYPADSLASH"] = tinypad.SlashHandler
 	SLASH_TINYPADSLASH1 = "/pad"
 	SLASH_TINYPADSLASH2 = "/tinypad"
+	SLASH_TINYPADSLASH3 = "/tp"
 	-- setup the rest
 	editBox:SetHyperlinksEnabled(true)
 	self:SetMinResize(268,96)
@@ -685,3 +686,27 @@ function tinypad:Insert(body,page,bookmark)
 	end
 	tinypad:ShowPage(current)
 end
+
+
+
+
+
+local TinyPadLDB= {
+	type = "launcher",
+	label= 'TinyPad',
+	text= 'TP',
+	--value= '/TP',
+	--icon = "Interface\\AddOns\\ViragDevTool\\icon",
+	OnClick = function(self, button)
+		if  button == "LeftButton"  then
+			tinypad:Toggle()
+		end
+	end,
+	OnTooltipShow = function(tooltip)
+		if  not tooltip  or  not tooltip.AddLine  then  return  end
+		tooltip:AddLine("|cffd6ff00 Click: |r Toggles TinyPad frame")
+	end,
+}
+
+LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("TinyPad", TinyPadLDB)
+
