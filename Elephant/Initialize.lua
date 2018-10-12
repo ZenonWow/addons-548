@@ -50,6 +50,7 @@ frame isn't shown).
 function Elephant:OnEnable()
   -- Registering events
   Elephant:RegisterEventsRefresh()
+	Elephant:RegisterEvent('PLAYER_LOGOUT', Elephant.OnLogout, nil)
 
   -- Displays default log
   if not Elephant.dbpc.char.logs[Elephant.dbpc.char.currentlogindex] then
@@ -58,3 +59,22 @@ function Elephant:OnEnable()
   Elephant.tempConf.currentline = #Elephant.dbpc.char.logs[Elephant.dbpc.char.currentlogindex].logs
   Elephant:ShowCurrentLog()
 end
+
+--[[
+When addon is disabled. Unregister events
+and log disable message.
+]]
+function Elephant:OnDisable()
+  -- Unregister events
+  Elephant:UnregisterAllEvents()
+	Elephant:AddHeaderToStructures(true, true)
+end
+
+--[[
+Handle PLAYER_LOGOUT event. (Unused alternative: PLAYER_LEAVING_WORLD)
+Log stop message.
+]]
+function Elephant.OnLogout()
+	Elephant:AddHeaderToStructures(true, true)
+end
+

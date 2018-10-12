@@ -124,10 +124,24 @@ end
 Returns the default message displayed when a
 log is started or stopped.
 ]]
-function Elephant:GetStateChangeActionMsg(isEnabled)
+function Elephant:GetStateChangeActionMsg(logName, action)
+	--local playerName = GetUnitName('player')
+	--local clColor = GetClassColorByGUID( UnitGUID('player') )
+	local classColorTable = RAID_CLASS_COLORS[select(2,UnitClass('player'))]
+  local clColor = classColorTable  and  Elephant:MakeTextHexColor(classColorTable.r, classColorTable.g, classColorTable.b)
+	local playerName = GetSenderWithClassColor( GetUnitName('player'), clColor )
+	
+	local timestamp = date("%Y-%m-%d") ..' '.. date("%H:%M:%S")
+	
+	if  action == true  then  action = 'enabled'
+	elseif  action == false  then  action = 'disabled'
+	end
+	return logName ..' logging of '.. playerName ..' '.. action ..' at '.. timestamp
+	--[[
   if isEnabled then
     return format(Elephant.L['logstartedon'], date("%m/%d/%Y"), date("%H:%M:%S"))
   else
     return Elephant.L['logstopped']
   end
+	--]]
 end

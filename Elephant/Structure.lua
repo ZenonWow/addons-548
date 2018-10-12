@@ -61,6 +61,17 @@ local function SaveMsgToTableAtPosition(t, msg, position)
 end
 
 --[[
+Adds a footer to the given log object.
+Warning: should only be used if the log of
+this chat *is* enabled.
+]]
+local function AddFooterToTable(logObject)
+  -- For "easier-to-read" code
+  local t = logObject.logs
+	AddMsgToTable(t, { ['type'] = "SYSTEM", ['arg1'] = Elephant:GetStateChangeActionMsg(logObject.name, 'stopped') } )
+end
+
+--[[
 Adds a header to the given log object.
 Warning: should only be used if the log of
 this chat *is* enabled.
@@ -79,7 +90,7 @@ local function AddHeaderToTable(logObject)
     if not logObject.hasMessage then
       -- If the log does not have a message since the last header
       -- then simply modify the last header
-      SaveMsgToTableAtPosition(t, { ['type'] = "SYSTEM", ['arg1'] = Elephant:GetStateChangeActionMsg(true) } , #t)
+      SaveMsgToTableAtPosition(t, { ['type'] = "SYSTEM", ['arg1'] = Elephant:GetStateChangeActionMsg(logObject.name, 'started') } , #t)
     else
       -- Otherwise add two lines
       AddMsgToTable(t, { ['arg1'] = " " } )
@@ -90,7 +101,7 @@ local function AddHeaderToTable(logObject)
   -- If log did save a message since the last header
   -- or log is empty
   if logObject.hasMessage or #t == 0 then
-    AddMsgToTable(t, { ['type'] = "SYSTEM", ['arg1'] = Elephant:GetStateChangeActionMsg(true) } )
+    AddMsgToTable(t, { ['type'] = "SYSTEM", ['arg1'] = Elephant:GetStateChangeActionMsg(logObject.name, 'started') } )
   end
 
   -- Specify that no messages has been saved since the last header
@@ -192,12 +203,14 @@ Iterates over all the saved logs and for each
 *enabled* log found:
 - adds a header
 - checks its size
+If addFooter == true then:
+- adds a footer: Logging stopped.
 If nonCustomChannelsOnly is true, this is done
 only to channels that have not been manually
 joined by the user (i.e. whisper, raid, ... and
 trade, worlddefense, ...).
 ]]
-function Elephant:AddHeaderToStructures(nonCustomChannelsOnly)
+function Elephant:AddHeaderToStructures(nonCustomChannelsOnly, addFooter)
   local k, v
 
   for k,v in pairs(Elephant.dbpc.char.logs) do
@@ -211,10 +224,12 @@ function Elephant:AddHeaderToStructures(nonCustomChannelsOnly)
           )
         )
       then
-        AddHeaderToTable(v)
+        if addFooter then AddFooterToTable(v)
+				else AddHeaderToTable(v)
+				end
       end
     end
-    CheckTableSize(k)
+    if  not addFooter  then  CheckTableSize(k)  end
   end
 end
 
@@ -410,13 +425,15 @@ The buttons of the current log are also
 updated (enabling/disabling as needed).
 ]]
 function Elephant:ToggleEnableCurrentLog()
-  Elephant.dbpc.char.logs[Elephant.dbpc.char.currentlogindex].enabled = not Elephant.dbpc.char.logs[Elephant.dbpc.char.currentlogindex].enabled
+	local logIndex = Elephant.dbpc.char.currentlogindex
+	local logObject = Elephant.dbpc.char.logs[logIndex]
+  logObject.enabled = not logObject.enabled
 
-  if Elephant.dbpc.char.logs[Elephant.dbpc.char.currentlogindex].enabled then
-    Elephant:CaptureNewMessage( { ['arg1'] = " " } , Elephant.dbpc.char.currentlogindex)
-    Elephant:CaptureNewMessage( { ['arg1'] = " " } , Elephant.dbpc.char.currentlogindex)
+  if logObject.enabled then
+    Elephant:CaptureNewMessage( { ['arg1'] = " " } , logIndex)
+    Elephant:CaptureNewMessage( { ['arg1'] = " " } , logIndex)
   end
-  Elephant:CaptureNewMessage( { ['type'] = "SYSTEM", ['arg1'] = Elephant:GetStateChangeActionMsg(Elephant.dbpc.char.logs[Elephant.dbpc.char.currentlogindex].enabled) } , Elephant.dbpc.char.currentlogindex)
+  Elephant:CaptureNewMessage( { ['type'] = "SYSTEM", ['arg1'] = Elephant:GetStateChangeActionMsg(logObject.name, logObject.enabled) } , logIndex)
 
   Elephant:UpdateCurrentLogButtons()
 end
