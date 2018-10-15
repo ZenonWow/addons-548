@@ -29,15 +29,15 @@ local x = addon.engine
 
 -- Store my frames
 x.frames = {
-	["general"]		= false
-	["outgoing"]	= false
-	["critical"]	= false
-	["damage"]		= false
-	["healing"]		= false
-	["power"]		= false
-	["class"]		= false
-	["procs"]		= false
-	["loot"]		= false
+	["general"]		= false,
+	["outgoing"]	= false,
+	["critical"]	= false,
+	["damage"]		= false,
+	["healing"]		= false,
+	["power"]		= false,
+	["class"]		= false,
+	["procs"]		= false,
+	["loot"]		= false,
 	["lossofcontrol"] = _G.LossOfControlFrame,
 	["errors"] = _G.UIErrorsFrame,
 }
@@ -486,7 +486,7 @@ do
 			frames[frameIndex[index]]				-- this frame's last entry index
 		
 		-- If the frame is not enabled, then dont even worry about it
-		if not settings.enabledFrame and settings.secondaryFrame == 0 then
+		if  not settings  or  not settings.enabledFrame and settings.secondaryFrame == 0 then
 			index = index + 1	-- heh, still need to iterate to the next frame :P
 			return
 		end
