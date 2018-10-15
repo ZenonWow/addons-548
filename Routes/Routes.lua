@@ -954,6 +954,19 @@ local taboo_zone_args_desc_table = {
 ------------------------------------------------------------------------------------------------------
 -- General event functions
 
+BINDING_HEADER_Routes = L["Routes"]
+BINDING_NAME_ROUTESTOGGLEFRAME = "Toggle Routes config"
+
+function Routes.ToggleConfig()
+	local appName = 'Routes'
+	local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+  if  not AceConfigDialog.OpenFrames[appName]  then
+		AceConfigDialog:Open(appName)
+	else
+		AceConfigDialog:Close(appName)
+	end
+end
+
 function Routes:OnInitialize()
 	-- Initialize database
 	self.db = LibStub("AceDB-3.0"):New("RoutesDB", defaults)
@@ -962,10 +975,9 @@ function Routes:OnInitialize()
 
 	-- Initialize the ace options table
 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Routes", options)
-	local f = function() LibStub("AceConfigDialog-3.0"):Open("Routes") end
-	self:RegisterChatCommand(L["routes"], f)
+	self:RegisterChatCommand(L["routes"], Routes.ToggleConfig)
 	if L["routes"] ~= "routes" then
-		self:RegisterChatCommand("routes", f)
+		self:RegisterChatCommand("routes", Routes.ToggleConfig)
 	end
 
 	-- Upgrade old storage format (which was dependant on LibBabble-Zone-3.0
