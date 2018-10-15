@@ -1,5 +1,5 @@
 ## Interface: 50400
-## Title: _NPCScan.Overlay
+## Title: NPCScan.Overlay
 ## Notes: Adds mob patrol paths to your map.
 ## Notes-deDE: Fügt deiner Karte die Laufpfade hinzu
 ## Notes-enCN: 在你的地图上新增怪物路径图。
