@@ -255,12 +255,42 @@ local SubjectPatterns = {  -- same value as in Postal/Postal.lua
 	AHWon = format(AUCTION_WON_MAIL_SUBJECT, ".*"),
 }
 
+function private:GetMailItemText(mailIdx)
+	local hasItem = select(8, GetInboxHeaderInfo(mailIdx))
+	local items = {}
+	for itemIdx = 1, hasItem do
+		local link = GetInboxItemLink(mailIdx, itemIdx)
+		local name = TSMAPI:GetItemString(link)
+		local itemInfo = items[name]
+		if  name  and  not itemInfo  then
+			itemInfo = { c = 0, q = 0, l = link }
+			table.insert(items, itemInfo)
+			itemInfo.idx = #itemInfo
+			items[name] = itemInfo
+		end
+		if  itemInfo  then
+			itemInfo.c = itemInfo.c + 1
+			itemInfo.q = itemInfo.q + select(3, GetInboxItem(mailIdx, itemIdx))
+		end
+	end
+	
+	local itemInfo = items[1]
+	local itemText = "---"
+	local itemLink = itemInfo and itemInfo.l
+	if  itemInfo  then
+		itemText = itemInfo.l
+		if  1 < itemInfo.q  then  itemText = itemLink ..'('.. itemInfo.q ..')'  end
+		if  1 < #items  then  itemText = hasItem .. ' items: '.. itemText ..', ...'  end
+	end
+	--local itemText = (quantity > 0 and format("%s (%d)", itemLink, quantity)) or (quantity == -1 and L["Multiple Items"]) or "---"
+	return itemText, itemLink
+end
+
 function private:InboxUpdate()
 	if not private.frame or not private.frame:IsVisible() then return end
 	TSMAPI:CancelFrame("inboxLootTextDelay")
 
 	local numMail, totalMail = GetInboxNumItems()
-
 	local greenColor, redColor = "|cff00ff00", "|cffff0000"
 	local mailInfo = {}
 	local collectGold = 0
@@ -278,56 +308,17 @@ function private:InboxUpdate()
 				mailInfo[i] = format(L["Sale: %s (%d) | %s | %s"], itemName, quantity, TSMAPI:FormatTextMoney(bid - ahcut, greenColor), FormatDaysLeft(daysLeft, i))
 			end
 		elseif hasItem then
-			--local itemLink
-			local items = {}
-			--local count = 0
-			--local quantity = 0
-			for j = 1, hasItem do
-				local link = GetInboxItemLink(i, j)
-				--if  link  then  count = count + 1  end
-				local name = TSMAPI:GetItemString(link)
-				local itemInfo = items[name]
-				if  name  and  not itemInfo  then
-					itemInfo = { c = 0, q = 0, l = link }
-					table.insert(items, itemInfo)
-					itemInfo.idx = #itemInfo
-					items[name] = itemInfo
-				end
-				if  itemInfo  then
-					itemInfo.c = itemInfo.c + 1
-					itemInfo.q = itemInfo.q + select(3, GetInboxItem(i, j))
-				end
-				--[[
-				itemLink = itemLink or link
-				quantity = quantity + select(3, GetInboxItem(i, j))
-				if TSMAPI:GetItemString(itemLink) ~= TSMAPI:GetItemString(link) then
-					itemLink = L["Multiple Items"]
-					quantity = -1
-					break
-				end
-				--]]
-			end
-			local itemInfo = items[1]
-			local itemDesc = "---"
-			if  itemInfo  then
-				itemDesc = itemInfo.l
-			  if  1 < itemInfo.q  then  itemDesc = format("%s (%d)", itemDesc, itemInfo.q)  end
-				if  1 < #items  then  itemDesc = hasItem .. ' items: '.. itemDesc ..', ...'  end
-			end
-			--[[
-			local itemDesc = (quantity > 0 and format("%s (%d)", itemLink, quantity)) or (quantity == -1 and L["Multiple Items"]) or "---"
-/run ChatFrame1:AddMessage(GetInboxItemLink(1,1))
-			--]]
+			local itemText, itemLink = private:GetMailItemText(i)
 			--if hasItem == 1 and itemLink and strfind(subject, "^" .. TSMAPI:StrEscape(format(AUCTION_EXPIRED_MAIL_SUBJECT, TSMAPI:GetSafeItemInfo(itemLink)))) then 
-			if hasItem == 1 and itemLink and strfind(subject, SubjectPatterns.AHExpired) then
-				mailInfo[i] = format(L["Expired: %s | %s"], itemDesc, FormatDaysLeft(daysLeft, i))
+			if hasItem == 1 and strfind(subject, SubjectPatterns.AHExpired) then
+				mailInfo[i] = format(L["Expired: %s | %s"], itemText, FormatDaysLeft(daysLeft, i))
 			elseif cod > 0 then
-				mailInfo[i] = format(L["COD: %s | %s | %s | %s"], itemDesc, TSMAPI:FormatTextMoney(cod, redColor), sender or "---", FormatDaysLeft(daysLeft, i))
+				mailInfo[i] = format(L["COD: %s | %s | %s | %s"], itemText, TSMAPI:FormatTextMoney(cod, redColor), sender or "---", FormatDaysLeft(daysLeft, i))
 			elseif money > 0 then
 				collectGold = collectGold + money
-				mailInfo[i] = format("%s + %s | %s | %s", itemDesc, TSMAPI:FormatTextMoney(money, greenColor), sender or "---", FormatDaysLeft(daysLeft, i))
+				mailInfo[i] = format("%s + %s | %s | %s", itemText, TSMAPI:FormatTextMoney(money, greenColor), sender or "---", FormatDaysLeft(daysLeft, i))
 			else
-				mailInfo[i] = format("%s | %s | %s", itemDesc, sender or "---", FormatDaysLeft(daysLeft, i))
+				mailInfo[i] = format("%s | %s | %s", itemText, sender or "---", FormatDaysLeft(daysLeft, i))
 			end
 		elseif money > 0 then
 			mailInfo[i] = format("%s | %s | %s | %s", subject, TSMAPI:FormatTextMoney(money, greenColor), sender or "---", FormatDaysLeft(daysLeft, i))
@@ -532,15 +523,16 @@ function private:LootMailItem(index)
 					break
 				end
 			end
-			local itemDesc = (quantity > 0 and format("%s (%d)", itemLink, quantity)) or (quantity == -1 and "Multiple Items") or "?"
-			if hasItem == 1 and itemLink and strfind(subject, "^" .. TSMAPI:StrEscape(format(AUCTION_EXPIRED_MAIL_SUBJECT, TSMAPI:GetSafeItemInfo(itemLink)))) then
-				TSM:Printf(L["Collected expired auction of %s"], itemDesc)
+			local itemText, itemLink = private:GetMailItemText(index)
+			--if hasItem == 1 and itemLink and strfind(subject, "^" .. TSMAPI:StrEscape(format(AUCTION_EXPIRED_MAIL_SUBJECT, TSMAPI:GetSafeItemInfo(itemLink)))) then
+			if hasItem == 1 and strfind(subject, SubjectPatterns.AHExpired) then
+				TSM:Printf(L["Collected expired auction of %s"], itemText)
 			elseif cod > 0 then
-				TSM:Printf(L["Collected COD of %s from %s for %s."], itemDesc, sender, TSMAPI:FormatTextMoney(cod, redColor))
+				TSM:Printf(L["Collected COD of %s from %s for %s."], itemText, sender, TSMAPI:FormatTextMoney(cod, redColor))
 			elseif money > 0 then
-				TSM:Printf(L["Collected %s and %s from %s."], itemDesc, TSMAPI:FormatTextMoney(money, greenColor), sender)
+				TSM:Printf(L["Collected %s and %s from %s."], itemText, TSMAPI:FormatTextMoney(money, greenColor), sender)
 			else
-				TSM:Printf(L["Collected %s from %s."], itemDesc, sender)
+				TSM:Printf(L["Collected %s from %s."], itemText, sender)
 			end
 		elseif money > 0 then
 			TSM:Printf(L["Collected %s from %s."], TSMAPI:FormatTextMoney(money, greenColor), sender)
