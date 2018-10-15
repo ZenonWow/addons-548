@@ -48,6 +48,7 @@ Routes.lua
 TSP.lua
 
 # Routes Module files
+Modules\Broker.lua
 Modules\AutoShow.lua
 Modules\Waypoints.lua
 Modules\TomTom.lua
