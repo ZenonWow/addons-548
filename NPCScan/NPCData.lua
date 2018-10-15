@@ -693,6 +693,7 @@ local NPC_DATA = {
 	[51077] = { world_id = ZN.EASTERN_KINGDOMS,         map_name = ZN.ELWYNN_FOREST,               is_tamable = true,  is_achievement = false }, -- Bushtail
 	[51078] = { world_id = ZN.PANDARIA,                 map_name = ZN.THE_JADE_FOREST,             is_tamable = false, is_achievement = true  }, -- Ferdinand
 	[51079] = { world_id = ZN.EASTERN_KINGDOMS,         map_name = ZN.VASHJIR,                     is_tamable = false, is_achievement = false }, -- Captain Foulwind
+	[51236] = { world_id = ZN.DEEPHOLM,                 map_name = ZN.DEEPHOLM,                    is_tamable = false, is_achievement = false }, -- Blood Seeker (Aeonaxx alt spawn)
 	[51401] = { world_id = ZN.KALIMDOR,                 map_name = ZN.ULDUM,                       is_tamable = true,  is_achievement = false }, -- Madexx
 	[51402] = { world_id = ZN.KALIMDOR,                 map_name = ZN.ULDUM,                       is_tamable = true,  is_achievement = false }, -- Madexx
 	[51403] = { world_id = ZN.KALIMDOR,                 map_name = ZN.ULDUM,                       is_tamable = true,  is_achievement = false }, -- Madexx
