@@ -73,15 +73,21 @@ if  GetCVarBool == nil  then
 	function GetCVarBool(cvar)  return GetCVar(cvar) == "1"  end
 end
 
+local isLogging = false
+local function Log(...)
+	if  isLogging  then  DEFAULT_CHAT_FRAME:AddMessage(...)  end
+end
+
 --[[
 /run SetCVar("gxMaximize", 1); SetCVar("gxWindow", 1); RestartGx()
+/dump GetCVar("gxMaximize") , GetCVar("gxWindow")
 --]]
 function ToggleFullscreen(goFullscreen, fullscreenIsExlusive) 
   local wasMaximized= GetCVarBool("gxMaximize")
   local wasWindowed= GetCVarBool("gxWindow")
   local wasFullscreen= wasMaximized or not wasWindowed
 	if  nil == goFullscreen  then  goFullscreen = not wasFullscreen  end
-	if  nil == fullscreenIsExlusive  then  fullscreenIsExlusive = not Broker_EverythingDB.Stuff.fullscreenWasWindowed  end
+	--if  nil == fullscreenIsExlusive  then  fullscreenIsExlusive = not Broker_EverythingDB.Stuff.fullscreenWasWindowed  end
   Broker_EverythingDB.Stuff= Broker_EverythingDB.Stuff or {}
 	
   if  not goFullscreen  then
@@ -89,7 +95,9 @@ function ToggleFullscreen(goFullscreen, fullscreenIsExlusive)
     if  wasFullscreen  then  Broker_EverythingDB.Stuff.fullscreenWasWindowed= wasWindowed  end
 		-- return if nothing changes
 		if  not wasMaximized  and  wasWindowed  then  return  end
-    -- go windowed and not maximized
+    
+		--Log('ToggleFullscreen(' .. tostring(goFullscreen) ..', '.. tostring(fullscreenIsExlusive)  ..'): gxMaximize = 0 ; gxWindow = 1')
+		-- go windowed and not maximized
     ns.SetCVar("gxMaximize", 0)
     ns.SetCVar("gxWindow", 1)
   else
@@ -97,14 +105,20 @@ function ToggleFullscreen(goFullscreen, fullscreenIsExlusive)
 		local varValue= fullscreenIsWindowed  and  1  or  0
 		-- return if nothing changes
 		if  wasMaximized == fullscreenIsWindowed  and  wasWindowed == fullscreenIsWindowed  then  return  end
+		
+		--Log('ToggleFullscreen('.. tostring(goFullscreen) ..', '.. tostring(fullscreenIsExlusive) ..'): gxMaximize = gxWindow = '.. varValue)
 		-- awkward logic: non-windowed (exclusive) fullscreen is not maximized
     ns.SetCVar("gxMaximize", varValue)
     --if  not fullscreenIsExlusive  then  ns.SetCVar("gxMaximize", 1)  end
     ns.SetCVar("gxWindow", varValue)
   end
-  --ns.SetCVar("gxWindow", 1 - tonumber(GetCVar("gxWindow")))
+  
+	Log('ToggleFullscreen('.. tostring(goFullscreen) ..', '.. tostring(fullscreenIsExlusive) ..'): gxMaximize = '.. GetCVar("gxMaximize") ..' gxWindow = '.. GetCVar("gxWindow"))
+	--ns.SetCVar("gxWindow", 1 - tonumber(GetCVar("gxWindow")))
   RestartGx()
+	
 end
+
 
 ns.modules[name].ontooltip = function(tt)
 	--if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
