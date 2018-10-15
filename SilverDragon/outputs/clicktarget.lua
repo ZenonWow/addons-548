@@ -178,7 +178,8 @@ function module:PLAYER_REGEN_ENABLED()
 end
 
 function module:MODIFIER_STATE_CHANGED(event, modifier, state)
-	if modifier:sub(2) == "ALT" then
+	--if modifier:sub(2) == "ALT" then
+	if modifier:sub(2) == "CTRL" then
 		self:ToggleDrag(state == 1)
 	end
 end
@@ -300,7 +301,8 @@ popup:SetAttribute("type", "macro")
 
 local on_enter = function()
 	popup:SetBackdropBorderColor(1, 1, 0.15)
-	if not IsAltKeyDown() then
+	--if not IsAltKeyDown() then
+	if not IsCtrlKeyDown() then
 		-- alt-tabbing screws this up, so play it safe
 		module:ToggleDrag(false)
 	end
