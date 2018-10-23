@@ -31,9 +31,13 @@ lib:Embed(AdvancedIconSelector)
 local L = LibStub("AceLocale-3.0"):GetLocale("AdvancedIconSelector", true)
 local AIS = AdvancedIconSelector
 
-local DEBUG = false
+--[[
+/run AIS.debug=true
+--]]
+AIS.debug=true
+--local DEBUG = false
 function AIS:Debug(...)
-	if DEBUG then
+	if AIS.debug then
 		print("|cff00ff00[AIS] [Debug]|r", ...)
 	end
 end

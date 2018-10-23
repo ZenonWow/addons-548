@@ -4,9 +4,12 @@ local BCTR = LibStub("LibBabble-CreatureType-3.0"):GetReverseLookupTable()
 local addon = LibStub("AceAddon-3.0"):NewAddon("SilverDragon", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0")
 SilverDragon = addon
 addon.events = LibStub("CallbackHandler-1.0"):New(addon)
-
-local debugf = tekDebug and tekDebug:GetFrame("SilverDragon")
-local function Debug(...) if debugf then debugf:AddMessage(string.join(", ", tostringall(...))) end end
+--[[
+/run SilverDragon.debug=true
+--]]
+--local debugf = tekDebug and tekDebug:GetFrame("SilverDragon")
+local debugf = tekDebug and tekDebug:GetFrame("SilverDragon") or DEFAULT_CHAT_FRAME
+local function Debug(...)  if  debugf and SilverDragon.debug  then debugf:AddMessage(string.join(", ", tostringall(...))) end  end
 addon.Debug = Debug
 
 local mfloor, mpow, mabs = math.floor, math.pow, math.abs

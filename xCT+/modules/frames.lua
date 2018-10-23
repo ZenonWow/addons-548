@@ -389,6 +389,8 @@ function x:AddSpamMessage(framename, mergeID, message, colorname, interval)
 	end
 
 	local heap, stack = spamHeap[framename], spamStack[framename]
+	if  not heap  then  return  end
+
 	if heap[mergeID] then
 		heap[mergeID].color = colorname
 		table_insert(heap[mergeID].entries, message)

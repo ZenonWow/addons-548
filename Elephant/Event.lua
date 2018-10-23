@@ -160,7 +160,7 @@ local function HandleMessage(prat_msg, event, ...)
           if UnitInRaid("player") then
             player = GetRaidRosterInfo(masterloot_raid)
           else
-            if masterloot_party > 0 then
+            if masterloot_party and masterloot_party > 0 then
               player = UnitName("party" .. masterloot_party)
             else
               player = UnitName("player")

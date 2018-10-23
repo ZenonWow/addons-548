@@ -302,7 +302,7 @@ popup:SetAttribute("type", "macro")
 local on_enter = function()
 	popup:SetBackdropBorderColor(1, 1, 0.15)
 	--if not IsAltKeyDown() then
-	if not IsCtrlKeyDown() then
+	if not IsControlKeyDown() then
 		-- alt-tabbing screws this up, so play it safe
 		module:ToggleDrag(false)
 	end

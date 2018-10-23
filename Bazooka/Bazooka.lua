@@ -2552,6 +2552,7 @@ function Bazooka:openConfigDialog(opts, ...)
         InterfaceAddOnsList_Update()
         return self:openConfigDialog(opts, ...)
     end
+    InterfaceOptionsFrame_Show()
     InterfaceOptionsFrame_OpenToCategory(self.dummyOpts)
     InterfaceOptionsFrame_OpenToCategory(self.dummyOpts)
 end
