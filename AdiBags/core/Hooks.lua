@@ -25,16 +25,23 @@ local pairs = _G.pairs
 
 local hookedBags = {}
 addon.hookedBags = hookedBags
-local containersFrames = {}
+local ContainerFrames = {}
 do
-	for i = 1, NUM_CONTAINER_FRAMES, 1 do
-		containersFrames[i] = _G["ContainerFrame"..i]
+	for  i = 1,NUM_CONTAINER_FRAMES  do
+		ContainerFrames[i] = _G["ContainerFrame"..i]
+	end
+end
+
+local function GetNumBags()
+	if addon:GetInteractingWindow() == "BANKFRAME" then
+		return NUM_BAG_SLOTS + NUM_BANKBAGSLOTS
+	else
+		return NUM_BAG_SLOTS
 	end
 end
 
 local IterateBuiltInContainers
 do
-	local GetContainerNumSlots = GetContainerNumSlots
 	local function iter(maxContainer, id)
 		while id < maxContainer do
 			id = id + 1
@@ -45,16 +52,16 @@ do
 	end
 
 	function IterateBuiltInContainers()
-		if addon:GetInteractingWindow() == "BANKFRAME" then
-			return iter, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS, -1
-		else
-			return iter, NUM_BAG_SLOTS, -1
-		end
+		return iter, GetNumBags(), -1
 	end
 end
 
+--[[
+/run for i=1,NUM_CONTAINER_FRAMES do local f=_G['ContainerFrame'..i]; local id=f:GetID(); print(i ..'.: id='.. id ..' slots='.. GetContainerNumSlots(i)) end
+--]]
+
 function addon:GetContainerFrame(id, spawn)
-	for _, frame in pairs(containersFrames) do
+	for i, frame in pairs(ContainerFrames) do
 		if frame:IsShown() and frame:GetID() == id then
 			return frame
 		end
@@ -69,29 +76,46 @@ function addon:GetContainerFrame(id, spawn)
 end
 
 function addon:ToggleAllBags()
-	local open, total = 0, 0
+	if  IsShiftKeyDown()  then  return self.hooks.ToggleAllBags()  end
+	
 	for i, bag in self:IterateBags() do
-		if bag:CanOpen() then
-			total = total + 1
-			if bag:IsOpen() then
-				open = open + 1
-			end
+		if  bag:CanOpen() and  not bag:IsOpen() then
+			return self:OpenAllBags()
 		end
 	end
+	
+	--[[
+	local numBags = GetNumBags()
+	local found = {}
+	for  i = 1,NUM_CONTAINER_FRAMES  do
+		local frame = ContainerFrames[i]
+		local id = frame:GetID()
+		if  0 <= id  and  id <= numBags  and  frame:IsShown()  then
+			found[id] = frame
+		end
+	end
+	
+	for  id = 0,numBags  do
+		if  not found[id]  then
+			return self:OpenAllBags()
+		end
+	end
+	--]]
+	----[[
 	for id in IterateBuiltInContainers() do
-		total = total + 1
-		if self:GetContainerFrame(id) then
-			open = open + 1
+		if not self:GetContainerFrame(id) then
+			return self:OpenAllBags()
 		end
 	end
-	if open == total then
-		return self:CloseAllBags()
-	else
-		return self:OpenAllBags()
-	end
+	--]]
+	
+	-- All bags open so close them
+	return self:CloseAllBags()
 end
 
 function addon:OpenAllBags(requesterFrame)
+	if  IsShiftKeyDown()  then  return self.hooks.OpenAllBags(requesterFrame)  end
+	
 	if requesterFrame then return end -- UpdateInteractingWindow takes care of these cases
 	for _, bag in self:IterateBags() do
 		bag:Open()
@@ -102,6 +126,8 @@ function addon:OpenAllBags(requesterFrame)
 end
 
 function addon:CloseAllBags(requesterFrame)
+	if  IsShiftKeyDown()  then  return self.hooks.CloseAllBags(requesterFrame)  end
+	
 	if requesterFrame then return end -- UpdateInteractingWindow takes care of these cases
 	local found = false
 	for i, bag in self:IterateBags() do
@@ -109,6 +135,21 @@ function addon:CloseAllBags(requesterFrame)
 			found = true
 		end
 	end
+	
+	--[[
+	local numBags = GetNumBags()
+	local found = {}
+	for  i = 1,NUM_CONTAINER_FRAMES  do
+		local frame = ContainerFrames[i]
+		local id = frame:GetID()
+		if  0 <= id  and  id <= numBags  and  frame:IsShown()  then
+			frame:Hide()
+			found = 1
+		end
+	end
+	--]]
+	
+	----[[
 	for id in IterateBuiltInContainers() do
 		local frame = self:GetContainerFrame(id)
 		if frame then
@@ -116,10 +157,14 @@ function addon:CloseAllBags(requesterFrame)
 			found = 1
 		end
 	end
+	--]]
 	return found
 end
-
+--[[
 function addon:ToggleBag(id)
+	print('ToggleBag('..id..')')
+	if  IsShiftKeyDown()  then  return self.hooks.ToggleBag(id)  end
+	
 	local ourBag = hookedBags[id]
 	if ourBag then
 		return ourBag:Toggle()
@@ -130,8 +175,11 @@ function addon:ToggleBag(id)
 		end
 	end
 end
-
+--]]
 function addon:OpenBackpack()
+	print('OpenBackpack()')
+	if  IsShiftKeyDown()  then  return self.hooks.OpenBackpack()  end
+	
 	local ourBackpack = hookedBags[BACKPACK_CONTAINER]
 	if ourBackpack then
 		self.backpackWasOpen = ourBackpack:IsOpen()
@@ -144,6 +192,9 @@ function addon:OpenBackpack()
 end
 
 function addon:CloseBackpack()
+	print('CloseBackpack()')
+	if  IsShiftKeyDown()  then  return self.hooks.CloseBackpack()  end
+	
 	if self.backpackWasOpen then
 		return
 	end
@@ -159,19 +210,24 @@ function addon:CloseBackpack()
 end
 
 function addon:ToggleBackpack()
+	print('ToggleBackpack()')
+	if  IsShiftKeyDown()  then  return self.hooks.ToggleBackpack()  end
+	
+	local frame = self:GetContainerFrame(BACKPACK_CONTAINER)
+	if frame then  return self.hooks.ToggleBackpack()  end
+	
 	local ourBackpack = hookedBags[BACKPACK_CONTAINER]
 	if ourBackpack then
 		return ourBackpack:Toggle()
-	end
-	local frame = self:GetContainerFrame(BACKPACK_CONTAINER)
-	if frame then
-		self:CloseAllBags()
 	else
-		self:OpenBackpack()
+		return self.hooks.ToggleBackpack()
+		--self:OpenBackpack()
 	end
 end
 
 function addon:CloseSpecialWindows()
+	print('CloseSpecialWindows()')
 	local found = self.hooks.CloseSpecialWindows()
+	if  IsShiftKeyDown()  then  return  found  end
 	return self:CloseAllBags() or found
 end
