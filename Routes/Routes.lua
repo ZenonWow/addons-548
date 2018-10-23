@@ -960,7 +960,7 @@ BINDING_NAME_ROUTESTOGGLEFRAME = "Toggle Routes config"
 function Routes.ToggleConfig()
 	local appName = 'Routes'
 	local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-  if  not AceConfigDialog.OpenFrames[appName]  then
+	if  not AceConfigDialog.OpenFrames[appName]  then
 		AceConfigDialog:Open(appName)
 	else
 		AceConfigDialog:Close(appName)

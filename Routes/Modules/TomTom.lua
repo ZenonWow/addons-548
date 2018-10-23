@@ -77,6 +77,7 @@ function TT:QueueFirstNode()
 	if a then
 		if stored_uid then
 			self:RemoveQueuedNode()
+			return
 		end
 		route_name = b
 		route_table = db.routes[ Routes.LZName[a][1] ][b]
