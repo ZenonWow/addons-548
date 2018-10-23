@@ -93,10 +93,16 @@ local function generateTooltip(tt)
 
 	if Broker_EverythingDB.showHints then
 		tt:AddSeparator(3,0,0,0,0)
+		--[[
 		tt:AddLine(C("copper",L["Left-click"]).." ||"		,C("green",L["Open time manager"]))
 		tt:AddLine(C("copper",L["Right-click"]).." ||"		,C("green",L["Local or server time"]))
 		tt:AddLine(C("copper",L["Shift+Right-click"]).." ||",C("green",L["Open calendar"]))
 		tt:AddLine(C("copper",L["Shift+Left-click"]).." ||"	,C("green",L["12 / 24 hours mode"]))
+		--]]
+		tt:AddLine(C("copper",L["Left-click"]).." ||",C("green",L["Open calendar"]))
+		tt:AddLine(C("copper",L["Right-click"]).." ||"		,C("green",L["Open time manager"]))
+		tt:AddLine(C("copper",L["Shift+Left-click"]).." ||"	,C("green",L["12 / 24 hours mode"]))
+		tt:AddLine(C("copper",L["Shift+Right-click"]).." ||"		,C("green",L["Local or server time"]))
 	end
 
 end
@@ -154,10 +160,16 @@ ns.modules[name].ontooltip = function(tt)
 
 	if Broker_EverythingDB.showHints then
 		tt:AddLine(" ")
+		--[[
 		tt:AddLine(C("copper",L["Left-click"]).." || "..C("green",L["Open time manager"]))
 		tt:AddLine(C("copper",L["Right-click"]).." || "..C("green",L["Local or server time"]))
 		tt:AddLine(C("copper",L["Shift+Right-click"]).." || "..C("green",L["Open calendar"]))
 		tt:AddLine(C("copper",L["Shift+Left-click"]).." || "..C("green",L["12 / 24 hours mode"]))
+		--]]
+		tt:AddLine(C("copper",L["Left-click"]).." ||",C("green",L["Open calendar"]))
+		tt:AddLine(C("copper",L["Right-click"]).." ||"		,C("green",L["Open time manager"]))
+		tt:AddLine(C("copper",L["Shift+Left-click"]).." ||"	,C("green",L["12 / 24 hours mode"]))
+		tt:AddLine(C("copper",L["Shift+Right-click"]).." ||"		,C("green",L["Local or server time"]))
 	end
 end
 
@@ -180,16 +192,16 @@ end
 
 ns.modules[name].onclick = function(self,button)
 	local shift = IsShiftKeyDown()
-	if button == "RightButton" and not shift then
+	if  shift  and  button == "RightButton"  then
 		if Broker_EverythingDB[name].timeLocal == true then
 			Broker_EverythingDB[name].timeLocal = false
 		else
 			Broker_EverythingDB[name].timeLocal = true
 		end
 		ns.modules[name].onupdate(self)
-	elseif button == "RightButton" and shift then
-		securecall("ToggleCalendar")
-	elseif button == "LeftButton" and shift then 
+	elseif  not shift   and  button == "RightButton" then
+		securecall("ToggleTimeManager")
+	elseif  shift  and  button == "LeftButton"  then 
 		if Broker_EverythingDB[name].format24 == true then
 			Broker_EverythingDB[name].format24 = false
 		else
@@ -197,7 +209,7 @@ ns.modules[name].onclick = function(self,button)
 		end
 		ns.modules[name].onupdate(self)
 	else
-		securecall("ToggleTimeManager")
+		securecall("ToggleCalendar")
 	end
 end
 

@@ -336,9 +336,9 @@ local function gpsTooltip(self,tt,ttName,modName)
 	if Broker_EverythingDB.showHints then
 		tt:AddSeparator(3,0,0,0,0)
 		line, column = tt:AddLine()
-		tt:SetCell(line, 1, C("copper",L["Left-click"]).." || "..C("green",L["Open World map"]), nil, nil, 3)
+		tt:SetCell(line, 1, C("copper",L["Left-click"]).." || "..C("green",L["Open transport menu"]), nil, nil, 3)
 		line, column = tt:AddLine()
-		tt:SetCell(line, 1, C("copper",L["Right-click"]).." || "..C("green",L["Open transport menu"]), nil, nil, 3)
+		tt:SetCell(line, 1, C("copper",L["Right-click"]).." || "..C("green",L["Open World map"]), nil, nil, 3)
 	end
 end
 
@@ -449,12 +449,16 @@ local function onleave(self,tt,ttN)
 end
 
 local function onclick(self,button)
-	if button == "LeftButton" then
+	if button == "RightButton" then
 		securecall("ToggleFrame",WorldMapFrame)
-	elseif button == "RightButton" then
+	elseif button == "LeftButton" then
 		if tt1 then onleave(self,tt1,ttName1) end
 		if tt2 then onleave(self,tt2,ttName2) end
 		if tt3 then onleave(self,tt3,ttName3) end
+		if tt4 then
+			onleave(self,tt4,ttName4)
+			return
+		end
 
 		if (InCombatLockdown()) then return; end
 		if Broker_EverythingDB[name0].shortMenu then
