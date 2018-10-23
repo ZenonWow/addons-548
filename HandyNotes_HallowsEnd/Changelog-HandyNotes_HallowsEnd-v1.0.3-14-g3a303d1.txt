@@ -1,0 +1,15 @@
+Ethan Centaurai:
+	- Deleted gitattributes and gitignore.
+	- Update README.
+	- Small wording changes.
+	- Fix an unclickable menu entry for users who don’t have TomTom or Cartographer Waypoints installed. Thank you Rainrider for the patch!
+	- Remove duplicate bucket in Twilight Highlands.
+	- Add a special case for the Westfall bucket, which can appear in one of two places.
+	- Add Kalimdor map markers to Kalimdor continent map.
+	- Update Cataclysm map markers.
+	- Update Kalimdor map markers.
+	- Fix the candy bucket at Azure Watch.
+	- Add map markers to Eastern Kingdoms continent map.
+	- Increase the accuracy of Eastern Kingdoms map markers.
+	- Add map markers to Pandaria continent map.
+	- Increase the accuracy of Pandaria map markers.
