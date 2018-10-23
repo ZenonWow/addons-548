@@ -4,10 +4,14 @@ if not L then return end
 
 -- Main.lua
 L["Raven"] = true
-L["Raven left click"] = "點擊|cffffff00左鍵|r 以 打開/關閉配置菜單"
-L["Raven right click"] = "點擊|cffffff00右鍵|r 以 鎖定/解鎖所有計時條組"
-L["Raven shift left click"] = "|cffffff00Shift+左鍵|r 以 啟用/禁用 Raven"
-L["Raven shift right click"] = "|cffffff00Shift+右鍵|r 以 顯示/隱藏系統默認BUFF"
+L["Left-click"] = "點擊|cffffff00左鍵|r"
+L["right click"] = "點擊|cffffff00右鍵|r"
+L["shift left click"] = "|cffffff00Shift+左鍵|r"
+L["shift right click"] = "|cffffff00Shift+右鍵|r"
+L["Toggle menu"] = "以 打開/關閉配置菜單"
+L["Toggle positioning"] = "以 鎖定/解鎖所有計時條組"
+L["Toggle Raven"] = "以 啟用/禁用 Raven"
+L["Toggle Blizzard buffs"] = "以 顯示/隱藏系統默認BUFF"
 L["Shared Potion Cooldown"] = "共享藥水冷卻"
 L["Shared Elixir Cooldown"] = "共享藥劑冷卻"
 L["Global Cooldown"] = "公共冷卻"

@@ -4,6 +4,14 @@ if not L then return end
 
 -- Main.lua
 L["Raven"] = true
+L["Left-click"] = "|cffffff00Left-click|r"
+L["Right-click"] = "|cffffff00Right-click|r"
+L["Shift+Left-click"] = "|cffffff00Shift+Left-click|r"
+L["Shift+Right-click"] = "|cffffff00Shift+Right-click|r"
+L["Toggle menu"] = "to open/close options menu"
+L["Toggle positioning"] = "to toggle bar positioning"
+L["Toggle Raven"] = "to enable/disable Raven"
+L["Toggle Blizzard buffs"] = "to toggle Blizzard buffs"
 L["Raven left click"] = "|cffffff00Left-click|r to open/close options menu"
 L["Raven right click"] = "|cffffff00Right-click|r to toggle locking all bar groups"
 L["Raven shift left click"] = "|cffffff00Shift-left-click|r to enable/disable Raven"

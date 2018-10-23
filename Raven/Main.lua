@@ -569,13 +569,13 @@ function MOD:InitializeLDB()
 					MOD.db.profile.hideBlizz = not MOD.db.profile.hideBlizz
 					MOD.db.profile.hideConsolidated = MOD.db.profile.hideBlizz
 				else
-					MOD:ToggleBarGroupLocks()
+					MOD:OptionsPanel()
 				end
 			elseif msg == "LeftButton" then
 				if IsShiftKeyDown() then
 					MOD.db.profile.enabled = not MOD.db.profile.enabled
 				else
-					MOD:OptionsPanel()
+					MOD:ToggleBarGroupLocks()
 				end
 			end
 			doUpdate = true
@@ -583,10 +583,10 @@ function MOD:InitializeLDB()
 		OnTooltipShow = function(tooltip)
 			if not tooltip or not tooltip.AddLine then return end
 			tooltip:AddLine(L["Raven"])
-			tooltip:AddLine(L["Raven left click"])
-			tooltip:AddLine(L["Raven right click"])
-			tooltip:AddLine(L["Raven shift left click"])
-			tooltip:AddLine(L["Raven shift right click"])
+			tooltip:AddLine(L["Left-click"] ..' '.. L["Toggle menu"])
+			tooltip:AddLine(L["Right-click"] ..' '.. L["Toggle positioning"])
+			tooltip:AddLine(L["Shift+Left-click"] ..' '.. L["Toggle Raven"])
+			tooltip:AddLine(L["Shift+Right-click"] ..' '.. L["Toggle Blizzard buffs"])
 		end,
 	})
 	MOD.ldbi = LibStub("LibDBIcon-1.0", true)

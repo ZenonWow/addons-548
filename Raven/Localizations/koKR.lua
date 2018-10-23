@@ -5,6 +5,14 @@ if not L then return end
 
 -- Main.lua
 L["Raven"] = true
+L["Left-click"] = "|cffffff00좌클릭|r"
+L["Right-click"] = "|cffffff00우클릭|r"
+L["Shift+Left-click"] = "|cffffff00쉬프트 좌클릭|r"
+L["Shift+Right-click"] = "|cffffff00쉬프트 우클릭|r"
+L["Toggle menu"] = "옵션메뉴 열기/닫기"
+L["Toggle positioning"] = "바그룹 잠금"
+L["Toggle Raven"] = "Raven 활성화/비활성화"
+L["Toggle Blizzard buffs"] = "블리자드 버프 전환"
 L["Raven left click"] = "|cffffff00좌클릭|r 옵션메뉴 열기/닫기"
 L["Raven right click"] = "|cffffff00우클릭|r 바그룹 잠금"
 L["Raven shift left click"] = "|cffffff00쉬프트 좌클릭|r Raven 활성화/비활성화"

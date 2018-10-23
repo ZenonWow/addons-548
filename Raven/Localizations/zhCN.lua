@@ -4,6 +4,14 @@ if not L then return end
 
 -- Main.lua
 L["Raven"] = true
+L["Left-click"] = "点击|cffffff00左键|r"
+L["Right-click"] = "点击|cffffff00右键|r"
+L["Shift+Left-click"] = "|cffffff00Shift+左键|r"
+L["Shift+Right-click"] = "|cffffff00Shift+右键|r"
+L["Toggle menu"] = "以 打开/关闭配置菜单"
+L["Toggle positioning"] = "以 锁定/解锁所有计时条组"
+L["Toggle Raven"] = "以 启用/禁用 Raven"
+L["Toggle Blizzard buffs"] = "以 显示/隐藏系统默认BUFF"
 L["Raven left click"] = "点击|cffffff00左键|r 以 打开/关闭配置菜单"
 L["Raven right click"] = "点击|cffffff00右键|r 以 锁定/解锁所有计时条组"
 L["Raven shift left click"] = "|cffffff00Shift+左键|r 以 启用/禁用 Raven"
