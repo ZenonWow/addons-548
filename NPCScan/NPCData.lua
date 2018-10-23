@@ -21,6 +21,11 @@ local L = private.L
 local ZN = private.ZONE_NAMES
 
 
+local function print(...)
+	DEFAULT_CHAT_FRAME:AddMessage(...)
+end
+
+
 local NPC_DATA = {
 	[61]    = { world_id = ZN.EASTERN_KINGDOMS,         map_name = ZN.ELWYNN_FOREST,               is_tamable = false, is_achievement = false }, -- Thuros Lightfingers
 	[62]    = { world_id = ZN.EASTERN_KINGDOMS,         map_name = ZN.NORTHSHIRE,                  is_tamable = false, is_achievement = false }, -- Gug Fatcandle
@@ -819,7 +824,9 @@ for npc_id, data in pairs(NPC_DATA) do
 	private.NPC_ID_TO_MAP_NAME[npc_id] = data.map_name
 	private.NPC_ID_TO_NAME[npc_id] = L.NPCs[tostring(npc_id)]
 	private.NPC_ID_TO_WORLD_NAME[npc_id] = data.world_id
-	private.NPC_NAME_TO_ID[L.NPCs[tostring(npc_id)]] = npc_id
+	local name = L.NPCs[tostring(npc_id)]
+	if  name  then  private.NPC_NAME_TO_ID[name] = npc_id
+	else  print("Missing name from NPCs database of npc=".. npc_id)   end
 
 	if data.is_tamable then
 		private.TAMABLE_ID_TO_MAP_NAME[npc_id] = data.map_name
@@ -827,12 +834,12 @@ for npc_id, data in pairs(NPC_DATA) do
 		private.TAMABLE_ID_TO_WORLD_NAME[npc_id] = data.world_id
 		--Builds a list of non achievement mobs for the Beast tab
 		if not data.is_achievement then
-			private.TAMABLE_NON_ACHIEVMENT_LIST[npc_id] = L.NPCs[tostring(npc_id)]
+			private.TAMABLE_NON_ACHIEVMENT_LIST[npc_id] = name
 		end
 
 	elseif not data.is_achievement then
 		private.UNTAMABLE_ID_TO_MAP_NAME[npc_id] = data.map_name
-		private.UNTAMABLE_ID_TO_NAME[npc_id] = L.NPCs[tostring(npc_id)]
+		private.UNTAMABLE_ID_TO_NAME[npc_id] = name
 		private.UNTAMABLE_ID_TO_WORLD_NAME[npc_id] = data.world_id
 	end
 end
