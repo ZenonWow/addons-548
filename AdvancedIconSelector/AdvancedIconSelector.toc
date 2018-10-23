@@ -23,10 +23,10 @@
 
 ### Embedded libraries
 #@no-lib-strip@
-Libs\LibStub\LibStub.lua
-Libs\AceLocale-3.0\AceLocale-3.0.xml
-Libs\AceAddon-3.0\AceAddon-3.0.xml
-Libs\AceConsole-3.0\AceConsole-3.0.xml
+#Libs\LibStub\LibStub.lua
+#Libs\AceLocale-3.0\AceLocale-3.0.xml
+#Libs\AceAddon-3.0\AceAddon-3.0.xml
+#Libs\AceConsole-3.0\AceConsole-3.0.xml
 Libs\LibAdvancedIconSelector-1.0\LibAdvancedIconSelector-1.0.xml
 #@end-no-lib-strip@
 
