@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan by Saiket                                                         *
+  * NPCScan by Saiket                                                         *
   * Locales/Locale-esES.lua - Localized string constants (es-ES/es-MX).        *
   ****************************************************************************]]
 
@@ -841,7 +841,7 @@ private.L["CONFIG_ALERT_UNMUTE"] = "Quitar el silencio al sonido de alerta"
 private.L["CONFIG_ALERT_UNMUTE_DESC"] = "Activa el sonido del juego cuando se muestra el boton de objetivo NPC para que pueda oir la alerta, incluso con el silencio activado."
 private.L["CONFIG_CACHEWARNINGS"] = "Muestra recordatorios sobre el cache al conectar y al cambiar de mundo"
 private.L["CONFIG_CACHEWARNINGS_DESC"] = "Si un PNJ ya está en cache cuando conectas o cambias de mundo, esta opción muestra un recordatorio sobre los PNJs que están en caché y no pueden buscarse."
-private.L["CONFIG_DESC"] = "Estas opciones permiten configurar el modo en que _NPCScan te alerta cuando encuentra un NPC raro."
+private.L["CONFIG_DESC"] = "Estas opciones permiten configurar el modo en que NPCScan te alerta cuando encuentra un NPC raro."
 private.L["CONFIG_PRINTTIME"] = "Publicar tiempos en la ventana de chat"
 private.L["CONFIG_PRINTTIME_DESC"] = "Añade el tiempo actual a todos los mensajes publicados. Útil para recordar cuando fueron encontrados los PNJs"
 private.L["CONFIG_TEST"] = "Probar alerta al encontrar"
@@ -892,5 +892,5 @@ private.L["TOOLS_TITLE"] = "|cff808080Herramientas|r"
 -- private.L["VIGNETTE_SCAN_DESC"] = "Show alerts for Vignette Mobs.  This is a Beta Feature:  There is currently no way to filter mobs, so it will always trigger even if mob not tracked or ignored."
 
 
-_G[ "BINDING_NAME_CLICK _NPCScanButton:LeftButton" ] = [=[Marca el último NPC encontrado
-|cff808080(Usalo cuando _NPCScan te alerta)|r]=];
+_G[ "BINDING_NAME_CLICK NPCScanButton:LeftButton" ] = [=[Marca el último NPC encontrado
+|cff808080(Usalo cuando NPCScan te alerta)|r]=];

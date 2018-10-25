@@ -133,7 +133,7 @@ panel_subtext:SetJustifyV("TOP")
 panel_subtext:SetText(L.SEARCH_DESC)
 
 
-local add_found_checkbox = _G.CreateFrame("CheckButton", "_NPCScanSearchAchievementAddFoundCheckbox", panel, "InterfaceOptionsCheckButtonTemplate")
+local add_found_checkbox = _G.CreateFrame("CheckButton", "NPCScanSearchAchievementAddFoundCheckbox", panel, "InterfaceOptionsCheckButtonTemplate")
 add_found_checkbox:SetPoint("TOPLEFT", panel_subtext, "BOTTOMLEFT", -2, 0)
 add_found_checkbox.tooltipText = L.SEARCH_ACHIEVEMENTADDFOUND_DESC
 
@@ -174,7 +174,7 @@ table_container:SetPoint("RIGHT", -16, 0)
 table_container:SetPoint("BOTTOM", npc_controls)
 
 
-local npc_world_editbox = CreateEditBox("_NPCScanSearchNpcWorldEditBox", npc_controls, L.SEARCH_WORLD_DESC, "npc_name_editbox")
+local npc_world_editbox = CreateEditBox("NPCScanSearchNpcWorldEditBox", npc_controls, L.SEARCH_WORLD_DESC, "npc_name_editbox")
 
 panel.npc_world_editbox = npc_world_editbox
 
@@ -199,7 +199,7 @@ end)
 panel.npc_world_button = npc_world_button
 
 
-local npc_world_button_dropdown = _G.CreateFrame("Frame", "_NPCScanSearchNPCWorldButtonDropdown", npc_world_button)
+local npc_world_button_dropdown = _G.CreateFrame("Frame", "NPCScanSearchNPCWorldButtonDropdown", npc_world_button)
 _G.UIDropDownMenu_SetAnchor(npc_world_button_dropdown, 0, 0, "TOPRIGHT", npc_world_button, "BOTTOMRIGHT")
 
 panel.npc_world_button.dropdown = npc_world_button_dropdown
@@ -330,7 +330,7 @@ npc_controls:SetPoint("LEFT", npc_id_editbox_label)
 npc_controls:SetPoint("TOP", npc_add_button)
 
 
-local npc_name_editbox = CreateEditBox("_NPCScanSearchNpcNameEditBox", npc_controls, L.SEARCH_NAME_DESC, "npc_id_editbox")
+local npc_name_editbox = CreateEditBox("NPCScanSearchNpcNameEditBox", npc_controls, L.SEARCH_NAME_DESC, "npc_id_editbox")
 npc_name_editbox:SetPoint("LEFT", npc_name_editbox_label:GetStringWidth() > npc_id_editbox_label:GetStringWidth() and npc_name_editbox_label or npc_id_editbox_label, "RIGHT", 8, 0)
 npc_name_editbox:SetPoint("RIGHT", npc_remove_button, "LEFT", -4, 0)
 npc_name_editbox:SetPoint("TOP", npc_name_editbox_label)
@@ -339,7 +339,7 @@ npc_name_editbox:SetPoint("BOTTOM", npc_name_editbox_label)
 panel.npc_name_editbox = npc_name_editbox
 
 
-local npc_id_editbox = CreateEditBox("_NPCScanSearchNpcIDEditBox", npc_controls, L.SEARCH_ID_DESC, "npc_world_editbox")
+local npc_id_editbox = CreateEditBox("NPCScanSearchNpcIDEditBox", npc_controls, L.SEARCH_ID_DESC, "npc_world_editbox")
 npc_id_editbox:SetPoint("LEFT", npc_name_editbox)
 npc_id_editbox:SetPoint("TOP", npc_id_editbox_label)
 npc_id_editbox:SetPoint("BOTTOM", npc_id_editbox_label)
@@ -583,7 +583,7 @@ do
 	local function AddTab(identifier, update_func, activate_func, deactivate_func)
 		num_tabs = num_tabs + 1
 
-		local tab = _G.CreateFrame("Button", "_NPCScanSearchTab" .. num_tabs, table_container, "TabButtonTemplate")
+		local tab = _G.CreateFrame("Button", "NPCScanSearchTab" .. num_tabs, table_container, "TabButtonTemplate")
 		tab:SetHitRectInsets(6, 6, 6, 0)
 		tab:SetScript("OnClick", Tab_OnClick)
 		tab:SetScript("OnEnter", Tab_OnEnter)
@@ -644,7 +644,7 @@ do
 		UpdateButtonStates()
 
 		for npc_id, npc_name in pairs(npc_data) do
-			if not _G._NPCScanOptions.IgnoreList.NPCs[npc_id] then
+			if not _G.NPCScanOptions.IgnoreList.NPCs[npc_id] then
 				local map_name = map_names[npc_id]
 
 				local new_row = panel.table:AddRow(npc_id,
@@ -698,7 +698,7 @@ do
 		local achievement = private.ACHIEVEMENTS[tab.identifier]
 
 		for criteria_id, npc_id in pairs(achievement.Criteria) do
-			if not _G._NPCScanOptions.IgnoreList.NPCs[npc_id] then
+			if not _G.NPCScanOptions.IgnoreList.NPCs[npc_id] then
 				if npc_id > 1 then
 					local npc_name, _, is_completed = _G.GetAchievementCriteriaInfoByID(tab.identifier, criteria_id)
 					local map_name = private.NPC_ID_TO_MAP_NAME[npc_id]

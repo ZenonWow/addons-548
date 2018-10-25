@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan by Saiket                                                         *
+  * NPCScan by Saiket                                                         *
   * Locales/Locale-itIT.lua - Localized string constants (it-IT).              *
   ****************************************************************************]]
 
@@ -841,7 +841,7 @@ private.L["CONFIG_ALERT_UNMUTE"] = "Attiva per il suono d'avviso"
 private.L["CONFIG_ALERT_UNMUTE_DESC"] = "Abilita il suono del gioco quando il bottone obiettivo viene mostrato così puoi sentire gli avvisi anche quando mutato."
 private.L["CONFIG_CACHEWARNINGS"] = "Stampa promemoria della cache al login ed ai cambiamenti di mondo"
 private.L["CONFIG_CACHEWARNINGS_DESC"] = "Se un PNG è già nella cache quando logghi o cambi mondo, questa opzione stampa un promemoria di quali mob nella cache non possono essere cercati."
-private.L["CONFIG_DESC"] = "Queste opzioni ti lasciano configurare il modo in cui _NPCScan ti avvisa quando trova PNG rari."
+private.L["CONFIG_DESC"] = "Queste opzioni ti lasciano configurare il modo in cui NPCScan ti avvisa quando trova PNG rari."
 private.L["CONFIG_PRINTTIME"] = "Aggiungi l'ora nel riquadro della chat"
 private.L["CONFIG_PRINTTIME_DESC"] = "Aggiungi l'ora corrente a tutti i messaggi. Utile per ricordare quando si sono visti i PNG."
 private.L["CONFIG_TEST"] = "Prova Allarme Trovato"
@@ -892,5 +892,5 @@ private.L["VIGNETTE_SCAN"] = "Mostra avvisi per le Vignette dei Mob"
 private.L["VIGNETTE_SCAN_DESC"] = "Mostra avvisi per le Vignette dei Mob. Questa è una caratteristica in beta. Al momento non c'é alcun modo per filtrare i mob, quindi verrà sempre visualizzato un'avviso anche se il mob non viene tracciato o ignorato."
 
 
-_G[ "BINDING_NAME_CLICK _NPCScanButton:LeftButton" ] = [=[Targetta l'ultimo NPC trovato
-|cff808080(Usato da _NPCScan per avvisarti)|r]=];
+_G[ "BINDING_NAME_CLICK NPCScanButton:LeftButton" ] = [=[Targetta l'ultimo NPC trovato
+|cff808080(Usato da NPCScan per avvisarti)|r]=];

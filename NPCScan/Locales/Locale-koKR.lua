@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan by Saiket                                                         *
+  * NPCScan by Saiket                                                         *
   * Locales/Locale-koKR.lua - Localized string constants (ko-KR).              *
   ****************************************************************************]]
 
@@ -841,12 +841,12 @@ private.L["CONFIG_ALERT_UNMUTE"] = "경보시에는 음향효과 꺼짐 무시"
 private.L["CONFIG_ALERT_UNMUTE_DESC"] = "음향효과를 꺼 두었다면, NPC를 탐색하게 되었을 때 음향효과를 자동으로 켭니다."
 private.L["CONFIG_CACHEWARNINGS"] = "로그인 / 큰 지역 이동시 캐쉬 내용 알림"
 private.L["CONFIG_CACHEWARNINGS_DESC"] = "로그인시나 큰 지역을 이동시 이미 캐쉬된 NPC가 있다면, 해당 NPC들이 탐색되지 않음을 알립니다."
-private.L["CONFIG_DESC"] = "_NPCScan에서 NPC를 탐색하였을때의 경보 옵션을 설정할 수 있습니다."
+private.L["CONFIG_DESC"] = "NPCScan에서 NPC를 탐색하였을때의 경보 옵션을 설정할 수 있습니다."
 private.L["CONFIG_PRINTTIME"] = "대화창에 시간 표시하기"
 private.L["CONFIG_PRINTTIME_DESC"] = "모든 출력 메시지에 현재 시간을 추가합니다. NPC가 발견됐을 때 기록하기 위해 사용됩니다."
 private.L["CONFIG_TEST"] = "탐색시 경보 테스트"
 private.L["CONFIG_TEST_DESC"] = "탐색시 경보가 어떻게 보여지는지 테스트합니다."
-private.L["CONFIG_TEST_HELP_FORMAT"] = "Target 버튼을 클릭하거나 _NPCScan에 할당해둔 단축키를 눌러 탐색된 NPC를 선택할 수 있습니다. |cffffffff<%s>|r 키를 누른 상태로 Target 버튼을 드래그하여 이동시킬 수 있습니다. 만약 NPC가 전투중에 탐색되었다면, Target버튼은 전투가 끝난 후 활성화 됩니다."
+private.L["CONFIG_TEST_HELP_FORMAT"] = "Target 버튼을 클릭하거나 NPCScan에 할당해둔 단축키를 눌러 탐색된 NPC를 선택할 수 있습니다. |cffffffff<%s>|r 키를 누른 상태로 Target 버튼을 드래그하여 이동시킬 수 있습니다. 만약 NPC가 전투중에 탐색되었다면, Target버튼은 전투가 끝난 후 활성화 됩니다."
 private.L["CONFIG_TEST_NAME"] = "당신! (테스트)"
 private.L["CONFIG_TITLE"] = "|cffCCCC88NPCScan|r"
 private.L["FOUND_FORMAT"] = "발견 |cff808080“%s”|r!"
@@ -892,5 +892,5 @@ private.L["TOOLS_TITLE"] = "|cff808080도구|r"
 -- private.L["VIGNETTE_SCAN_DESC"] = "Show alerts for Vignette Mobs.  This is a Beta Feature:  There is currently no way to filter mobs, so it will always trigger even if mob not tracked or ignored."
 
 
-_G[ "BINDING_NAME_CLICK _NPCScanButton:LeftButton" ] = [=[마지막으로 탐색된 NPC 타겟
-|cff808080(_NPCScan에서 탐색이 되어 경보가 되었을 때)|r]=];
+_G[ "BINDING_NAME_CLICK NPCScanButton:LeftButton" ] = [=[마지막으로 탐색된 NPC 타겟
+|cff808080(NPCScan에서 탐색이 되어 경보가 되었을 때)|r]=];

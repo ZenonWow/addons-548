@@ -15,7 +15,7 @@ readded ghostly pandarens and camel figures
 
 v5.2.1
 -Stopped Tamable Beasts and Default Rares from being displayed in the cache list when not being tracked.
--Added warning for users that are running the unsupported _NPCScan.Autoadd
+-Added warning for users that are running the unsupported NPCScan.Autoadd
 -Removed the rare beasts that can not currently be tamed due to being level 91+ from the Tamable Alert List.
 
 v5.2
@@ -91,12 +91,12 @@ Torhal:
 4.0.3.6: Updated and fixed non-English localizations so they will print chat messages properly.
 
 4.0.3.5:
--Added an option to print timestamps with all messages. See the main _NPCScan options pane.
+-Added an option to print timestamps with all messages. See the main NPCScan options pane.
 -Updated 3D portraits to fit the alert popup better.
 -Updated frFR, koKR, and zhTW localizations.
 
 4.0.3.4:
--Fixed an error for characters that hadn't used an updated version of _NPCScan since before 4.0.0.1.  If you still experience an error on login, please reset that character's settings.-
+-Fixed an error for characters that hadn't used an updated version of NPCScan since before 4.0.0.1.  If you still experience an error on login, please reset that character's settings.-
         Updated mob name translations.
 
 4.0.3.3:
@@ -109,7 +109,7 @@ Torhal:
 -Added Cataclysm rares to defaults.  If you hadn't added them already, they will automatically appear in your custom NPCs list.
 -Updated the database of tamable rares.
 -Updated esES localization.
--Added a way for stable mods like HunterStableInfo to coexist with _NPCScan.  Authors, see source docs.
+-Added a way for stable mods like HunterStableInfo to coexist with NPCScan.  Authors, see source docs.
 
 4.0.0.6:
 -Updated frFR and deDE localizations, and added esES/esMX localization by galen2.
@@ -157,7 +157,7 @@ Torhal:
 -The targeting button now marks the rare with a green triangle when clicked.
 -Fixed an issue with horizontal scrolling in the rare mob list.
 
-3.3.0.3: Compatible with _NPCScan.Overlay <kbd>3.3.0.6</kbd>.
+3.3.0.3: Compatible with NPCScan.Overlay <kbd>3.3.0.6</kbd>.
 
 3.3.0.2: Fixed a bug in version detection.  Arcturis should be added to player scan lists now.
 
@@ -178,7 +178,7 @@ Torhal:
 
 3.2.0.6:
 -Rare tamable mobs now only show alerts when found in their original zone.
--Added a new “<span style="font-family: monospace;">NpcOverlay_Found message</span>” to be used by _NPCScan.Overlay.
+-Added a new “<span style="font-family: monospace;">NpcOverlay_Found message</span>” to be used by NPCScan.Overlay.
 
 3.2.0.5: Classified Terror Spinner as a tamable mob.
 
@@ -188,10 +188,10 @@ Torhal:
 -Added new 3.2 rare spirit beast Skoll.
 -Now uses AceEvent-3.0 to communicate with map overlay-type addons.
 
-3.2.0.2: Now loads properly when _NPCScan.Overlay isn't present.
+3.2.0.2: Now loads properly when NPCScan.Overlay isn't present.
 
 3.2.0.1:
--Now manages which overlays are shown by the <cite>RareSpawnOverlay</cite> and <cite>_NPCScan.Overlay</cite> addons.
+-Now manages which overlays are shown by the <cite>RareSpawnOverlay</cite> and <cite>NPCScan.Overlay</cite> addons.
 -Added four rare raptor mobs that drop non-combat pets in 3.2: Dart, Takk the Leaper, Ravasaur Matriarch, and Razormaw Matriarch.
 -No longer shows an alert button for tamable NPCs while resting (in an inn or city), although you will still need to clear the cache.
 -Added all localized mob names for zhTW, and as many as I could find for zhCN and koKR.

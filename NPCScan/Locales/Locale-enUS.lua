@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan by Saiket                                                         *
+  * NPCScan by Saiket                                                         *
   * Locales/Locale-enUS.lua - Localized string constants (en-US).              *
   ****************************************************************************]]
 
@@ -832,7 +832,7 @@ select( 2, ... ).L = setmetatable( {
 	CONFIG_ALERT_UNMUTE_DESC = "Enables game sound while the targetting button is shown so you can hear alerts even while muted.",
 	CONFIG_CACHEWARNINGS = "Print cache reminders on login and world changes",
 	CONFIG_CACHEWARNINGS_DESC = "If an NPC is already cached when you log in or change worlds, this option prints a reminder of which cached mobs can't be searched for.",
-	CONFIG_DESC = "These options let you configure the way _NPCScan alerts you when it finds rare NPCs.",
+	CONFIG_DESC = "These options let you configure the way NPCScan alerts you when it finds rare NPCs.",
 	CONFIG_PRINTTIME = "Print timestamps to chat frame",
 	CONFIG_PRINTTIME_DESC = "Adds the current time to all printed messages.  Useful for recording when NPCs were found.",
 	CONFIG_TEST = "Test Found Alert",
@@ -895,9 +895,10 @@ select( 2, ... ).L = setmetatable( {
 } );
 
 
-SLASH__NPCSCAN1 = "/npcscan";
-SLASH__NPCSCAN2 = "/scan";
+SLASH_NPCSCAN1 = "/npcscan";
+SLASH_NPCSCAN2 = "/scan";
+SLASH_NPCSCAN3 = "/npc";
 
-BINDING_HEADER__NPCSCAN = "_|cffCCCC88NPCScan|r";
-_G[ "BINDING_NAME_CLICK _NPCScanButton:LeftButton" ] = [=[Target last found mob
-|cff808080(Use when _NPCScan alerts you)|r]=];
+BINDING_HEADER_NPCSCAN = "NPCScan";
+_G[ "BINDING_NAME_CLICK NPCScanButton:LeftButton" ] = [=[Target last found mob
+|cff808080(Use when NPCScan alerts you)|r]=];

@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan by Saiket                                                         *
+  * NPCScan by Saiket                                                         *
   * Locales/Locale-frFR.lua - Localized string constants (fr-FR).              *
   ****************************************************************************]]
 
@@ -841,7 +841,7 @@ private.L["CONFIG_ALERT_UNMUTE"] = "Enlever la sourdine pour le son d'alerte"
 private.L["CONFIG_ALERT_UNMUTE_DESC"] = "Active les sons du jeu quand le bouton de ciblage est affiché afin que vous puissiez entendre les alertes même si le jeu est mis en sourdine."
 private.L["CONFIG_CACHEWARNINGS"] = "Me rappeler de vider mon cache à la connexion"
 private.L["CONFIG_CACHEWARNINGS_DESC"] = "Si un PNJ est présent dans le cache quand vous vous connectez à ce personnage, cette option affichera un rappel des monstres en cache que l'addon ne pourra pas rechercher." -- Needs review
-private.L["CONFIG_DESC"] = "Ces options vous permettent de définir comment _NPCScan vous prévient quand il trouve un PNJ rare."
+private.L["CONFIG_DESC"] = "Ces options vous permettent de définir comment NPCScan vous prévient quand il trouve un PNJ rare."
 private.L["CONFIG_PRINTTIME"] = "Afficher l'horodatage dans la fenêtre de discussion"
 private.L["CONFIG_PRINTTIME_DESC"] = "Ajoute l'heure actuelle à tous les messages affichés dans la fenêtre de discussion. Utile pour enregistrer quand les PNJs ont été trouvés."
 private.L["CONFIG_TEST"] = "Test de l'alerte"
@@ -892,5 +892,5 @@ private.L["VIGNETTE_SCAN"] = "Afficher les alertes des monstres Vignette" -- Nee
 private.L["VIGNETTE_SCAN_DESC"] = "Affiche les alertes des montres Vignette. Cette fonctionnalité est en bêta : il n'a actuellement aucun moyen de filtrer les monstres, elles seront donc toujours déclenchées même si un monstre n'est pas surveillé ou ignoré." -- Needs review
 
 
-_G[ "BINDING_NAME_CLICK _NPCScanButton:LeftButton" ] = [=[Cibler dernier monstre trouvé
-|cff808080(Utile qd _NPCScan vous alerte)|r]=];
+_G[ "BINDING_NAME_CLICK NPCScanButton:LeftButton" ] = [=[Cibler dernier monstre trouvé
+|cff808080(Utile qd NPCScan vous alerte)|r]=];

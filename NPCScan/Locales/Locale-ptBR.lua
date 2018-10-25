@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan by Saiket                                                         *
+  * NPCScan by Saiket                                                         *
   * Locales/Locale-ptBR.lua - Localized string constants (pt-BR).              *
   ****************************************************************************]]
 
@@ -841,7 +841,7 @@ private.L["CONFIG_ALERT_UNMUTE"] = "Tirar do mudo para os alertas sonoros."
 private.L["CONFIG_ALERT_UNMUTE_DESC"] = "Ativa os sons de jogo enquanto o botão de alvo estiver visível, assim você pode ouvir os alertas mesmo que o som esteja mudo."
 private.L["CONFIG_CACHEWARNINGS"] = "Imprimir lembrete de cache ao entrar no jogo ou trocar de mundo."
 private.L["CONFIG_CACHEWARNINGS_DESC"] = "Se um PNJ já estiver no cache quando você entrar no jogo ou mudar de mundo, esta opção imprime um lembrete de quais unidades do cache não podem ser procuradas."
-private.L["CONFIG_DESC"] = "Estas opções permitem configurar o modo como o _NPCScan te alerta quando encontra um PNJ raro."
+private.L["CONFIG_DESC"] = "Estas opções permitem configurar o modo como o NPCScan te alerta quando encontra um PNJ raro."
 private.L["CONFIG_PRINTTIME"] = "Mostrar data e hora na janela de chat"
 private.L["CONFIG_PRINTTIME_DESC"] = "Adiciona a hora atual a todas as mensagens impressas. Útil para gravar quando os PNJs forem encontrados."
 private.L["CONFIG_TEST"] = "Testar Alerta de Encontrado"
@@ -892,5 +892,5 @@ private.L["VIGNETTE_SCAN"] = "Mostrar alertas para Vinheta de PNJ's"
 private.L["VIGNETTE_SCAN_DESC"] = "Mostrar alertas para Vinheta de PNJ's.  Esta é uma função BETA:  Não há atualmente nenhuma maneira de filtrar pnj's, por isso sempre irá disparar mesmo pnj não rastreado ou ignorado."
 
 
-_G[ "BINDING_NAME_CLICK _NPCScanButton:LeftButton" ] = [=[Marca o ultimo PNJ encontrado
-|cff808080(Use quando _NPCScan alertar você)|r]=];
+_G[ "BINDING_NAME_CLICK NPCScanButton:LeftButton" ] = [=[Marca o ultimo PNJ encontrado
+|cff808080(Use quando NPCScan alertar você)|r]=];

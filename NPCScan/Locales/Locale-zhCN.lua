@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan by Saiket                                                         *
+  * NPCScan by Saiket                                                         *
   * Locales/Locale-zhCN.lua - Localized string constants (zh-CN).              *
   ****************************************************************************]]
 
@@ -841,7 +841,7 @@ private.L["CONFIG_ALERT_UNMUTE"] = "报警时取消游戏静音"
 private.L["CONFIG_ALERT_UNMUTE_DESC"] = "如果你静音了游戏，则在找到 NPC 时解除静音。"
 private.L["CONFIG_CACHEWARNINGS"] = "在登录和切换区域时显示缓存提示"
 private.L["CONFIG_CACHEWARNINGS_DESC"] = "如果某个 NPC 在你登录或改变区域时已经在缓存中了，这一选项将显示一条关于已缓存怪物无法搜索的提示。"
-private.L["CONFIG_DESC"] = "这些选项可定制 _NPCScan 在找到稀有 NPC 时的警示方式。"
+private.L["CONFIG_DESC"] = "这些选项可定制 NPCScan 在找到稀有 NPC 时的警示方式。"
 private.L["CONFIG_PRINTTIME"] = "发送时间戳到聊天窗口"
 private.L["CONFIG_PRINTTIME_DESC"] = "发送消息添加当前时间。用于记录何时何地发现。"
 private.L["CONFIG_TEST"] = "测试警报"
@@ -892,5 +892,5 @@ private.L["VIGNETTE_SCAN"] = "显示怪物插图警报"
 private.L["VIGNETTE_SCAN_DESC"] = "显示怪物插图警报。这是一个测试功能：目前没有办法过滤怪物，所以它将总是触发，即使怪物未被追踪或忽略。"
 
 
-_G[ "BINDING_NAME_CLICK _NPCScanButton:LeftButton" ] = [=[选定最后一个找到的怪物
-|cff808080（在 _NPCScan 警报时使用）|r]=];
+_G[ "BINDING_NAME_CLICK NPCScanButton:LeftButton" ] = [=[选定最后一个找到的怪物
+|cff808080（在 NPCScan 警报时使用）|r]=];

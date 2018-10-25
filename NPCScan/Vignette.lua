@@ -171,12 +171,12 @@ function private.VignetteBuildList(instanceid)
 		end
 	end
 
-	private.macrotext = private.macrotext .. "\n/run _G._NPCScan.SetVignetteTarget()"
+	private.macrotext = private.macrotext .. "\n/run _G.NPCScan.SetVignetteTarget()"
 	return true
 end
 
 
---_G._NPCScan.macrotext
+--_G.NPCScan.macrotext
 -- Vignette alert,  VIGNETTE_ADDED Currently does not work corrrectly to bugs with instanceid assignment
 -- Will revisit again when 6.0 is released to see if issue is resolved
 -- Refrence: http://wowpedia.org/API_C_Vignettes.GetVignetteInfoFromInstanceID
@@ -214,7 +214,7 @@ function private.VFrame:VIGNETTE_ADDED(event, instanceid, ...)
 	end
 
 	if private.Options.ShowAlertAsToast and alert_text then
-		Toast:Spawn("_NPCScanAlertToast", alert_text)
+		Toast:Spawn("NPCScanAlertToast", alert_text)
 	elseif alert_text then
 		private.Print(alert_text, _G.GREEN_FONT_COLOR)
 	end

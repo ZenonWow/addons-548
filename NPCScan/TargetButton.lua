@@ -21,7 +21,7 @@ local L = private.L
 -------------------------------------------------------------------------------
 -- Frames.
 -------------------------------------------------------------------------------
-local target_button = _G.CreateFrame("Button", "_NPCScanButton", _G.UIParent, "SecureActionButtonTemplate,SecureHandlerShowHideTemplate")
+local target_button = _G.CreateFrame("Button", "NPCScanButton", _G.UIParent, "SecureActionButtonTemplate,SecureHandlerShowHideTemplate")
 target_button:Hide()
 target_button:SetPoint("BOTTOM", _G.UIParent, 0, 128)
 target_button:SetSize(150, 42)
@@ -47,7 +47,7 @@ target_button:SetBackdropBorderColor(0.7, 0.15, 0.05) -- Brown
 target_button:HookScript("OnShow", function(self)
 	self:RegisterEvent("MODIFIER_STATE_CHANGED")
 	self:RegisterEvent("PLAYER_TARGET_CHANGED")
-	self:EnableDrag(_G.IsModifiedClick("_NPCSCAN_BUTTONDRAG"))
+	self:EnableDrag(_G.IsModifiedClick("NPCSCAN_BUTTONDRAG"))
 end)
 
 target_button:HookScript("OnHide", function(self)
@@ -296,7 +296,7 @@ end
 
 -- Enables or disables dragging when the drag modifier is held.
 function target_button:MODIFIER_STATE_CHANGED()
-	self:EnableDrag(_G.IsModifiedClick("_NPCSCAN_BUTTONDRAG"))
+	self:EnableDrag(_G.IsModifiedClick("NPCSCAN_BUTTONDRAG"))
 end
 
 

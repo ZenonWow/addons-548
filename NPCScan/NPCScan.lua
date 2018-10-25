@@ -24,7 +24,7 @@ local Dialog = _G.LibStub("LibDialog-1.0")
 local Toast = _G.LibStub("LibToast-1.0")
 
 local L = private.L
-_G._NPCScan = private
+_G.NPCScan = private
 
 local debugger -- Only defined if needed.
 
@@ -58,10 +58,10 @@ local MOUSEOVER_TARGET_DELAY = 300
 -- Variables.
 -------------------------------------------------------------------------------
 private.Options = {}
-_NPCScanOptions = {}
+NPCScanOptions = {}
 
 private.OptionsCharacter = {}
-_NPCScanOptionsCharacter = {}
+NPCScanOptionsCharacter = {}
 
 local OptionsDefault = {
 	Version = DB_VERSION,
@@ -114,7 +114,7 @@ local OptionsCharacterDefault = {
 -- Dialogs and Toasts.
 -------------------------------------------------------------------------------
 Dialog:Register("NPCSCAN_AUTOADD_WARNING", {
-	text = "You appear to be running _NPCScan.AutoAdd v2.2 or earlier, which may prevent _NPCScan from working properly.\n\nIt is recommended that you disable _NPCScan.AutoAdd until it is updated.",
+	text = "You appear to be running NPCScan.AutoAdd v2.2 or earlier, which may prevent NPCScan from working properly.\n\nIt is recommended that you disable NPCScan.AutoAdd until it is updated.",
 	text_justify_h = "left",
 	text_justify_v = "bottom",
 	buttons = {
@@ -128,7 +128,7 @@ Dialog:Register("NPCSCAN_AUTOADD_WARNING", {
 	width = 500,
 })
 
-Toast:Register("_NPCScanAlertToast", function(toast, ...)
+Toast:Register("NPCScanAlertToast", function(toast, ...)
 	if private.Options.PersistentToast then
 		toast:MakePersistent()
 	end
@@ -166,7 +166,7 @@ end
 
 
 do
-	local tooltip = _G.CreateFrame("GameTooltip", "_NPCScanTooltip")
+	local tooltip = _G.CreateFrame("GameTooltip", "NPCScanTooltip")
 	local tooltip_text = tooltip:CreateFontString()
 	tooltip:AddFontStrings(tooltip_text, tooltip:CreateFontString())
 
@@ -428,7 +428,7 @@ local function AchievementActivate(achievement)
 	achievement.Active = true
 
 	for criteria_id, npc_id in pairs(achievement.Criteria) do
-		if not _G._NPCScanOptions.IgnoreList.NPCs[npc_id] then
+		if not _G.NPCScanOptions.IgnoreList.NPCs[npc_id] then
 			AchievementNPCActivate(achievement, npc_id, criteria_id)
 		end
 	end
@@ -532,7 +532,7 @@ function private.RareMobToggle(identifier, enable)
 
 	if npcs and enable then
 		for npc_id, _ in pairs(npcs) do
-			if not _G._NPCScanOptions.IgnoreList.NPCs[npc_id] then
+			if not _G.NPCScanOptions.IgnoreList.NPCs[npc_id] then
 				NPCActivate(npc_id, private.NPC_ID_TO_WORLD_NAME[npc_id])
 			end
 		end
@@ -812,7 +812,7 @@ do
 			local alert_text = L[is_tamable and "FOUND_TAMABLE_FORMAT" or "FOUND_FORMAT"]:format(npc_name)
 
 			if private.Options.ShowAlertAsToast then
-				Toast:Spawn("_NPCScanAlertToast", alert_text)
+				Toast:Spawn("NPCScanAlertToast", alert_text)
 			else
 				private.Print(alert_text, _G.GREEN_FONT_COLOR)
 			end
@@ -909,13 +909,13 @@ end
 -- Loads defaults, validates settings, and starts scan.
 -- Used instead of ADDON_LOADED to give overlay mods a chance to load and register for messages.
 function private.Frame:PLAYER_LOGIN(event_name)
-	if _G.IsAddOnLoaded("_NPCScan.AutoAdd") then
-		if _G.GetAddOnMetadata("_NPCScan.AutoAdd", "Version"):match("^([%d.]+)") <= "2.2" then
+	if _G.IsAddOnLoaded("NPCScan.AutoAdd") then
+		if _G.GetAddOnMetadata("NPCScan.AutoAdd", "Version"):match("^([%d.]+)") <= "2.2" then
 			Dialog:Spawn("NPCSCAN_AUTOADD_WARNING")
 		end
 	end
-	private.Options = _G._NPCScanOptions
-	private.OptionsCharacter = _G._NPCScanOptionsCharacter
+	private.Options = _G.NPCScanOptions
+	private.OptionsCharacter = _G.NPCScanOptionsCharacter
 	private.Overlays.Register()
 	private.Synchronize()
 
@@ -1071,7 +1071,7 @@ do
 		--@end-debug@]===]
 	}
 
-	_G.SlashCmdList["_NPCSCAN"] = function(input)
+	_G.SlashCmdList["NPCSCAN"] = function(input)
 		local subcommand, arguments = input:match("^(%S+)%s*(.-)%s*$")
 		if subcommand then
 			local func = SUBCOMMAND_FUNCS[subcommand:upper()]

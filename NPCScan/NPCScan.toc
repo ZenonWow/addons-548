@@ -37,11 +37,11 @@
 ## X-WoWI-ID: 12995
 ## X-Localizations: deDE, enCN, enTW, enUS, esES, esMX, frFR, itIT, koKR, ptBR, ptPT, ruRU, zhCN, zhTW
 ## X-CompatibleLocales: deDE, enCN, enTW, enUS, esES, esMX, frFR, itIT, koKR, ptBR, ptPT, ruRU, zhCN, zhTW
-## SavedVariables: _NPCScanOptions
-## SavedVariablesPerCharacter: _NPCScanOptionsCharacter
+## SavedVariables: NPCScanOptions
+## SavedVariablesPerCharacter: NPCScanOptionsCharacter
 ## OptionalDeps: Ace3, LibDialog-1.0, LibSharedMedia-3.0, LibTextDump-1.0, LibTextTable-1.1
 ## X-Curse-Packaged-Version: 5.4.8.6
-## X-Curse-Project-Name: _NPCScan
+## X-Curse-Project-Name: NPCScan
 ## X-Curse-Project-ID: npcscan
 ## X-Curse-Repository-ID: wow/npcscan/mainline
 

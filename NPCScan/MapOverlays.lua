@@ -19,7 +19,7 @@ local MESSAGE_REMOVE = "NpcOverlay_Remove"
 local MESSAGE_FOUND = "NpcOverlay_Found"
 
 
--- Announces to overlay mods that _NPCScan will take over control of shown paths.
+-- Announces to overlay mods that NPCScan will take over control of shown paths.
 function NS.Register()
 	NS:SendMessage(MESSAGE_REGISTER, FOLDER_NAME)
 end

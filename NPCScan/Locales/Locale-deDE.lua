@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan by Saiket                                                         *
+  * NPCScan by Saiket                                                         *
   * Locales/Locale-deDE.lua - Localized string constants (de-DE).              *
   ****************************************************************************]]
 
@@ -841,7 +841,7 @@ private.L["CONFIG_ALERT_UNMUTE"] = "Stummschaltung für Warnton ausschalten"
 private.L["CONFIG_ALERT_UNMUTE_DESC"] = "Schaltet Spielgeräusche ein während die Zielschaltfläche angezeigt wird, um Warntöne trotz Stummschaltung zu hören."
 private.L["CONFIG_CACHEWARNINGS"] = "Cache-Erinnerungsmitteilungen beim Einloggen und bei Gebietswechsel ausgeben"
 private.L["CONFIG_CACHEWARNINGS_DESC"] = "Falls ein NSC beim Einloggen oder beim Gebietswechsel bereits im Cache vorhanden ist, gibt diese Option eine Erinnerungsmitteilung aus, nach welchen Mobs nicht gesucht werden kann."
-private.L["CONFIG_DESC"] = "Diese Option läßt dich einstellen, auf welche Weise _NPCScan dich warnt, wenn es einen seltenen NSC findet."
+private.L["CONFIG_DESC"] = "Diese Option läßt dich einstellen, auf welche Weise NPCScan dich warnt, wenn es einen seltenen NSC findet."
 private.L["CONFIG_PRINTTIME"] = "Zeitstempel im Chat ausgeben"
 private.L["CONFIG_PRINTTIME_DESC"] = "Fügt die aktuelle Uhrzeit in alle gesendete Nachrichten ein. Nützlich um zu sehen wann ein NPC gefunden wurden."
 private.L["CONFIG_TEST"] = "Gefunden-Warnton testen"
@@ -892,5 +892,5 @@ private.L["VIGNETTE_SCAN"] = "Warnungen für Vignette Mobs anzeigen"
 private.L["VIGNETTE_SCAN_DESC"] = "Warnungen für Vignette Mobs anzeigen.Dies ist ein Beta Feature: Derzeit gibt es keine Möglichkeit Mobs zu filtern, so dass es immer ausgelöst wird, selbst wenn der Mob nicht verfolgt oder ignoriert wird."
 
 
-_G[ "BINDING_NAME_CLICK _NPCScanButton:LeftButton" ] = [=[Auf letzten gefundenen Mob zielen
-|cff808080(Benutzen, wenn _NPCScan dich warnt)|r]=];
+_G[ "BINDING_NAME_CLICK NPCScanButton:LeftButton" ] = [=[Auf letzten gefundenen Mob zielen
+|cff808080(Benutzen, wenn NPCScan dich warnt)|r]=];
