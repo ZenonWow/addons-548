@@ -1,6 +1,14 @@
-﻿----------------------------------------------------------------------
+﻿
+----------------------------------------------------------------------
 -- 	L00: Leatrix Plus 5.4.14 (4th June 2014) (www.leatrix.com)
 ---------------------------------------------------------------------- 
+--[[
+/dump LeaPlusDB.AutoAcceptQuestTitles
+/dump LeaPlusDB.AutoTurnInQuestTitles
+/dump GetQuestLink(32719)
+/run LeaPlusDB.AutoAcceptQuestTitles = { ["Mogu Runes of Fate"] = 32719 }
+/run LeaPlusDB.AutoTurnInQuestTitles["Candy Bucket"] = true
+--]]
 --[[
 		00: Start					Shows where everything is
 		01: Locks					Enables and disables panel controls
@@ -28,6 +36,8 @@
 ----------------------------------------------------------------------
 
 --  Create global tables if they don't exist
+	LeaPlus = LeaPlus or {}
+	local LeaPlus = LeaPlus
 	LeaPlusDB = LeaPlusDB or {}
 	LeaPlusDC = LeaPlusDC or {}
 
@@ -45,6 +55,7 @@
 	LeaPlusLC["ShowErrorsFlag"] = 1
 	LeaPlusLC["NumberOfPages"] = 8
 	LeaPlusLC["RaidColors"] = RAID_CLASS_COLORS
+	local NUMGOSSIPBUTTONS = NUMGOSSIPBUTTONS or 32
 
 --	Create event frame
 	local LpEvt = CreateFrame("FRAME")
@@ -52,6 +63,31 @@
 	LpEvt:RegisterEvent("VARIABLES_LOADED")
 	LpEvt:RegisterEvent("PLAYER_ENTERING_WORLD")
 	LpEvt:RegisterEvent("PLAYER_LOGOUT")
+	
+	function LpEvt:SetRegisterEvent(enabled, ...)
+		local eventList = { ... }
+		--LeaPlusLC:Print('LpEvt:SetRegisterEvent('.. tostring(enabled) ..','.. eventList[1] ..',...')
+		if  enabled  then
+			for  i = 1,#eventList  do  self:RegisterEvent(eventList[i])  end
+		else
+			for  i = 1,#eventList  do  self:UnregisterEvent(eventList[i])  end
+		end
+	end
+
+	function LpEvt:SetRawHook(enabled, hookedFunc)
+		LpEvt.hooks = LpEvt.hooks or {}
+		-- Return if already enabled/disabled
+		if  enabled == not not LpEvt.hooks[hookedFunc]  then  return false  end
+		LeaPlusLC:Print('LpEvt:SetRawHook('.. tostring(enabled) ..','.. hookedFunc ..')')
+		
+		if  enabled  then
+			LpEvt.hooks[hookedFunc] = _G[hookedFunc]
+			_G[hookedFunc] = LpEvt[hookedFunc]
+		else
+			_G[hookedFunc] = LpEvt.hooks[hookedFunc]
+			LpEvt.hooks[hookedFunc] = nil
+		end
+	end
 
 ----------------------------------------------------------------------
 --	L01: Locks
@@ -71,84 +107,59 @@
 --	Lock and dim invalid options
 	function LeaPlusLC:SetDim()
 
+		local lockItem
+		
 		-- Whisper invite
-		if LeaPlusLC["InviteFromWhisper"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["InvWhisperBtn"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["InvWhisperBtn"],false)
-		end
+		lockItem = LeaPlusLC["InviteFromWhisper"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["InvWhisperBtn"],lockItem)
 
 		-- Player chains
-		if (LeaPlusLC["ShowPlayerChain"] ~= LeaPlusDB["ShowPlayerChain"]) or LeaPlusLC["ShowPlayerChain"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["ModPlayerChain"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["ModPlayerChain"],false)
-		end
+		lockItem = (LeaPlusLC["ShowPlayerChain"] ~= LeaPlusDB["ShowPlayerChain"]) or LeaPlusLC["ShowPlayerChain"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["ModPlayerChain"],lockItem)
 
 		-- Protect privacy
-		if (LeaPlusLC["AchieveControl"] ~= LeaPlusDB["AchieveControl"]) or LeaPlusLC["AchieveControl"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["CharOnlyAchieves"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["CharOnlyAchieves"],false)
-		end
+		lockItem = (LeaPlusLC["AchieveControl"] ~= LeaPlusDB["AchieveControl"]) or LeaPlusLC["AchieveControl"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["CharOnlyAchieves"],lockItem)
 
 		-- Battle.net friend request blocking
-		if (LeaPlusLC["ManageBnetReq"] ~= LeaPlusDB["ManageBnetReq"]) or LeaPlusLC["ManageBnetReq"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["BlockBnetReq"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["BlockBnetReq"],false)
-		end
+		lockItem = (LeaPlusLC["ManageBnetReq"] ~= LeaPlusDB["ManageBnetReq"]) or LeaPlusLC["ManageBnetReq"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["BlockBnetReq"],lockItem)
 
 		-- Spell icons
-		if (LeaPlusLC["ShowSpellIcons"] ~= LeaPlusDB["ShowSpellIcons"]) or LeaPlusLC["ShowSpellIcons"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["SpellIconsBtn"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["SpellIconsBtn"],false)
-		end
+		lockItem = (LeaPlusLC["ShowSpellIcons"] ~= LeaPlusDB["ShowSpellIcons"]) or LeaPlusLC["ShowSpellIcons"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["SpellIconsBtn"],lockItem)
 
 		-- Frame options
-		if (LeaPlusLC["FrmEnabled"] ~= LeaPlusDB["FrmEnabled"]) or LeaPlusLC["FrmEnabled"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["MoveFramesButton"],true)
-		elseif LeaPlusLC["FrmEnabled"] == "On" then
-			LeaPlusLC:LockItem(LeaPlusCB["MoveFramesButton"],false)
-		end
+		lockItem = (LeaPlusLC["FrmEnabled"] ~= LeaPlusDB["FrmEnabled"]) or LeaPlusLC["FrmEnabled"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["MoveFramesButton"],lockItem)
 
 		-- World map modification button
-		if (LeaPlusLC["ShowMapMod"] ~= LeaPlusDB["ShowMapMod"]) or LeaPlusLC["ShowMapMod"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["MapOptBtn"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["MapOptBtn"],false)
-		end
+		lockItem = (LeaPlusLC["ShowMapMod"] ~= LeaPlusDB["ShowMapMod"]) or LeaPlusLC["ShowMapMod"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["MapOptBtn"],lockItem)
 
 		-- Automatically toggle nameplates
-		if (LeaPlusLC["AutoEnName"] ~= LeaPlusDB["AutoEnName"]) or LeaPlusLC["AutoEnName"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["ModEnPanelBtn"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["ModEnPanelBtn"],false)
-		end
+		lockItem = (LeaPlusLC["AutoEnName"] ~= LeaPlusDB["AutoEnName"]) or LeaPlusLC["AutoEnName"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["ModEnPanelBtn"],lockItem)
 
 		-- Manage emote sounds
-		if (LeaPlusLC["ManageRestedEmotes"] ~= LeaPlusDB["ManageRestedEmotes"]) or LeaPlusLC["ManageRestedEmotes"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["NoSoundRested"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["NoSoundRested"],false)
-		end
+		lockItem = (LeaPlusLC["ManageRestedEmotes"] ~= LeaPlusDB["ManageRestedEmotes"]) or LeaPlusLC["ManageRestedEmotes"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["NoSoundRested"],lockItem)
 
 		-- Tooltip options
-		if (LeaPlusLC["TipModEnable"] ~= LeaPlusDB["TipModEnable"]) or LeaPlusLC["TipModEnable"] == "Off" then
+		if (LeaPlusLC["TipModEnable"] ~= LeaPlusDB["TipModEnable"]) or LeaPlusLC["TipModEnable"] == false then
 			LeaPlusLC:LockItem(LeaPlusCB["MoveTooltipButton"],true)
 			LeaPlusLC:LockItem(LeaPlusCB["TipAnchorToMouse"],true)
 			LeaPlusLC:LockItem(LeaPlusCB["ModTipMouseBtn"],true)
 			LeaPlusCB["ModTipMouseBtn"]:SetAlpha(1)
 
-		elseif LeaPlusLC["TipModEnable"] == "On" then
+		elseif LeaPlusLC["TipModEnable"] then
 
 			LeaPlusLC:LockItem(LeaPlusCB["MoveTooltipButton"],false)
 			LeaPlusLC:LockItem(LeaPlusCB["TipAnchorToMouse"],false)
 			LeaPlusLC:LockItem(LeaPlusCB["ModTipMouseBtn"],false)
 
 			-- Anchor to mouse
-			if (LeaPlusLC["TipAnchorToMouse"] ~= LeaPlusDB["TipAnchorToMouse"]) or LeaPlusLC["TipAnchorToMouse"] == "Off" then
+			if (LeaPlusLC["TipAnchorToMouse"] ~= LeaPlusDB["TipAnchorToMouse"]) or LeaPlusLC["TipAnchorToMouse"] == false then
 				LeaPlusLC:LockItem(LeaPlusCB["ModTipMouseBtn"],true)
 			else
 				LeaPlusLC:LockItem(LeaPlusCB["ModTipMouseBtn"],false)
@@ -157,113 +168,68 @@
 		end
 
 		-- Quest detail font slider lockout
-		if (LeaPlusLC["QuestFontChange"] ~= LeaPlusDB["QuestFontChange"]) or LeaPlusLC["QuestFontChange"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["LeaPlusQuestFontSize"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["LeaPlusQuestFontSize"],false)
-		end
+		lockItem = (LeaPlusLC["QuestFontChange"] ~= LeaPlusDB["QuestFontChange"]) or LeaPlusLC["QuestFontChange"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["LeaPlusQuestFontSize"],lockItem)
 
 		-- Mail font slider lockout
-		if (LeaPlusLC["MailFontChange"] ~= LeaPlusDB["MailFontChange"]) or LeaPlusLC["MailFontChange"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["LeaPlusMailFontSize"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["LeaPlusMailFontSize"],false)
-		end
+		lockItem = (LeaPlusLC["MailFontChange"] ~= LeaPlusDB["MailFontChange"]) or LeaPlusLC["MailFontChange"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["LeaPlusMailFontSize"],lockItem)
 
 		-- Automatically accept quest lockout
-		if LeaPlusLC["AutoAcceptQuests"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["AcceptOnlyDailys"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["AcceptOnlyDailys"],false)
-		end
+		lockItem = LeaPlusLC["AutoAcceptQuests"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["AcceptOnlyDailys"],lockItem)
+		LeaPlusLC:LockItem(LeaPlusCB["AcceptAllQuests"],lockItem)
 
 		-- Automatically turn-in quest lockout
-		if LeaPlusLC["AutoTurnInQuests"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["TurnInOnlyDailys"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["TurnInOnlyDailys"],false)
-		end
+		lockItem = LeaPlusLC["AutoTurnInQuests"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["TurnInOnlyDailys"],lockItem)
+		LeaPlusLC:LockItem(LeaPlusCB["TurnInAllQuests"],lockItem)
 
 		-- Automatic resurrection lockout
-		if LeaPlusLC["AutoAcceptRes"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["NoAutoResInCombat"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["NoAutoResInCombat"],false)
-		end
+		lockItem = LeaPlusLC["AutoAcceptRes"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["NoAutoResInCombat"],lockItem)
 
 		-- Error frame quest lockout
-		if LeaPlusLC["HideErrorFrameText"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["ShowQuestUpdates"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["ShowQuestUpdates"],false)
-		end
+		lockItem = LeaPlusLC["HideErrorFrameText"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["ShowQuestUpdates"],lockItem)
 
 		-- Leatrix Plus panel tooltip placement
-		if LeaPlusLC["PlusShowTips"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["PanelTipAnchor"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["PanelTipAnchor"],false)
-		end
+		lockItem = LeaPlusLC["PlusShowTips"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["PanelTipAnchor"],lockItem)
 
 		-- Leatrix Plus scale
-		if LeaPlusLC["PlusPanelScaleCheck"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["LeaPlusScaleValue"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["LeaPlusScaleValue"],false)
-		end
+		lockItem = LeaPlusLC["PlusPanelScaleCheck"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["LeaPlusScaleValue"],lockItem)
 
 		-- Leatrix Plus alpha
-		if LeaPlusLC["PlusPanelAlphaCheck"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["LeaPlusAlphaValue"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["LeaPlusAlphaValue"],false)
-		end
+		lockItem = LeaPlusLC["PlusPanelAlphaCheck"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["LeaPlusAlphaValue"],lockItem)
 
 		-- Class coloring lockout
-		if (LeaPlusLC["Manageclasscolors"] ~= LeaPlusDB["Manageclasscolors"]) or LeaPlusLC["Manageclasscolors"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["ColorLocalChannels"],true)
-			LeaPlusLC:LockItem(LeaPlusCB["ColorGlobalChannels"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["ColorLocalChannels"],false)
-			LeaPlusLC:LockItem(LeaPlusCB["ColorGlobalChannels"],false)
-		end
+		lockItem = (LeaPlusLC["Manageclasscolors"] ~= LeaPlusDB["Manageclasscolors"]) or LeaPlusLC["Manageclasscolors"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["ColorLocalChannels"],lockItem)
+		LeaPlusLC:LockItem(LeaPlusCB["ColorGlobalChannels"],lockItem)
 
 		-- Trade and guild block lockout
-		if (LeaPlusLC["ManageTradeGuild"] ~= LeaPlusDB["ManageTradeGuild"]) or LeaPlusLC["ManageTradeGuild"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["NoTradeRequests"],true)
-			LeaPlusLC:LockItem(LeaPlusCB["NoGuildInvites"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["NoTradeRequests"],false)
-			LeaPlusLC:LockItem(LeaPlusCB["NoGuildInvites"],false)
-		end
+		lockItem = (LeaPlusLC["ManageTradeGuild"] ~= LeaPlusDB["ManageTradeGuild"]) or LeaPlusLC["ManageTradeGuild"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["NoTradeRequests"],lockItem)
+		LeaPlusLC:LockItem(LeaPlusCB["NoGuildInvites"],lockItem)
 
 		-- Automated repair with guild
-		if LeaPlusLC["AutoRepairOwnFunds"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["AutoRepairGuildFunds"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["AutoRepairGuildFunds"],false)
-		end
+		lockItem = LeaPlusLC["AutoRepairOwnFunds"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["AutoRepairGuildFunds"],lockItem)
 
 		-- Viewport
-		if (LeaPlusLC["ViewPortEnable"] ~= LeaPlusDB["ViewPortEnable"]) or LeaPlusLC["ViewPortEnable"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["ModViewportBtn"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["ModViewportBtn"],false)
-		end
+		lockItem = (LeaPlusLC["ViewPortEnable"] ~= LeaPlusDB["ViewPortEnable"]) or LeaPlusLC["ViewPortEnable"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["ModViewportBtn"],lockItem)
 
 		-- Minimap customisation
-		if (LeaPlusLC["MinimapMod"] ~= LeaPlusDB["MinimapMod"]) or LeaPlusLC["MinimapMod"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["ModMinimapBtn"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["ModMinimapBtn"],false)
-		end
+		lockItem = (LeaPlusLC["MinimapMod"] ~= LeaPlusDB["MinimapMod"]) or LeaPlusLC["MinimapMod"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["ModMinimapBtn"],lockItem)
 
 		-- Coordinates
-		if (LeaPlusLC["StaticCoordsEn"] ~= LeaPlusDB["StaticCoordsEn"]) or LeaPlusLC["StaticCoordsEn"] == "Off" then
-			LeaPlusLC:LockItem(LeaPlusCB["ModStaticCoordsBtn"],true)
-		else
-			LeaPlusLC:LockItem(LeaPlusCB["ModStaticCoordsBtn"],false)
-		end
+		lockItem = (LeaPlusLC["StaticCoordsEn"] ~= LeaPlusDB["StaticCoordsEn"]) or LeaPlusLC["StaticCoordsEn"] == false
+		LeaPlusLC:LockItem(LeaPlusCB["ModStaticCoordsBtn"],lockItem)
 
 	end
 
@@ -495,9 +461,9 @@
 
 	-- Show button tooltips for Leatrix Plus settings
 	function LeaPlusLC:ShowTooltip()
-		if LeaPlusLC["PlusShowTips"] == "On" then
+		if LeaPlusLC["PlusShowTips"] then
 			GameTooltip:SetOwner(self, "ANCHOR_NONE")
-			if LeaPlusLC["PanelTipAnchor"] == "On" then
+			if LeaPlusLC["PanelTipAnchor"] then
 				-- Show tips on the right side of the panel
 				GameTooltip:SetPoint("TOPRIGHT",LeaPlusLC["PageF"],"TOPLEFT",0,0)
 			else
@@ -510,7 +476,7 @@
 
 	-- Show button tooltips for interface settings (top side)
 	function LeaPlusLC:ShowFacetip()
-		if LeaPlusLC["PlusShowTips"] == "On" then
+		if LeaPlusLC["PlusShowTips"] then
 			GameTooltip:SetOwner(self, "ANCHOR_TOP")
 			GameTooltip:SetText(self.tiptext, nil, nil, nil, nil, true)
 		end
@@ -558,25 +524,17 @@
 -- 	Copy globals to locals
 	function LeaPlusLC:Load()
 
-		-- Load a string variable or set it to default if it's not set to "On" or "Off"
+		-- Load a boolean variable or set it to default
  		local function LoadVarChk(var, def)
-			if not LeaPlusDB[var] then
-				-- If variable doesn't exist, set it to default
-				LeaPlusDB[var] = def
+			-- Set config variable to saved value
+			local value = LeaPlusDB[var]
+			if  value == false  or  value == true  then  LeaPlusLC[var] = value
+			elseif  value == "On"  then  LeaPlusLC[var] = true
+			elseif  value == "Off" then  LeaPlusLC[var] = false
 			else
-				-- Variable exists
-				if type(LeaPlusDB[var]) == "string" then
-					if LeaPlusDB[var] ~= "On" and LeaPlusDB[var] ~= "Off" then
-						-- If variable is a string with an invalid value, set it to default
-						LeaPlusDB[var] = def
-					end
-				else
-					-- If variable is not a string, set it to default
-					LeaPlusDB[var] = def
-				end
+				-- If variable is not On/Off/true/false or missing then set it to default
+				LeaPlusLC[var] = def
 			end
-			-- Set variable to saved value
-			LeaPlusLC[var] = LeaPlusDB[var]
 		end
 
 		-- Load a numeric variable and set it to default if it's not within a given range
@@ -622,136 +580,138 @@
 		end
 
 		-- Automation
-		LoadVarChk("AcceptPartyFriends", "Off")			-- Party from friends
-		LoadVarChk("AcceptPartyGuild", "Off")			-- Party from guild
-		LoadVarChk("AutoConfirmRole", "Off")			-- Dungeon groups
-		LoadVarChk("InviteFromWhisper", "Off")			-- Invite from whispers
+		LoadVarChk("AcceptPartyFriends", false)			-- Party from friends
+		LoadVarChk("AcceptPartyGuild", false)			-- Party from guild
+		LoadVarChk("AutoConfirmRole", false)			-- Dungeon groups
+		LoadVarChk("InviteFromWhisper", false)			-- Invite from whispers
 		LeaPlusLC["InvKey"]	= LeaPlusDB["InvKey"] or "plus"
  
-		LoadVarChk("AutoReleaseInBG", "Off")			-- Release in battlegrounds
-		LoadVarChk("AutoAcceptSummon", "Off")			-- Accept summon
-		LoadVarChk("AutoAcceptRes", "Off")				-- Accept resurrect
-		LoadVarChk("NoAutoResInCombat", "On")			-- Exclude combat res
+		LoadVarChk("AutoReleaseInBG", false)			-- Release in battlegrounds
+		LoadVarChk("AutoAcceptSummon", false)			-- Accept summon
+		LoadVarChk("AutoAcceptRes", false)				-- Accept resurrect
+		LoadVarChk("NoAutoResInCombat", true)			-- Exclude combat res
 
-		LoadVarChk("NoDuelRequests", "Off")				-- Block duels
-		LoadVarChk("NoPetDuels", "Off")					-- Block pet battle duels
-		LoadVarChk("NoPartyInvites", "Off")				-- Block party invites
+		LoadVarChk("NoDuelRequests", false)				-- Block duels
+		LoadVarChk("NoPetDuels", false)					-- Block pet battle duels
+		LoadVarChk("NoPartyInvites", false)				-- Block party invites
 
-		LoadVarChk("ManageTradeGuild", "Off")			-- Manage blockers
-		LoadVarChk("NoTradeRequests", "On")				-- Block trades
-		LoadVarChk("NoGuildInvites", "On")				-- Block guild invites
+		LoadVarChk("ManageTradeGuild", false)			-- Manage blockers
+		LoadVarChk("NoTradeRequests", true)				-- Block trades
+		LoadVarChk("NoGuildInvites", true)				-- Block guild invites
 
 		-- Interaction
-		LoadVarChk("AutoSellJunk", "Off")				-- Sell junk automatically
-		LoadVarChk("AutoRepairOwnFunds", "Off")			-- Automatically repair
-		LoadVarChk("AutoRepairGuildFunds", "On")		-- Use guild funds
-		LoadVarChk("NoBagAutomation", "Off")			-- Prevent bag automation
-		LoadVarChk("AhExtras", "Off")					-- Auction house extras
-		LoadVarChk("AhBuyoutOnly", "Off")				-- Buyout only
-		LoadVarChk("AhGoldOnly", "Off")					-- Gold only
+		LoadVarChk("AutoSellJunk", false)				-- Sell junk automatically
+		LoadVarChk("AutoRepairOwnFunds", false)			-- Automatically repair
+		LoadVarChk("AutoRepairGuildFunds", true)		-- Use guild funds
+		LoadVarChk("NoBagAutomation", false)			-- Prevent bag automation
+		LoadVarChk("AhExtras", false)					-- Auction house extras
+		LoadVarChk("AhBuyoutOnly", false)				-- Buyout only
+		LoadVarChk("AhGoldOnly", false)					-- Gold only
 
-		LoadVarChk("NoRaidRestrictions", "Off")			-- Remove raid restrictions
-		LoadVarChk("RoleSave", "Off")					-- Save dungeon roles
-		LoadVarChk("ShowRaidToggle", "Off")				-- Show raid toggle button
+		LoadVarChk("NoRaidRestrictions", false)			-- Remove raid restrictions
+		LoadVarChk("RoleSave", false)					-- Save dungeon roles
+		LoadVarChk("ShowRaidToggle", false)				-- Show raid toggle button
 
-		LoadVarChk("NoConfirmLoot", "Off")				-- Hide loot warnings
-		LoadVarChk("NoLootWonAlert", "Off")				-- Hide loot won alerts
-		LoadVarChk("SoilAlert", "Off")					-- Dark Soil alert
+		LoadVarChk("NoConfirmLoot", false)				-- Hide loot warnings
+		LoadVarChk("NoLootWonAlert", false)				-- Hide loot won alerts
+		LoadVarChk("SoilAlert", false)					-- Dark Soil alert
 
 		-- Chat
-		LoadVarChk("UseEasyChatResizing", "Off")		-- Use easy resizing
-		LoadVarChk("NoCombatLogTab", "Off")				-- Hide the combat log
-		LoadVarChk("NoChatButtons", "Off")				-- Hide chat buttons
-		LoadVarChk("UnclampChat", "Off")				-- Unclamp chat frame
-		LoadVarChk("MoveChatEditBoxToTop", "Off")		-- Move editbox to top
+		LoadVarChk("UseEasyChatResizing", false)		-- Use easy resizing
+		LoadVarChk("NoCombatLogTab", false)				-- Hide the combat log
+		LoadVarChk("NoChatButtons", false)				-- Hide chat buttons
+		LoadVarChk("UnclampChat", false)				-- Unclamp chat frame
+		LoadVarChk("MoveChatEditBoxToTop", false)		-- Move editbox to top
 
-		LoadVarChk("NoStickyChat", "Off")				-- Disable sticky chat
-		LoadVarChk("UseArrowKeysInChat", "Off")			-- Use arrow keys in chat
-		LoadVarChk("NoChatFade", "Off")					-- Disable chat fade
-		LoadVarChk("MaxChatHstory", "Off")				-- Increase chat history
+		LoadVarChk("NoStickyChat", false)				-- Disable sticky chat
+		LoadVarChk("UseArrowKeysInChat", false)			-- Use arrow keys in chat
+		LoadVarChk("NoChatFade", false)					-- Disable chat fade
+		LoadVarChk("MaxChatHstory", false)				-- Increase chat history
 
-		LoadVarChk("UnivGroupColor", "Off")				-- Universal group color
-		LoadVarChk("Manageclasscolors", "Off")			-- Manage class colors
-		LoadVarChk("ColorLocalChannels", "On")			-- Local channel colors
-		LoadVarChk("ColorGlobalChannels", "On")			-- Global channel colors
+		LoadVarChk("UnivGroupColor", false)				-- Universal group color
+		LoadVarChk("Manageclasscolors", false)			-- Manage class colors
+		LoadVarChk("ColorLocalChannels", true)			-- Local channel colors
+		LoadVarChk("ColorGlobalChannels", true)			-- Global channel colors
 
 		-- Text
-		LoadVarChk("HideZoneText", "Off")				-- Hide zone text
-		LoadVarChk("HideSubzoneText", "Off")			-- Hide subzone text
+		LoadVarChk("HideZoneText", false)				-- Hide zone text
+		LoadVarChk("HideSubzoneText", false)			-- Hide subzone text
 
-		LoadVarChk("NoHitIndicators", "Off")			-- Hide portrait text
+		LoadVarChk("NoHitIndicators", false)			-- Hide portrait text
 
-		LoadVarChk("HideErrorFrameText", "Off")			-- Hide error messages
-		LoadVarChk("ShowQuestUpdates", "On")			-- Show quest updates
+		LoadVarChk("HideErrorFrameText", false)			-- Hide error messages
+		LoadVarChk("ShowQuestUpdates", true)			-- Show quest updates
 
-		LoadVarChk("MailFontChange", "Off")				-- Resize mail text
+		LoadVarChk("MailFontChange", false)				-- Resize mail text
 		LoadVarNum("LeaPlusMailFontSize", 22, 10, 36)	-- Mail text slider
 
-		LoadVarChk("QuestFontChange", "Off")			-- Resize quest detail text
+		LoadVarChk("QuestFontChange", false)			-- Resize quest detail text
 		LoadVarNum("LeaPlusQuestFontSize", 18, 10, 36)	-- Quest detail text slider
 
 		-- Interface
-		LoadVarChk("ShowMapMod", "Off")					-- Enable world map customisation
-		LoadVarChk("MapRevealBox", "On")				-- Map reveal checkbox state
+		LoadVarChk("ShowMapMod", false)					-- Enable world map customisation
+		LoadVarChk("MapRevealBox", true)				-- Map reveal checkbox state
 
 		LoadVarNum("LeaPlusMapScale", 1.0, 0.50, 2.70)	-- Map scale slider
 		LoadVarNum("LeaPlusMapOpacity", 0.0, 0.0, 1.0)	-- Map opacity slider
 
-		LoadVarChk("CursorCoords", "On")				-- Show cursor coordinates
-		LoadVarChk("MapRing", "Off")					-- Hide player ring
-		LoadVarChk("MapLock", "Off")					-- Lock map position
-		LoadVarChk("MapQuestBox", "On")					-- Show quest details
-		LoadVarChk("MapQuestLeft", "Off")				-- On left side
+		LoadVarChk("CursorCoords", true)				-- Show cursor coordinates
+		LoadVarChk("MapRing", false)					-- Hide player ring
+		LoadVarChk("MapLock", false)					-- Lock map position
+		LoadVarChk("MapQuestBox", true)					-- Show quest details
+		LoadVarChk("MapQuestLeft", false)				-- On left side
 
 		LoadVarAnc("MapA", "TOPLEFT")					-- Map anchor
 		LoadVarNum("MapX", 10, -5000, 5000)				-- Map position X axis
 		LoadVarNum("MapY", -118, -5000, 5000)			-- Map position Y axis
 
-		LoadVarChk("MinimapMod", "Off")					-- Enable minimap customisation
-		LoadVarChk("MergeTrackBtn", "Off")				-- Merge buttons
-		LoadVarChk("HideMinimapZone", "Off")			-- Hide zone text
-		LoadVarChk("HideMinimapTime", "Off")			-- Hide clock
-		LoadVarChk("MinimapMouseZoom", "Off")			-- Mousewheel zoom
+		LoadVarChk("MinimapMod", false)					-- Enable minimap customisation
+		LoadVarChk("MergeTrackBtn", false)				-- Merge buttons
+		LoadVarChk("HideMinimapZone", false)			-- Hide zone text
+		LoadVarChk("HideMinimapTime", false)			-- Hide clock
+		LoadVarChk("MinimapMouseZoom", false)			-- Mousewheel zoom
 		LoadVarNum("MinimapScale", 1.00, 0.50, 3.00)	-- Minimap scale slider
 
-		LoadVarChk("FrmEnabled", "Off")					-- Enable frames customisation
+		LoadVarChk("FrmEnabled", false)					-- Enable frames customisation
 
-		LoadVarChk("ShowVanityButtons", "Off")			-- Show vanity buttons
-		LoadVarChk("ShowVanityInFrame", "Off")			-- Vanity buttons dual layout
-		LoadVarChk("ShowVolume", "Off")					-- Show volume control
-		LoadVarChk("ShowVolumeInFrame", "Off")			-- Volume control dual layout
-		LoadVarChk("ShowDressTab", "Off")				-- Show dressup buttons
+		LoadVarChk("ShowVanityButtons", false)			-- Show vanity buttons
+		LoadVarChk("ShowVanityInFrame", false)			-- Vanity buttons dual layout
+		LoadVarChk("ShowVolume", false)					-- Show volume control
+		LoadVarChk("ShowVolumeInFrame", false)			-- Volume control dual layout
+		LoadVarChk("ShowDressTab", false)				-- Show dressup buttons
 
-		LoadVarChk("StaticCoords", "On")				-- Enable coordinates
-		LoadVarChk("StaticCoordsEn", "Off")				-- Show coordinates
-		LoadVarChk("StaticCoordsBack", "Off")			-- Show background
-		LoadVarChk("StaticCoordsTop", "Off")			-- Show on top
-		LoadVarChk("StaticCoordsLock", "Off")			-- Lock coordinates
+		LoadVarChk("StaticCoords", true)				-- Enable coordinates
+		LoadVarChk("StaticCoordsEn", false)				-- Show coordinates
+		LoadVarChk("StaticCoordsBack", false)			-- Show background
+		LoadVarChk("StaticCoordsTop", false)			-- Show on top
+		LoadVarChk("StaticCoordsLock", false)			-- Lock coordinates
 		LoadVarNum("StaticCoordsScale", 2.2, 0.9, 2.2)	-- Coordinates scale slider
 		LoadVarAnc("CoordsA", "CENTER")					-- Coordinates anchor
 		LoadVarAnc("CoordsR", "CENTER")					-- Coordinates relative
 		LoadVarNum("CoordsX", 0, -5000, 5000)			-- Coordinates X axis
 		LoadVarNum("CoordsY", 0, -5000, 5000)			-- Coordinates Y axis
 
-		LoadVarChk("ShowSpellIcons", "Off")				-- Show spell icons
-		LoadVarChk("ShowSpellTips", "On")				-- Show spell tooltips
-		LoadVarChk("SpellIDonTip", "On")				-- Show spell ID in tips
-		LoadVarChk("SpellOnPlayer", "Off")				-- Anchor to player
+		LoadVarChk("ShowSpellIcons", false)				-- Show spell icons
+		LoadVarChk("ShowSpellTips", true)				-- Show spell tooltips
+		LoadVarChk("SpellIDonTip", true)				-- Show spell ID in tips
+		LoadVarChk("SpellOnPlayer", false)				-- Anchor to player
 
-		LoadVarChk("DurabilityStatus", "Off")			-- Show durability status
+		LoadVarChk("DurabilityStatus", false)			-- Show durability status
 
 		-- Miscellaneous
-		LoadVarChk("ShowQuestLevels", "Off")			-- Show quest levels
-		LoadVarChk("AutoAcceptQuests", "Off")			-- Accept quests
-		LoadVarChk("AcceptOnlyDailys", "Off")			-- Restrict to dailies
-		LoadVarChk("AutoTurnInQuests", "Off")			-- Turn-in quests
-		LoadVarChk("TurnInOnlyDailys", "Off")			-- Restrict to dailies
+		LoadVarChk("ShowQuestLevels", false)			-- Show quest levels
+		LoadVarChk("AutoAcceptQuests", false)			-- Accept chosen quests (Ctrl)
+		LoadVarChk("AcceptOnlyDailys", false)			-- All dailies"
+		LoadVarChk("AcceptAllQuests", false)			-- All quests"
+		LoadVarChk("AutoTurnInQuests", false)			-- Turn-in chosen quests (Ctrl)
+		LoadVarChk("TurnInOnlyDailys", false)			-- All dailies"
+		LoadVarChk("TurnInAllQuests", false)			-- All quests"
 
-		LoadVarChk("TipModEnable", "Off")				-- Enable tooltip customisation
-		LoadVarChk("TipShowTitle", "On")				-- Show title
-		LoadVarChk("TipShowRank", "On")					-- Show rank
-		LoadVarChk("TipShowTarget", "On")				-- Show target
-		LoadVarChk("TipBackSimple", "Off")				-- Color backdrops
+		LoadVarChk("TipModEnable", false)				-- Enable tooltip customisation
+		LoadVarChk("TipShowTitle", true)				-- Show title
+		LoadVarChk("TipShowRank", true)					-- Show rank
+		LoadVarChk("TipShowTarget", true)				-- Show target
+		LoadVarChk("TipBackSimple", false)				-- Color backdrops
 		LoadVarNum("LeaPlusTipSize", 1.00, 0.50, 3.00)	-- Tooltip scale slider
 
 		LoadVarAnc("TipPosAnchor", "BOTTOMRIGHT")		-- Tooltip anchor
@@ -759,64 +719,64 @@
 		LoadVarNum("TipPosXOffset", -13, -5000, 5000)	-- Tooltip X offset
 		LoadVarNum("TipPosYOffset", 94, -5000, 5000)	-- Tooltip Y offset
 
-		LoadVarChk("TipAnchorToMouse", "Off")			-- Anchor to mouse
+		LoadVarChk("TipAnchorToMouse", false)			-- Anchor to mouse
 		LoadVarNum("TipMouseAnchor", 4, 1, 9)			-- Anchor to mouse dropdown value
 		LoadVarNum("TipMouseOffsetX", 0, -400, 400)		-- Anchor to mouse X offset
 		LoadVarNum("TipMouseOffsetY", -120, -400, 400)	-- Anchor to mouse Y offset
 		LoadVarNum("TipAlpha", 1.0, 0, 1.0)				-- Tooltip alpha
-		LoadVarChk("TipHideCombat", "Off")				-- Hide tips in combat
+		LoadVarChk("TipHideCombat", false)				-- Hide tips in combat
 
-		LoadVarChk("NoGryphons", "Off")					-- Hide gryphons
-		LoadVarChk("NoClassBar", "Off")					-- Hide stance bar
-		LoadVarChk("NoCharControls", "Off")				-- Hide character controls
+		LoadVarChk("NoGryphons", false)					-- Hide gryphons
+		LoadVarChk("NoClassBar", false)					-- Hide stance bar
+		LoadVarChk("NoCharControls", false)				-- Hide character controls
 
-		LoadVarChk("AutoEnName", "Off")					-- Toggle enemy plates
-		LoadVarChk("AutoEnPets", "On")					-- Show pets
-		LoadVarChk("AutoEnGuardians", "On")				-- Show guardians
-		LoadVarChk("AutoEnTotems", "On")				-- Show totems
-		LoadVarChk("AutoEnClassCol", "Off")				-- Show class color
+		LoadVarChk("AutoEnName", false)					-- Toggle enemy plates
+		LoadVarChk("AutoEnPets", true)					-- Show pets
+		LoadVarChk("AutoEnGuardians", true)				-- Show guardians
+		LoadVarChk("AutoEnTotems", true)				-- Show totems
+		LoadVarChk("AutoEnClassCol", false)				-- Show class color
 
-		LoadVarChk("ClassColPlayer", "Off")				-- Player in class color
-		LoadVarChk("ClassColTarget", "Off")				-- Target in class color
-		LoadVarChk("ShowPlayerChain", "Off")			-- Show player chain
+		LoadVarChk("ClassColPlayer", false)				-- Player in class color
+		LoadVarChk("ClassColTarget", false)				-- Target in class color
+		LoadVarChk("ShowPlayerChain", false)			-- Show player chain
 		LoadVarNum("PlayerChainMenu", 2, 1, 3)			-- Player chain dropdown value
 
 		-- System
-		LoadVarChk("NoDeathEffect", "Off")				-- Hide death effect
-		LoadVarChk("NoSpecialEffects", "Off")			-- Hide special effects
-		LoadVarChk("NoGlowEffect", "Off")				-- Remove screen glow
-		LoadVarChk("ManageZoomLevel", "Off")			-- Max camera distance
+		LoadVarChk("NoDeathEffect", false)				-- Hide death effect
+		LoadVarChk("NoSpecialEffects", false)			-- Hide special effects
+		LoadVarChk("NoGlowEffect", false)				-- Remove screen glow
+		LoadVarChk("ManageZoomLevel", false)			-- Max camera distance
 
-		LoadVarChk("ViewPortEnable", "Off")				-- Enable viewport
+		LoadVarChk("ViewPortEnable", false)				-- Enable viewport
 		LoadVarNum("ViewPortTop", 0, 0, 250)			-- Top border
 		LoadVarNum("ViewPortBottom", 0, 0, 250)			-- Bottom border
 		LoadVarNum("ViewPortLeft", 0, 0, 250)			-- Left border
 		LoadVarNum("ViewPortRight", 0, 0, 250)			-- Right border
-		LoadVarChk("ViewportResize", "Off")				-- Resize game world
+		LoadVarChk("ViewportResize", false)				-- Resize game world
 
-		LoadVarChk("ManageRestedEmotes", "Off")			-- Manage emote sounds
-		LoadVarChk("NoSoundRested", "On")				-- Silence rested emotes
+		LoadVarChk("ManageRestedEmotes", false)			-- Manage emote sounds
+		LoadVarChk("NoSoundRested", true)				-- Silence rested emotes
 
-		LoadVarChk("AchieveControl", "Off")				-- Manage privacy
-		LoadVarChk("CharOnlyAchieves", "On")			-- Protect privacy
+		LoadVarChk("AchieveControl", false)				-- Manage privacy
+		LoadVarChk("CharOnlyAchieves", true)			-- Protect privacy
 
-		LoadVarChk("ManageBnetReq", "Off")				-- Manage friend requests			
-		LoadVarChk("BlockBnetReq", "On")				-- Block friend requests
+		LoadVarChk("ManageBnetReq", false)				-- Manage friend requests			
+		LoadVarChk("BlockBnetReq", true)				-- Block friend requests
 
 		-- Settings
-		LoadVarChk("ShowMinimapIcon", "On")				-- Show minimap button
+		LoadVarChk("ShowMinimapIcon", true)				-- Show minimap button
 		LoadVarNum("MinimapIconPos", -65, -180, 180)	-- Minimap button position
-		LoadVarChk("ShowStartTag", "On")				-- Show startup message
-		LoadVarChk("VersionChecker", "On")				-- Show version warning
-		LoadVarChk("OpenPlusAtHome", "Off")				-- Show home on startup
+		LoadVarChk("ShowStartTag", true)				-- Show startup message
+		LoadVarChk("VersionChecker", true)				-- Show version warning
+		LoadVarChk("OpenPlusAtHome", false)				-- Show home on startup
 	
-		LoadVarChk("PlusShowTips", "On")				-- Show option tooltips
-		LoadVarChk("PanelTipAnchor", "Off")				-- On the left side
+		LoadVarChk("PlusShowTips", true)				-- Show option tooltips
+		LoadVarChk("PanelTipAnchor", false)				-- On the left side
 
-		LoadVarChk("PlusPanelAlphaCheck", "Off")		-- Modify panel alpha
+		LoadVarChk("PlusPanelAlphaCheck", false)		-- Modify panel alpha
 		LoadVarNum("LeaPlusAlphaValue", 1.0, 0.0, 1.0)	-- Panel alpha slider
 
-		LoadVarChk("PlusPanelScaleCheck", "Off")		-- Modify panel scale
+		LoadVarChk("PlusPanelScaleCheck", false)		-- Modify panel scale
 		LoadVarNum("LeaPlusScaleValue", 1.0, 0.0, 1.7)	-- Panel scale slider
 
 		-- Panel position
@@ -830,6 +790,9 @@
 
 		-- Save all settings now
 		LeaPlusLC:Save();
+
+		LeaPlusDB.AutoAcceptQuestTitles = LeaPlusDB.AutoAcceptQuestTitles or {}
+		LeaPlusDB.AutoTurnInQuestTitles = LeaPlusDB.AutoTurnInQuestTitles or {}
 
 		-- Release memory
 		LeaPlusLC.Load = nil
@@ -956,11 +919,13 @@
 		LeaPlusDB["DurabilityStatus"]		= LeaPlusLC["DurabilityStatus"]
 
 		-- Miscellaneous
-		LeaPlusDB["ShowQuestLevels"]		= LeaPlusLC["ShowQuestLevels"]
+		LeaPlusDB["ShowQuestLevels"]			= LeaPlusLC["ShowQuestLevels"]
 		LeaPlusDB["AutoAcceptQuests"] 		= LeaPlusLC["AutoAcceptQuests"]
 		LeaPlusDB["AcceptOnlyDailys"] 		= LeaPlusLC["AcceptOnlyDailys"]
+		LeaPlusDB["AcceptAllQuests"] 			= LeaPlusLC["AcceptAllQuests"]
 		LeaPlusDB["AutoTurnInQuests"] 		= LeaPlusLC["AutoTurnInQuests"]
 		LeaPlusDB["TurnInOnlyDailys"] 		= LeaPlusLC["TurnInOnlyDailys"]
+		LeaPlusDB["TurnInAllQuests"] 			= LeaPlusLC["TurnInAllQuests"]
 
 		LeaPlusDB["TipModEnable"]			= LeaPlusLC["TipModEnable"]
 		LeaPlusDB["TipShowTitle"]			= LeaPlusLC["TipShowTitle"]
@@ -1054,7 +1019,7 @@
 		--	Automatically accept Dungeon Finder queue requests
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["AutoConfirmRole"] == "On" then
+		if LeaPlusLC["AutoConfirmRole"] then
 			LFDRoleCheckPopupAcceptButton:SetScript("OnShow", function()
 				local leader = ""
 				for i=1, GetNumSubgroupMembers() do 
@@ -1075,153 +1040,125 @@
 		--	Invite from whispers
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["InviteFromWhisper"] == "On" then
-			LpEvt:RegisterEvent("CHAT_MSG_WHISPER");
-			LpEvt:RegisterEvent("CHAT_MSG_BN_WHISPER");
-		else
-			LpEvt:UnregisterEvent("CHAT_MSG_WHISPER");
-			LpEvt:UnregisterEvent("CHAT_MSG_BN_WHISPER");
-		end
+		LpEvt:SetRegisterEvent( LeaPlusLC["InviteFromWhisper"],
+			'CHAT_MSG_WHISPER',
+			'CHAT_MSG_BN_WHISPER'
+		)
 
 		----------------------------------------------------------------------
 		--	Disable full-screen glow
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoGlowEffect"] == "On" then
-			SetCVar("ffxGlow", "0")
-		else
-			SetCVar("ffxGlow", "1")
-		end
+		SetCVar( "ffxGlow", LeaPlusLC["NoGlowEffect"] and '0' or '1' )
 
 		----------------------------------------------------------------------
 		--	Disable death effect
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoDeathEffect"] == "On" then
-			SetCVar("ffxDeath", "0")
-		else
-			SetCVar("ffxDeath", "1")
-		end
+		SetCVar( "ffxDeath", LeaPlusLC["NoDeathEffect"] and '0' or '1' )
 
 		----------------------------------------------------------------------
 		--	Disable special effects
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoSpecialEffects"] == "On" then
-			SetCVar("ffxSpecial", "0")
-			SetCVar("ffxNetherWorld", "0")
-		else
-			SetCVar("ffxSpecial", "1")
-			SetCVar("ffxNetherWorld", "1")
-		end
+		SetCVar("ffxSpecial", LeaPlusLC["NoSpecialEffects"] and '0' or '1' )
+		SetCVar("ffxNetherWorld", LeaPlusLC["NoSpecialEffects"] and '0' or '1' )
 
 		----------------------------------------------------------------------
 		--	Block duels
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoDuelRequests"] == "On" then
-			LpEvt:RegisterEvent("DUEL_REQUESTED");
-		else
-			LpEvt:UnregisterEvent("DUEL_REQUESTED");
-		end
+		LpEvt:SetRegisterEvent( LeaPlusLC["NoDuelRequests"],
+			'DUEL_REQUESTED'
+		)
 
 		----------------------------------------------------------------------
 		--	Block pet battle duels
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoPetDuels"] == "On" then
-			LpEvt:RegisterEvent("PET_BATTLE_PVP_DUEL_REQUESTED");
-		else
-			LpEvt:UnregisterEvent("PET_BATTLE_PVP_DUEL_REQUESTED");
-		end
+		LpEvt:SetRegisterEvent( LeaPlusLC["NoPetDuels"],
+			'PET_BATTLE_PVP_DUEL_REQUESTED'
+		)
 
 		----------------------------------------------------------------------
 		--	Block party invites
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoPartyInvites"] == "On" or LeaPlusLC["AcceptPartyFriends"] == "On" then
-			LpEvt:RegisterEvent("PARTY_INVITE_REQUEST");
-		else
-			LpEvt:UnregisterEvent("PARTY_INVITE_REQUEST");
-		end
+		LpEvt:SetRegisterEvent( LeaPlusLC["NoPartyInvites"] or LeaPlusLC["AcceptPartyFriends"],
+			'PARTY_INVITE_REQUEST'
+		)
 
 		----------------------------------------------------------------------
 		--	Battleground release
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["AutoReleaseInBG"] == "On" then
-			LpEvt:RegisterEvent("PLAYER_DEAD");
-		else
-			LpEvt:UnregisterEvent("PLAYER_DEAD");
-		end
+		LpEvt:SetRegisterEvent( LeaPlusLC["AutoReleaseInBG"],
+			'PLAYER_DEAD'
+		)
 
 		----------------------------------------------------------------------
 		--	Automatic resurrection
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["AutoAcceptRes"] == "On" then
-			LpEvt:RegisterEvent("RESURRECT_REQUEST");
-		else
-			LpEvt:UnregisterEvent("RESURRECT_REQUEST");
-		end
+		LpEvt:SetRegisterEvent( LeaPlusLC["AutoAcceptRes"],
+			'RESURRECT_REQUEST'
+		)
 
 		----------------------------------------------------------------------
 		--	Automatic summon
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["AutoAcceptSummon"] == "On" then
-			LpEvt:RegisterEvent("CONFIRM_SUMMON");
-		else
-			LpEvt:UnregisterEvent("CONFIRM_SUMMON");
-		end
+		LpEvt:SetRegisterEvent( LeaPlusLC["AutoAcceptSummon"],
+			'CONFIRM_SUMMON'
+		)
 
+		----------------------------------------------------------------------
+		--	Automatically open quests on gossip
+		----------------------------------------------------------------------
+
+		LpEvt:SetRegisterEvent( LeaPlusLC.AutoAcceptQuests or LeaPlusLC.AutoTurnInQuests,
+			'GOSSIP_SHOW',
+			'GOSSIP_CLOSED'
+		)
+		
 		----------------------------------------------------------------------
 		--	Automatically accept quests
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["AutoAcceptQuests"] == "On" or (LeaPlusLC["AutoAcceptQuests"] == "On" and LeaPlusLC["AcceptOnlyDailys"] == "On") then
-			LpEvt:RegisterEvent("QUEST_DETAIL");
-			LpEvt:RegisterEvent("QUEST_ACCEPT_CONFIRM")
-		else
-			LpEvt:UnregisterEvent("QUEST_DETAIL");
-			LpEvt:UnregisterEvent("QUEST_ACCEPT_CONFIRM")
-		end
+		LpEvt:SetRawHook(LeaPlusLC.AutoAcceptQuests, 'QuestDetailAcceptButton_OnClick')
+		LpEvt:SetRegisterEvent( LeaPlusLC.AutoAcceptQuests,
+			'QUEST_DETAIL',
+			'QUEST_ACCEPT_CONFIRM'
+		)
 
 		----------------------------------------------------------------------
 		--	Automatically turn-in quests
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["AutoTurnInQuests"] == "On" then
-			LpEvt:RegisterEvent("QUEST_PROGRESS")
-			LpEvt:RegisterEvent("QUEST_COMPLETE")
-		else
-			LpEvt:UnregisterEvent("QUEST_PROGRESS")
-			LpEvt:UnregisterEvent("QUEST_COMPLETE")
-		end
+		LpEvt:SetRawHook(LeaPlusLC.AutoTurnInQuests, 'QuestProgressCompleteButton_OnClick')
+		LpEvt:SetRegisterEvent( LeaPlusLC.AutoTurnInQuests,
+			'QUEST_PROGRESS',
+			'QUEST_COMPLETE',
+			'QUEST_FINISHED'
+		)
 
 		----------------------------------------------------------------------
 		--	Sell junk automatically and repair automatically
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["AutoSellJunk"] == "On" or LeaPlusLC["AutoRepairOwnFunds"] == "On" then
-			LpEvt:RegisterEvent("MERCHANT_SHOW");
-		else
-			LpEvt:UnregisterEvent("MERCHANT_SHOW");
-		end
+		LpEvt:SetRegisterEvent( LeaPlusLC["AutoSellJunk"] or LeaPlusLC["AutoRepairOwnFunds"],
+			'MERCHANT_SHOW'
+		)
 
 		----------------------------------------------------------------------
 		--	Don't confirm loot rolls
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoConfirmLoot"] == "On" then
-			LpEvt:RegisterEvent("CONFIRM_LOOT_ROLL");
-			LpEvt:RegisterEvent("CONFIRM_DISENCHANT_ROLL");
-			LpEvt:RegisterEvent("LOOT_BIND_CONFIRM")
-		else
-			LpEvt:UnregisterEvent("CONFIRM_LOOT_ROLL");
-			LpEvt:UnregisterEvent("CONFIRM_DISENCHANT_ROLL");
-			LpEvt:UnregisterEvent("LOOT_BIND_CONFIRM");
-		end
+		LpEvt:SetRegisterEvent( LeaPlusLC["NoConfirmLoot"],
+			'CONFIRM_LOOT_ROLL',
+			'CONFIRM_DISENCHANT_ROLL',
+			'LOOT_BIND_CONFIRM'
+		)
 
 	end
 
@@ -1235,7 +1172,7 @@
 		-- Show warning if using a very old version of Leatrix Plus
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["VersionChecker"] == "On" then
+		if LeaPlusLC["VersionChecker"] then
 
 			local wowversion = select(4, GetBuildInfo()) or 0;
 			local plusversion = tonumber(LeaPlusLC["InterfaceVer"]);
@@ -1326,7 +1263,7 @@
 		--	Show player chain
 		----------------------------------------------------------------------
 
-		if LeaPlusDB["ShowPlayerChain"] == "On" then -- Checks global
+		if LeaPlusDB["ShowPlayerChain"] then -- Checks global
 
 			-- Create configuration panel
 			local ChainPanel = LeaPlusLC:CreateSidePanel("Player Chain", 164, 160)
@@ -1392,7 +1329,7 @@
 		-- Show raid frame toggle button
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowRaidToggle"] == "On" then
+		if LeaPlusLC["ShowRaidToggle"] then
 
 			-- Check to make sure raid toggle button exists
 			if CompactRaidFrameManagerDisplayFrameHiddenModeToggle then
@@ -1422,7 +1359,7 @@
 		-- Hide hit indicators (portrait text)
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoHitIndicators"] == "On" then
+		if LeaPlusLC["NoHitIndicators"] then
 			hooksecurefunc(PlayerHitIndicator, "Show", PlayerHitIndicator.Hide)
 			hooksecurefunc(PetHitIndicator, "Show", PetHitIndicator.Hide)
 		end
@@ -1431,7 +1368,7 @@
 		-- Class colored player
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ClassColPlayer"] == "On" then
+		if LeaPlusLC["ClassColPlayer"] then
 
 			local PlayFN = CreateFrame("FRAME", nil, PlayerFrame)
 			PlayFN:SetWidth(119)
@@ -1451,7 +1388,7 @@
 		-- Class colored target
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ClassColTarget"] == "On" then
+		if LeaPlusLC["ClassColTarget"] then
 
 			local function TargetFrameCol()
 				if UnitIsPlayer("target") then
@@ -1482,7 +1419,7 @@
 		----------------------------------------------------------------------
 
 		-- Show spell icons
-		if LeaPlusLC["ShowSpellIcons"] == "On" then
+		if LeaPlusLC["ShowSpellIcons"] then
 
 			-- Disable buffs on top of target frame (otherwise they would conflict)
 			TargetFrame_UpdateBuffsOnTop = function() TARGET_FRAME_BUFFS_ON_TOP = false; end
@@ -1518,7 +1455,7 @@
 
 			-- Change spell icon scale when player frame scale changes
 			PlayerFrame:HookScript("OnSizeChanged", function(self, name, value)
-				if LeaPlusLC["SpellOnPlayer"] == "On" then
+				if LeaPlusLC["SpellOnPlayer"] then
 					for i = 1, iCount do
 						icon[i]:SetScale(PlayerFrame:GetScale());
 					end
@@ -1527,7 +1464,7 @@
 
 			-- Change spell icon scale when target frame scale changes
 			TargetFrame:HookScript("OnSizeChanged", function(self, name, value)
-				if LeaPlusLC["SpellOnPlayer"] == "Off" then
+				if LeaPlusLC["SpellOnPlayer"] == false then
 					for i = 1, iCount do
 						icon[i]:SetScale(TargetFrame:GetScale());
 					end
@@ -1551,7 +1488,7 @@
 					icon[i]:SetToplevel(true)
 
 					-- Update icon tooltip
-					if LeaPlusLC["ShowSpellTips"] == "On" then
+					if LeaPlusLC["ShowSpellTips"] then
 
 						-- Update tooltip while OnEnter is active
 						icon[i].z:SetScript("OnUpdate", function()
@@ -1563,7 +1500,7 @@
 
 						-- Show tooltip when OnEnter is active
 						icon[i]:SetScript("OnEnter", function(self)
-							if LeaPlusLC["ShowSpellTips"] == "On" then
+							if LeaPlusLC["ShowSpellTips"] then
 								-- Show the tooltip for the spell
 								GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 15, -25)
 								GameTooltip:SetUnitBuff(owner, spell);
@@ -1574,7 +1511,7 @@
 
 						-- Hide tooltip and remove OnUpdate
 						icon[i]:SetScript("OnLeave", function(self)
-							if LeaPlusLC["ShowSpellTips"] == "On" then
+							if LeaPlusLC["ShowSpellTips"] then
 								GameTooltip:Hide();
 								-- Hide the anchor frame
 								icon[i].z:Hide();
@@ -1700,7 +1637,7 @@
 				for i = 1, iCount do
 					-- Show icons above target or player frame
 					icon[i]:ClearAllPoints()
-					if LeaPlusLC["SpellOnPlayer"] == "On" then
+					if LeaPlusLC["SpellOnPlayer"] then
 						icon[i]:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 116 + (22 * (i - 1)), 5)
 						icon[i]:SetScale(PlayerFrame:GetScale());
 					else
@@ -1763,9 +1700,9 @@
 			LeaPlusLC:CreateButton("ResetClassBtn", SpellPanel, "Reset", "BOTTOMLEFT", 80, 10, 70, 25, true, "")
 			LeaPlusCB["ResetClassBtn"]:SetScript("OnClick", function()
 				-- Reset the checkboxes
-				LeaPlusLC["ShowSpellTips"] = "On";
-				LeaPlusLC["SpellIDonTip"] = "On";
-				LeaPlusLC["SpellOnPlayer"] = "Off";
+				LeaPlusLC["ShowSpellTips"] = true
+				LeaPlusLC["SpellIDonTip"] = true
+				LeaPlusLC["SpellOnPlayer"] = false
 				for i = 1, iCount do
 					-- Reset the panel controls
 					SpellEB[i]:SetText("");
@@ -1872,9 +1809,9 @@
 
 					end
 
-					LeaPlusLC["ShowSpellTips"] = "On";
-					LeaPlusLC["SpellIDonTip"] = "On";
-					LeaPlusLC["SpellOnPlayer"] = "Off";
+					LeaPlusLC["ShowSpellTips"] = true
+					LeaPlusLC["SpellIDonTip"] = true
+					LeaPlusLC["SpellOnPlayer"] = false
 					SpellPanel:Show(); SpellPanel:Hide();
 					SaveClassControls();
 
@@ -1892,7 +1829,7 @@
 
 			-- Function to show spell ID in tooltips
 			local function SpellIDonTip(unit, target, index)
-				if LeaPlusLC["SpellIDonTip"] == "On" then
+				if LeaPlusLC["SpellIDonTip"] then
 					local spellid = select(11, UnitAura(target, index));
 					if spellid then
 						GameTooltip:AddLine("Spell ID: " .. spellid)
@@ -1913,7 +1850,7 @@
 		-- Coordinates
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["StaticCoordsEn"] == "On" then
+		if LeaPlusLC["StaticCoordsEn"] then
 
 			-- Create movable coordinates frame
 			local StaticCoordBox = CreateFrame("Frame", nil, UIParent)
@@ -1977,7 +1914,7 @@
 			-- Function to show coordinates based on options (run by many handlers)
 			local function RefreshStaticCoords()
 				-- Show or hide coordinates
-				if LeaPlusLC["StaticCoords"] == "On" then
+				if LeaPlusLC["StaticCoords"] then
 					-- Show coordinates and set map to current zone
 					StaticCoordBox:Show();
 					SetMapToCurrentZone();
@@ -1985,7 +1922,7 @@
 					StaticCoordBox:Hide();
 				end
 				-- Show or hide the background
-				if LeaPlusLC["StaticCoordsBack"] == "On" then
+				if LeaPlusLC["StaticCoordsBack"] then
 					StaticCoordBox.t:Show();
 				else
 					StaticCoordBox.t:Hide();
@@ -1996,7 +1933,7 @@
 				StaticCoordBox:SetHeight(18 * scale);
 				Splay:SetScale(scale);
 				-- Set locked status
-				if LeaPlusLC["StaticCoordsLock"] == "On" then
+				if LeaPlusLC["StaticCoordsLock"] then
 					StaticCoordBox:SetScript("OnDragStart", nil);
 					StaticCoordBox:EnableMouse(false);
 				else
@@ -2004,13 +1941,13 @@
 					StaticCoordBox:EnableMouse(true);
 				end
 				-- Show on top
-				if LeaPlusLC["StaticCoordsTop"] == "On" then
+				if LeaPlusLC["StaticCoordsTop"] then
 					StaticCoordBox:SetFrameStrata("HIGH")
 				else
 					StaticCoordBox:SetFrameStrata("MEDIUM")
 				end
 				-- Show coordinates
-				if LeaPlusLC["StaticCoords"] == "On" then
+				if LeaPlusLC["StaticCoords"] then
 					StaticCoordBox:Show();
 				else
 					StaticCoordBox:Hide();
@@ -2029,21 +1966,21 @@
 
 			-- Hide coordinates frame when battle pet frame is shown
 			hooksecurefunc("PetBattleFrame_Display", function() 
-				if LeaPlusLC["StaticCoords"] == "On" then
+				if LeaPlusLC["StaticCoords"] then
 					LeaPlusLC["StaticCoordBox"]:Hide();
 				end
 			end)
 
 			-- Refresh coordinates when battle frame is hidden
 			hooksecurefunc("PetBattleFrame_Remove", function() 
-				if LeaPlusLC["StaticCoords"] == "On" then
+				if LeaPlusLC["StaticCoords"] then
 					RefreshStaticCoords();
 				end
 			end)
 
 			-- Hide coordinates frame when world map is shown
 			local function HideWithMap()
-				if LeaPlusLC["StaticCoords"] == "On" then
+				if LeaPlusLC["StaticCoords"] then
 					if WorldMapFrame:IsShown() then
 						StaticCoordBox:Hide();
 					else
@@ -2077,11 +2014,11 @@
 			LeaPlusCB["ResetStaticBtn"]:SetScript("OnClick", function()
 
 				-- Reset checkboxes
-				LeaPlusLC["StaticCoords"] = "On"
-				LeaPlusLC["StaticCoordsBack"] = "Off"
+				LeaPlusLC["StaticCoords"] = true
+				LeaPlusLC["StaticCoordsBack"] = false
 				LeaPlusLC["StaticCoordsScale"] = 2.2;
-				LeaPlusLC["StaticCoordsLock"] = "Off";
-				LeaPlusLC["StaticCoordsTop"] = "Off";
+				LeaPlusLC["StaticCoordsLock"] = false
+				LeaPlusLC["StaticCoordsTop"] = false
 				RefreshStaticCoords();
 
 				-- Reset coordinates frame location
@@ -2098,11 +2035,11 @@
 			LeaPlusCB["ModStaticCoordsBtn"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Private profile
-					LeaPlusLC["StaticCoords"] = "Off"
-					LeaPlusLC["StaticCoordsBack"] = "Off"
+					LeaPlusLC["StaticCoords"] = false
+					LeaPlusLC["StaticCoordsBack"] = false
 					LeaPlusLC["StaticCoordsScale"] = 2.2;
-					LeaPlusLC["StaticCoordsLock"] = "Off";
-					LeaPlusLC["StaticCoordsTop"] = "Off";
+					LeaPlusLC["StaticCoordsLock"] = false
+					LeaPlusLC["StaticCoordsTop"] = false
 					LeaPlusLC["CoordsA"], LeaPlusLC["CoordsR"], LeaPlusLC["CoordsX"], LeaPlusLC["CoordsY"] = "BOTTOMRIGHT", "BOTTOMRIGHT", -300, 130
 					StaticCoordBox:ClearAllPoints();
 					StaticCoordBox:SetPoint(LeaPlusLC["CoordsA"], UIParent, LeaPlusLC["CoordsR"], LeaPlusLC["CoordsX"], LeaPlusLC["CoordsY"]);
@@ -2115,7 +2052,7 @@
 
 			-- Refresh map when zone changes if coordinates are showing (so that coordinates update to new zone)
 			local function UpdateMapZone()
-				if LeaPlusLC["StaticCoords"] == "On" then
+				if LeaPlusLC["StaticCoords"] then
 					if StaticCoordBox:IsShown() then
 						SetMapToCurrentZone();
 					end
@@ -2134,7 +2071,7 @@
 		-- Minimap customisation
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["MinimapMod"] == "On" then
+		if LeaPlusLC["MinimapMod"] then
 
 			-- Create minimap modification side panel
 			local SideMinimap = LeaPlusLC:CreateSidePanel("Minimap", 164, 280)
@@ -2161,7 +2098,7 @@
 			local zonta,zontp,zontr,zontx,zonty = MinimapZoneTextButton:GetPoint();
 
 			local function ShowZoneTip()
-				if LeaPlusLC["HideMinimapZone"] == "On" then
+				if LeaPlusLC["HideMinimapZone"] then
 					-- Show zone information in tooltip
 					local zoneName = GetZoneText();
 					local subzoneName = GetSubZoneText();
@@ -2183,7 +2120,7 @@
 
 			-- Merge buttons
 			local function UpdateMiniMergeButtons()
-				if LeaPlusLC["MergeTrackBtn"] == "On" then
+				if LeaPlusLC["MergeTrackBtn"] then
 					-- Hide calendar button
 					GameTimeFrame:Hide();
 					-- Move the tracking button to the calendar button space
@@ -2216,7 +2153,7 @@
 
 			-- Hide minimap zone text
 			local function UpdateMiniZoneText()
-				if LeaPlusLC["HideMinimapZone"] == "On" then
+				if LeaPlusLC["HideMinimapZone"] then
 					-- Hide the minimap zone information and world map button
 					MinimapZoneTextButton:Hide(); MiniMapWorldMapButton:Hide();
 					MinimapBorderTop:SetTexture("");
@@ -2253,7 +2190,7 @@
 			end
 
 			local function UpdateClock()
-				if LeaPlusLC["HideMinimapTime"] == "On"	then
+				if LeaPlusLC["HideMinimapTime"]	then
 					TimeManagerClockButton:Hide();
 				else
 					TimeManagerClockButton:Show();
@@ -2276,7 +2213,7 @@
 			end
 
 			local function MiniZoomSet()
-				if LeaPlusLC["MinimapMouseZoom"] == "On" then
+				if LeaPlusLC["MinimapMouseZoom"] then
 					MinimapZoomIn:Hide()
 					MinimapZoomOut:Hide()
 					Minimap:EnableMouseWheel(true)
@@ -2307,13 +2244,13 @@
 			LeaPlusLC:CreateButton("ResetMinimapBtn", SideMinimap, "Reset", "BOTTOMLEFT", 80, 10, 70, 25, true, "")
 			LeaPlusCB["ResetMinimapBtn"]:SetScript("OnClick", function()
 				-- Reset the minimap scale and refresh the side panel
-				LeaPlusLC["MergeTrackBtn"] = "Off"
+				LeaPlusLC["MergeTrackBtn"] = false
 				UpdateMiniMergeButtons();
-				LeaPlusLC["HideMinimapZone"] = "Off"
+				LeaPlusLC["HideMinimapZone"] = false
 				UpdateMiniZoneText(); ShowTextAndTip();
-				LeaPlusLC["HideMinimapTime"] = "Off"
+				LeaPlusLC["HideMinimapTime"] = false
 				UpdateClock();
-				LeaPlusLC["MinimapMouseZoom"] = "Off"
+				LeaPlusLC["MinimapMouseZoom"] = false
 				MiniZoomSet();
 				LeaPlusLC["MinimapScale"] = 1.00;
 				RefreshMinimap();
@@ -2329,12 +2266,12 @@
 					if IsShiftKeyDown() and IsControlKeyDown() then
 
 						-- Top secret profile (ssh!)
-						LeaPlusLC["MergeTrackBtn"] = "On"; UpdateMiniMergeButtons();
-						LeaPlusLC["HideMinimapZone"] = "On"
+						LeaPlusLC["MergeTrackBtn"] = true UpdateMiniMergeButtons();
+						LeaPlusLC["HideMinimapZone"] = true
 						UpdateMiniZoneText(); ShowTextAndTip();
-						LeaPlusLC["HideMinimapTime"] = "Off"
+						LeaPlusLC["HideMinimapTime"] = false
 						UpdateClock();
-						LeaPlusLC["MinimapMouseZoom"] = "Off"
+						LeaPlusLC["MinimapMouseZoom"] = false
 						MiniZoomSet();
 						LeaPlusLC["MinimapScale"] = 1.30;
 						RefreshMinimap();
@@ -2358,7 +2295,7 @@
 		--	Quest detail text size
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["QuestFontChange"] == "On" then
+		if LeaPlusLC["QuestFontChange"] then
 
 			-- Function to update the font size
 			local function QuestSizeUpdate()
@@ -2379,7 +2316,7 @@
 		--	Resize mail text
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["MailFontChange"] == "On" then
+		if LeaPlusLC["MailFontChange"] then
 
 			-- Function to update the font size
 			local function MailSizeUpdate()
@@ -2400,7 +2337,7 @@
 		--	Map customisation (first part)
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowMapMod"] == "On" then
+		if LeaPlusLC["ShowMapMod"] then
 
 			-- Set world map to mini size if map customisation is enabled (rest is done in variable)
 			SetCVar("miniWorldMap", "1")
@@ -2411,7 +2348,7 @@
 		--	Show durability status
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["DurabilityStatus"] == "On" then
+		if LeaPlusLC["DurabilityStatus"] then
 
 			local Slots = {"HeadSlot", "ShoulderSlot", "ChestSlot", "WristSlot", "HandsSlot", "WaistSlot", "LegsSlot", "FeetSlot", "MainHandSlot", "SecondaryHandSlot"}
 			local SlotsFriendly = {INVTYPE_HEAD, INVTYPE_SHOULDER, INVTYPE_CHEST, INVTYPE_WRIST, INVTYPE_HAND, INVTYPE_WAIST, INVTYPE_LEGS, INVTYPE_FEET, INVTYPE_WEAPONMAINHAND, INVTYPE_WEAPONOFFHAND}
@@ -2498,7 +2435,7 @@
 		--	Hide loot won alerts
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoLootWonAlert"] == "On" then
+		if LeaPlusLC["NoLootWonAlert"] then
 			local function NoLootAlert()
 				LootWonAlertFrame1:Hide()
 				BonusRollLootWonFrame:Hide();
@@ -2513,7 +2450,7 @@
 		--	Hide character controls
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoCharControls"] == "On" then
+		if LeaPlusLC["NoCharControls"] then
 			CharacterModelFrameControlFrame:HookScript("OnShow", CharacterModelFrameControlFrame.Hide);
 			DressUpModelControlFrame:HookScript("OnShow", DressUpModelControlFrame.Hide);
 			SideDressUpModelControlFrame:HookScript("OnShow", SideDressUpModelControlFrame.Hide);
@@ -2523,7 +2460,7 @@
 		--	Zone text
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["HideZoneText"] == "On" then
+		if LeaPlusLC["HideZoneText"] then
 			ZoneTextFrame:SetScript("OnShow", ZoneTextFrame.Hide);
 		end
 
@@ -2531,7 +2468,7 @@
 		--	Subzone text
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["HideSubzoneText"] == "On" then
+		if LeaPlusLC["HideSubzoneText"] then
 			SubZoneTextFrame:SetScript("OnShow", SubZoneTextFrame.Hide);
 		end
 
@@ -2540,7 +2477,7 @@
 		----------------------------------------------------------------------
 
 		-- Set these to nil because they taint if set to 0
-		if LeaPlusLC["NoStickyChat"] == "On" then
+		if LeaPlusLC["NoStickyChat"] then
 			ChatTypeInfo.WHISPER.sticky = nil
 			ChatTypeInfo.BN_WHISPER.sticky = nil
 			ChatTypeInfo.CHANNEL.sticky = nil
@@ -2550,7 +2487,7 @@
 		--	Arrow keys in chat
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["UseArrowKeysInChat"] == "On" then
+		if LeaPlusLC["UseArrowKeysInChat"] then
 			-- Enable arrow keys for normal chat frames
 			for i = 1, NUM_CHAT_WINDOWS, 1 do
 				_G["ChatFrame" .. i .. "EditBox"]:SetAltArrowKeyMode(false)
@@ -2568,7 +2505,7 @@
 		--	Hide stance bar
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoClassBar"] == "On" then
+		if LeaPlusLC["NoClassBar"] then
 			local stancebar = CreateFrame("FRAME")
 			stancebar:Hide();
 			UIPARENT_MANAGED_FRAME_POSITIONS["StanceBarFrame"] = nil;
@@ -2579,7 +2516,7 @@
 		--	Remove raid restrictions
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoRaidRestrictions"] == "On" then
+		if LeaPlusLC["NoRaidRestrictions"] then
 			SetAllowLowLevelRaid(1);
 		end
 
@@ -2587,7 +2524,7 @@
 		--	Hide gryphons
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoGryphons"] == "On" then
+		if LeaPlusLC["NoGryphons"] then
 			MainMenuBarLeftEndCap:Hide();
 			MainMenuBarRightEndCap:Hide();
 		end
@@ -2596,7 +2533,7 @@
 		--	Disable chat fade
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoChatFade"] == "On" then
+		if LeaPlusLC["NoChatFade"] then
 			-- Process normal chat frames
 			for i = 1, NUM_CHAT_WINDOWS do
 				_G[("ChatFrame" .. i)]:SetFading(false)
@@ -2614,7 +2551,7 @@
 		--	Prevent bag automation
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoBagAutomation"] == "On" then
+		if LeaPlusLC["NoBagAutomation"] then
 			local function GoAwayBags() return end
 			OpenAllBags = GoAwayBags;
 			CloseAllBags = GoAwayBags;
@@ -2624,8 +2561,8 @@
 		--	Tooltip anchor to mouse
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["TipModEnable"] == "On" then
-			if (LeaPlusLC["TipAnchorToMouse"] == "On") then
+		if LeaPlusLC["TipModEnable"] then
+			if (LeaPlusLC["TipAnchorToMouse"]) then
 
 				-- Disable fading for certain UI elements (such as player frame)
 				GameTooltip.FadeOut = GameTooltip.Hide;
@@ -2649,7 +2586,7 @@
 				-- Hook tooltip update function to position and hide tooltips
 				GameTooltip:HookScript("OnUpdate", function(frame, elapsed)
 					if GetMouseFocus() == WorldFrame then
-						if LeaPlusLC["TipHideCombat"] == "On" and (UnitAffectingCombat("player")) and not IsShiftKeyDown() then
+						if LeaPlusLC["TipHideCombat"] and (UnitAffectingCombat("player")) and not IsShiftKeyDown() then
 							GameTooltip:SetAlpha(0);
 						else
 							GameTooltip:SetAlpha(LeaPlusLC["TipAlpha"]);
@@ -2696,7 +2633,7 @@
 		--	Use easy chat frame resizing
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["UseEasyChatResizing"] == "On" then
+		if LeaPlusLC["UseEasyChatResizing"] then
 			ChatFrame1Tab:HookScript("OnMouseDown", function(self,arg1)
 				if arg1 == "LeftButton" then
 					if select(8, GetChatWindowInfo(1)) then
@@ -2716,7 +2653,7 @@
 		--	Increase chat history length
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["MaxChatHstory"] == "On" then
+		if LeaPlusLC["MaxChatHstory"] then
 			-- Process normal chat frames
 			for i = 1, NUM_CHAT_WINDOWS, 1 do
 				if (_G["ChatFrame" .. i]:GetMaxLines() ~= 4096) then
@@ -2738,7 +2675,7 @@
 		--	Show quest levels
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowQuestLevels"] == "On" then
+		if LeaPlusLC["ShowQuestLevels"] then
 
 			-- Create table for tags (only needed if quest type tags are used)
 			local QuestTags = {Elite = "+", Group = "G", Dungeon = "D", Raid = "R", PvP = "P", Daily = "!", Heroic = "H", Repeatable = "?"}
@@ -2785,7 +2722,7 @@
 		--	Hide error text
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["HideErrorFrameText"] == "On" then
+		if LeaPlusLC["HideErrorFrameText"] then
 	
 			local OrigErrHandler = UIErrorsFrame:GetScript('OnEvent')
 
@@ -2816,7 +2753,7 @@
 
 				-- Handle information messages
 				if event == 'UI_INFO_MESSAGE'  then
-					if LeaPlusLC["ShowQuestUpdates"] == "On" then
+					if LeaPlusLC["ShowQuestUpdates"] then
 						return OrigErrHandler(self, event, err, ...)
 					end
 				end
@@ -2829,7 +2766,7 @@
 		--	Show vanity buttons (helm and cloak on character sheet)
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowVanityButtons"] == "On" then
+		if LeaPlusLC["ShowVanityButtons"] then
 
 			-- Create checkboxs
 			local hbox = CreateFrame('CheckButton', nil, CharacterModelFrame, "OptionsCheckButtonTemplate")
@@ -2892,7 +2829,7 @@
 
 			-- Positioning functions for dual layout
 			local function SetVanityPlacement()
-				if LeaPlusLC["ShowVanityInFrame"] == "On" then
+				if LeaPlusLC["ShowVanityInFrame"] then
 					hbox:ClearAllPoints();
 					hbox:SetPoint("TOPLEFT", 166, -326)
 					hbox:SetHitRectInsets(0, -10, 0, 0);
@@ -2926,14 +2863,14 @@
 
 			hbox:SetScript('OnMouseDown', function(self, btn)
 				if btn == "RightButton" and IsShiftKeyDown() then
-					if LeaPlusLC["ShowVanityInFrame"] == "On" then LeaPlusLC["ShowVanityInFrame"] = "Off" else LeaPlusLC["ShowVanityInFrame"] = "On" end
+					if LeaPlusLC["ShowVanityInFrame"] then LeaPlusLC["ShowVanityInFrame"] = false else LeaPlusLC["ShowVanityInFrame"] = true end
 					SetVanityPlacement();
 				end
 			end)
 
 			cbox:SetScript('OnMouseDown', function(self, btn)
 				if btn == "RightButton" and IsShiftKeyDown() then
-					if LeaPlusLC["ShowVanityInFrame"] == "On" then LeaPlusLC["ShowVanityInFrame"] = "Off" else LeaPlusLC["ShowVanityInFrame"] = "On" end
+					if LeaPlusLC["ShowVanityInFrame"] then LeaPlusLC["ShowVanityInFrame"] = false else LeaPlusLC["ShowVanityInFrame"] = true end
 					SetVanityPlacement();
 				end
 			end)
@@ -2947,7 +2884,7 @@
 		--	Show dressup buttons
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowDressTab"] == "On" then
+		if LeaPlusLC["ShowDressTab"] then
 
 			-- Add buttons to main dressup frame
 			LeaPlusLC:CreateButton("DressUpTabBtn", DressUpFrame, "Tabard", "BOTTOMLEFT", 26, 79, 80, 22, false, "")
@@ -2989,7 +2926,7 @@
 		--	Minimap button
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowMinimapIcon"] == "On" then
+		if LeaPlusLC["ShowMinimapIcon"] then
 	
 			-- Create minimap button
 			local minibtn = CreateFrame("Button", "LeaPlusMapBtn", Minimap)
@@ -3073,7 +3010,7 @@
 						LeaPlusLC:HideFrames();
 						LeaPlusLC["PageF"]:Show();
 					end
-					if LeaPlusLC["OpenPlusAtHome"] == "Off" then
+					if LeaPlusLC["OpenPlusAtHome"] == false then
 						LeaPlusLC["Page"..LeaPlusLC["LeaStartPage"]]:Show()
 					else
 						LeaPlusLC["Page0"]:Show();
@@ -3090,12 +3027,12 @@
 
 					-- Shift key modifier toggles coordinates
 					if IsShiftKeyDown() and not IsControlKeyDown() then
-						if LeaPlusLC["StaticCoordsEn"] == "On" then
-							if LeaPlusLC["StaticCoords"] == "On" then
-								LeaPlusLC["StaticCoords"] = "Off";
+						if LeaPlusLC["StaticCoordsEn"] then
+							if LeaPlusLC["StaticCoords"] then
+								LeaPlusLC["StaticCoords"] = false
 								ActionStatus_DisplayMessage("Coordinates Disabled", true);
 							else
-								LeaPlusLC["StaticCoords"] = "On";
+								LeaPlusLC["StaticCoords"] = true
 								SetMapToCurrentZone();
 								ActionStatus_DisplayMessage("Coordinates Enabled", true);
 							end
@@ -3124,7 +3061,7 @@
 					end
 
 					-- No modifier key toggles error text
-					if LeaPlusDB["HideErrorFrameText"] == "On" then -- Checks global
+					if LeaPlusDB["HideErrorFrameText"] then -- Checks global
 						if LeaPlusLC["ShowErrorsFlag"] == 1 then 
 							LeaPlusLC["ShowErrorsFlag"] = 0
 							minibtn:SetNormalTexture("Interface/COMMON/Indicator-Red.png")
@@ -3154,7 +3091,7 @@
 		-- L32: Tooltip customisation
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["TipModEnable"] == "On" then
+		if LeaPlusLC["TipModEnable"] then
 
 			local LT = {}
 
@@ -3223,10 +3160,10 @@
 			-- Create reset button
 			LeaPlusLC:CreateButton("ResetTipBtn", SideTip, "Reset", "BOTTOMLEFT", 80, 10, 70, 25, true, "")
 			LeaPlusCB["ResetTipBtn"]:SetScript("OnClick", function()
-				LeaPlusLC["TipShowTitle"] = "On";
-				LeaPlusLC["TipShowRank"] = "On";
-				LeaPlusLC["TipShowTarget"] = "On";
-				LeaPlusLC["TipBackSimple"] = "Off";
+				LeaPlusLC["TipShowTitle"] = true
+				LeaPlusLC["TipShowRank"] = true
+				LeaPlusLC["TipShowTarget"] = true
+				LeaPlusLC["TipBackSimple"] = false
 				LeaPlusLC["LeaPlusTipSize"] = 1.00
 				LeaPlusLC["TipPosXOffset"] = -13
 				LeaPlusLC["TipPosYOffset"] = 94
@@ -3249,11 +3186,11 @@
 			LeaPlusCB["MoveTooltipButton"]:SetScript("OnClick", function()
 				if IsShiftKeyDown() and IsControlKeyDown() then
 					-- Private profile
-					LeaPlusLC["TipShowTitle"] = "On";
-					LeaPlusLC["TipShowRank"] = "On";
-					LeaPlusLC["TipShowTarget"] = "On";
-					LeaPlusLC["TipBackSimple"] = "On";
-					LeaPlusLC["TipAnchorToMouse"] = "Off";
+					LeaPlusLC["TipShowTitle"] = true
+					LeaPlusLC["TipShowRank"] = true
+					LeaPlusLC["TipShowTarget"] = true
+					LeaPlusLC["TipBackSimple"] = true
+					LeaPlusLC["TipAnchorToMouse"] = false
 					LeaPlusLC["LeaPlusTipSize"] = 1.25
 					LeaPlusLC["TipPosXOffset"] = -13
 					LeaPlusLC["TipPosYOffset"] = 94
@@ -3293,7 +3230,7 @@
 
 			-- Function to set the tooltip scale
 			local function SetTipScale()
-				if LeaPlusLC["TipModEnable"] == "On" then
+				if LeaPlusLC["TipModEnable"] then
 					-- General tooltip
 					GameTooltip:SetScale(LeaPlusLC["LeaPlusTipSize"])
 					-- Item tooltip (links in caht)
@@ -3342,7 +3279,7 @@
 				LeaPlusLC["TipMouseOffsetX"] = 0
 				LeaPlusLC["TipMouseOffsetY"] = -120
 				LeaPlusLC["TipAlpha"] = 1.0
-				LeaPlusLC["TipHideCombat"] = "Off";
+				LeaPlusLC["TipHideCombat"] = false
 				SideAnchor:Hide(); SideAnchor:Show();
 			end)
 
@@ -3466,7 +3403,7 @@
 					end
 
 					-- Show title
-					if LeaPlusLC["TipShowTitle"] == "On" then
+					if LeaPlusLC["TipShowTitle"] then
 						LT["NameText"] = UnitPVPName(LT["Unit"])
 					else
 						LT["NameText"] = LT["TipUnitName"]
@@ -3500,7 +3437,7 @@
 				if LT["TipIsPlayer"] and LT["GuildName"] then
 					
 					-- Show guild line
-					if LeaPlusLC["TipShowRank"] == "On" then
+					if LeaPlusLC["TipShowRank"] then
 						if UnitIsInMyGuild(LT["Unit"]) then
 							_G["GameTooltipTextLeft" .. LT["GuildLine"]]:SetText("|c00aaaaff" .. LT["GuildName"] .. " - " .. LT["GuildRank"] .. "|r")
 						else
@@ -3624,14 +3561,14 @@
 
 				if UnitCanAttack("player", LT["Unit"]) and not (UnitIsDeadOrGhost(LT["Unit"])) and not (LT["TipFaction"] == nil) and not (LT["TipFaction"] == UnitFactionGroup("player")) then
 					-- Hostile faction
-					if LeaPlusLC["TipBackSimple"] == "On" then
+					if LeaPlusLC["TipBackSimple"] then
 						GameTooltip:SetBackdropColor(0.5, 0.0, 0.0);
 					else
 						GameTooltip:SetBackdropColor(0.0, 0.0, 0.0);
 					end
 				else
 					-- Friendly faction
-					if LeaPlusLC["TipBackSimple"] == "On" then
+					if LeaPlusLC["TipBackSimple"] then
 						GameTooltip:SetBackdropColor(0.0, 0.0, 0.5);
 					else
 						GameTooltip:SetBackdropColor(0.0, 0.0, 0.0);
@@ -3642,7 +3579,7 @@
 				--	Show target
 				----------------------------------------------------------------------
 
-				if LeaPlusLC["TipShowTarget"] == "On" then
+				if LeaPlusLC["TipShowTarget"] then
 
 					-- Get target
 					LT["Target"] = UnitName(LT["Unit"] .. "target");
@@ -3689,7 +3626,7 @@
 		-- Map customisation
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowMapMod"] == "On" then
+		if LeaPlusLC["ShowMapMod"] then
 
 			----------------------------------------------------------------------
 			-- Basic modification
@@ -3939,12 +3876,12 @@
 			-- Handle clicks
 			LeaPlusCB["MapRevealBox"]:SetScript("OnClick", function()
 				if LeaPlusCB["MapRevealBox"]:GetChecked() == 1 then
-					LeaPlusLC["MapRevealBox"] = "On"
+					LeaPlusLC["MapRevealBox"] = true
 					if WorldMapFrame:IsShown() then
 						RefMap()
 					end
 				else
-					LeaPlusLC["MapRevealBox"] = "Off"
+					LeaPlusLC["MapRevealBox"] = false
 					if texcount > 0 then
 						for i = 1, texcount do MapTex[i]:Hide()	end
 						texcount = 0
@@ -3954,12 +3891,12 @@
 
 			-- Set checkbox state
 			LeaPlusCB["MapRevealBox"]:SetScript("OnShow", function()
-				if LeaPlusLC["MapRevealBox"] == "On" then LeaPlusCB["MapRevealBox"]:SetChecked(true) else LeaPlusCB["MapRevealBox"]:SetChecked(false) end
+				if LeaPlusLC["MapRevealBox"] then LeaPlusCB["MapRevealBox"]:SetChecked(true) else LeaPlusCB["MapRevealBox"]:SetChecked(false) end
 			end)
 
 			-- Update map
 			hooksecurefunc("WorldMapFrame_Update", function()
-				if WorldMapFrame:IsShown() and LeaPlusLC["MapRevealBox"] == "On" then
+				if WorldMapFrame:IsShown() and LeaPlusLC["MapRevealBox"] then
 					RefMap();
 				end
 			end)
@@ -3970,7 +3907,7 @@
 
 			-- Hide map pointer ring
 			WorldMapPing:HookScript("OnShow", function()
-				if LeaPlusLC["MapRing"] == "On" then
+				if LeaPlusLC["MapRing"] then
 					WorldMapPing:Hide()
 				end
 			end)
@@ -3981,7 +3918,7 @@
 
 			local function ShowQuestDetails()
 				QuestLogDetailFrame:ClearAllPoints()
-				if LeaPlusLC["MapQuestLeft"] == "On" then
+				if LeaPlusLC["MapQuestLeft"] then
 					QuestLogDetailFrame:SetPoint("TOPRIGHT", WorldMapFrame, "TOPLEFT", -10, 0)
 				else
 					QuestLogDetailFrame:SetPoint("TOPLEFT", WorldMapFrame, "TOPRIGHT", 10, 0)
@@ -3991,7 +3928,7 @@
 
 			-- Hook POI clicking function to show quest detail frame
 			hooksecurefunc("WorldMapQuestPOI_OnClick", function(self)
-				if LeaPlusLC["MapQuestBox"] == "On" then
+				if LeaPlusLC["MapQuestBox"] then
 					if not IsShiftKeyDown() and not IsControlKeyDown() then
 						-- Get the quest log index position of the button that was clicked
 						local cquest = self.quest.questLogIndex
@@ -4017,7 +3954,7 @@
 
 			-- When the map is closed, the quest detail should close too
 			LeaPlusCB["MapRevealBox"]:SetScript("OnHide", function()
-				if LeaPlusLC["MapQuestBox"] == "On" then
+				if LeaPlusLC["MapQuestBox"] then
 					QuestLogDetailFrame:Hide();
 				end
 			end)
@@ -4071,7 +4008,7 @@
 
 			-- Function to toggle cursor coordinates (run on startup and when option is clicked)
 			local function RefreshCursorCoords()
-				if LeaPlusLC["CursorCoords"] == "On" then
+				if LeaPlusLC["CursorCoords"] then
 					Cmap:Show();
 					Cmap:SetScript("OnUpdate", UpdateCursorCoords)
 				else
@@ -4106,7 +4043,7 @@
 				WORLDMAP_SETTINGS.opacity = LeaPlusLC["LeaPlusMapOpacity"];
 				SetCVar("worldMapOpacity", LeaPlusLC["LeaPlusMapOpacity"]);
 				-- Set map lock state
-				if LeaPlusLC["MapLock"] == "On" then
+				if LeaPlusLC["MapLock"] then
 					WORLDMAP_SETTINGS.locked = true
 					SetCVar("lockedWorldMap", 1);
 				else
@@ -4114,11 +4051,11 @@
 					SetCVar("lockedWorldMap", 0);
 				end
 				-- Set map ring state
-				if LeaPlusLC["MapRing"] == "On" then
+				if LeaPlusLC["MapRing"] then
 					WorldMapPing:Hide()
 				end
 				-- Map quest box
-				if LeaPlusLC["MapQuestBox"] == "Off" then
+				if LeaPlusLC["MapQuestBox"] == false then
 					LeaPlusLC:LockItem(LeaPlusCB["MapQuestLeft"],true)
 				else
 					LeaPlusLC:LockItem(LeaPlusCB["MapQuestLeft"],false)
@@ -4190,14 +4127,14 @@
 			LeaPlusCB["ResetMapBtn"]:SetScript("OnClick", function()
 				LeaPlusLC["LeaPlusMapScale"] = 1.0
 				LeaPlusLC["LeaPlusMapOpacity"] = 0.0
-				LeaPlusLC["MapLock"] = "Off"
+				LeaPlusLC["MapLock"] = false
 				LeaPlusLC["MapA"] = "TOPLEFT"
 				LeaPlusLC["MapX"] = 10
 				LeaPlusLC["MapY"] = -118
-				LeaPlusLC["MapQuestBox"] = "On"
-				LeaPlusLC["MapQuestLeft"] = "Off"
-				LeaPlusLC["CursorCoords"] = "On"
-				LeaPlusLC["MapRing"] = "Off"
+				LeaPlusLC["MapQuestBox"] = true
+				LeaPlusLC["MapQuestLeft"] = false
+				LeaPlusLC["CursorCoords"] = true
+				LeaPlusLC["MapRing"] = false
 				RefreshMapMod();
 				RefreshMapPos();
 				ToggleMapSafe();
@@ -4223,14 +4160,14 @@
 						-- Top secret profile (ssh!)
 						LeaPlusLC["LeaPlusMapScale"] = 1.75
 						LeaPlusLC["LeaPlusMapOpacity"] = 0.0
-						LeaPlusLC["MapLock"] = "Off"
+						LeaPlusLC["MapLock"] = false
 						LeaPlusLC["MapA"] = "TOPLEFT"
 						LeaPlusLC["MapX"] = 0
 						LeaPlusLC["MapY"] = 0
-						LeaPlusLC["CursorCoords"] = "On"
-						LeaPlusLC["MapQuestBox"] = "On"
-						LeaPlusLC["MapQuestLeft"] = "Off"
-						LeaPlusLC["MapRing"] = "Off"
+						LeaPlusLC["CursorCoords"] = true
+						LeaPlusLC["MapQuestBox"] = true
+						LeaPlusLC["MapQuestLeft"] = false
+						LeaPlusLC["MapRing"] = false
 						RefreshMapMod();
 						RefreshMapPos();
 						RefreshCursorCoords();
@@ -4288,11 +4225,11 @@
 		-- Show volume control on character sheet
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["ShowVolume"] == "On" then
+		if LeaPlusLC["ShowVolume"] then
 
 			-- Function to update master volume
 			local function MasterVolUpdate()
-				if LeaPlusLC["ShowVolume"] == "On" then
+				if LeaPlusLC["ShowVolume"] then
 					-- Set the volume
 					SetCVar("Sound_MasterVolume", LeaPlusLC["LeaPlusMaxVol"]);
 					-- Format the slider text
@@ -4315,7 +4252,7 @@
 
 			-- Dual layout
 			local function SetVolumePlacement()
-				if LeaPlusLC["ShowVolumeInFrame"] == "On" then
+				if LeaPlusLC["ShowVolumeInFrame"] then
 					LeaPlusCB["LeaPlusMaxVol"]:ClearAllPoints();
 					LeaPlusCB["LeaPlusMaxVol"]:SetPoint("TOPLEFT", 72, -276)
 				else
@@ -4326,7 +4263,7 @@
 
 			LeaPlusCB["LeaPlusMaxVol"]:SetScript('OnMouseDown', function(self, btn)
 				if btn == "RightButton" and IsShiftKeyDown() then
-					if LeaPlusLC["ShowVolumeInFrame"] == "On" then LeaPlusLC["ShowVolumeInFrame"] = "Off" else LeaPlusLC["ShowVolumeInFrame"] = "On" end
+					if LeaPlusLC["ShowVolumeInFrame"] then LeaPlusLC["ShowVolumeInFrame"] = false else LeaPlusLC["ShowVolumeInFrame"] = true end
 					SetVolumePlacement();
 				end
 			end)
@@ -4341,7 +4278,7 @@
 		-- Unclamp chat frame
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["UnclampChat"] == "On" then
+		if LeaPlusLC["UnclampChat"] then
 
 			-- Process normal chat frames
 			for i = 1, NUM_CHAT_WINDOWS, 1 do
@@ -4362,7 +4299,7 @@
 		-- Hide chat buttons
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["NoChatButtons"] == "On" then
+		if LeaPlusLC["NoChatButtons"] then
 
 			-- Create hidden frame to store unwanted frames (more efficient than creating functions)
 			local tframe = CreateFrame("FRAME")
@@ -4472,7 +4409,7 @@
 		----------------------------------------------------------------------
 
 		-- Frame Movement
-		if LeaPlusLC["FrmEnabled"] == "On" then
+		if LeaPlusLC["FrmEnabled"] then
 
 			-- Lock the player and target frames
 			PlayerFrame_SetLocked(true)
@@ -4559,7 +4496,7 @@
 
 				-- Set tooltip
 				cbox:SetScript("OnEnter", function()
-					if LeaPlusLC["PlusShowTips"] == "On" then
+					if LeaPlusLC["PlusShowTips"] then
 						GameTooltip:SetOwner(cbox, "ANCHOR_LEFT", -10, -50)
 						GameTooltip:SetText(tip, nil, nil, nil, nil, true)
 					end
@@ -4858,7 +4795,7 @@
 		--	Move chat editbox to top
 		----------------------------------------------------------------------
 
-		if LeaPlusLC["MoveChatEditBoxToTop"] == "On" then
+		if LeaPlusLC["MoveChatEditBoxToTop"] then
 
 			-- Set options for normal chat frames
 			for i = 1, NUM_CHAT_WINDOWS, 1 do
@@ -4898,7 +4835,7 @@
 		-- Automatically toggle nameplates
 		----------------------------------------------------------------------
 
-		if LeaPlusDB["AutoEnName"] == "On" then -- Checks global
+		if LeaPlusDB["AutoEnName"] then -- Checks global
 
 			-- Create side panel
 			local EnPanel = LeaPlusLC:CreateSidePanel("Enemy Plates", 164, 230)
@@ -4921,10 +4858,10 @@
 			-- Create reset button
 			LeaPlusLC:CreateButton("ResetEnPanelBtn", EnPanel, "Reset", "BOTTOMLEFT", 80, 10, 70, 25, true, "")
 			LeaPlusCB["ResetEnPanelBtn"]:SetScript("OnClick", function()
-				LeaPlusLC["AutoEnPets"] = "On"
-				LeaPlusLC["AutoEnGuardians"] = "On"
-				LeaPlusLC["AutoEnTotems"] = "On"
-				LeaPlusLC["AutoEnClassCol"] = "Off"
+				LeaPlusLC["AutoEnPets"] = true
+				LeaPlusLC["AutoEnGuardians"] = true
+				LeaPlusLC["AutoEnTotems"] = true
+				LeaPlusLC["AutoEnClassCol"] = false
 				EnPanel:Hide(); EnPanel:Show();
 				LeaPlusLC:EnPlateFunc();
 			end)
@@ -4936,10 +4873,10 @@
 				else
 					if IsShiftKeyDown() and IsControlKeyDown() then
 						-- Private profile
-						LeaPlusLC["AutoEnPets"] = "On"
-						LeaPlusLC["AutoEnGuardians"] = "On"
-						LeaPlusLC["AutoEnTotems"] = "On"
-						LeaPlusLC["AutoEnClassCol"] = "Off"
+						LeaPlusLC["AutoEnPets"] = true
+						LeaPlusLC["AutoEnGuardians"] = true
+						LeaPlusLC["AutoEnTotems"] = true
+						LeaPlusLC["AutoEnClassCol"] = false
 						LeaPlusLC:EnPlateFunc();
 					else
 						EnPanel:Show();
@@ -4961,10 +4898,10 @@
 
 			-- Function to set console variables
 			local function EnPlateFunc()
-				if LeaPlusLC["AutoEnPets"] == "On" 		then SetCVar("nameplateShowEnemyPets", 1) else SetCVar("nameplateShowEnemyPets", 0) end
-				if LeaPlusLC["AutoEnGuardians"] == "On" then SetCVar("nameplateShowEnemyGuardians", 1) else SetCVar("nameplateShowEnemyGuardians", 0) end
-				if LeaPlusLC["AutoEnTotems"] == "On" 	then SetCVar("nameplateShowEnemyTotems", 1) else SetCVar("nameplateShowEnemyTotems", 0) end
-				if LeaPlusLC["AutoEnClassCol"] == "On" 	then SetCVar("ShowClassColorInNameplate", 1) else SetCVar("ShowClassColorInNameplate", 0) end
+				if LeaPlusLC["AutoEnPets"] 		then SetCVar("nameplateShowEnemyPets", 1) else SetCVar("nameplateShowEnemyPets", 0) end
+				if LeaPlusLC["AutoEnGuardians"] then SetCVar("nameplateShowEnemyGuardians", 1) else SetCVar("nameplateShowEnemyGuardians", 0) end
+				if LeaPlusLC["AutoEnTotems"] 	then SetCVar("nameplateShowEnemyTotems", 1) else SetCVar("nameplateShowEnemyTotems", 0) end
+				if LeaPlusLC["AutoEnClassCol"] 	then SetCVar("ShowClassColorInNameplate", 1) else SetCVar("ShowClassColorInNameplate", 0) end
 			end
 
 			-- Give function a file level scope
@@ -5013,11 +4950,11 @@
 		-- Block Battle.net friend requests
 		----------------------------------------------------------------------
 
-		if LeaPlusDB["ManageBnetReq"] == "On" then -- Checks global
+		if LeaPlusDB["ManageBnetReq"] then -- Checks global
 
 			-- Function to decline friend requests
 			local function DeclineReqs()
-				if LeaPlusLC["BlockBnetReq"] == "On" then
+				if LeaPlusLC["BlockBnetReq"] then
 					-- Hide chat message
 					SetCVar("showToastFriendRequest", "0")
 					-- Decline friend request
@@ -5036,7 +4973,7 @@
 
 			-- Manage friend request toast frames
 			hooksecurefunc("BNToastFrame_Show", function()
-				if LeaPlusLC["BlockBnetReq"] == "On" then
+				if LeaPlusLC["BlockBnetReq"] then
 					if BNToastFrame.toastType == 4 or BNToastFrame.toastType == 5 then
 						BNToastFrame_Close()
 					end
@@ -5060,7 +4997,7 @@
 		-- Hide the combat log
 		----------------------------------------------------------------------
 
-		if LeaPlusDB["NoCombatLogTab"] == "On" then -- Checks global
+		if LeaPlusDB["NoCombatLogTab"] then -- Checks global
 
 			-- Reload UI if chat windows are reset by the user
 			hooksecurefunc("FCF_ResetChatWindows", ReloadUI)
@@ -5113,7 +5050,7 @@
 		-- Dark Soil alert
 		----------------------------------------------------------------------
 
-		if LeaPlusDB["SoilAlert"] == "On" then -- Checks global
+		if LeaPlusDB["SoilAlert"] then -- Checks global
 
 			-- Quit if best friend (exalted) rep with all of the Tiller factions
 			local tillergroup = {Jogu = 1273, Ella = 1275, Hillpaw = 1276, CheeChee = 1277, Sho = 1278, Haohan = 1279, Tina = 1280, Gina = 1281, Fish = 1282, Fung = 1283}
@@ -5149,7 +5086,7 @@
 		-- Viewport (added late in the loading process)
 		----------------------------------------------------------------------
 
-		if LeaPlusDB["ViewPortEnable"] == "On" then -- Checks global
+		if LeaPlusDB["ViewPortEnable"] then -- Checks global
 
 			-- Store original functions so they can be recalled later
 			local origWFClear = WorldFrame.ClearAllPoints
@@ -5189,7 +5126,7 @@
 				local gwidth, gheight = string.match(GetCVar("gxResolution"),"(%d+).-(%d+)");
 				local scale = 768 / gheight;
 
-				if LeaPlusLC["ViewportResize"] == "On" then
+				if LeaPlusLC["ViewportResize"] then
 					-- Resize is on, remove borders and resize game world
 					BordTop:SetHeight(0);
 					BordBot:SetHeight(0);
@@ -5258,7 +5195,7 @@
 				LeaPlusLC["ViewPortBottom"] = 0
 				LeaPlusLC["ViewPortLeft"] = 0
 				LeaPlusLC["ViewPortRight"] = 0
-				LeaPlusLC["ViewportResize"] = "Off"
+				LeaPlusLC["ViewportResize"] = false
 				SideViewport:Hide(); SideViewport:Show();
 				RefreshViewport();
 			end)
@@ -5274,7 +5211,7 @@
 						LeaPlusLC["ViewPortBottom"] = 5
 						LeaPlusLC["ViewPortLeft"] = 5
 						LeaPlusLC["ViewPortRight"] = 5
-						LeaPlusLC["ViewportResize"] = "On"
+						LeaPlusLC["ViewportResize"] = true
 						RefreshViewport();
 					else
 						SideViewport:Show();
@@ -5298,7 +5235,7 @@
 		----------------------------------------------------------------------
 
 		-- Universal group chat color (ColorPickerFrame:GetColorRGB())
-		if LeaPlusDB["UnivGroupColor"] == "On" then -- Checks global
+		if LeaPlusDB["UnivGroupColor"] then -- Checks global
 			-- Set raid and instance to party colors
 			ChangeChatColor("RAID", 0.67, 0.67, 1)
 			ChangeChatColor("RAID_LEADER", 0.46, 0.78, 1)
@@ -5311,7 +5248,7 @@
 		----------------------------------------------------------------------
 
 		-- No emote sounds while rested (otherwise known as 'Shut up, Dwarf!')
-		if LeaPlusDB["ManageRestedEmotes"] == "On" then -- Checks global
+		if LeaPlusDB["ManageRestedEmotes"] then -- Checks global
 
 			-- Zone table 		English					, French					, German					, Italian						, Russian					, S Chinese	, Spanish					, T Chinese	,
 			local zonetable = {	"The Halfhill Market"	, "Marché de Micolline"		, "Der Halbhügelmarkt"		, "Il Mercato di Mezzocolle"	, "Рынок Полугорья"			, "半山市集"	, "El Mercado del Alcor"	, "半丘市集"	,
@@ -5329,7 +5266,7 @@
 				local emoset = GetCVar("Sound_EnableEmoteSounds");
 
 				-- Set emote sound setting
-				if LeaPlusLC["NoSoundRested"] == "On" then
+				if LeaPlusLC["NoSoundRested"] then
 
 					if IsResting() then
 						-- Character is resting so silence emotes
@@ -5384,9 +5321,9 @@
 		----------------------------------------------------------------------
 
 		-- Privacy options (achievement points)
-		if LeaPlusDB["AchieveControl"] == "On" then -- Checks global
+		if LeaPlusDB["AchieveControl"] then -- Checks global
 			local function DoPrivacy()
-				if LeaPlusLC["CharOnlyAchieves"] == "On" then
+				if LeaPlusLC["CharOnlyAchieves"] then
 					ShowAccountAchievements(true);
 				else
 					ShowAccountAchievements(false);
@@ -5403,7 +5340,7 @@
 		----------------------------------------------------------------------
 
 		-- Manage camera zoom distance
-		if LeaPlusDB["ManageZoomLevel"] == "On" then -- Checks global
+		if LeaPlusDB["ManageZoomLevel"] then -- Checks global
 
 			-- Set the zoom setting on startup
 			SetCVar("CameraDistanceMax", "50")
@@ -5417,7 +5354,7 @@
 		----------------------------------------------------------------------
 
 		-- Save group roles per spec
-		if LeaPlusDB["RoleSave"] == "On" then -- Checks global
+		if LeaPlusDB["RoleSave"] then -- Checks global
 
 			-- Create global tables if needed
 			LeaPlusDC["RoleSave"] = LeaPlusDC["RoleSave"] or {};
@@ -5502,17 +5439,17 @@
 		----------------------------------------------------------------------
 
 		-- Set trade and guild locks
-		if LeaPlusDB["ManageTradeGuild"] == "On" then -- Checks global
+		if LeaPlusDB["ManageTradeGuild"] then -- Checks global
 
 			-- Function to check or uncheck trade and guild options in Blizzard options panel
 			local function TradeGuild()
-				if LeaPlusLC["ManageTradeGuild"] == "On" then
-					if LeaPlusLC["NoTradeRequests"] == "On" then
+				if LeaPlusLC["ManageTradeGuild"] then
+					if LeaPlusLC["NoTradeRequests"] then
 						InterfaceOptionsControlsPanelBlockTrades:SetValue("1");
 					else
 						InterfaceOptionsControlsPanelBlockTrades:SetValue("0");
 					end
-					if LeaPlusLC["NoGuildInvites"] == "On" then
+					if LeaPlusLC["NoGuildInvites"] then
 						InterfaceOptionsControlsPanelBlockGuildInvites:SetValue("1");
 					else
 						InterfaceOptionsControlsPanelBlockGuildInvites:SetValue("0");
@@ -5538,7 +5475,7 @@
 		-- Use class colors in chat
 		----------------------------------------------------------------------
 
-		if LeaPlusDB["Manageclasscolors"] == "On" then -- Checks global
+		if LeaPlusDB["Manageclasscolors"] then -- Checks global
 
 			-- Function to set channel colors
 			local function SetChatChannelColor(chatgroup)
@@ -5546,7 +5483,7 @@
 					-- Set local channel color
 					for i=1, 18 do
 						if _G["ChatConfigChatSettingsLeftCheckBox" .. i .. "Check"] then
-							if LeaPlusLC["ColorLocalChannels"] == "On" then
+							if LeaPlusLC["ColorLocalChannels"] then
 								ToggleChatColorNamesByClassGroup(true, _G["ChatConfigChatSettingsLeftCheckBox" .. i .. "Check"]:GetParent().type);
 							else
 								ToggleChatColorNamesByClassGroup(false, _G["ChatConfigChatSettingsLeftCheckBox" .. i .. "Check"]:GetParent().type);
@@ -5557,7 +5494,7 @@
 				if not chatgroup or chatgroup == "global" then
 					-- Set global channel color
 					for i=1, 50 do
-						if LeaPlusLC["ColorGlobalChannels"] == "On" then
+						if LeaPlusLC["ColorGlobalChannels"] then
 							ToggleChatColorNamesByClassGroup(true, "CHANNEL"..i)
 						else
 							ToggleChatColorNamesByClassGroup(false, "CHANNEL"..i)
@@ -5624,7 +5561,7 @@
 			----------------------------------------------------------------------
 
 			-- Auction House buyout only
-			if LeaPlusLC["AhExtras"] == "On" then
+			if LeaPlusLC["AhExtras"] then
 
 				-- Set default auction duration value to saved setting or default setting
 				AuctionFrameAuctions.duration = LeaPlusDB["AHDuration"] or 3
@@ -5646,9 +5583,9 @@
 					LeaPlusCB[name].f:Show();
 					LeaPlusCB[name]:SetScript('OnClick', function()
 						if LeaPlusCB[name]:GetChecked() == nil then
-							LeaPlusLC[name] = "Off"
+							LeaPlusLC[name] = false
 						elseif LeaPlusCB[name]:GetChecked() == 1 then
-							LeaPlusLC[name] = "On"
+							LeaPlusLC[name] = true
 						end
 					end)
 					LeaPlusCB[name]:SetScript('OnShow', function(self)
@@ -5658,7 +5595,7 @@
 
 				-- Show the correct fields in the AH frame and match prices
 				local function SetupAh()
-					if LeaPlusLC["AhBuyoutOnly"] == "On" then
+					if LeaPlusLC["AhBuyoutOnly"] then
 						-- Hide the start price
 						StartPrice:SetAlpha(0);
 						-- Set start price to buyout price 
@@ -5670,7 +5607,7 @@
 						StartPrice:SetAlpha(1);
 					end
 					-- If gold only is on, set copper and silver to 99
-					if LeaPlusLC["AhGoldOnly"] == "On" then
+					if LeaPlusLC["AhGoldOnly"] then
 						StartPriceCopper:SetText("99"); StartPriceCopper:Disable();
 						StartPriceSilver:SetText("99"); StartPriceSilver:Disable();
 						BuyoutPriceCopper:SetText("99"); BuyoutPriceCopper:Disable();
@@ -5702,7 +5639,7 @@
 	
 				-- Lock the create auction button if buyout gold box is empty (when using buyout only and gold only)
 				AuctionsCreateAuctionButton:HookScript("OnEnable", function()
-					if LeaPlusLC["AhGoldOnly"] == "On" and LeaPlusLC["AhBuyoutOnly"] == "On" then
+					if LeaPlusLC["AhGoldOnly"] and LeaPlusLC["AhBuyoutOnly"] then
 						if BuyoutPriceGold:GetText() == "" then
 							AuctionsCreateAuctionButton:Disable();
 						end
@@ -5761,7 +5698,7 @@
 						-- Return anything you might be holding
 						ClearCursor();
 						-- Set copper and silver prices to 99 if gold mode is on
-						if LeaPlusLC["AhGoldOnly"] == "On" then
+						if LeaPlusLC["AhGoldOnly"] then
 							StartPriceCopper:SetText("99")
 							StartPriceSilver:SetText("99")
 							BuyoutPriceCopper:SetText("99")
@@ -5779,7 +5716,7 @@
 				-- Set tab key actions (if different from Blizzard defaults)
 				StartPriceGold:HookScript("OnTabPressed", function()
 					if not IsShiftKeyDown() then
-						if LeaPlusLC["AhBuyoutOnly"] == "Off" and LeaPlusLC["AhGoldOnly"] == "On" then
+						if LeaPlusLC["AhBuyoutOnly"] == false and LeaPlusLC["AhGoldOnly"] then
 							BuyoutPriceGold:SetFocus()
 						end
 					end
@@ -5787,7 +5724,7 @@
 
 				BuyoutPriceGold:HookScript("OnTabPressed", function()
 					if IsShiftKeyDown() then
-						if LeaPlusLC["AhBuyoutOnly"] == "Off" and LeaPlusLC["AhGoldOnly"] == "On" then
+						if LeaPlusLC["AhBuyoutOnly"] == false and LeaPlusLC["AhGoldOnly"] then
 							StartPriceGold:SetFocus()
 						end
 					end
@@ -5798,7 +5735,7 @@
 		elseif module == "Blizzard_ItemAlterationUI" then
 
 			-- Hide character controls (transmogrification window)
-			if LeaPlusLC["NoCharControls"] == "On" then
+			if LeaPlusLC["NoCharControls"] then
 				TransmogrifyModelFrameControlFrame:HookScript("OnShow", TransmogrifyModelFrameControlFrame.Hide)
 			end
 
@@ -5906,7 +5843,7 @@
 		-- Leatrix Plus options panel scale
 		local function SetPlusScale()
 			-- Set panel scale
-			if LeaPlusLC["PlusPanelScaleCheck"] == "On" then
+			if LeaPlusLC["PlusPanelScaleCheck"] then
 				LeaPlusLC["PageF"]:SetScale(LeaPlusLC["LeaPlusScaleValue"])
 			else
 				LeaPlusLC["PageF"]:SetScale(1.00)
@@ -5927,7 +5864,7 @@
 
 		-- Leatrix Plus options panel alpha
 		local function SetPlusAlpha()
-			if LeaPlusLC["PlusPanelAlphaCheck"] == "On" then
+			if LeaPlusLC["PlusPanelAlphaCheck"] then
 				LeaPlusLC["PageF"].t:SetAlpha(LeaPlusLC["LeaPlusAlphaValue"])
 			else
 				LeaPlusLC["PageF"].t:SetAlpha(1.0)
@@ -5956,6 +5893,114 @@
 ----------------------------------------------------------------------
 -- 	L64: Default Events
 ----------------------------------------------------------------------
+
+	local function  IsDebugLogging()
+		return  LeaPlus.debug  or  LeaPlus.tempDebug  or  (IsAltKeyDown()  and  IsControlKeyDown())
+	end
+
+	function GetQuestLogInfoByTitle(searchTitle)
+		numEntries, numQuests = GetNumQuestLogEntries()
+		for  i = 1,numEntries  do
+			local title,level,questTag,suggestedGroup,isHeader,
+				isCollapsed,isComplete,isDaily,questID,startEvent,
+				displayQuestID,isOnMap,hasLocalPOI,isTask,isStory,isHidden = GetQuestLogTitle(i)
+			
+			if  not isHeader  and  title == searchTitle  then
+				if  IsDebugLogging()  then  LeaPlusLC:Print( 'GetQuestLogInfoByTitle("'.. searchTitle ..'"): '.. i ..'. quest='.. (questID or '?') )  end
+				return i, questID, isComplete, isDaily
+			end
+		end
+		if  IsDebugLogging()  then  LeaPlusLC:Print('GetQuestLogInfoByTitle("'.. searchTitle ..'"): not found')  end
+	end
+
+
+	local function FindQuestLevelInList(quests, paramStep, searchTitle)
+		for  i = 1,NUMGOSSIPBUTTONS*paramStep, paramStep  do
+			if  quests[i] == searchTitle  then
+				-- Found the quest in the npc's list?
+				return quests[i+1]
+			elseif  not quests[i]  then
+				-- The first nil title signals the end of the list
+				return
+			end
+		end
+	end
+
+	local function FindQuestLevel(searchTitle)
+		return  FindQuestLevelInList( {GetGossipActiveQuests()}, 5, searchTitle)
+			or  FindQuestLevelInList( {GetGossipAvailableQuests()}, 6, searchTitle)
+	end
+
+	local function GetQuestLinkForReal(questID, title, level)
+		--local link = GetQuestLink(questLogID)
+		if  not questID  then  return  title  or  ''  end
+		level = level  or  FindQuestLevel(title)  or  -1
+		return "\124cffffff00\124Hquest:".. questID ..":".. level .."\124h[".. title .."]\124h\124r"
+	end
+
+	local function GetQuestString(questID, title, level)
+		if  not questID  then  return  title  or  ''  end
+		local link = GetQuestLinkForReal(questID, title, level)
+		return "quest=".. tostring(questID) .." ".. link
+	end
+	
+	
+	local function AddRemoveAutoQuest(AutoQuestTitles, actionText, questID, title)
+		questID = questID  or  GetQuestID()
+		title = title  or  GetTitleText()
+		
+		if  IsAltKeyDown()  then
+			if  IsControlKeyDown()  then
+				-- Hold Alt-Control to enable debugging. Auto-accepting will happen as usual, but the quest is not added to AutoQuestTitles.
+				LeaPlus.tempDebug = true
+				return true
+			end
+			-- Disabling automatic actions is first in precedence
+			return false
+		elseif  IsShiftKeyDown()  then
+			-- Shift-Click -> Remove from AutoQuestTitles
+			if  AutoQuestTitles[title]  then  LeaPlusLC:Print("Disabled ".. actionText ..": ".. GetQuestString(questID, title))  end
+			AutoQuestTitles[title] = nil
+			return false    -- Disable automation
+		elseif  IsControlKeyDown()  then
+			-- Cltrl-Click -> Add to AutoQuestTitles
+			if  not AutoQuestTitles[title]  then  LeaPlusLC:Print("Will ".. actionText ..": ".. GetQuestString(questID, title))  end
+			AutoQuestTitles[title] = questID
+			return true
+		elseif  LeaPlus.tempDisableAutoQuest  then
+			-- Do nothing if disabled when clicking npc (on gossip frame)
+			return false
+		else
+			return true
+		end
+	end
+
+	local function CheckRepeatedEvent(event, questID)
+		local now = GetTime()
+		LeaPlus[event] = LeaPlus[event] or { timeStamp = 0 }
+		local lastEvent = LeaPlus[event]
+		
+		if  lastEvent.questID ~= questID  or  1 < now - lastEvent.timeStamp  then
+			lastEvent.questID = questID
+			lastEvent.timeStamp = now
+		else
+			LeaPlusLC:Print("Repeated ".. event ..": ".. GetQuestString(questID, title))
+			return true
+		end
+	end
+
+
+	function LpEvt.QuestDetailAcceptButton_OnClick(...)
+		AddRemoveAutoQuest(LeaPlusDB.AutoAcceptQuestTitles, 'auto-accept')
+		return LpEvt.hooks.QuestDetailAcceptButton_OnClick(...)
+	end
+
+	function LpEvt.QuestProgressCompleteButton_OnClick(...)
+		AddRemoveAutoQuest(LeaPlusDB.AutoTurnInQuestTitles, 'turn-in')
+		return LpEvt.hooks.QuestProgressCompleteButton_OnClick(...)
+	end
+
+
 
 	local function eventHandler(self, event, arg1, arg2, ...)
 
@@ -6002,7 +6047,7 @@
 
 		if event == "RESURRECT_REQUEST" then
 			if GetCorpseRecoveryDelay() == 0 then
-				if ((UnitAffectingCombat(arg1)) and LeaPlusLC["NoAutoResInCombat"] == "Off") or not (UnitAffectingCombat(arg1)) then
+				if ((UnitAffectingCombat(arg1)) and LeaPlusLC["NoAutoResInCombat"] == false) or not (UnitAffectingCombat(arg1)) then
 					AcceptResurrect()
 					StaticPopup_Hide("RESURRECT_NO_TIMER")
 					DoEmote("thank", arg1)
@@ -6030,8 +6075,8 @@
 		if event == "PARTY_INVITE_REQUEST" then
 
 			-- If a friend, accept if you're accepting friends and not in Dungeon Finder
-			if 	(LeaPlusLC["AcceptPartyFriends"] == "On" and LeaPlusLC:FriendCheck(arg1)) or
-				(LeaPlusLC["AcceptPartyFriends"] == "On" and LeaPlusLC:RealIDCheck(arg1)) then
+			if 	(LeaPlusLC["AcceptPartyFriends"] and LeaPlusLC:FriendCheck(arg1)) or
+				(LeaPlusLC["AcceptPartyFriends"] and LeaPlusLC:RealIDCheck(arg1)) then
 
 				if not LeaPlusLC:IsInLFGQueue() then
 					AcceptGroup();
@@ -6052,7 +6097,7 @@
 			end
 
 			-- If not a friend and you're blocking invites, decline
-			if LeaPlusLC["NoPartyInvites"] == "On" then
+			if LeaPlusLC["NoPartyInvites"] then
 				if LeaPlusLC:FriendCheck(arg1) or LeaPlusLC:RealIDCheck(arg1) then
 					return
 				else
@@ -6083,33 +6128,148 @@
 		end
 
 		----------------------------------------------------------------------
+		-- Open quests on gossip that are known to be completed or accepted automatically
+		----------------------------------------------------------------------
+
+		-- Automatically accept chosen quests from gossip menu
+		if  event == "GOSSIP_SHOW"  then
+			LeaPlus.tempDebug = nil
+			if  IsShiftKeyDown()  or  IsControlKeyDown()  or  IsAltKeyDown()  then
+				LeaPlus.tempDisableAutoGossip = true
+				LeaPlus.tempDisableAutoQuest = true
+				-- Hold both Alt and Control when opening gossip frame to keep on logging until the quest frame is closed
+				if  IsControlKeyDown()  and  IsAltKeyDown()
+				then  LeaPlus.tempDebug = true
+				else  return  end
+			else
+				-- In case gossip is shown again without closing it first. Maybe there is no such case.
+				LeaPlus.tempDisableAutoQuest = LeaPlus.tempDisableAutoGossip
+			end
+			
+			-- Automatically select the first auto-complete quest from gossip menu
+			if  LeaPlusLC.AutoTurnInQuests  then
+				local quests, numQuestParams = { GetGossipActiveQuests() } , 5
+				for  i = 1,NUMGOSSIPBUTTONS*numQuestParams, numQuestParams  do
+					local index = (i-1)/numQuestParams+1
+					-- quests[3] == nil usually -> #quests == 2, ignoring quests[6] == "title of 2nd quest", and the other quests
+					local title, level, trivial, complete = quests[i], quests[i+1], quests[i+2], quests[i+3]
+					-- The first nil title signals the end of the list
+					
+					if  not title  and  i == 1  and  IsDebugLogging()  then  LeaPlusLC:Print("GetGossipActiveQuests() is empty")  end
+					if  not title  then  break  end
+					
+					local logIndex, questID, logComplete, logDaily = GetQuestLogInfoByTitle(title)
+					local alreadyCompleted = not logIndex    -- Active quests that aren't in the quest log are already completed
+					if  IsDebugLogging()  then  LeaPlusLC:Print( "GossipActiveQuest ".. index ..": ".. GetQuestString(questID, title) .." complete:".. (complete or 'no') )  end
+					
+					if  complete  or  alreadyCompleted  then
+						if  LeaPlusLC.TurnInAllQuests
+							or  LeaPlusLC.TurnInOnlyDailys  and  logDaily
+							or  alreadyCompleted  -- Open alreadyCompleted quests even if dailies are off.
+							-- Their questID is unknown until opened. Metching the title would be the only possibility.
+							or  LeaPlusDB.AutoTurnInQuestTitles  and  LeaPlusDB.AutoTurnInQuestTitles[title]
+							or  LeaPlusDB.AutoAcceptQuestTitles  and  LeaPlusDB.AutoAcceptQuestTitles[title]	-- Auto-accepted quests are also turned in automatically
+							--or  title:sub(1,11) == "A Dish for "  -- The 10 Tiller daily food quests are covered with the "alreadyCompleted" case
+						then
+							if  IsDebugLogging()  then  LeaPlusLC:Print("SelectGossipActiveQuest(".. index .."): ".. GetQuestString(questID, title))  end
+							SelectGossipActiveQuest( index )
+							return  -- Only select one and handle the oncoming events
+						end
+					end
+				end
+			end
+		
+			-- Automatically select the first acceptable quest from gossip menu
+			if  LeaPlusLC.AutoAcceptQuests  then
+				local quests, numQuestParams = { GetGossipAvailableQuests() } , 6
+				for  i = 1,NUMGOSSIPBUTTONS*numQuestParams, numQuestParams  do
+					local index = (i-1)/numQuestParams+1
+					-- quests[3] == nil usually -> #quests == 2, ignoring quests[7] == "title of 2nd quest", and the other quests
+					local title, level, trivial, dailyWeekly, repeatable = quests[i], quests[i+1], quests[i+2], quests[i+3], quests[i+4]
+					
+					-- The first nil title signals the end of the list
+					if  not title  and  i == 1  and  IsDebugLogging()  then  LeaPlusLC:Print("GetGossipAvailableQuests() is empty")  end
+					if  not title  then  break  end
+					if  IsDebugLogging()  then  LeaPlusLC:Print( "GossipAvailableQuest ".. index ..": ".. title .." daily:".. (dailyWeekly or 'no') .." repeat:".. (repeatable or 'no') )  end
+					
+					--local daily = dailyWeekly == 1
+					--local weekly = dailyWeekly == 2  -- guesswork
+					local daily = dailyWeekly or repeatable
+					if  daily  and  LeaPlusLC.AcceptOnlyDailys
+						or  LeaPlusLC.AcceptAllQuests
+						or  LeaPlusDB.AutoAcceptQuestTitles[title]
+					then
+						if  IsDebugLogging()  then  LeaPlusLC:Print("SelectGossipAvailableQuest(".. index .."): ".. title)  end
+						SelectGossipAvailableQuest( index )
+						return  -- Only select one and handle the oncoming events
+					end
+				end
+			end
+			
+			return  -- "GOSSIP_SHOW"
+		end
+		
+		if  event == "GOSSIP_CLOSED"  then
+			-- Next time gossip is shown it will be auto-accepting again
+			if  IsDebugLogging()  then  LeaPlusLC:Print(event)  end
+			LeaPlus.tempDisableAutoGossip = nil
+		end
+		
+		----------------------------------------------------------------------
 		-- Automatically accept quests
 		----------------------------------------------------------------------
 
+		if  event == "QUEST_GREETING"  then
+			if  IsAltKeyDown()  and  IsControlKeyDown()  then  LeaPlusLC:Print(event)  end
+			return
+		end
+
 		-- Automatically accept all quests or daily quests with daily check on
-		if event == "QUEST_DETAIL" then
-			if ((LeaPlusLC["AutoAcceptQuests"] == "On" and LeaPlusLC["AcceptOnlyDailys"] == "Off") or (LeaPlusLC["AutoAcceptQuests"] == "On" and LeaPlusLC["AcceptOnlyDailys"] == "On" and QuestIsDaily() == 1)) then
-				if not IsShiftKeyDown() then
-					if not QuestGetAutoAccept() then
-						-- If quest requires an accept click
-						AcceptQuest()
-					else
-						-- If it's automatically accepted, just close the window
-						CloseQuest()
-					end
+		if  event == "QUEST_DETAIL"  and  LeaPlusLC.AutoAcceptQuests  then
+			local questID = GetQuestID()
+			local title = GetTitleText()
+			
+			local automatic = AddRemoveAutoQuest(LeaPlusDB.AutoAcceptQuestTitles, 'auto-accept', questID, title)
+			if  not automatic  then  return  end
+
+			-- Avoid infinite recursion if the event is repeated.
+			if  CheckRepeatedEvent(event, questID)  then  return  end
+			
+			if  LeaPlusLC.AcceptAllQuests
+				or  LeaPlusLC.AcceptOnlyDailys  and  QuestIsDaily()
+				or  LeaPlusDB.AutoAcceptQuestTitles  and  LeaPlusDB.AutoAcceptQuestTitles[title]
+			then
+				-- Save last accepted questID
+				LeaPlusLC:Print("Auto accept: ".. GetQuestString(questID, title))
+				if not QuestGetAutoAccept() then
+					-- If quest requires an accept click
+					LeaPlus.questAcceptID = questID
+					AcceptQuest()
+				else
+					-- If it's automatically accepted, just close the window
+					CloseQuest()
 				end
 			end
 			return
 		end
 
 		-- Quests requiring confirmation
-		if event == "QUEST_ACCEPT_CONFIRM" then
-			if ((LeaPlusLC["AutoAcceptQuests"] == "On" and LeaPlusLC["AcceptOnlyDailys"] == "Off") or (LeaPlusLC["AutoAcceptQuests"] == "On" and LeaPlusLC["AcceptOnlyDailys"] == "On" and QuestIsDaily() == 1)) then
-				if not IsShiftKeyDown() then
-					ConfirmAcceptQuest()
-					StaticPopup_Hide("QUEST_ACCEPT_CONFIRM")
-				end
+		if  event == "QUEST_ACCEPT_CONFIRM"  and  not IsShiftKeyDown()  then
+			local questID = GetQuestID()
+			-- If this is still the last accepted quest then confirm
+			local confirm = LeaPlus.questAcceptID == questID
+			if  IsDebugLogging()  then  LeaPlusLC:Print( event ..", is last accepted quest: ".. tostring(confirm) )  end
+			if  confirm  then
+				ConfirmAcceptQuest()
+				StaticPopup_Hide("QUEST_ACCEPT_CONFIRM")
 			end
+			return
+		end
+
+		if  event == "QUEST_ACCEPTED"  then
+			-- QuestFrame is now closed, previous events are not expected to repeat, or cause a loop
+			if  IsDebugLogging()  then  LeaPlusLC:Print(event)  end
+			LeaPlus.questAcceptID = nil
 			return
 		end
 
@@ -6117,29 +6277,45 @@
 		-- Automatically turn-in quests
 		----------------------------------------------------------------------
 
-		-- Active quest turn-ins
-		if event == "QUEST_PROGRESS" then
-			if ((LeaPlusLC["AutoTurnInQuests"] == "On" and LeaPlusLC["TurnInOnlyDailys"] == "Off") or (LeaPlusLC["AutoTurnInQuests"] == "On" and LeaPlusLC["TurnInOnlyDailys"] == "On" and QuestIsDaily() == 1)) then
-				if not IsShiftKeyDown() then
-					if IsQuestCompletable() then
-						CompleteQuest()
-					end
+		if  LeaPlusLC.AutoTurnInQuests  and  (event == "QUEST_PROGRESS" or event == "QUEST_COMPLETE")  then
+			local questID = GetQuestID()
+			local title = GetTitleText()
+			
+			local automatic = AddRemoveAutoQuest(LeaPlusDB.AutoTurnInQuestTitles, 'turn-in', questID, title)
+			if  not automatic  then  return  end
+			
+			if  LeaPlusLC.TurnInAllQuests
+				or  LeaPlusLC.TurnInOnlyDailys  and  QuestIsDaily()
+				or  LeaPlusDB.AutoTurnInQuestTitles  and  LeaPlusDB.AutoTurnInQuestTitles[title]
+				or  LeaPlusDB.AutoAcceptQuestTitles  and  LeaPlusDB.AutoAcceptQuestTitles[title]	-- Auto-accepted quests are also turned in automatically
+				--or  title:sub(1,11) == "A Dish for "  -- The 10 Tiller daily food quests are covered by TurnInOnlyDailys
+			then
+				-- Avoid infinite recursion if the event is repeated. This happens when GetQuestReward() fails,
+				-- for ex. when the inventory is full or a unique item reward is already in the bags.
+				if  CheckRepeatedEvent(event, questID)  then  return  end
+				
+				if  event == "QUEST_PROGRESS"  and  IsQuestCompletable()  then
+					-- Turn in quest
+					LeaPlusLC:Print("Auto turn-in: ".. GetQuestString(questID, title))
+					CompleteQuest()
+				elseif  event == "QUEST_COMPLETE"  and  GetNumQuestChoices() <= 1  then
+					-- If there is only one reward item offered, take it and forget quest
+					if  IsDebugLogging()  then  LeaPlusLC:Print("Get reward for: ".. GetQuestString(questID, title))  end
+					GetQuestReward(GetNumQuestChoices())
 				end
 			end
-			return
+			
+			return  -- "QUEST_PROGRESS" or "QUEST_COMPLETE"
 		end
 
-		-- Turn-in completed quest
-		if event == "QUEST_COMPLETE" then
-			if ((LeaPlusLC["AutoTurnInQuests"] == "On" and LeaPlusLC["TurnInOnlyDailys"] == "Off") or (LeaPlusLC["AutoTurnInQuests"] == "On" and LeaPlusLC["TurnInOnlyDailys"] == "On" and QuestIsDaily() == 1)) then
-				if not IsShiftKeyDown() then
-					if GetNumQuestChoices() <= 1 then
-						-- If there is only one reward item offered, grab it
-						GetQuestReward(GetNumQuestChoices())
-					end
-				end
-			end
-			return
+		if event == "QUEST_FINISHED" then
+			if  IsDebugLogging()  then  LeaPlusLC:Print(event)  end
+			local now = GetTime()
+			LeaPlus.QUEST_DETAIL   = { timeStamp = now }
+			LeaPlus.QUEST_PROGRESS = { timeStamp = now }
+			LeaPlus.QUEST_COMPLETE = { timeStamp = now }
+			LeaPlus.tempDisableAutoQuest = nil
+			LeaPlus.questAcceptID = nil
 		end
 
 		----------------------------------------------------------------------
@@ -6167,7 +6343,7 @@
 			-- Automatically sell junk
 			----------------------------------------------------------------------
 
-			if LeaPlusLC["AutoSellJunk"] == "On" then
+			if LeaPlusLC["AutoSellJunk"] then
 
 				local Total = 0
 				local SoldCount = 0
@@ -6203,7 +6379,7 @@
 			-- Automatically repair
 			----------------------------------------------------------------------
 
-			if LeaPlusLC["AutoRepairOwnFunds"] == "On" then
+			if LeaPlusLC["AutoRepairOwnFunds"] then
 
 				if CanMerchantRepair() then
 					local PlayerMoney = GetMoney()
@@ -6229,7 +6405,7 @@
 					if (CanRepair) then -- if the repair option is available at the merchant
 
 						-- Guild repair first (eek!) if guild option is on and player is in guild
-						if LeaPlusLC["AutoRepairGuildFunds"] == "On" and IsInGuild() then
+						if LeaPlusLC["AutoRepairGuildFunds"] and IsInGuild() then
 							if CanGuildBankRepair() then -- If you have permission to use guilf funds
 								local withdrawLimit = GetGuildBankWithdrawMoney()
 								local guildBankMoney = GetGuildBankMoney()
@@ -6286,7 +6462,7 @@
 
 		if event == "VARIABLES_LOADED" then
 			LeaPlusLC:Variable()
-			if LeaPlusLC["ShowStartTag"] == "On" then
+			if LeaPlusLC["ShowStartTag"] then
 				LeaPlusLC:Print("Leatrix Plus " .. LeaPlusLC["AddonVer"] .. ".");
 			end
 			return
@@ -6329,15 +6505,15 @@
 		----------------------------------------------------------------------
 
 		-- Manage privacy
-		if LeaPlusDB["AchieveControl"] == "On" then
-			if wipe or (not wipe and LeaPlusLC["AchieveControl"] == "Off") then
+		if LeaPlusDB["AchieveControl"] then
+			if wipe or (not wipe and LeaPlusLC["AchieveControl"] == false) then
 				ShowAccountAchievements(false);
 			end
 		end
 
 		-- Manage class colors
-		if LeaPlusDB["Manageclasscolors"] == "On" then
-			if wipe or (not wipe and LeaPlusLC["Manageclasscolors"] == "Off") then
+		if LeaPlusDB["Manageclasscolors"] then
+			if wipe or (not wipe and LeaPlusLC["Manageclasscolors"] == false) then
 				-- Restore local channel color
 				for i = 1, 18 do
 					if _G["ChatConfigChatSettingsLeftCheckBox" .. i .. "Check"] then
@@ -6352,60 +6528,60 @@
 		end
 
 		-- Manage Blizzard blockers
-		if LeaPlusDB["ManageTradeGuild"] == "On" then
-			if wipe or (not wipe and LeaPlusLC["ManageTradeGuild"] == "Off") then
+		if LeaPlusDB["ManageTradeGuild"] then
+			if wipe or (not wipe and LeaPlusLC["ManageTradeGuild"] == false) then
 				InterfaceOptionsControlsPanelBlockTrades:SetValue("0")
 				InterfaceOptionsControlsPanelBlockGuildInvites:SetValue("0")
 			end
 		end
 
 		-- Map customisation
-		if LeaPlusDB["ShowMapMod"] == "On" then
-			if wipe or (not wipe and LeaPlusLC["ShowMapMod"] == "Off") then
+		if LeaPlusDB["ShowMapMod"] then
+			if wipe or (not wipe and LeaPlusLC["ShowMapMod"] == false) then
 				SetCVar("worldMapOpacity", "0")
 				SetCVar("lockedWorldMap", "1")
 			end
 		end
 
 		-- Show volume control
-		if LeaPlusDB["ShowVolume"] == "On" then
-			if wipe or (not wipe and LeaPlusLC["ShowVolume"] == "Off") then
+		if LeaPlusDB["ShowVolume"] then
+			if wipe or (not wipe and LeaPlusLC["ShowVolume"] == false) then
 				SetCVar("Sound_MasterVolume", "1")
 			end
 		end
 
 		-- Hide chat buttons
-		if LeaPlusDB["NoChatButtons"] == "On" then
-			if wipe or (not wipe and LeaPlusLC["NoChatButtons"] == "Off") then
+		if LeaPlusDB["NoChatButtons"] then
+			if wipe or (not wipe and LeaPlusLC["NoChatButtons"] == false) then
 				SetCVar("chatMouseScroll", "0")
 			end
 		end
 
 		-- Manage Battle.net friend requests
-		if LeaPlusDB["ManageBnetReq"] == "On" then
-			if wipe or (not wipe and LeaPlusLC["ManageBnetReq"] == "Off") then
+		if LeaPlusDB["ManageBnetReq"] then
+			if wipe or (not wipe and LeaPlusLC["ManageBnetReq"] == false) then
 				SetCVar("showToastFriendRequest", "1")
 			end
 		end
 
 		-- Manage emote sounds
-		if LeaPlusDB["ManageRestedEmotes"] == "On" then
-			if wipe or (not wipe and LeaPlusLC["ManageRestedEmotes"] == "Off") then
+		if LeaPlusDB["ManageRestedEmotes"] then
+			if wipe or (not wipe and LeaPlusLC["ManageRestedEmotes"] == false) then
 				SetCVar("Sound_EnableEmoteSounds", "1")
 			end
 		end
 
 		-- Manage zoom level
-		if LeaPlusDB["ManageZoomLevel"] == "On" then
-			if wipe or (not wipe and LeaPlusLC["ManageZoomLevel"] == "Off") then
+		if LeaPlusDB["ManageZoomLevel"] then
+			if wipe or (not wipe and LeaPlusLC["ManageZoomLevel"] == false) then
 				SetCVar("CameraDistanceMax", "15")
 				SetCVar("cameraDistanceMaxFactor", "1")
 			end
 		end
 
 		-- Universal group color
-		if LeaPlusDB["UnivGroupColor"] == "On" then
-			if wipe or (not wipe and LeaPlusLC["UnivGroupColor"] == "Off") then
+		if LeaPlusDB["UnivGroupColor"] then
+			if wipe or (not wipe and LeaPlusLC["UnivGroupColor"] == false) then
 				ChangeChatColor("RAID", 1, 0.50, 0)
 				ChangeChatColor("RAID_LEADER", 1, 0.28, 0.04)
 				ChangeChatColor("INSTANCE_CHAT", 1, 0.50, 0)
@@ -6418,13 +6594,13 @@
 		----------------------------------------------------------------------
 
 		-- Prevent Blizzard from caching frames if frame customisation is enabled
-		if LeaPlusDB["FrmEnabled"] == "On" then
+		if LeaPlusDB["FrmEnabled"] then
 			PlayerFrame:SetUserPlaced(false)
 			TargetFrame:SetUserPlaced(false)
 		end
 
 		-- Store the auction house duration value if auction house option is enabled
-		if LeaPlusDB["AhExtras"] == "On" then
+		if LeaPlusDB["AhExtras"] then
 			if AuctionFrameAuctions and AuctionFrameAuctions.duration then
 				LeaPlusDB["AHDuration"] = AuctionFrameAuctions.duration
 			end
@@ -6458,7 +6634,7 @@
 				LeaPlusLC["PageF"]:Show();
 			end
 			-- Show the correct menu
-			if LeaPlusLC["OpenPlusAtHome"] == "Off" then
+			if LeaPlusLC["OpenPlusAtHome"] == false then
 				-- If previously viewed page is stored and show home on startup is disabled, show last viewed page
 				LeaPlusLC["Page" .. LeaPlusLC["LeaStartPage"]]:Show()
 			else
@@ -6624,6 +6800,9 @@
 --	Slash command support
 	SLASH_LEATRIX_PLUS_LTP1 = '/ltp'
 	SLASH_LEATRIX_PLUS_LTP2 = '/leaplus'
+	SLASH_LEATRIX_PLUS_LTP3 = '/lea+'
+	SLASH_LEATRIX_PLUS_LTP4 = '/lea'
+	SLASH_LEATRIX_PLUS_LTP5 = '/lp'
 
 	SlashCmdList["LEATRIX_PLUS_LTP"] = function(str)
 		LeaPlusLC:Slash(string.lower(str));
@@ -6660,7 +6839,7 @@
 
 		-- Set alpha to match main panel
 		Side:HookScript("OnShow", function()
-			if LeaPlusLC["PlusPanelAlphaCheck"] == "On" then
+			if LeaPlusLC["PlusPanelAlphaCheck"] then
 				Side.t:SetAlpha(LeaPlusLC["LeaPlusAlphaValue"])
 			else
 				Side.t:SetAlpha(1.00)
@@ -6781,7 +6960,7 @@
 			if tipstyle == 2 then
 				-- Tooltip positioned left of the checkbox
 				Cbox:SetScript("OnEnter", function()
-					if LeaPlusLC["PlusShowTips"] == "On" then
+					if LeaPlusLC["PlusShowTips"] then
 						GameTooltip:SetOwner(Cbox, "ANCHOR_LEFT", -10, -50)
 						GameTooltip:SetText(tip, nil, nil, nil, nil, true)
 					end
@@ -6789,7 +6968,7 @@
 			elseif tipstyle == 3 then
 				-- Tooltip positioned left of the checkbox with gap (for inset options)
 				Cbox:SetScript("OnEnter", function()
-					if LeaPlusLC["PlusShowTips"] == "On" then
+					if LeaPlusLC["PlusShowTips"] then
 						GameTooltip:SetOwner(Cbox, "ANCHOR_LEFT", -26, -50)
 						GameTooltip:SetText(tip, nil, nil, nil, nil, true)
 					end
@@ -6816,9 +6995,9 @@
 		-- Process clicks
 		Cbox:SetScript('OnClick', function()
 			if Cbox:GetChecked() == nil then
-				LeaPlusLC[field] = "Off"
+				LeaPlusLC[field] = false
 			elseif Cbox:GetChecked() == 1 then
-				LeaPlusLC[field] = "On"
+				LeaPlusLC[field] = true
 			end
 			LeaPlusLC:SetDim(); -- Lock invalid options
 			LeaPlusLC:ReloadCheck(); -- Show reload button if needed
@@ -7350,11 +7529,13 @@
 	pg = "Page6";
 
 	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Quests"					, 	146, -72);
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowQuestLevels"			,	"Show quest levels*"			,	146, -92, 	"If checked, quest levels will be shown in the quest log.\n\n* Requires UI reload.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutoAcceptQuests"			, 	"Accept quests"					,	146, -112, 	"If checked, quests will be accepted automatically.\n\nYou can hold the shift key down when you talk to a quest giver to over-ride this setting.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AcceptOnlyDailys"			, 	"Restrict to dailies"			, 	166, -132, 	"If checked, only daily quests will be accepted automatically.\n\nYou can hold the shift key down when you talk to a quest giver to over-ride this setting.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutoTurnInQuests"			,	"Turn-in quests"				,	146, -152, 	"If checked, quests will be turned-in automatically.\n\nYou can hold the shift key down when you talk to a quest giver to over-ride this setting.")
-	LeaPlusLC:MakeCB(LeaPlusLC[pg], "TurnInOnlyDailys"			,	"Restrict to dailies"			,	166, -172, 	"If checked, only daily quests will be turned-in automatically.\n\nYou can hold the shift key down when you talk to a quest giver to over-ride this setting.")
+	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowQuestLevels"				,	"Show quest levels*"			,	146, -92, 	"If checked, quest levels will be shown in the quest log.\n\n* Requires UI reload.")
+	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutoAcceptQuests"			,	"Accept chosen quests (Ctrl)"					,	146, -112, 	"Hold the Control key when you click on a quest while talking to a quest giver to select to be accepted automatically.\n\nHold the Shift key when you talk to a quest giver to over-ride this setting.\n\nHold the Shift key when you click the quest to stop accepting automatically.")
+	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AcceptOnlyDailys"			,	"Dailies"					,	166, -132, 	"If checked, all daily quests will be accepted automatically.\n\Hold the Shift key when you talk to a quest giver to over-ride this setting.")
+	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AcceptAllQuests"				,	"All quests"			,	238, -132, 	"If checked, all quests will be accepted automatically.\n\Hold the Shift key when you talk to a quest giver to over-ride this setting.")
+	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutoTurnInQuests"			,	"Turn-in chosen quests (Ctrl)"				,	146, -152, 	"Hold the Control key when you click on a quest while talking to a quest giver to select for automatic turn-in.\n\nHold the Shift key when you talk to a quest giver to over-ride this setting.\n\nHold the Shift key when you click the quest to stop turning in automatically.")
+	LeaPlusLC:MakeCB(LeaPlusLC[pg], "TurnInOnlyDailys"			,	"Dailies"					,	166, -172, 	"If checked, all daily quests will be turned-in automatically.\n\Hold the Shift key when you talk to a quest giver to over-ride this setting.")
+	LeaPlusLC:MakeCB(LeaPlusLC[pg], "TurnInAllQuests"				,	"All quests"			,	238, -172, 	"If checked, all quests will be turned-in automatically.\n\Hold the Shift key when you talk to a quest giver to over-ride this setting.")
 
 	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Tooltip"					, 	146, -212);
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "TipModEnable"				,	"Enable customisation*"			,	146, -232, 	"If checked, the tooltip will be color coded and you will be able to modify the tooltip layout and scale.\n\n* Requires UI reload.  After the reload, a configuration button will be available to the right and the checkbox control below will be available.")
