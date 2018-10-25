@@ -1,0 +1,4 @@
+<Bindings>
+	<!-- Modified Click Actions -->
+	<ModifiedClick action="FULLSTACK" default="ALT"/>
+</Bindings>

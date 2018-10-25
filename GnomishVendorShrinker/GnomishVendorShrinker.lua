@@ -22,15 +22,31 @@ GVS:SetScript("OnEvent", function(self, event, ...) if self[event] then return s
 GVS:Hide()
 
 
+--[[
+/run SetModifiedClick('SPLITSTACK',nil)
+/run SetModifiedClick('SPLITSTACK','SHIFT')
+/run SetModifiedClick('SPLITSTACK','SHIFT-BUTTON2')
+/run SetModifiedClick('SPLITSTACK','ALT-BUTTON1')
+--]]
+
 local function OnClick(self, button)
-	if IsAltKeyDown() and not self.altcurrency then self:BuyItem(true)
-	elseif IsModifiedClick() then HandleModifiedItemClick(GetMerchantItemLink(self:GetID()))
+	--if IsAltKeyDown() and not self.altcurrency then self:BuyItem(true)
+	if IsModifiedClick('FULLSTACK') and not self.altcurrency then
+		self:BuyItem(true)
+	elseif IsModifiedClick() then
+		-- Don't search for the item if clicking in the vendor frame
+		--local HandleModifiedItemClick = GVS.hooks.HandleModifiedItemClick  or  _G.HandleModifiedItemClick
+		GVS.onClickInGVS = true
+		HandleModifiedItemClick(GetMerchantItemLink(self:GetID()))
+		GVS.onClickInGVS = false
 	elseif self.altcurrency then
 		local id = self:GetID()
 		local link = GetMerchantItemLink(id)
 		self.link, self.texture = GetMerchantItemLink(id), self.icon:GetTexture()
 		MerchantFrame_ConfirmExtendedItemCost(self)
-	else self:BuyItem() end
+	else
+		self:BuyItem()
+	end
 end
 
 
@@ -43,15 +59,18 @@ local function PopoutOnClick(self, button)
 	local maxPurchase = GetMerchantItemMaxStack(id)
 	local _, _, _, _, _, _, _, itemStackSize = GetItemInfo(link)
 
-	local size = numAvailable > 0 and numAvailable or itemStackSize
-	-- OpenStackSplitFrame(size, self, "LEFT", "RIGHT")
-	OpenStackSplitFrame(250, self, "LEFT", "RIGHT")
+	local size = numAvailable > 0 and numAvailable or 20*itemStackSize+1
+	OpenStackSplitFrame(size, self, "LEFT", "RIGHT")
+	-- OpenStackSplitFrame(250, self, "LEFT", "RIGHT")
 end
 
 
 local function Purchase(id, quantity)
 	local _, _, _, vendorStackSize, numAvailable = GetMerchantItemInfo(id)
 	local maxPurchase = GetMerchantItemMaxStack(id)
+	-- fix bug of buying only 5
+	--print('GVS.Purchase('.. id ..','.. quantity ..'): maxPurchase = '.. maxPurchase)
+	if  vendorStackSize == 5  then  maxPurchase = vendorStackSize  end
 
 	if numAvailable > 0 and numAvailable < quantity then quantity = numAvailable end
 	local purchased = 0
@@ -88,6 +107,20 @@ end
 local function OnLeave()
 	GameTooltip:Hide()
 	ResetCursor()
+end
+
+local function ItemOnEnter(self)
+	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+	GameTooltip:SetMerchantItem(self:GetID())
+	GameTooltip_ShowCompareItem()
+	MerchantFrame.itemHover = self:GetID()
+	if IsModifiedClick("DRESSUP") then ShowInspectCursor() else ResetCursor() end
+end
+
+local function ItemOnLeave(self)
+	GameTooltip:Hide()
+	ResetCursor()
+	MerchantFrame.itemHover = nil
 end
 
 
@@ -223,19 +256,9 @@ for i=1,NUMROWS do
 	row.altframes = {}
 	row.AddAltCurrency, row.GetAltCurrencyFrame = AddAltCurrency, GetAltCurrencyFrame
 
-	row:SetScript('OnEnter', function(self)
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-		GameTooltip:SetMerchantItem(self:GetID())
-		GameTooltip_ShowCompareItem()
-		MerchantFrame.itemHover = self:GetID()
-		if IsModifiedClick("DRESSUP") then ShowInspectCursor() else ResetCursor() end
-	end)
-	row:SetScript('OnLeave', function()
-		GameTooltip:Hide()
-		ResetCursor()
-		MerchantFrame.itemHover = nil
-	end)
-
+	row:SetScript('OnEnter', ItemOnEnter)
+	row:SetScript('OnLeave', ItemOnLeave)
+	
 	rows[i] = row
 end
 
@@ -404,12 +427,18 @@ local offset = 0
 GVS:EnableMouseWheel(true)
 GVS:SetScript("OnMouseWheel", function(self, value) scrollbar:SetValue(scrollbar:GetValue() - value * SCROLLSTEP) end)
 GVS:SetScript("OnShow", function(self, noreset)
+	GVS:RawHook('HandleModifiedItemClick')
+	GVS:RawHook('ChatEdit_InsertLink')
 	local max = math.max(0, GetMerchantNumItems() - NUMROWS)
 	scrollbar:SetMinMaxValues(0, max)
 	scrollbar:SetValue(noreset and math.min(scrollbar:GetValue(), max) or 0)
 	Refresh()
 end)
-GVS:SetScript("OnHide", function() if StackSplitFrame:IsVisible() then StackSplitFrame:Hide() end end)
+GVS:SetScript("OnHide", function()
+	GVS:Unhook('HandleModifiedItemClick')
+	GVS:Unhook('ChatEdit_InsertLink')
+	if StackSplitFrame:IsVisible() then StackSplitFrame:Hide() end
+end)
 
 
 -- Reanchor the buyback button, it acts weird when switching tabs otherwise...
@@ -434,3 +463,67 @@ if MerchantFrame:IsVisible() and MerchantFrame.selectedTab == 1 then Show() end
 
 
 LibStub("tekKonfig-AboutPanel").new(nil, "GnomishVendorShrinker")
+
+
+
+
+function GVS.OnItemLink(link)
+	-- Don't react if Shoft-Clicking in vendor frame
+	if  not link  or  GVS.onClickInGVS  then  return  end
+	-- Leave it for the chat editbox if it's open
+	if  ChatEdit_GetActiveWindow()  then  return  end
+	
+	--local itemID, itemName = link:match('%|Hitem:(%d*):%d*:%d*:%d*:%d*:%d*:%d*:%d*:%d*:%d*:%d*%|h%[(.-)%]')
+	--local itemID, itemName = link:match('\124Hitem:(%d*):%d*:%d*:%d*:%d*:%d*:%d*:%d*:%d*:%d*:%d*\124h%[(.-)%]')
+	local itemID, itemName = link:match('\124Hitem:(%d-):.-\124h%[(.-)%]')
+	DEFAULT_CHAT_FRAME:AddMessage('GnomishVendorShrinker.OnItemLink('.. link ..'): item='.. tostring(itemID))
+	if  itemName  then
+		editbox:SetText(itemName)
+		searchstring = itemName
+		Refresh()
+		return true
+	end
+end
+	
+function GVS.HandleModifiedItemClick(...)
+	local link = ... ; DEFAULT_CHAT_FRAME:AddMessage('GnomishVendorShrinker.HandleModifiedItemClick('.. link ..')')
+	return IsModifiedClick('CHATLINK') and GVS.OnItemLink(...)
+		or GVS.hooks.HandleModifiedItemClick(...)
+end
+
+
+function GVS.ChatEdit_InsertLink(...)
+	local link = ... ; DEFAULT_CHAT_FRAME:AddMessage('GnomishVendorShrinker.ChatEdit_InsertLink('.. link ..')')
+	return GVS.OnItemLink(...)
+		or GVS.hooks.ChatEdit_InsertLink(...)
+end
+
+
+function GVS:RawHook(hookFuncName)
+	-- Already registered?
+	self.hooks = self.hooks or {}
+	if  self.hooks[hookFuncName]  then
+		--DEFAULT_CHAT_FRAME:AddMessage('GnomishVendorShrinker:RawHook(): '.. hookFuncName ..' was already registered.')
+	else
+		self.hooks[hookFuncName] = _G[hookFuncName]
+		_G[hookFuncName] = self[hookFuncName]
+	end
+end
+
+
+function GVS:Unhook(hookFuncName)
+	if  not self.hooks  or  not self.hooks[hookFuncName]  then
+		-- Not registered
+		DEFAULT_CHAT_FRAME:AddMessage('GnomishVendorShrinker:Unhook(): '.. hookFuncName ..' was not registered.')
+	elseif  _G[hookFuncName] ~= self[hookFuncName]  then
+		-- Other addon hooked before our hook, don't know how to unhook from the chain
+		DEFAULT_CHAT_FRAME:AddMessage('GnomishVendorShrinker:Unhook(): '.. hookFuncName ..' was hooked by other addon, failed to unhook.')
+	else
+		-- Replace our function with original
+		_G[hookFuncName] = self.hooks[hookFuncName]
+		self.hooks[hookFuncName] = nil
+	end
+end
+
+
+
