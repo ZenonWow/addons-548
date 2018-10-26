@@ -1,5 +1,0 @@
-<Ui xmlns="http://www.blizzard.com/wow/ui/">
-	<Script file="AuraFilters.lua"/>
-	<Script file="Style.lua"/>
-	<Script file="Layout.lua"/>
-</Ui>

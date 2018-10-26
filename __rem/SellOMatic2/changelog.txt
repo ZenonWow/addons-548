@@ -1,7 +1,0 @@
-**a053:**
-
-* Updated TOC.
-* Updated locales.
-* Updated max iLevel of items to 600.
-
-----
