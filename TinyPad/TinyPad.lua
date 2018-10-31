@@ -82,7 +82,8 @@ function tinypad:PLAYER_LOGIN()
 	local old_ChatEdit_InsertLink = ChatEdit_InsertLink
 	function ChatEdit_InsertLink(text)
 		if editBox:HasFocus() then
-			return editBox:Insert(text)
+			editBox:Insert(text)
+			return true
 		else
 			return old_ChatEdit_InsertLink(text)
 		end
@@ -93,7 +94,8 @@ function tinypad:PLAYER_LOGIN()
 		function QuestLogTitleButton_OnClick(self, button)
 			if editBox:HasFocus() then
 				local link = GetQuestLink(self:GetID()+FauxScrollFrame_GetOffset(QuestLogScrollFrame))
-				return editBox:Insert(link)
+				editBox:Insert(link)
+				return true
 			else
 				return old_QuestLogTitleButton_OnClick(self, button)
 			end
@@ -103,7 +105,8 @@ function tinypad:PLAYER_LOGIN()
 		function QuestMapLogTitleButton_OnClick(self, button)
 			if editBox:HasFocus() then
 				local link = GetQuestLink(GetQuestLogIndexByID(self.questID))
-				return editBox:Insert(link)
+				editBox:Insert(link)
+				return true
 			else
 				return old_QuestMapLogTitleButton_OnClick(self, button)
 			end
@@ -137,7 +140,8 @@ function tinypad:ADDON_LOADED(addon)
 		local old_TradeSkillLinkButton_OnClick = TradeSkillLinkButton:GetScript("OnClick")
 		TradeSkillLinkButton:SetScript("OnClick",function(self,...)
 			if editBox:HasFocus() then
-				return editBox:Insert(GetTradeSkillListLink())
+				editBox:Insert(GetTradeSkillListLink())
+				return true
 			else
 				return old_TradeSkillLinkButton_OnClick(self,...)
 			end
@@ -146,7 +150,8 @@ function tinypad:ADDON_LOADED(addon)
 		local old_AchievementButton_OnClick = AchievementButton_OnClick
 		function AchievementButton_OnClick(self,...)
 			if editBox:HasFocus() and IsModifiedClick("CHATLINK") then
-				return editBox:Insert(GetAchievementLink(self.id))
+				editBox:Insert(GetAchievementLink(self.id))
+				return true
 			else
 				return old_AchievementButton_OnClick(self,...)
 			end
