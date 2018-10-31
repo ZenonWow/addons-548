@@ -1,0 +1,38 @@
+14:48] Joyous: There are two ways, the second one might not work in combat.
+1.
+http://wowprogramming.com/docs/secure_template/SecureActionButtonTemplate.html
+http://wowwiki.wikia.com/wiki/SecureActionButtonTemplate
+
+local macroBody = ".tele"
+local button = CreateFrame("Button", "macroButton", UIParent, "SecureActionButtonTemplate")
+button:SetAttribute("type", "macro")
+button:SetAttribute("macrotext", macroBody)
+
+2.
+http://wowprogramming.com/docs/scripts/OnClick.html
+http://wowprogramming.com/docs/api/RunMacroText.html
+http://wowwiki.wikia.com/wiki/API_Button_Click
+Call RunMacroText() in the button's OnClick handler:
+
+local macroBody = ".tele"
+local button = CreateFrame("Button")
+button:SetScript("OnClick", function(self, mouseButton)
+  DEFAULT_CHAT_FRAME:AddMessage("MacroButton OnClick handler run.")  -- remove if works fine
+  RunMacroText(macroBody, self)
+end)
+
+... then positions and show your button(edited)
+
+
+
+----
+local b = CreateFrame("Button", "TeleportButton", UIParent, "UIPanelButtonTemplate2")
+b:SetScript("OnClick", function(self, mouseButton)
+  RunMacroText(".tele Stormwind", self)
+end)
+-- position the button
+
+
+http://wowprogramming.com/docs/api/RunMacroText.html
+http://wowprogramming.com/docs/widgets/Button.html
+http://wowprogramming.com/docs/scripts/OnClick.html

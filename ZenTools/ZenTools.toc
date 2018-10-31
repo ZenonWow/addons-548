@@ -1,0 +1,25 @@
+## Interface: 50400
+## Title: MyAdd
+## Notes: Personal development addon
+## Author: Mongusious
+## X-Email: 
+## SavedVariables: BlackMarketTrackerAuctionData, BlackMarketTrackerArchive
+
+# ActionBarChatLink.lua
+
+Media.lua
+# PlaySoundOverride.lua
+
+BlackMarketTracker.lua
+PrintUnitAuras.lua
+TargetWatcherMop.lua
+MacroClicks.lua
+
+ItemRefHook.lua  # taints logout in 7.3.5?
+# MyDebug.lua
+# MyMouseEventDemo.lua
+# TargetWatcher.lua
+# ResizeViewport.lua
+# ChatMod.lua
+ScrathPad.lua
+

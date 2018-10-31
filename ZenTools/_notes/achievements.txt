@@ -1,0 +1,100 @@
+http://wowprogramming.com/docs/api/GetAchievementInfoFromCriteria.html
+--
+This function or event no longer exists in version 6.0.2 (19034) of World of Warcraft. Please check the main API page for an up-to-date listing of the valid API functions
+Gets information about an achievement or statistic given a criterion ID
+id, name, points, description, flags, icon, rewardText = GetAchievementInfoFromCriteria(id)
+Arguments:
+id - The numeric ID of an achievement or statistic criterion (as can be retrieved from GetAchievementCriteriaInfo()) (number)
+Returns:
+id - The numeric ID of the achievement or statistic (number)
+name - Name of the achievement or statistic (string)
+points - Amount of achievement points awarded for completing the achievement (number)
+description - Description of the achievement (string)
+flags - Test against the following masks with bit.band() to reveal additional information: (bitfield)
+0x00000001 - Info is for a statistic, not an achievement
+0x00000002 - Achievement should be hidden in normal displays
+0x00000080 - Achievement should display its criteria as a progress bar regardless of per-criterion flags
+icon - Path to an icon texture for the achievement (string)
+rewardText - Text describing a reward for the achievement, or the empty string if no reward is offered (string)
+
+
+
+http://wowprogramming.com/docs/api/GetAchievementCriteriaInfo.html
+--
+Gets information about criteria for an achievement or data for a statistic
+description, type, completed, quantity, requiredQuantity, characterName, flags, assetID, quantityString, criteriaID = GetAchievementCriteriaInfo(achievementID, index) or GetAchievementCriteriaInfo(statisticID)
+Arguments:
+achievementID - The numeric ID of an achievement (number)
+index - Index of one of the achievement's criteria (between 1 and GetAchievementNumCriteria()) (number)
+statisticID - The numeric ID of a statistic (number)
+Returns:
+description - Description of the criterion (as displayed in the UI for achievements with multiple criteria) or statistic (string)
+type - Type of criterion: a value of 8 indicates the criterion is another achievement; other values are not used in the default UI (number)
+completed - True if the player has completed the criterion; otherwise false (boolean)
+quantity - If applicable, number of steps taken towards completing the criterion (e.g. for the only criterion of "Did Somebody Order a Knuckle Sandwich?", the player's current Unarmed skill; for the first criterion of "Pest Control", 1 if the player has killed an Adder, 0 otherwise (number)
+requiredQuantity - If applicable, number of steps required to complete the criterion (e.g. 400 for the only criterion of "Did Somebody Order a Knuckle Sandwich?"; 1 for any criterion of "Pest Control" (number)
+characterName - Character name with which the criterion was completed. Currently always the player character's name for completed criteria (string)
+flags - Test against the following masks with bit.band() to reveal additional information: (bitfield)
+0x00000001 - Criterion should be displayed as a progress bar
+0x00000002 - Criterion should be hidden in normal achievement displays
+assetID - Internal ID number of the quest to complete, NPC to kill, item to acquire, world object to interact with, achievement to earn, or other game entity related to completing the criterion. (Note: some but not all of these ID types are usable elsewhere in the WoW API) (number)
+quantityString - Text to be shown when displaying quantity and requiredQuantity in a UI element. (Not always the same as format("%d / %d", quantity, requiredQuantity); e.g. "Got My Mind On My Money" shows monetary amounts with embedded textures for gold, silver, and copper) (string)
+criteriaID - Unique ID number identifying the criterion; usable with GetAchievementInfoFromCriteria() (number)
+
+
+
+AddTrackedAchievement(id)
+
+
+
+Achievement functions
+--
+AddTrackedAchievement - Adds an achievement to the objectives tracker UI
+AreAccountAchievementsHidden - Returns whether the player is displaying only character achievements to others
+CanShowAchievementUI - Returns whether the Achievements UI should be enabled
+ClearAchievementComparisonUnit - Disables comparing achievements/statistics with another player
+GetAchievementCategory - Returns the numeric ID of the category to which an achievement belongs
+GetAchievementComparisonInfo - Returns information about the comparison unit's achievements
+GetAchievementCriteriaInfo - Gets information about criteria for an achievement or data for a statistic
+GetAchievementCriteriaInfoByID - This function is not yet documented
+GetAchievementGuildRep - This function is not yet documented
+GetAchievementInfo - Gets information about an achievement or statistic
+GetAchievementLink - Returns a hyperlink representing the player's progress on an achievement
+GetAchievementNumCriteria - Returns the number of measured criteria for an achievement
+GetAchievementNumRewards - Returns the number of point rewards for an achievement (currently always 1)
+GetAchievementReward - Returns the number of achievement points awarded for earning an achievement
+GetCategoryAchievementPoints - Returns the number of achievement points obtained in this category
+GetCategoryInfo - Returns information about an achievement/statistic category
+GetCategoryList - Returns a list of all achievement categories
+GetCategoryNumAchievements - Returns the number of achievements/statistics to display in a category
+GetComparisonAchievementPoints - Returns the comparison unit's total achievement points earned
+GetComparisonCategoryNumAchievements - Returns the number of achievements completed by the comparison unit within a category
+GetComparisonStatistic - Returns the comparison unit's data for a statistic
+GetGuildAchievementMemberInfo - This function is not yet documented
+GetGuildAchievementMembers - This function is not yet documented
+GetGuildAchievementNumMembers - This function is not yet documented
+GetGuildCategoryList - Returns a list of all guild achievement categories
+GetGuildRosterLargestAchievementPoints - This function is not yet documented
+GetLatestCompletedAchievements - Returns a list of the player's/player guild's most recently earned achievements
+GetLatestCompletedComparisonAchievements - Returns a list of the comparison unit's most recently earned achievements
+GetLatestUpdatedComparisonStats - Returns a list of the comparison unit's latest updated statisticsdeprecated
+GetLatestUpdatedStats - Returns a list of the player's latest updated statisticsdeprecated
+GetNextAchievement - Returns the next achievement for an achievement which is part of a series
+GetNumComparisonCompletedAchievements - Returns the number of achievements earned by the comparison unit
+GetNumCompletedAchievements - Returns the number of achievements earned by the player/guild
+GetNumTrackedAchievements - Returns the number of achievements flagged for display in the objectives tracker UI
+GetPreviousAchievement - Returns the previous achievement for an achievement which is part of a series
+GetStatistic - Returns data for a statistic that can be shown on the statistics tab of the achievements window
+GetStatisticsCategoryList - Returns a list of all statistic categories
+GetTotalAchievementPoints - Returns the player's total achievement points earned
+GetTrackedAchievements - Returns numeric IDs of the achievements flagged for display in the objectives tracker UI
+HasCompletedAnyAchievement - Checks if the player has completed at least 1 achievement
+IsAchievementEligible - This function is not yet documented
+IsTrackedAchievement - Returns whether an achievement is flagged for display in the objectives tracker UI
+RemoveTrackedAchievement - Removes an achievement from the objectives tracker UI
+SetAchievementComparisonPortrait - This function is not yet documented
+SetAchievementComparisonUnit - Enables comparing achievements/statistics with another player
+SetFocusedAchievement - This function is not yet documented
+ShowAccountAchievements - Enables or disables the display of only character achievements to others
+
+

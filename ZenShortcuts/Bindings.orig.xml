@@ -1,0 +1,139 @@
+	<!-- Chat frame bindings header="CHAT" -->
+	<Binding name="OPENCHAT" category="BINDING_HEADER_CHAT">
+		ChatFrame_OpenChat("");
+	</Binding>
+	<Binding name="TOGGLECHARACTER0" header="BLANK8" category="BINDING_HEADER_INTERFACE">
+		ToggleCharacter("PaperDollFrame");
+	</Binding>
+	<Binding name="TOGGLETALENTS" category="BINDING_HEADER_INTERFACE">
+		ToggleTalentFrame();
+	</Binding>
+
+	elseif ( strsub(link, 1, 8) == "specpane" ) then
+		ToggleTalentFrame(SPECIALIZATION_TAB);
+		return;
+	elseif ( strsub(link, 1, 10) == "talentpane" ) then
+		ToggleTalentFrame(TALENTS_TAB);
+		return;
+	elseif ( strsub(link, 1, 11) == "honortalent" ) then
+		ToggleTalentFrame(PVP_TALENTS_TAB);
+		return;
+
+	elseif ( strsub(link, 1, 10) == "worldquest" ) then
+		ShowUIPanel(WorldMapFrame);
+		return;
+	elseif ( strsub(link, 1, 7) == "journal" ) then
+		if ( not HandleModifiedItemClick(GetFixedLink(text)) ) then
+			if ( not EncounterJournal ) then
+				EncounterJournal_LoadUI();
+			end
+			EncounterJournal_OpenJournalLink(strsplit(":", link));
+		end
+		return;
+
+
+	<Binding name="TOGGLEQUESTLOG" header="BLANK11" category="BINDING_HEADER_INTERFACE">
+		ToggleQuestLog();
+	</Binding>
+	<Binding name="TOGGLEWORLDMAP" category="BINDING_HEADER_INTERFACE">
+		ToggleWorldMap();
+	</Binding>
+	<Binding name="TOGGLEWORLDMAPSIZE" category="BINDING_HEADER_INTERFACE">
+		if ( WorldMapFrame:IsShown() ) then
+			WorldMapFrame_ToggleWindowSize();
+		end
+	</Binding>
+
+	<Binding name="STOPCASTING" category="BINDING_HEADER_MISC">
+		SpellStopCasting();
+	</Binding>
+	<Binding name="STOPATTACK" category="BINDING_HEADER_MISC">
+		StopAttack();
+	</Binding>
+	<Binding name="DISMOUNT" category="BINDING_HEADER_MISC">
+		Dismount();
+	</Binding>
+
+
+<!-- Hidden bindings -->
+	<Binding name="TURNORACTION" runOnUp="true" hidden="true">
+		if ( keystate == "down" ) then
+			TurnOrActionStart();
+		else
+			TurnOrActionStop();
+		end
+	</Binding>
+	<Binding name="CAMERAORSELECTORMOVE" runOnUp="true" hidden="true">
+		if ( keystate == "down" ) then
+			CameraOrSelectOrMoveStart();
+		else
+			CameraOrSelectOrMoveStop(IsModifiedClick("STICKYCAMERA"));
+		end
+	</Binding>
+
+
+	<Binding name="TOGGLEPORTALS" hidden="true" debug="true" category="BINDING_HEADER_DEBUG">
+		TogglePortals();
+	</Binding>
+
+
+
+	<!-- Modified Click Actions -->
+	<ModifiedClick action="SELFCAST" default="ALT"/>
+	<ModifiedClick action="FOCUSCAST" default="NONE"/>
+	<ModifiedClick action="AUTOLOOTTOGGLE" default="SHIFT"/>
+	<ModifiedClick action="MAILAUTOLOOTTOGGLE" default="SHIFT"/>
+	<ModifiedClick action="STICKYCAMERA" default="CTRL"/>
+	<ModifiedClick action="CHATLINK" default="SHIFT-BUTTON1"/>
+	<ModifiedClick action="DRESSUP" default="CTRL-BUTTON1"/>
+	<ModifiedClick action="SOCKETITEM" default="SHIFT-BUTTON2"/>
+	<ModifiedClick action="SPLITSTACK" default="SHIFT"/>
+	<ModifiedClick action="PICKUPACTION" default="SHIFT"/>
+	<ModifiedClick action="PICKUPITEM" default="SHIFT"/>
+	<ModifiedClick action="COMPAREITEMS" default="SHIFT"/>
+	<ModifiedClick action="OPENALLBAGS" default="SHIFT"/>
+	<ModifiedClick action="QUESTWATCHTOGGLE" default="SHIFT"/>
+	<ModifiedClick action="TOKENWATCHTOGGLE" default="SHIFT"/>
+	<ModifiedClick action="SHOWITEMFLYOUT" default="ALT"/>
+	<ModifiedClick action="SHOWMULTICASTFLYOUT" default="ALT"/>
+
+
+->		FriendsFrame_ShowDropdown(name, 1, lineid, chatType, chatFrame);
+
+
+
+FrameXML/ItemRef.lua:
+function SetItemRef(link, text, button, chatFrame)
+	if ( strsub(link, 1, 6) == "player" ) then
+      ...
+			if ( IsModifiedClick("CHATLINK") ) then
+			...
+				if ( ChatEdit_GetActiveWindow() ) then
+					ChatEdit_InsertLink(name);
+				else
+					SendWho(WHO_TAG_EXACT..name);
+				end
+				
+			elseif ( button == "RightButton" and (not isGMLink) ) then
+				FriendsFrame_ShowDropdown(name, 1, lineid, chatType, chatFrame);
+			else
+				ChatFrame_SendTell(name, chatFrame);
+			end
+		end
+		return;
+
+
+
+
+
+
+
+function MovieFrame_OnKeyUp(self, key)
+	local keybind = GetBindingFromClick(key);
+	if ( keybind == "TOGGLEGAMEMENU" or key == "SPACE" or key == "ENTER" ) then
+		self.CloseDialog:Show();
+	elseif ( keybind == "TOGGLEMUSIC" or keybind == "TOGGLESOUND" ) then
+		RunBinding(keybind);
+	end
+end
+

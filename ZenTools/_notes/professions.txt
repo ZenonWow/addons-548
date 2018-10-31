@@ -1,0 +1,189 @@
+HandleModifiedItemClick(link)
+HandleModifiedItemClick(GetMerchantItemLink(self:GetID()))
+if ( IsModifiedClick("CHATLINK") ) then ChatEdit_InsertLink(link) end
+
+
+/dump BuyMerchantItem( 1 , 1 )
+/dump BuyMerchantItem( 1 , 3 )
+/dump BuyMerchantItem( 1 , 5 )
+/dump BuyMerchantItem( 1 , 20 )
+/dump BuyMerchantItem( 1 , 20 )
+
+
+
+ShowUIPanel(ItemRefTooltip);
+if ( not ItemRefTooltip:IsShown() ) then
+	ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE");
+end
+ItemRefTooltip:SetHyperlink(link); 
+
+
+
+http://wowwiki.wikia.com/wiki/API_ChatFrame_OnHyperlinkShow
+--
+ChatFrame_OnHyperlinkShow(chatFrame, link, text, button)
+-> calls SetItemRef()
+chatFrame - table (Frame) - ChatFrame in which the link was clicked.
+link - String - The link component of the clicked hyperlink. (e.g. "item:6948:0:0:0...")
+text - String - The label component of the clicked hyperlink. (e.g. "[Hearthstone]")
+button - String - Button clicking the hyperlink button. (e.g. "LeftButton")
+
+
+http://wowprogramming.com/docs/api/GetMerchantItemLink.html
+--
+link = GetMerchantItemLink(index)
+Returns a hyperlink for an item available for purchase from a vendor
+index - Index of an item in the vendor's listing (between 1 and GetMerchantNumItems()) (number)
+link - A hyperlink for the item (string, hyperlink)
+
+
+
+http://wowprogramming.com/docs/api/GetMerchantItemMaxStack.html
+--
+maxStack = GetMerchantItemMaxStack(index)
+Returns the maximum number of an item allowed in a single purchase. Determines the largest value usable for the second argument (quantity) of BuyMerchantItem() when purchasing the item. For most items, this is the same as the maximum stack size of the item.
+index - Index of an item in the vendor's listing (between 1 and GetMerchantNumItems()) (number)
+maxStack - Largest number of items allowed in a single purchase (number)
+Examples:
+-- Buys the largest quantity possible in one purchase for the given index
+BuyMerchantItem(index, GetMerchantItemMaxStack(index))
+
+
+
+http://wowprogramming.com/docs/api/GetMerchantItemInfo.html
+--
+name, texture, price, quantity, numAvailable, isUsable, extendedCost = GetMerchantItemInfo(index)
+Returns information about an item available for purchase from a vendor
+index - Index of an item in the vendor's listing (between 1 and GetMerchantNumItems()) (number)
+Returns:
+name - Name of the item (string)
+texture - Path to an icon texture for the item (string)
+price - Current cost to purchase the item from this vendor (in copper) (number)
+quantity - Number of stacked items per purchase (number)
+numAvailable - Number of items available for purchase, if the vendor has a limited stock of the item; -1 if the vendor has an unlimited supply of the item (number)
+isUsable - 1 if the player can use or equip the item; otherwise nil (1nil)
+extendedCost - 1 if the item's price uses one or more alternate currencies (for which details can be found via GetMerchantItemCostInfo(index)); otherwise nil (1nil)
+
+
+
+http://wowprogramming.com/docs/api/BuyMerchantItem.html
+--
+BuyMerchantItem(index, quantity)
+Purchases an item available from a vendor
+index - Index of an item in the vendor's listing (between 1 and GetMerchantNumItems()) (number)
+quantity - Number of items to purchase (between 1 and  GetMerchantItemMaxStack(index)) (number)
+
+
+
+http://wowprogramming.com/docs/api/GetTradeSkillRecipeLink.html
+--
+link = GetTradeSkillRecipeLink(index)
+Returns hyperlink for a tradeskill recipe. The tooltip produced when resolving the link describes the recipe itself -- its reagents and (if present) description -- in addition to (if applicable) the item created. For a link which only describes the created item, see GetTradeSkillItemLink().
+index - Index of a recipe in the trade skill list (between 1 and GetNumTradeSkills()) (number)
+link - A hyperlink for the trade skill recipe (string)
+
+
+
+http://wowprogramming.com/docs/api/GetTradeSkillItemLink.html
+--
+link = GetTradeSkillItemLink(index)
+Returns a hyperlink for the item created by a tradeskill recipe. The tooltip produced when resolving the link describes only the item created by the recipe. For a link which describes the recipe itself (its reagents and description), see GetTradeSkillRecipeLink().
+If the recipe does not create an item, this function returns the same hyperlink as does GetTradeSkillRecipeLink() (though the text of the link may differ).
+index - Index of a recipe in the trade skill list (between 1 and GetNumTradeSkills()) (number)
+link - A hyperlink for the item created by the recipe (string)
+
+
+
+http://wowprogramming.com/docs/api/GetNumTradeSkills.html
+--
+numSkills = GetNumTradeSkills()
+Returns the number of entries in the trade skill listing. Entries include both group headers and individual trade skill recipes. Reflects the list as it should currently be displayed, not necessarily the complete list -- if headers are collapsed or a filter is enabled, a smaller number will be returned.
+Returns 0 if a trade skill is not "open".
+numSkills - Number of headers and recipes to display in the trade skill list (number)
+
+
+
+http://wowprogramming.com/docs/api/DoTradeSkill.html
+--
+DoTradeSkill(index [, repeat])
+Performs a trade skill recipe
+index - Index of a recipe in the trade skill list (between 1 and GetNumTradeSkills()) (number)
+repeat - Number of times to repeat the recipe (number)
+
+
+
+
+
+http://wowprogramming.com/docs/api/GetSpellLink.html
+--
+link, tradeLink = GetSpellLink(index, "bookType") or GetSpellLink("name") or GetSpellLink(id)
+Returns a hyperlink for a spell
+index - Index of a spell in the spellbook (number, spellbookID)
+bookType - Type of spellbook (string)
+  pet - The pet's spellbook
+  spell - The player's spellbook
+  name - Name of a spell, optionally including secondary text (e.g. "Mana Burn" to find the player's highest rank, or "Mana Burn(Rank 2)" -- no space before the parenthesis -- for a specific rank) (string)
+id - Numeric ID of a spell (number, spellID)
+link - A hyperlink for the spell (string, hyperlink)
+tradeLink - A hyperlink representing the player's list of trade skill recipes, if the spell is a trade skill (i.e. if "casting" the spell opens a trade skill window) (string)
+
+
+
+
+Tradeskill functions
+CloseTradeSkill - Ends interaction with the Trade Skill UI
+CollapseGuildTradeSkillHeader - Collapses the corresponding profession in the guild window
+CollapseTradeSkillSubClass - Collapses a group header in the trade skill listing
+DoTradeSkill - Performs a trade skill recipe
+ExpandGuildTradeSkillHeader - Expands the corresponding profession in the guild window
+ExpandTradeSkillSubClass - Expands a group header in the trade skill listing
+GetFirstTradeSkill - Returns the index of the first non-header in the trade skill listing
+GetGuildTradeSkillInfo - Returns information about the specified guild profession entry.
+GetNumGuildTradeSkill - Returns the number of people and headers currently visible in the profession view of your guild window
+GetNumTradeSkills - Returns the number of entries in the trade skill listing
+GetProfessionInfo - Returns details on a profession from its index including name, icon, and skill level
+GetTradeSkillCategoryFilter - This function is not yet documented
+GetTradeSkillCooldown - Returns the time remaining on a trade skill recipe's cooldown
+GetTradeSkillDescription - Returns descriptive text for a tradeskill recipe
+GetTradeSkillIcon - Returns the icon for a trade skill recipe
+GetTradeSkillInfo - Returns information about a trade skill header or recipe
+GetTradeSkillInvSlotFilter - Returns whether the trade skill listing is filtered by a given item equipment slot
+GetTradeSkillInvSlots - Returns a list of recipe equipment slots for the current trade skill
+GetTradeSkillItemLevelFilter - Returns the current settings for filtering the trade skill listing by required level of items produced
+GetTradeSkillItemLink - Returns a hyperlink for the item created by a tradeskill recipe
+GetTradeSkillItemNameFilter - Returns the current search text for filtering the trade skill listing by name
+GetTradeSkillLine - Returns information about the current trade skill
+GetTradeSkillListLink - Returns a hyperlink to the player's list of recipes for the current trade skill
+GetTradeSkillNumMade - Returns the number of items created when performing a tradeskill recipe
+GetTradeSkillNumReagents - Returns the number of different reagents required for a trade skill recipe
+GetTradeSkillReagentInfo - Returns information about a reagent in a trade skill recipe
+GetTradeSkillReagentItemLink - Returns a hyperlink for a reagent in a tradeskill recipe
+GetTradeSkillRecipeLink - Returns hyperlink for a tradeskill recipe
+GetTradeSkillSelectionIndex - Returns the index of the currently selected trade skill recipe
+GetTradeSkillSubCategories - This function is not yet documented
+GetTradeSkillSubClassFilteredSlots - This function is not yet documented
+GetTradeSkillSubClasses - Returns a list of recipe subclasses for the current trade skill
+GetTradeSkillTexture - This function is not yet documented
+GetTradeSkillTools - Returns a list of required tools for a trade skill recipe
+GetTradeskillRepeatCount - Returns the number of times the trade skill recipe currently being performed will repeat
+GetTrainerTradeskillRankValues - This function is not yet documented
+IsTradeSkillGuild - This function is not yet documented
+IsTradeSkillLinked - Returns whether the TradeSkill UI is showing another player's skill
+IsTradeSkillReady - This function is not yet documented
+IsTradeSkillRepeating - This function is not yet documented
+SelectTradeSkill - Selects a recipe in the trade skill listing
+SetGuildTradeSkillCategoryFilter - This function is not yet documented
+SetGuildTradeSkillItemNameFilter - This function is not yet documented
+SetTradeSkillCategoryFilter - Filters the trade skill listing by subclass of items produced
+SetTradeSkillInvSlotFilter - Filters the trade skill listing by equipment slot of items produced
+SetTradeSkillItemLevelFilter - Filters the trade skill listing by required level of items produced
+SetTradeSkillItemNameFilter - Filters the trade skill listing by name of recipe, item produced, or reagents
+SetTradeSkillRepeatCount - This function is not yet documented
+SortGuildTradeSkill - This function is not yet documented
+StopTradeSkillRepeat - Cancels repetition of a trade skill recipe
+TradeSkillOnlyShowMakeable - Filters the trade skill listing by whether the player currently has enough reagents for each recipe
+TradeSkillOnlyShowSkillUps - Filters the trade skill listing by whether the player can gain skill ranks from each recipe
+ViewGuildRecipes - Opens the guild profession view for a profession
+
+
+

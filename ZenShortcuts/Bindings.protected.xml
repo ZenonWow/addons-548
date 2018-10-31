@@ -1,0 +1,14 @@
+<Bindings>
+
+  <!-- ClearTarget keybind is missing since vanilla wow: you have to close every window with ESC and then you can lose that target -->
+	<Binding name="CLEARTARGET" category="BINDING_HEADER_MISC">
+		ClearTarget();
+		-- PROTECTED: need  /cleartarget  macro to bind to
+	</Binding>
+
+	<Binding name="FOCUSMOUSEOVER" category="BINDING_HEADER_MISC">
+		FocusUnit('mouseover');
+		-- PROTECTED: need  /focus [@mouseover,nodead]  macro to bind to
+	</Binding>
+
+</Bindings>

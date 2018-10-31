@@ -1,0 +1,30 @@
+<Bindings>
+	
+	<!-- UI Panels header="INTERFACE" -->
+	
+	
+	<Binding name="TOGGLEBLACKMARKET"
+		header="ZenTools"
+    >
+		-- description="Open the Black Market without updating auctions"
+		BlackMarket_LoadUI()
+		BlackMarketFrame_Show()
+	</Binding>
+	
+	
+	<Binding name="PRINTUNITAURAS"
+		>
+		-- description="Print mouseover / target / focus unit's auras to General chat frame"
+		PrintUnitAuras()
+	</Binding>
+	
+	
+	
+	<!-- Modified Click Actions -->
+	<!-- SHIFT-B1: CHATLINK, SHIFT(-B2): SPLITSTACK -->
+	<!--ModifiedClick action="USE_ITEM" default="SHIFT-BUTTON2"/-->
+	<ModifiedClick action="USE_ITEM" default="CTRL-BUTTON2"/>
+	<ModifiedClick action="RUN_MACRO" default="CTRL"/>
+	<!--ModifiedClick action="RUN_MACRO_B2" default="BUTTON2"/-->
+	
+</Bindings>

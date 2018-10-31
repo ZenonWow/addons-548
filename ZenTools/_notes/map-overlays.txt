@@ -1,0 +1,49 @@
+numOverlays = GetNumMapOverlays()
+Returns the number of overlays for the current world map zone. Map overlays correspond to areas which are "discovered" when entered by the player, "filling in" the blank areas of the world map.
+numOverlays - Number of overlays for the current world map zone (number)
+
+
+textureName, textureWidth, textureHeight, offsetX, offsetY, mapPointX, mapPointY = GetMapOverlayInfo(index)
+Returns information about a world map overlay. Map overlays correspond to areas which are "discovered" when entered by the player, "filling in" the blank areas of the world map.
+index - Index of a map overlay (between 1 and GetNumMapOverlays()) (number)
+textureName - Path to the overlay texture (string)
+textureWidth - Width of the texture (in pixels) (number)
+textureHeight - Height of the texture (in pixels) (number)
+offsetX - Horizontal position of the overlay's top left corner relative to the zone map (0 = left edge, 1 = right edge) (number)
+offsetY - Vertical position of the overlay's top left corner relative to the zone map (0 = top, 1 = bottom) (number)
+mapPointX - Unused (number)
+mapPointY - Unused (number)
+
+
+
+
+mapFileName, textureHeight, textureWidth, isMicroDungeon, microDungeonMapName = GetMapInfo()
+Returns information about the current world map texture. World map images are broken into several tiles; the full texture paths follow the format "Interface\\WorldMap\\"..mapFileName.."\\"..mapFileName..i, where i is a number between 1 and 12 (or in a zone with multiple area images, "Interface\\WorldMap\\"..mapFileName.."\\"..mapFileName..dungeonLevel.."_"..i, where dungeonLevel is a number between 1 and GetNumDungeonMapLevels()).
+World map images are 4 tiles wide and 3 tiles high.
+mapFileName - Unique part of the path to the world map textures. (string)
+textureHeight - Height of the combined map texture tiles. (number)
+textureWidth - Width of the combined map texture tiles. (string)
+isMicroDungeon - Whether or not the current map area is a Micro Dungeon. (boolean)
+microDungeonMapName - Unique part of the path to the world map textures. (string)
+
+
+
+http://wowprogramming.com/docs/api/UpdateMapHighlight.html
+--
+name, fileName, texCoordX, texCoordY, textureX, textureY, scrollChildX, scrollChildY = UpdateMapHighlight(cursorX, cursorY)
+Returns information about the texture used for highlighting zones in a continent map on mouseover
+cursorX - Horizontal position of the mouse cursor relative to the current world map (0 = left edge, 1 = right edge) (number)
+cursorY - Vertical position of the unit relative to the current world map (0 = top, 1 = bottom) (number)
+Returns:
+name - The name of the zone being highlighted (string)
+fileName - Unique part of the path to the highlight texture for the zone; full path follows the format "Interface\\WorldMap\\"..fileName.."\\"..fileName.."Highlight" (string)
+texCoordX - Right texCoord value for the highlight texture (number)
+texCoordY - Bottom texCoord value for the highlight texture (number)
+textureX - Width of the texture as a proportion of the world map's width (number)
+textureY - Height of the texture as a proportion of the world map's height (number)
+scrollChildX - Horizontal position of the texture's top left corner relative to the current world map (0 = left edge, 1 = right edge) (number)
+scrollChildY - Vertical position of the texture's top left corner relative to the current world map (0 = top, 1 = bottom) (number)
+
+
+
+

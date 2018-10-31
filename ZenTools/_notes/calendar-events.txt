@@ -1,0 +1,27 @@
+http://wowprogramming.com/docs/api/CalendarGetHolidayInfo.html
+--
+Returns additional information about a holiday event. Information can only be retrieved for events which might be visible in the calendar's current month -- i.e. those in the current month as well as those in (roughly) the last week of the previous month and (roughly) the first two weeks of the following month. To reliably retrieve information for events outside the calendar's current month, first change the calendar's month with CalendarSetMonth.
+name, description, texture = CalendarGetHolidayInfo(monthOffset, day, index)
+Arguments:
+monthOffset - Month to query relative to the calendar's currently displayed month (i.e. 0 for current month, 1 for next month, -1 for previous month) (number)
+day - Day of the month to query (number)
+index - Index of an event on the given day (from 1 to CalendarGetNumDayEvents()) (number)
+Returns:
+name - Localized name of the event (string)
+description - Localized text describing the event (string)
+texture - Unique portion of the path to a texture for the event (e.g. "CalendarChildrensWeek"). The mechanism by which a full texture path can be generated is not public API, but can be found in Addons/BlizzardCalendar/Blizzard_Calendar.lua after extracting default UI files with the AddOn Kit. (string)
+
+
+
+http://wowprogramming.com/docs/api/CalendarGetNumDayEvents.html
+--
+Returns the number of calendar events on a given day
+numEvents = CalendarGetNumDayEvents(monthOffset, day)
+Arguments:
+monthOffset - Month to query relative to the calendar's currently displayed month (i.e. 0 for current month, 1 for next month, -1 for previous month) (number)
+day - Day of the month to query (number)
+Returns:
+numEvents - Number of events on the given day (number)
+
+
+

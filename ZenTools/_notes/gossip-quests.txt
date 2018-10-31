@@ -1,0 +1,447 @@
+/dump { GetGossipActiveQuests() }
+/run local a = { GetGossipActiveQuests() } ; print(#a) ; for i = 1,50,5  do if not a[i] then break end print(i..'. '..a[i]) end
+
+/run GetQuestLogIndexByID(questID)
+Quest log size:
+/run MAX_QUESTS = 25
+/run SelectGossipActiveQuest(1)
+/run SelectActiveQuest(1)
+/dump { GetGossipAvailableQuests() }
+/dump { GetGossipActiveQuests() }
+/run SelectGossipAvailableQuest(1)
+/run SelectAvailableQuest(1)
+--/dump GetActiveQuests()
+/dump GetGossipOptions()
+/dump GossipTitleButton1:GetID()
+/dump GetQuestID()
+QuestFrameProgressPanel
+QuestProgressCompleteButton_OnClick
+
+wow.exe -console
+exportInterfaceFiles art
+
+/run  GGAQ=GGAQ or GetGossipAvailableQuests; function GetGossipAvailableQuests() return "Mukk",nil,nil,nil,nil end
+/run  if GGAQ then GetGossipAvailableQuests=GGAQ end
+
+--[[
+local NUMGOSSIPBUTTONS = NUMGOSSIPBUTTONS or 32
+for  i = 1,NUMGOSSIPBUTTONS  do
+	local btn = _G['GossipTitleButton'..i]
+	if  not btn  then  break  end
+	if  btn:IsVisible()  then  LeaPlusLC:Print('Gossip '.. i ..': '.. btn:GetText())  end
+end
+--]]
+
+
+
+/run local quests = GetGossipActiveQuests() ; for  i = 1,#quests  do   print(#quests ..'/'.. i*2-1 .. ': ' .. tostring(quests[i*2-1]))  end  
+
+
+NPC "Gossip" Dialog functions
+CloseGossip - Ends an NPC "gossip" interaction
+ForceGossip - This function is not yet documented
+GetGossipActiveQuests - Returns a list of quests which can be turned in to the current Gossip NPC
+GetGossipAvailableQuests - Returns a list of quests available from the current Gossip NPC
+GetGossipOptions - Returns a list of interaction options for the Gossip NPC
+GetGossipText - Returns greeting or other text to be displayed in an NPC dialog
+GetNumGossipActiveQuests - Returns the number of quests which can be turned in to the current Gossip NPC
+GetNumGossipAvailableQuests - Returns the number of quests available from the current Gossip NPC
+GetNumGossipOptions - Returns the number of non-quest dialog options for the current Gossip NPC
+SelectGossipActiveQuest - Chooses a quest which can be turned in to the current Gossip NPC
+SelectGossipAvailableQuest - Chooses a quest available from the current Gossip NPC
+SelectGossipOption - Chooses and activates an NPC dialog option
+
+
+
+[13:03:52] [1]="Mogu Runes of Fate",
+[13:04:09] [1]=32719
+
+/eventtrace
+GOSSIP_SHOW
+GOSSIP_CLOSED
+QUEST_DETAIL
+MODIFIER_STATE_CHANGED
+
+
+http://wowprogramming.com/docs/api/ShowQuestComplete.html
+http://wowprogramming.com/docs/api/GetSuperTrackedQuestID.html
+
+
+
+
+
+http://wowprogramming.com/docs/api/SelectGossipOption.html
+--
+SelectGossipOption(index [, "text" [, confirm]])
+Chooses and activates an NPC dialog option. Results may vary according to the gossip option chosen; may end the gossip (firing a GOSSIP_CLOSED event) and start another interaction (firing a MERCHANT_SHOW, TRAINER_SHOW, TAXIMAP_OPENED, or similar event) or may continue the gossip with new text and new options (firing another GOSSIP_SHOW event).
+Calling this function with only the first argument may cause the GOSSIP_CONFIRM event to fire, indicating that the player needs to provide confirmation (or additional information) before the option will be activated. Confirmation is needed for certain options requiring the character to spend (e.g. when activating Dual Talent Specialization); additional information is needed for options such as those used when redeeming a Loot Card code from the WoW trading card game to receive an in-game item. In either case, the confirmation and additional information can be provided (as by the popup dialog in the default UI) by calling this function again with all three arguments.
+index - The option in the NPC gossip window to select, from 1 to GetNumGossipOptions() (number)
+text - Text to include when confirming the selection (string)
+confirm - true to confirm the selection; false or omitted otherwise (boolean)
+
+
+
+http://wowprogramming.com/docs/api/SelectActiveQuest.html
+--
+SelectActiveQuest(index)
+Selects a quest which can be turned in to the current Quest NPC. Usable after a QUEST_GREETING event. Causes the QUEST_PROGRESS event to fire, in which it is determined whether the player can complete the quest.
+Note: Most quest NPCs present active quests using the GetGossipActiveQuests() instead of this function.
+index - Index of a quest which can be turned in to the current Quest NPC (between 1 and GetNumActiveQuests()) (number)
+
+
+
+http://wowprogramming.com/docs/api/SelectGossipActiveQuest.html
+--
+SelectGossipActiveQuest(index)
+Chooses a quest which can be turned in to the current Gossip NPC. Causes the QUEST_PROGRESS event to fire, in which it is determined whether the player can complete the quest.
+index - Index of a quest which can be turned in to the current Gossip NPC (between 1 and GetNumGossipActiveQuests()) (number)
+
+
+
+http://wowprogramming.com/docs/api/GetGossipOptions.html
+--
+text, gossipType, ... = GetGossipOptions()
+Returns a list of interaction options for the Gossip NPC
+text - Text to be displayed for the gossip option (string)
+gossipType - Non-localized string indicating the type of gossip option (string)
+Banker - Begin a Bank interaction
+BattleMaster - Queue for a battleground instance
+Binder - Set the player's Hearthstone location
+Gossip - Talk to the NPC
+Tabard - Begin a Tabard design interaction
+Taxi - Begin a Taxi (flight master) interaction
+Trainer - Begin a Trainer interaction
+Vendor - Begin a Merchant interaction
+... - Additional text, gossipType values for each gossip option available (list)
+
+
+
+http://wowprogramming.com/docs/api/GetGossipActiveQuests.html
+--
+name, level, isTrivial, isComplete, isLegendary, ... = GetGossipActiveQuests()
+Returns a list of quests which can be turned in to the current Gossip NPC. For quests offered by the NPC, see GetGossipAvailableQuests().
+name - Name of the quest (string)
+level - Suggested character level for attempting the quest (number)
+isTrivial - 1 if the quest is considered "trivial" at the player's level (rewards no XP); otherwise nil (1nil)
+isComplete - 1 if the quest is complete; otherwise nil (1nil)
+isLegendary - 1 if the quest is legendary; otherwise nil (1nil)
+... - Additional name, level, isTrivial, isComplete, isLegendary values for each active quest (list)
+
+
+
+http://wowprogramming.com/docs/api/GetGossipAvailableQuests.html
+--
+name, level, isTrivial, frequency, isRepeatable, isLegendary, ... = GetGossipAvailableQuests()
+Returns a list of quests available from the current Gossip NPC. For quests which can be turned in to the NPC, see GetGossipActiveQuests().
+name - Name of the quest. (string)
+level - Suggested character level for attempting the quest. (number)
+isTrivial - True if the quest is trivial (gray), false otherwise. (boolean)
+frequency - A number indicating how often the quest can be repeated. (number)
+1 - Normal quest
+LE_QUEST_FREQUENCY_DAILY - Daily quest
+LE_QUEST_FREQUENCY_WEEKLY - Weekly quest
+isRepeatable - True if the quest is repeatable, false otherwise. (boolean)
+isLegendary - True if the quest is a legendary quest, false otherwise. (boolean)
+... - Additional name, level, isTrivial, frequency, isRepeatable, isLegendary values for each available quest (list)
+
+
+
+http://wowprogramming.com/docs/api/GetAutoQuestPopUp.html
+--
+questId, type = GetAutoQuestPopUp(index)
+Returns information about the AutoQuestPopup(s)
+index - Index of the quest popup (between 1 and GetNumAutoQuestPopUps()) (number)
+questId - (number)
+type - Popup type, can be either of the following (string)
+COMPLETE - Completing a quest
+OFFER - Offering a quest
+
+
+
+http://wowprogramming.com/docs/api/GetQuestLogSpecialItemInfo.html
+--
+link, icon, charges = GetQuestLogSpecialItemInfo(questIndex)
+Returns information about a usable item associated with a current quest. Available for a number of quests which involve using an item (i.e. "Use the MacGuffin to summon and defeat the boss", "Use this saw to fell 12 trees", etc.)
+See also Quest functions, Objectives tracking functions.
+questIndex - Index of a quest log entry with an associated usable item (between 1 and GetNumQuestLogEntries()) (number)
+Returns:
+link - A hyperlink for the item (string, hyperlink)
+icon - Path to an icon texture for the item (string)
+charges - Number of times the item can be used, or 0 if no limit (number)
+
+
+
+http://wowprogramming.com/docs/api/GetQuestLogIndexByID.html
+--
+index = GetQuestLogIndexByID(id)
+Returns the index at which a particular quest ID can be found in the log.
+id - A quest's internal ID number (number)
+index - Index of the quest in the quest log (between 1 and GetNumQuestLogEntries()) (number)
+
+
+
+http://wowprogramming.com/docs/api/GetQuestLogTitle.html
+--
+title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, questID, startEvent, displayQuestID, isOnMap, hasLocalPOI, isTask, isStory, isHidden = GetQuestLogTitle(questIndex)
+Returns information about an entry in the player's quest log
+questIndex - Index of a quest in the quest log (between 1 and GetNumQuestLogEntries()) (number)
+Returns:
+title - Title of the quest or header (string)
+level - Recommended character level for attempting the quest (number)
+suggestedGroup - For some group quests, the recommended number of group members for attempting the quest (number)
+isHeader - True if the entry is a group header; false if the entry is a quest (boolean)
+isCollapsed - True if the entry is a collapsed header; otherwise false (boolean)
+
+isComplete - Whether the quest is complete (number)
+-1 - The quest was failed
+1 - The quest was completed
+nil - The quest has yet to reach a conclusion
+frequency - A number indicating how often the quest can be repeated. (number)
+
+1 - Normal quest
+LE_QUEST_FREQUENCY_DAILY - Daily quest
+LE_QUEST_FREQUENCY_WEEKLY - Weekly quest
+questID - The quest's questID. (number)
+startEvent - True if the quest starts a event (not completed, even if it says it is); otherwise false (boolean)
+displayQuestID - Whether to display the questID before title or not (boolean)
+isOnMap - (boolean)
+hasLocalPOI - (boolean)
+isTask - (boolean)
+isStory - (boolean)
+isHidden - Hides Quest in Log (boolean)
+
+
+
+
+
+http://wowprogramming.com/docs/api/GetTrackedAchievements.html
+--
+... = GetTrackedAchievements()
+Returns numeric IDs of the achievements flagged for display in the objectives tracker UI
+... - List of numeric IDs for the achievements being tracked (list)
+
+
+
+http://wowprogramming.com/docs/api/IsTrackedAchievement.html
+--
+isTracked = IsTrackedAchievement(id)
+Returns whether an achievement is flagged for display in the objectives tracker UI
+id - The numeric ID of an achievement (number)
+isTracked - True if the achievement is flagged for tracking; otherwise false (boolean)
+
+
+
+http://wowprogramming.com/docs/api/AddTrackedAchievement.html
+--
+AddTrackedAchievement(id)
+Adds an achievement to the objectives tracker UI
+id - The numeric ID of an achievement (number)
+
+
+
+http://wowprogramming.com/docs/api/GetAchievementLink.html
+--
+link = GetAchievementLink(id)
+Returns a hyperlink representing the player's progress on an achievement.
+The tooltip associated with the hyperlink shows not only the details of the achievement itself, but also the completion of or progress towards the achievement by the player who produced the link.
+id - The numeric ID of an achievement (number)
+link - A hyperlink for the player's achievement (string)
+
+
+
+
+
+
+
+
+Quest functions
+AbandonQuest - Confirms abandoning a questconfirmation
+AcceptQuest - Accepts the quest offered by a questgiver
+AcknowledgeAutoAcceptQuest - This function is not yet documented
+AddAutoQuestPopUp - Create a quest popup in the WatchFrame
+AddQuestWatch - Adds a quest to the objectives tracker
+C_Questline.GetNumAvailableQuestlines - This function is not yet documented
+C_Questline.GetQuestlineInfoByIndex - This function is not yet documented
+C_TaskQuest.GetQuestObjectiveStrByQuestID - This function is not yet documented
+C_TaskQuest.GetQuestTitleByQuestID - Return the name of a quest with a given ID
+C_TaskQuest.GetQuestsForPlayerByMapID - This function is not yet documented
+CanAbandonQuest - Returns info about whether a quest with a given ID can be abandoned
+ClearAutoAcceptQuestSound - This function is not yet documented
+CloseQuest - Ends interaction with a questgiver
+CloseQuestChoice - This function is not yet documented
+CollapseQuestHeader - Collapses a header in the quest log
+CompleteQuest - Begins turning in a quest to a questgiver
+ConfirmAcceptQuest - Accepts a quest started by another group member
+DeclineQuest - Declines a quest.
+ExpandQuestHeader - Expands a quest header in the quest log
+GetAbandonQuestItems - Returns information about items that would be destroyed by abandoning a quest
+GetAbandonQuestName - Returns the name of the quest being abandoned
+GetActiveLevel - Returns the level of a quest which can be turned in to the current Quest NPC
+GetActiveTitle - Returns the name of a quest which can be turned in to the current Quest NPC
+GetAutoQuestPopUp - Returns information about the AutoQuestPopup(s)
+GetAvailableLevel - Returns the level of a quest available from the current Quest NPC
+GetAvailableQuestInfo - Returns the flags of an available quest during an NPC dialog
+GetAvailableTitle - Returns the name of a quest available from the current Quest NPC
+GetContainerItemQuestInfo - Returns quest information about an item in the player's bags
+GetDailyQuestsCompleted - Returns the number of daily quests the player has completed today
+GetDistanceSqToQuest - Returns a (squared) distance to the quest objective location
+GetGossipActiveQuests - Returns a list of quests which can be turned in to the current Gossip NPC
+GetGossipAvailableQuests - Returns a list of quests available from the current Gossip NPC
+GetGreetingText - Returns the greeting text displayed for quest NPCs with multiple quests
+GetNumActiveQuests - Returns the number of quests which can be turned in to the current Quest NPC
+GetNumAutoQuestPopUps - Returns number of AutoQuestPopup(s)
+GetNumAvailableQuests - Returns the number quests available from the current Quest NPC
+GetNumGossipActiveQuests - Returns the number of quests which can be turned in to the current Gossip NPC
+GetNumGossipAvailableQuests - Returns the number of quests available from the current Gossip NPC
+GetNumQuestChoices - Returns the number of available quest rewards from which the player must choose one upon completing the quest presented by a questgiver
+GetNumQuestCurrencies - This function is not yet documented
+GetNumQuestItemDrops - This function is not yet documented
+GetNumQuestItems - Returns the number of different items required to complete the quest presented by a questgiver
+GetNumQuestLeaderBoards - Returns the number of quest objectives for a quest in the player's quest log
+GetNumQuestLogChoices - Returns the number of available item reward choices for the selected quest in the quest log
+GetNumQuestLogEntries - Returns the number of quests and headers in the quest log
+GetNumQuestLogRewardCurrencies - This function is not yet documented
+GetNumQuestLogRewardFactions - This function is not yet documented
+GetNumQuestLogRewards - Returns the number of item rewards for the selected quest in the quest log
+GetNumQuestLogTasks - This function is not yet documented
+GetNumQuestPOIWorldEffects - This function is not yet documented
+GetNumQuestRewards - Returns the number of different items always awarded upon completing the quest presented by a questgiver
+GetNumQuestWatches - Returns the number of quests included in the objectives tracker
+GetNumWorldStateUI - Returns the number of world state UI elements
+GetObjectiveText - Returns a summary of objectives for the quest offered by a questgiver
+GetProgressText - Returns the quest progress text presented by a questgiver
+GetQuestBackgroundMaterial - Returns background display style information for a questgiver dialog
+GetQuestChoiceInfo - This function is not yet documented
+GetQuestChoiceOptionInfo - This function is not yet documented
+GetQuestChoiceRewardCurrency - This function is not yet documented
+GetQuestChoiceRewardFaction - This function is not yet documented
+GetQuestChoiceRewardInfo - This function is not yet documented
+GetQuestChoiceRewardItem - This function is not yet documented
+GetQuestCurrencyInfo - Returns information about currency rewarded/required for quest completion
+GetQuestDifficultyColor - Returns a table of color values indicating the difficulty of a quest's level as compared to the player'sblizzarduiframexml
+GetQuestFactionGroup - This function is not yet documented
+GetQuestGreenRange - Returns the level range in which a quest below the player's level still rewards XP
+GetQuestID - Returns the internal ID of a quest featured in the currently active NPC dialogue (available after a QUEST_DETAIL event)
+GetQuestIndexForTimer - Returns the quest log index of a timed quest's timer
+GetQuestIndexForWatch - Returns the quest log index of a quest in the objectives tracker
+GetQuestItemInfo - Returns information about items in a questgiver dialog
+GetQuestItemLink - Returns a hyperlink for an item in a questgiver dialog
+GetQuestLink - Returns a hyperlink of a specific quest
+GetQuestLogChoiceInfo - Returns information about available item rewards for the selected quest in the quest log
+GetQuestLogCompletionText - Returns the completion text for the selected quest in the quest log
+GetQuestLogCriteriaSpell - Returns the spell required by a quest, if any
+GetQuestLogGroupNum - Returns the suggested group size for the selected quest in the quest log
+GetQuestLogIndexByID - Returns the index at which a particular quest ID can be found in the log.
+GetQuestLogIsAutoComplete - This function is not yet documented
+GetQuestLogItemDrop - This function is not yet documented
+GetQuestLogItemLink - Returns a hyperlink for an item related to the selected quest in the quest log
+GetQuestLogLeaderBoard - Returns information about objectives for a quest in the quest log
+GetQuestLogPortraitGiver - Returns quest-related NPC info for portrait display
+GetQuestLogPortraitTurnIn - Returns quest-related NPC info for portrait display
+GetQuestLogPushable - Return whether the selected quest in the quest log can be shared to party members
+GetQuestLogQuestText - Returns the description and objective text for the selected quest in the quest log
+GetQuestLogQuestType - This function is not yet documented
+GetQuestLogRequiredMoney - Returns the amount of money required for the selected quest in the quest log
+GetQuestLogRewardCurrencyInfo - This function is not yet documented
+GetQuestLogRewardFactionInfo - This function is not yet documented
+GetQuestLogRewardInfo - Returns information about item rewards for the selected quest in the quest log
+GetQuestLogRewardMoney - Returns the money reward for the selected quest in the quest log
+GetQuestLogRewardSkillPoints - Returns skill point reward info for the selected quest in the quest log
+GetQuestLogRewardSpell - Returns information about the spell reward for the selected quest in the quest log
+GetQuestLogRewardTalents - Returns the talent point reward for the selected quest in the quest log
+GetQuestLogRewardTitle - Returns the title reward for the selected quest in the quest log
+GetQuestLogRewardXP - Returns the experience reward at the player's level for the selected quest in the quest log
+GetQuestLogSelection - Returns the index of the selected quest in the quest log
+GetQuestLogSpecialItemCooldown - Returns cooldown information about an item associated with a current quest
+GetQuestLogSpecialItemInfo - Returns information about a usable item associated with a current quest
+GetQuestLogSpellLink - Returns a hyperlink for a spell in the selected quest in the quest log
+GetQuestLogTaskInfo - This function is not yet documented
+GetQuestLogTimeLeft - Returns time remaining for the selected quest in the quest log
+GetQuestLogTitle - Returns information about an entry in the player's quest log
+GetQuestMoneyToGet - Returns the amount of money required to complete the quest presented by a questgiver
+GetQuestObjectiveInfo - This function is not yet documented
+GetQuestPOIBlobCount - This function is not yet documented
+GetQuestPOILeaderBoard - This function is not yet documented
+GetQuestPOIWorldEffectInfo - This function is not yet documented
+GetQuestPOIs - This function is not yet documented
+GetQuestPortraitGiver - Returns quest-related NPC info for portrait display
+GetQuestPortraitTurnIn - Returns quest-related NPC info for portrait display
+GetQuestProgressBarPercent - Returns the completion percent of a quest with a bar. Such as apexiszones.
+GetQuestResetTime - Returns the amount of time remaining until the daily quest period resets
+GetQuestReward - Finishes turning in a quest to a questgiver, selecting an item reward if applicable
+GetQuestSortIndex - This function is not yet documented
+GetQuestSpellLink - Returns a hyperlink for a spell in a questgiver dialog
+GetQuestTagInfo - This function is not yet documented
+GetQuestText - Returns the text for the quest offered by a questgiver
+GetQuestTimers - Returns a list of the times remaining for any active timed quests
+GetQuestWatchIndex - Returns the quest watch (objective tracker) index of a quest in the quest log
+GetQuestWatchInfo - This function is not yet documented
+GetQuestWorldMapAreaID - Returns the map and floor for a given quest
+GetQuestsCompleted - Gets a table containing the quests the player has completed
+GetRewardMoney - Returns the amount of money awarded when completing a quest
+GetRewardSpell - Returns information about a spell awarded when completing a quest
+GetRewardTalents - Returns the talent points awarded when completing a quest
+GetRewardText - Returns questgiver dialog to be displayed when completing a quest
+GetRewardTitle - Returns the title awarded when completing a quest
+GetRewardXP - Returns the experience awarded when completing a quest
+GetSuggestedGroupNum - Returns the suggested group size for attempting the quest currently offered by a questgiver
+GetSuperTrackedQuestID - This function is not yet documented
+GetTitleText - Returns the title text for the quest presented by a questgiver
+GetWorldStateUIInfo - Returns information about a world state UI element
+HaveQuestData - This function is not yet documented
+IsActiveQuestLegendary - This function is not yet documented
+IsActiveQuestTrivial - Returns whether a quest which can be turned in to the current Quest NPC is trivial at the player's level
+IsAvailableQuestTrivial - Returns whether a quest available from the current Quest NPC is trivial at the player's level
+IsBreadcrumbQuest - This function is not yet documented
+IsCurrentQuestFailed - Returns whether the player has failed the selected quest in the quest log
+IsQuestCompletable - Returns whether the player can complete the quest presented by a questgiver
+IsQuestComplete - This function is not yet documented
+IsQuestFlaggedCompleted - Returns whether a quest is completed by the player or not
+IsQuestHardWatched - This function is not yet documented
+IsQuestLogSpecialItemInRange - Returns whether the player's target is in range for using an item associated with a current quest
+IsQuestSequenced - This function is not yet documented
+IsQuestTask - This function is not yet documented
+IsQuestWatched - Returns whether a quest from the quest log is listed in the objectives tracker
+IsStoryQuest - This function is not yet documented
+IsUnitOnQuest - Returns whether a unit is on one of the quests in the player's quest log
+IsUnitOnQuestByQuestID - This function is not yet documented
+PlayAutoAcceptQuestSound - This function is not yet documented
+ProcessQuestLogRewardFactions - This function is not yet documented
+QuestChooseRewardError - Causes the default UI to display an error message indicating that the player must choose a reward to complete the quest presented by a questgiver
+QuestFlagsPVP - Returns whether accepting the offered quest will flag the player for PvP
+QuestGetAutoAccept - This function is not yet documented
+QuestGetAutoLaunched - This function is not yet documented
+QuestHasPOIInfo - This function is not yet documented
+QuestIsDaily - This function is not yet documented
+QuestIsFromAreaTrigger - This function is not yet documented
+QuestIsWeekly - This function is not yet documented
+QuestLogPushQuest - Shares a quest with other group members
+QuestLogShouldShowPortrait - This function is not yet documented
+QuestMapUpdateAllQuests - This function is not yet documented
+QuestPOIGetIconInfo - Returns information about a QuestPOI icon
+QuestPOIGetQuestIDByIndex - This function is not yet documented
+QuestPOIGetQuestIDByVisibleIndex - This function is not yet documented
+QuestPOIGetSecondaryLocations - This function is not yet documented
+QuestPOIUpdateIcons - This function is not yet documented
+RemoveAutoQuestPopUp - Remove AutoQuestPopup
+RemoveQuestWatch - Removes a quest from the objectives tracker
+SelectActiveQuest - Selects a quest which can be turned in to the current Quest NPC
+SelectAvailableQuest - Chooses a quest available from the current Quest NPC
+SelectGossipActiveQuest - Chooses a quest which can be turned in to the current Gossip NPC
+SelectGossipAvailableQuest - Chooses a quest available from the current Gossip NPC
+SelectQuestLogEntry - Selects a quest from the quest log
+SendQuestChoiceResponse - This function is not yet documented
+SetAbandonQuest - Begins the process of abandoning a quest in the player's quest log
+SetSuperTrackedQuestID - This function is not yet documented
+ShowQuestComplete - This function is not yet documented
+ShowQuestOffer - This function is not yet documented
+SortQuestWatches - Sorts the quests listed in the watch frame based on the set criteria
+UnitIsQuestBoss - This function is not yet documented
+UseQuestLogSpecialItem - Uses the item associated with a current questprotected
+
+
+
+
+
+
+

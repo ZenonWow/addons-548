@@ -1,0 +1,115 @@
+http://wowwiki.wikia.com/wiki/Removing_Blizzard_default_frames
+--
+General about hiding framesEdit
+To hide a frame, you have to enter the frame name, followed by the command :Hide()
+
+Example:
+
+ MyFrame:Hide()
+Hides a frame called "MyFrame".
+
+If you use this in a Macro (not in an Addon), you have to add a /script-tag before:
+
+/script MyFrame:Hide()
+
+Show a hidden frameEdit
+Addon:
+
+ MyFrame:Show()
+Macro:
+
+/script MyFrame:Show()
+
+NOTE: Most frames have event handlers so even if you hide it, it can pop back up as a result of an event handler calling it's Show function. To avoid this you need to prevent the frame from getting these events or from executing the code that makes the frame show. Most Blizzard's frames (if not all) use a single function to handle all events, which makes it easier for us. When hidding the frame you can make the OnEvent function point to nil so no function gets called:
+
+ PlayerFrame:SetScript("OnEvent", nil);
+ PlayerFrame:Hide();
+And then restore the original function when you want to show the frame again:
+
+ PlayerFrame:SetScript("OnEvent", PlayerFrame_OnEvent);
+ PlayerFrame:Show();
+You will have to go through the code for each frame to get the exact functions, and with some (like target or pet) do some checks before actually showing it, i.e. Make sure the unit exists.
+
+In the following there are listed some frames you might want to hide:
+
+Unit Frames Edit
+Player Window Edit
+The Player window in the upper left that is always shown for yourself is PlayerFrame.
+
+  PlayerFrame:Hide()
+Party Window Edit
+The windows that are shown for group members are PartyMemberFrameX, where X = 1..4. All these can be hidden at once by the function HidePartyFrame(), provided by the default party frame lua code.
+
+ HidePartyFrame() -- hides all party members
+ PartyMemberFrameX:Hide() -- hides a specified party member (X=1/2/3/4)
+Minimap-Frames Edit
+To hide the minimap completely, enter:
+
+ MinimapCluster:Hide()
+Worldmap Button Edit
+The little button at the topleft of the minimap that toggles the worldmap
+
+  MiniMapWorldMapButton:Hide()
+Calendar Button Edit
+  GameTimeFrame:Hide()
+Zoom Buttons Edit
+  MinimapZoomIn:Hide() -- hides the zoom-in-button (+)
+  MinimapZoomOut:Hide() -- hides the zoom-out-button (-)
+Action Bars Edit
+Main Action Bar Edit
+Main bar which has a row of shortcuts (at the bottomleft)
+
+ MainActionBar:Hide()
+Main Menu Bar Edit
+Menu bar which has various WoW Options, Character Info, Social etc.
+
+  MainMenuBar:Hide()
+Main Menu Bar Endcaps Edit
+The gryphons that are at the sides of the bottom bar.
+
+  MainMenuBarLeftEndCap:Hide() -- to hide the left one
+  MainMenuBarRightEndCap:Hide() -- to hide the right one
+Shapeshift (Stance/Form/Stealth) Bar Edit
+  ShapeshiftBarFrame:Hide()
+Additional Action Bars Edit
+Bottom Left Edit
+Bottom left action bar (Above the Main Action Bar, left side)
+
+  MultiBarBottomLeft:Hide()
+Bottom Right Edit
+Bottom right action bar (Above the Main Action Bar, right side)
+
+  MultiBarBottomRight:Hide()
+Left Edit
+First action bar below minimap
+
+  MultiBarLeft:Hide()
+Right Edit
+Second action bar below minimap
+
+  MultiBarRight:Hide()
+Other Frames Edit
+UI Parent Edit
+Hides the UI Parent same as if you press ALT+Z
+
+ UIParent:Hide()
+Chat Edit
+The default chat frame.
+
+  ChatFrame1:Hide()
+Experience Bar Edit
+This is the long purple (or blue, if rested) bar on the default UI that shows your experience
+
+  MainMenuExpBar:Hide()
+Categories:
+HOWTOs Add category
+Recent Wiki Activity
+How to play a rogue
+Wikikinetic  • 3 hours ago
+Server:Jubei'Thos US
+A FANDOM user  • 5 hours ago
+Priestess Alathea
+Raylan13  • 6 hours ago
+Jandria
+Raylan13  • 6 hours ago
+ 

@@ -1,0 +1,9 @@
+## Interface: 50400
+## Title: ZenShortcuts
+## Notes: Usability bindings
+## Author: Mongusious
+## X-Email: 
+
+#Bindings.xml  -- implicit
+Bindings.lua
+

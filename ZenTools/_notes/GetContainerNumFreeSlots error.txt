@@ -1,0 +1,16 @@
+/run if GetContainerNumFreeSlots_ then GetContainerNumFreeSlots= GetContainerNumFreeSlots_ end
+
+GetContainerNumFreeSlots_= GetContainerNumFreeSlots_ or GetContainerNumFreeSlots
+function GetContainerNumFreeSlots(i)
+	freeSlots, bagFamily = GetContainerNumFreeSlots(i);
+	ChatFrame1:AddMessage('free=' ..freeSlots.. ', family=' ..bagFamily.. ' = GetContainerNumFreeSlots(' ..i.. ')')
+	return freeSlots, bagFamily
+end
+
+
+
+/run SetBinding('SHIFT-A',nil)
+/run SetBinding('SHIFT-S',nil)
+/dump GetBindingByKey('SHIFT-A')
+/dump GetBindingKey('CLICK SilverDragonPopupButton:LeftButton')
+/dump GetBindingKey('CLICK SilverDragonMacroButton:LeftButton')

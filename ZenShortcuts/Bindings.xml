@@ -1,0 +1,82 @@
+<Bindings>
+	
+	<!-- UI Panels header="INTERFACE" -->
+	
+	
+	<!-- Default TOGGLEGAMEMENU is way too overloaded -->
+	<Binding name="TOGGLEGAMEMENUONLY"
+		header="ZenShortcuts"
+		>
+		-- description="Don't Clear Target and close every frame on screen, just open the GameMenu"
+		ToggleGameMenuOnly()
+	</Binding>
+	
+	<!-- /macro -->
+	<Binding name="TOGGLEMACROS"
+		>
+		-- description="Open macro editor"
+		ToggleMacroFrame()
+	</Binding>
+	
+	<!-- /fstack -->
+	<Binding name="TOGGLEFRAMESTACK"
+		>
+		-- description="Show/hide frame inspector"
+		ToggleFrameStack()
+	</Binding>
+	
+	<Binding name="TOGGLEEVENTTRACE"
+		>
+		-- description="Show/hide event trace"
+		ToggleEventTrace()
+	</Binding>
+	
+	<Binding name="TOGGLELOOTHISTORY"
+		>
+		-- description="Show/hide loot history frame"
+		ToggleLootHistoryFrame()
+	</Binding>
+	
+	
+	
+	<!-- Default: TOGGLECHARACTER0 -->
+	<Binding name="TOGGLECHARACTEREQUIPMENT">
+		-- description="Go directly to Equipment Manager in Character Frame"
+		ToggleCharacterEquipment()
+	</Binding>
+	
+	<!-- Default: TOGGLETALENTS -->
+	<Binding name="TOGGLESPECIALIZATION">
+		-- description="Almost the same as builtin Toggle Talents that actually opens Specializations: it does so even if last time you opened the Talents Tab"
+		ToggleTalentFrame(SPECIALIZATION_TAB)
+	</Binding>
+	
+	<!-- Should override default TOGGLETALENTS -->
+	<Binding name="TOGGLETALENTSTAB">
+		-- description="Open the actual Talents Tab on the Talent Frame"
+		ToggleTalentFrame(TALENTS_TAB)
+	</Binding>
+	
+	
+	
+	<!-- Should override default FLIPCAMERAYAW to make it usable: looks back when pushed, looks forward when released -->
+	<Binding name="LOOKBACKWHILEPUSHED"
+		runOnUp="true"
+		>
+		-- description="See who's following: Look back when pushed, look forward when released"
+		FlipCameraYaw(180)
+	</Binding>
+	
+	<Binding name="DELETEOREJECT"
+		>
+		-- description="Delete item on cursor  or  eject passengers"
+		ZenShortcuts.DeleteItemOrEjectPassengers()
+	</Binding>
+	
+	<Binding name="CLICK ClearTargetButton:LeftButton"
+		>
+		-- description="Unselect Target"
+		-- CLICKs the ClearTargetButton without any code here
+	</Binding>
+	
+</Bindings>

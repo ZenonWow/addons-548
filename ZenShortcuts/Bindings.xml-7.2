@@ -1,0 +1,69 @@
+<Bindings>
+	
+	<!-- UI Panels header="INTERFACE" -->
+	<!-- Default TOGGLEGAMEMENU is way too overloaded -->
+	<Binding name="TOGGLEGAMEMENUONLY"
+		header="MyBindings"
+		>
+		-- description="Don't Clear Target and close every frame on screen, just open the GameMenu"
+		ToggleGameMenuOnly();
+	</Binding>
+	
+	<!-- /macro -->
+	<Binding name="TOGGLEMACROS"
+		header="MyBindings"
+		>
+		-- description="Open macro editor"
+		ShowMacroFrame();
+	</Binding>
+	
+	<!-- Default: TOGGLECHARACTER0 -->
+	<Binding name="TOGGLECHARACTEREQUIPMENT"
+		header="MyBindings"
+		>
+		-- description="Go directly to Equipment Manager in Character Frame"
+		ToggleCharacterEquipment();
+	</Binding>
+	
+	<!-- Default: TOGGLETALENTS -->
+	<Binding name="TOGGLESPECIALIZATION"
+		header="MyBindings"
+		>
+		-- description="Almost the same as builtin Toggle Talents that actually opens Specializations: it does so even if last time you opened the Talents Tab"
+		ToggleTalentFrame(SPECIALIZATION_TAB);
+	</Binding>
+	
+	<!-- Should override default TOGGLETALENTS -->
+	<Binding name="TOGGLETALENTSTAB"
+		header="MyBindings"
+		>
+		-- description="Open the actual Talents Tab on the Talent Frame"
+		ToggleTalentFrame(TALENTS_TAB);
+	</Binding>
+	
+	
+	<!-- Should override default FLIPCAMERAYAW to make it usable: looks back when pushed, looks forward when released -->
+	<Binding name="LOOKBACKWHILEPUSHED"
+		runOnUp="true"
+		header="MyBindings"
+		>
+		-- description="See who's following: Look back when pushed, look forward when released"
+		FlipCameraYaw(180);
+	</Binding>
+	
+	
+	<Binding name="DELETEOREJECT"
+		header="MyBindings"
+		>
+		-- description="Delete item on cursor  or  eject passengers"
+		_G.DeleteItemOrEjectPassengers()
+	</Binding>
+	
+	<Binding name="PRINTUNITAURAS"
+		header="MyBindings"
+		>
+		-- description="Print mouseover / target / focus unit's auras to General chat frame"
+		_G.PrintUnitAuras()
+	</Binding>
+	
+</Bindings>

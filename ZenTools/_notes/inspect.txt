@@ -1,0 +1,42 @@
+Inspect functions
+CanInspect - Returns whether a unit can be inspected
+ClearInspectPlayer - Ends inspection of another character
+GetInspectArenaData - This function is not yet documented
+GetInspectHonorData - Returns PvP honor information about the currently inspected unit
+GetInspectRatedBGData - This function is not yet documented
+GetInspectSpecialization - Return specialization global ID of inspected player.
+GetInspectTalent - This function is not yet documented
+HasInspectHonorData - Returns whether PvP honor and arena data for the currently inspected unit has been downloaded from the server
+NotifyInspect - Marks a unit for inspection and requests talent data from the serverserver
+RequestInspectHonorData - Requests PvP honor and arena data from the server for the currently inspected unitserver
+
+
+
+http://wowprogramming.com/docs/api/GetInspectHonorData.html
+--
+todayHK, todayHonor, yesterdayHK, yesterdayHonor, lifetimeHK, lifetimeRank = GetInspectHonorData()
+Returns PvP honor information about the currently inspected unit. Only available if data has been downloaded from the server; see HasInspectHonorData() and RequestInspectHonorData().
+Returns:
+todayHK - Number of honorable kills on the current day (number)
+todayHonor - Amount of honor points earned on the current day (number)
+yesterdayHK - Number of honorable kills on the previous day (number)
+yesterdayHonor - Amount of honor points earned on the previous day (number)
+lifetimeHK - Lifetime total of honorable kills scored (number)
+lifetimeRank - Highest rank earned in the pre-2.0 PvP reward system; see GetPVPRankInfo() for rank display information (number)
+
+
+
+http://wowprogramming.com/docs/api/GetInspectHonorData.html
+--
+todayHK, todayHonor, yesterdayHK, yesterdayHonor, lifetimeHK, lifetimeRank = GetInspectHonorData()
+Returns PvP honor information about the currently inspected unit. Only available if data has been downloaded from the server; see HasInspectHonorData() and RequestInspectHonorData().
+Returns:
+todayHK - Number of honorable kills on the current day (number)
+todayHonor - Amount of honor points earned on the current day (number)
+yesterdayHK - Number of honorable kills on the previous day (number)
+yesterdayHonor - Amount of honor points earned on the previous day (number)
+lifetimeHK - Lifetime total of honorable kills scored (number)
+lifetimeRank - Highest rank earned in the pre-2.0 PvP reward system; see GetPVPRankInfo() for rank display information (number)
+
+
+

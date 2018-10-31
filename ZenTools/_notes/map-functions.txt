@@ -1,0 +1,290 @@
+/dump GetContinentMapInfo()
+/dump GetContinentMaps()
+/dump GetMapHierarchy()
+/dump GetWorldLocFromMapPos()
+/dump GetCurrentMapHeaderIndex()
+
+CRITERIA_UPDATE
+
+
+GetMapContinents - Returns a list of map continents names
+GetMapHierarchy - This function is not yet documented
+GetMapInfo - Returns information about the current world map texture
+GetMapLandmarkInfo - Returns information about a map landmark
+GetMapNameByID - Returns the localized name of a given map
+GetMapOverlayInfo - Returns information about a world map overlay
+GetMapSubzones - Returns the map subzones for a given zone
+GetMapZones - Returns the map zones for a given continent
+
+GetCurrentMapContinent - Returns the current world map continent
+GetCurrentMapZone - Returns the current world map zone
+GetCurrentMapAreaID - Returns an ID number for the current map zone
+GetCurrentMapDungeonLevel - Returns which map image is currently selected on the world map (for zones which use more than one map image)
+GetCurrentMapHeaderIndex - This function is not yet documented
+GetCurrentMapLevelRange - Returns the level range of the currently shown zone.
+
+GetWorldLocFromMapPos - This function is not yet documented
+GetWorldMapTransformInfo - This function is not yet documented
+GetWorldMapTransforms - This function is not yet documented
+InitWorldMapPing - Initializes the frame used to display the character location "ping" on the World Mapinternal
+UpdateWorldMapArrow - This function is not yet documented
+
+
+
+
+/dump GetCurrentMapContinent(), GetCurrentMapZone(), GetCurrentMapAreaID()
+--
+continent = GetCurrentMapContinent()
+Returns the current world map continent
+continent - Index of the world map's current continent (in the list returned by GetMapContinents(), or one of the following values) (number)
+-1 - Cosmic map
+0 - Azeroth
+1 - Kalimdor
+2 - Eastern Kingdoms
+3 - Outland
+4 - Northrend
+5 - The Maelstrom
+6 - Pandaria
+7 - Draenor
+
+
+
+zone = GetCurrentMapZone()
+Returns the current world map zone
+zone - Index of a zone within the continent (in the list returned by GetMapZones(GetCurrentMapContinent())), or 0 for the continent map (number)
+
+
+
+areaID = GetCurrentMapAreaID()
+Returns an ID number for the current map zone.
+Currently only used in the default UI to determine whether the Wintergrasp map is showing (and if so, display the time remaining until the next battle).
+areaID - A number identifying the current map zone (number)
+
+
+
+dungeonLevel, x1, y1, x2, y2 = GetCurrentMapDungeonLevel()
+Returns which map image is currently selected on the world map (for zones which use more than one map image). Used in zones with more than one "floor" or area, such as Dalaran and several Wrath of the Lich King dungeons and raids. More than one map image may contain the player's current location; if the world map has not been explicitly set to show a particular area, this returns whichever is the "best" match.
+The coordinates provided are used to place the different dungeon maps relative to each other.
+dungeonLevel - Index of the current map image (number)
+x1 - The x coordinate of the left side of the map (number)
+y1 - The y coordinate of the top side of the map (number)
+x2 - The x coordinate of the right side of the map (number)
+y2 - The y coordinate of the bottom side of the map (number)
+
+
+
+
+
+... = GetMapContinents()
+Returns a list of map continents names
+... - A list of strings, each the localized name of a map continent (list)
+
+
+
+zoneid1,zoneid2,zoneid3... = GetAreaMaps([table])
+Returns all the IDs of zones available ingame.. When iterating through ALL the zones in the game, you should go over these, instead of something like "for i=1,2000 do ..."
+table - A table to put results into, instead of returning them. (table)
+zoneid1,zoneid2,zoneid3... - A list of all the zone IDs in the game. (list)
+
+
+
+... = GetMapZones(continentIndex)
+Returns the map zones for a given continent
+continentIndex - Index of a continent (in the list returned by GetMapContinents()) (number)
+... - A list of numbers and strings in pairs, each the ID of a zone within the continent and its localized name (list)
+
+
+
+zoneid1,zonename1, zoneid2,zonename2, zoneid3,zonename3... = GetMapSubzones(zoneID)
+Returns the map subzones for a given zone
+zoneID - ID of a zone (in the list returned by GetMapZones()) (number)
+zoneid1,zonename1, zoneid2,zonename2, zoneid3,zonename3... - A list of numbers and strings in pairs, each the ID of a subzone within the zone and its localized name (list)
+
+
+
+http://wowprogramming.com/docs/api/GetMapNameByID.html
+--
+mapname = GetMapNameByID(id)
+Returns the localized name of a given map. Map IDs can be obtained using GetCurrentMapAreaID().
+Note that you cannot obtain names of multiple floors of a map using this function. Oddly enough, these are stored in global variables, as follows:
+local floorName = _G["DUNGEON_FLOOR_" .. strupper(GetMapInfo() or "") .. floorNum]
+id - The unique numeric map ID (number, mapId)
+mapname - Localized map name. (string)
+Examples:
+local name = GetMapNameByID(21)
+-- == "Silverpine Forest"
+
+
+
+mapID, areaID, displayMapID, locLeft, locRight, locTop, locBottom, minLevel, maxLevel, flags = GetAreaMapInfo(areaMapID)
+Get information about map zone based on mapId
+areaMapID - MapId of the zone. (number)
+mapID - ()
+areaID - ()
+displayMapID - ()
+locLeft - ()
+locRight - ()
+locTop - ()
+locBottom - ()
+minLevel - ()
+maxLevel - ()
+flags - ()
+
+
+
+
+
+
+
+SetMapZoom(continentIndex [, zoneIndex])
+Sets the world map to show a specific zone or continent
+continentIndex - Index of a continent to display (in the list returned by GetMapContinents(), or one of the following values) (number)
+-1 - Cosmic map
+0 - Entire Azeroth map
+1 - Kalimdor
+2 - Eastern Kingdoms
+3 - Outland
+4 - Northrend
+5 - The Maelstrom
+6 - Pandaria
+7 - Draenor
+zoneIndex - Index of a zone within the continent to display (in the list returned by GetMapZones(continentIndex)), or omitted to show the continent map (number)
+-- show the cosmic map
+SetMapZoom( -1 )
+-- show all the azeroth continents
+SetMapZoom( 0 )
+-- show the outland continent
+SetMapZoom( 3 )
+-- show dun morogh
+SetMapZoom( 2, 7)
+
+
+
+SetMapByID(id)
+Sets the map based on a specified ID. For example, if you are an Undead character in the starting area, which is map ID 21, you can open your map and run SetMapByID(22) to change it to Western Plaguelands. In fact, you can run that anywhere If you are a fresh undead in tirisfal glades(MapAreaID:21), you get your map out, then you use SetMapByID(22) it will change to WPL
+id - The unique numeric map ID, can be obtained from GetCurrentMapAreaID() (number)
+-- Set the map to Tirisfal Glades
+SetMapByID(21)
+-- Set the map to Western Plaguelands
+SetMapByID(22)
+
+
+
+Sets the world map to show the zone in which the player is located
+SetMapToCurrentZone()
+
+
+
+
+
+http://wowprogramming.com/docs/api/GetPlayerMapPosition.html
+--
+unitX, unitY = GetPlayerMapPosition("unit")
+Returns the position of a unit in the player's party or raid on the world map. Returns 0,0 if the unit's location is not visible on the current world map.
+unit - A unit in the player's party or raid (string, unitID)
+unitX - Horizontal position of the unit relative to the zone map (0 = left edge, 1 = right edge) (number)
+unitY - Vertical position of the unit relative to the zone map (0 = top, 1 = bottom) (number)
+
+
+
+http://wowprogramming.com/docs/api/GetPlayerFacing.html
+--
+facing = GetPlayerFacing()
+Returns the player's orientation (heading). Indicates the direction the player model is (normally) facing and in which the player will move if he begins walking forward, not the camera orientation.
+facing - Direction the player is facing (in radians, 0 = north, values increasing counterclockwise) (number)
+Value is equal to 0 for North and increases counterclockwise. Full 360° is equal to 2π.
+North           0   −0
+North West   .25π   ~0.78538751602173
+West          .5π   ~1.5707750320435
+South           π   ~3.1415500640870
+East         1.5π   ~4.7124104499817
+North East  1.75π   ~5.4977979660034
+
+
+
+http://wowprogramming.com/docs/api/UnitDistanceSquared.html
+--
+distanceSquared, checkedDistance = UnitDistanceSquared("unit")
+Returns the squared distance to a unit in the player's group. The distance returned appears to work from anywhere (even across continents and instance boundaries, although the answer is of dubious value).
+unit - A unit in the player's party or raid (string, unitID)
+distanceSquared - Distance to that unit, squared (number)
+checkedDistance - true if the distance result is valid, false otherwise (eg. unit not found) (boolean)
+
+
+
+
+http://wowprogramming.com/docs/api/GetMapInfo.html
+--
+mapFileName, textureHeight, textureWidth, isMicroDungeon, microDungeonMapName = GetMapInfo()
+Returns information about the current world map texture. World map images are broken into several tiles; the full texture paths follow the format "Interface\\WorldMap\\"..mapFileName.."\\"..mapFileName..i, where i is a number between 1 and 12 (or in a zone with multiple area images, "Interface\\WorldMap\\"..mapFileName.."\\"..mapFileName..dungeonLevel.."_"..i, where dungeonLevel is a number between 1 and GetNumDungeonMapLevels()).
+World map images are 4 tiles wide and 3 tiles high.
+mapFileName - Unique part of the path to the world map textures. (string)
+textureHeight - Height of the combined map texture tiles. (number)
+textureWidth - Width of the combined map texture tiles. (string)
+isMicroDungeon - Whether or not the current map area is a Micro Dungeon. (boolean)
+microDungeonMapName - Unique part of the path to the world map textures. (string)
+
+
+
+
+
+ProcessMapClick(clickX, clickY)
+Possibly changes the WorldMap based on a mouse click. May change the map zone or zoom based on the click location: e.g. if the world map shows Dragonblight and one clicks in the area labeled "Wintergrasp" on the map, the current map zone changes to show Wintergrasp.
+clickX - Horizontal position of the click relative to the current world map (0 = left edge, 1 = right edge) (number)
+clickY - Vertical position of the click relative to the current world map (0 = top, 1 = bottom) (number)
+
+
+
+
+
+
+	
+	local continents = {GetMapContinents()}
+	local numContinents = #continents
+	local continent = 0
+	local zones
+	local numZones
+
+	for i = 1, numContinents, 2 do
+		continent = continent + 1
+		zones = {GetMapZones(continent)}
+		numZones = #zones
+
+		for j = 1, numZones, 2 do
+			IsAcceptedZone[continent][zones[j]] = false
+		end
+	end
+
+	IsAcceptedZone[1][13] = true -- Kalimdor
+	IsAcceptedZone[2][14] = true -- Eastern Kingdoms
+	IsAcceptedZone[3][466] = true -- Outland
+	IsAcceptedZone[4][485] = true -- Northrend
+	IsAcceptedZone[5][751] = true -- The Maelstrom
+	IsAcceptedZone[6][862] = true -- Pandaria
+	IsAcceptedZone[7][962] = true -- Draenor
+
+	-- Vashj'ir
+	for k, v in ipairs({610, 613, 614, 615}) do
+		IsAcceptedZone[2][v] = false
+	end
+
+	-- Dalaran
+	for k, v in ipairs({485, 504, 510, 924}) do -- Northrend, Dalaran#504, Crystalsong Forest, Dalaran#924
+		IsAcceptedZone[4][v] = false
+	end
+
+
+
+
+
+
+
+
+
+				for _, node in ipairs(widget.module.nodes) do
+					--TomTomLite:AddWaypoint
+					TomTom:AddMFWaypoint(node.area, node.level, node.x, node.y, {
+						title = string_format("Candy Bucket (%d)", node.quest),
+					})
+				end
+
