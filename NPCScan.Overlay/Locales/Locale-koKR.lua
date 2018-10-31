@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan.Overlay by Saiket                                                 *
+  * NPCScan.Overlay by Saiket                                                 *
   * Locales/Locale-koKR.lua - Localized string constants (ko-KR).              *
   ****************************************************************************]]
 
@@ -801,7 +801,7 @@ private.L.NPCs["6581"] = "우두머리 라바사우루스"
 -- private.L.NPCs["9736"] = "Quartermaster Zigris"
 -- private.L.NPCs["99"] = "Morgaine the Sly"
 
--- private.L["BUTTON_TOOLTIP_LINE1"] = "|cffffee00 _NPCScan.Overlay|r"
+-- private.L["BUTTON_TOOLTIP_LINE1"] = "|cffffee00 NPCScan.Overlay|r"
 -- private.L["BUTTON_TOOLTIP_LINE2"] = "Toggle World Map paths"
 -- private.L["BUTTON_TOOLTIP_LINE3"] = "Toggle World Map key"
 -- private.L["BUTTON_TOOLTIP_LINE4"] = "Toggle Mini Map paths"

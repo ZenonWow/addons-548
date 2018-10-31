@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan.Overlay by Saiket                                                 *
+  * NPCScan.Overlay by Saiket                                                 *
   * Locales/Locale-zhCN.lua - Localized string constants (zh-CN).              *
   ****************************************************************************]]
 
@@ -801,7 +801,7 @@ private.L.NPCs["9718"] = "霍克·巴什古德"
 private.L.NPCs["9736"] = "军需官兹格雷斯"
 private.L.NPCs["99"] = "狡猾的莫加尼"
 
-private.L["BUTTON_TOOLTIP_LINE1"] = "|cffffee00 _NPCScan.Overlay|r"
+private.L["BUTTON_TOOLTIP_LINE1"] = "|cffffee00 NPCScan.Overlay|r"
 private.L["BUTTON_TOOLTIP_LINE2"] = "|cffd6ff00点击：|r切换世界地图路径" -- Needs review
 private.L["BUTTON_TOOLTIP_LINE3"] = "|cffd6ff00Shift-点击：|r切换世界地图标记" -- Needs review
 private.L["BUTTON_TOOLTIP_LINE4"] = "|cffd6ff00右击：|r切换小地图路径" -- Needs review

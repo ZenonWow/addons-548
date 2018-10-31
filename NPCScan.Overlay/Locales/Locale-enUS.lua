@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan.Overlay by Saiket                                                 *
+  * NPCScan.Overlay by Saiket                                                 *
   * Locales/Locale-enUS.lua - Localized string constants (en-US).              *
   ****************************************************************************]]
 
@@ -794,7 +794,7 @@ select( 2, ... ).L = setmetatable( {
 
 	};
 
-	BUTTON_TOOLTIP_LINE1 = "|cffffee00 _NPCScan.Overlay|r",
+	BUTTON_TOOLTIP_LINE1 = "|cffffee00 NPCScan.Overlay|r",
 	BUTTON_TOOLTIP_LINE2 = "Toggle World Map paths",
 	BUTTON_TOOLTIP_LINE3 = "Toggle World Map key",
 	BUTTON_TOOLTIP_LINE4 = "Toggle Mini Map paths",
@@ -843,11 +843,11 @@ select( 2, ... ).L = setmetatable( {
 } );
 
 
-SLASH__NPCSCAN_OVERLAY1 = "/npcscanoverlay";
-SLASH__NPCSCAN_OVERLAY2 = "/npcoverlay";
-SLASH__NPCSCAN_OVERLAY3 = "/overlay";
+SLASH_NPCSCAN_OVERLAY1 = "/npcscanoverlay";
+SLASH_NPCSCAN_OVERLAY2 = "/npcoverlay";
+SLASH_NPCSCAN_OVERLAY3 = "/overlay";
 
-BINDING_HEADER__NPCSCAN_OVERLAY = "_|cffCCCC88NPCScan.Overlay|r";
-_G[ "BINDING_NAME_KEY _NPCScan.Overlay.Button:LeftButton" ] = [=[Toggle Mob Key]=];
-_G[ "BINDING_NAME_PATH _NPCScan.Overlay.Button:LeftButton" ] = [=[Toggle Mob Paths]=];
-_G[ "BINDING_NAME_MINIMAP_PATH _NPCScan.Overlay.Button:LeftButton" ] = [=[Toggle MiniMap Paths]=];
+BINDING_HEADER_NPCSCAN_OVERLAY = "_|cffCCCC88NPCScan.Overlay|r";
+_G[ "BINDING_NAME_KEY NPCScan.Overlay.Button:LeftButton" ] = [=[Toggle Mob Key]=];
+_G[ "BINDING_NAME_PATH NPCScan.Overlay.Button:LeftButton" ] = [=[Toggle Mob Paths]=];
+_G[ "BINDING_NAME_MINIMAP_PATH NPCScan.Overlay.Button:LeftButton" ] = [=[Toggle MiniMap Paths]=];

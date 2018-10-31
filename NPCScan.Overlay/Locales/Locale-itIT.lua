@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan.Overlay by Saiket                                                 *
+  * NPCScan.Overlay by Saiket                                                 *
   * Locales/Locale-itIT.lua - Localized string constants (it-IT).              *
   ****************************************************************************]]
 
@@ -801,7 +801,7 @@ private.L.NPCs["9718"] = "Ghok Granbastone"
 private.L.NPCs["9736"] = "Quartermastro Zigris"
 private.L.NPCs["99"] = "Morgaine la Furba"
 
-private.L["BUTTON_TOOLTIP_LINE1"] = "|cffffee00 _NPCScan.Overlay|r"
+private.L["BUTTON_TOOLTIP_LINE1"] = "|cffffee00 NPCScan.Overlay|r"
 private.L["BUTTON_TOOLTIP_LINE2"] = "|cffd6ff00 Clic: |r Attiva Percorsi Mappa del Mondo" -- Needs review
 private.L["BUTTON_TOOLTIP_LINE3"] = "|cffd6ff00 Shift+Clic: |r Attiva Chiave Mappa del Mondo" -- Needs review
 private.L["BUTTON_TOOLTIP_LINE4"] = "|cffd6ff00 Clic Destro: |r Attiva Percorsi Minimappa" -- Needs review

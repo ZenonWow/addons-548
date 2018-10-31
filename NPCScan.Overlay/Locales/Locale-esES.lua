@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan.Overlay by Saiket                                                 *
+  * NPCScan.Overlay by Saiket                                                 *
   * Locales/Locale-esES.lua - Localized string constants (es-ES/es-MX).        *
   ****************************************************************************]]
 
@@ -801,7 +801,7 @@ private.L.NPCs["9718"] = "Ghok Bashguud"
 private.L.NPCs["9736"] = "Intendente Zigris"
 private.L.NPCs["99"] = "Morgaine la Astuta"
 
-private.L["BUTTON_TOOLTIP_LINE1"] = "|cffffee00 _NPCScan.Overlay|r"
+private.L["BUTTON_TOOLTIP_LINE1"] = "|cffffee00 NPCScan.Overlay|r"
 private.L["BUTTON_TOOLTIP_LINE2"] = "|cffd6ff00 Clic: |r Alternar trayectorias del Mapa del mundo" -- Needs review
 private.L["BUTTON_TOOLTIP_LINE3"] = "|cffd6ff00 Shift Clic: |r Alternar tecla del Mapa del mundo" -- Needs review
 private.L["BUTTON_TOOLTIP_LINE4"] = "|cffd6ff00 Clic derecho: |r Alternar trayectorias del Minimapa" -- Needs review

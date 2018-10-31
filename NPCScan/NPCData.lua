@@ -21,9 +21,7 @@ local L = private.L
 local ZN = private.ZONE_NAMES
 
 
-local function print(...)
-	DEFAULT_CHAT_FRAME:AddMessage(...)
-end
+local function print(...)  DEFAULT_CHAT_FRAME:AddMessage(...)  end
 
 
 local NPC_DATA = {

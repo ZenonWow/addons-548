@@ -23,7 +23,8 @@ local Toast = _G.LibStub("LibToast-1.0")
 -------------------------------------------------------------------------------
 -- Config UI.
 -------------------------------------------------------------------------------
-panel.name = L.CONFIG_TITLE
+--panel.name = L.CONFIG_TITLE
+panel.name = FOLDER_NAME
 panel:Hide()
 
 

@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan.Overlay by Saiket                                                 *
+  * NPCScan.Overlay by Saiket                                                 *
   * Modules/Carbonite.lua - Modifies the WorldMap and Minimap modules for      *
   *   compatibility with Carbonite.                                            *
   ****************************************************************************]]
@@ -11,9 +11,9 @@ end
 
 
 local CarboniteVersion = GetAddOnMetadata("Carbonite", "Version"):match("^([%d.]+)");
-	--_NPCScanOverlayKey:SetMovable(false)
-	--_NPCScanOverlayKey:SetScript("OnMouseDown",nil )
-	--_NPCScanOverlayKey:SetScript("OnMouseUp", nil )
+	--NPCScanOverlayKey:SetMovable(false)
+	--NPCScanOverlayKey:SetScript("OnMouseDown",nil )
+	--NPCScanOverlayKey:SetScript("OnMouseUp", nil )
 local FOLDER_NAME, private = ...
 L = private.L
 
@@ -29,7 +29,7 @@ local function KeyToggle()
 	else
 		texture= private.KeyToggleIconTexture_Disabled
 	end
-	_NPCScanKeyToggle.KeyNormal:SetTexture(texture)
+	NPCScanKeyToggle.KeyNormal:SetTexture(texture)
 end
 
 

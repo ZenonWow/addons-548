@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan.Overlay by Saiket                                                 *
+  * NPCScan.Overlay by Saiket                                                 *
   * Modules/Minimap.lua - Canvas for the Minimap.                              *
   ****************************************************************************]]
 local FOLDER_NAME, private = ...
@@ -723,7 +723,7 @@ Config:SetHeight( Config:GetHeight() + Checkbox:GetHeight() );
 
 --- Toggles the module like a checkbox.
 function Minimap_Toggle ()
-	local enable = _NPCScanOverlayOptions.Modules.Minimap
+	local enable = NPCScanOverlayOptions.Modules.Minimap
 	if enable then
 		private.Modules.Disable( "Minimap" )
 	else

@@ -88,4 +88,4 @@ private.OverlayKeyColors = {
 }
 
 -- This is required, at the moment, to allow users to set their own colors.
-_NPCScanOverlayKeyColors = private.OverlayKeyColors
+NPCScanOverlayKeyColors = private.OverlayKeyColors

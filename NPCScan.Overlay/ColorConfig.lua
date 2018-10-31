@@ -4,9 +4,9 @@
 
 local FOLDER_NAME, private = ...
 local L = private.L
-local panel = CreateFrame("Frame", "_NPCScanOverlayPathColorList")
+local panel = CreateFrame("Frame", "NPCScanOverlayPathColorList")
 private.ColorConfig = panel
-tinsert(UISpecialFrames, "_NPCScanOverlayPathColorList")
+tinsert(UISpecialFrames, "NPCScanOverlayPathColorList")
 
 local modify_id
 local modify_Line
@@ -80,7 +80,7 @@ Texture:SetTexture(0, 0, 0, 0.5)
 Texture:SetPoint("BOTTOMLEFT", 5, 5)
 Texture:SetPoint("TOPRIGHT", -5, -5)
 
-local ScrollFrame = CreateFrame("ScrollFrame", "_NPCScanOverlayScrollFrame", Background, "UIPanelScrollFrameTemplate")
+local ScrollFrame = CreateFrame("ScrollFrame", "NPCScanOverlayScrollFrame", Background, "UIPanelScrollFrameTemplate")
 ScrollFrame:SetPoint("TOPLEFT", 4, -4)
 ScrollFrame:SetPoint("BOTTOMRIGHT", -4, 4)
 
@@ -107,10 +107,10 @@ local function AddLine(R, G, B)
 	end)
 end
 
-panel.Close = CreateFrame("Button", "SetColorCloseButton", _NPCScanOverlayPathColorList, "UIPanelButtonTemplate")
+panel.Close = CreateFrame("Button", "SetColorCloseButton", NPCScanOverlayPathColorList, "UIPanelButtonTemplate")
 panel.Close:SetPoint("BOTTOM", 0, 15)
 _G[panel.Close:GetName() .. "Text"]:SetText(_G.CLOSE)
-panel.Close:SetScript("OnClick", function() _NPCScanOverlayPathColorList:Hide() end)
+panel.Close:SetScript("OnClick", function() NPCScanOverlayPathColorList:Hide() end)
 panel.Close:SetWidth(SetColorCloseButtonText:GetStringWidth() + 30)
 panel.Close.tooltipText = L.CONFIG_SETCOLOR_DESC
 

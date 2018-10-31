@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScanner by SLOKnightfall, a branch of _NPCScan.Overlay by Saiket       *
+  * NPCScanner by SLOKnightfall, a branch of NPCScan.Overlay by Saiket       *
   * Modules/OmegaMap.lua - Canvas for the OmegaMap   addon.                    *
   ****************************************************************************]]
 

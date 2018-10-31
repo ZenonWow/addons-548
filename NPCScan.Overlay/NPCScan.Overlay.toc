@@ -37,10 +37,10 @@
 ## X-WoWI-ID: 14686
 ## X-Localizations: deDE, enCN, enTW, enUS, esES, esMX, frFR, koKR, ptBR, ptPT, ruRU, zhCN, zhTW
 ## X-CompatibleLocales: deDE, enCN, enTW, enUS, esES, esMX, frFR, koKR, ptBR, ptPT, ruRU, zhCN, zhTW
-## SavedVariables: _NPCScanOverlayOptions, _NPCScanMiniMapIcon, _NPCScanOverlayKeyColors
+## SavedVariables: NPCScanOverlayOptions, NPCScanMiniMapIcon, NPCScanOverlayKeyColors
 ## OptionalDeps: Ace3, NPCScan, OmegaMap, Carbonite
 ## X-Curse-Packaged-Version: 5.4.8.5
-## X-Curse-Project-Name: _NPCScan.Overlay
+## X-Curse-Project-Name: NPCScan.Overlay
 ## X-Curse-Project-ID: npcscan-overlay
 ## X-Curse-Repository-ID: wow/npcscan-overlay/mainline
 

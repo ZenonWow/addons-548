@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan.Overlay by Saiket                                                 *
+  * NPCScan.Overlay by Saiket                                                 *
   * Locales/Locale-deDE.lua - Localized string constants (de-DE).              *
   ****************************************************************************]]
 
@@ -801,7 +801,7 @@ private.L.NPCs["9718"] = "Ghok Haudrauf"
 private.L.NPCs["9736"] = "Rüstmeister Zigris"
 private.L.NPCs["99"] = "Morgaine die Verschlagene"
 
-private.L["BUTTON_TOOLTIP_LINE1"] = "|cffffee00 _NPCScan.Overlay|r"
+private.L["BUTTON_TOOLTIP_LINE1"] = "|cffffee00 NPCScan.Overlay|r"
 private.L["BUTTON_TOOLTIP_LINE2"] = "|cffd6ff00 Klick: |r Weltkarten Pfade An/Aus" -- Needs review
 private.L["BUTTON_TOOLTIP_LINE3"] = "|cffd6ff00 Rechts-Klick: |r Minikarten Pfade An/Aus" -- Needs review
 private.L["BUTTON_TOOLTIP_LINE4"] = "|cffaaf200 Mitte-Klick: |r Anzeige beider Pfade Mini & Weltkarte AN/Ausschalten" -- Needs review

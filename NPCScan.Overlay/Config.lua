@@ -1,6 +1,6 @@
 --[[****************************************************************************
-  * _NPCScan.Overlay by Saiket                                                 *
-  * _NPCScan.Overlay.Config.lua - Adds a configuration pane to enable and      *
+  * NPCScan.Overlay by Saiket                                                 *
+  * NPCScan.Overlay.Config.lua - Adds a configuration pane to enable and      *
   *   disable display modules like the WorldMap and BattlefieldMinimap.        *
   ****************************************************************************]]
 local FOLDER_NAME, private = ...
@@ -8,14 +8,14 @@ local L = private.L
 local panel = _G.CreateFrame("Frame")
 private.Config = panel
 
-panel.ShowAll = CreateFrame( "CheckButton", "_NPCScanOverlayConfigShowAllCheckbox", panel, "InterfaceOptionsCheckButtonTemplate" );
-panel.LockSwap = CreateFrame( "CheckButton", "_NPCScanOverlayConfigLoclSwapCheckbox", panel, "InterfaceOptionsCheckButtonTemplate" );
-panel.SetColor = CreateFrame( "Button", "_NPCScanOverlayConfigSetColorButton", panel, "UIPanelButtonTemplate" );
+panel.ShowAll = CreateFrame( "CheckButton", "NPCScanOverlayConfigShowAllCheckbox", panel, "InterfaceOptionsCheckButtonTemplate" );
+panel.LockSwap = CreateFrame( "CheckButton", "NPCScanOverlayConfigLoclSwapCheckbox", panel, "InterfaceOptionsCheckButtonTemplate" );
+panel.SetColor = CreateFrame( "Button", "NPCScanOverlayConfigSetColorButton", panel, "UIPanelButtonTemplate" );
 
 local ModuleMethods = setmetatable( {}, getmetatable( panel ) );
 panel.ModuleMeta = { __index = ModuleMethods; };
 
-local IsChildAddOn = IsAddOnLoaded( "_NPCScan" );
+local IsChildAddOn = IsAddOnLoaded( "NPCScan" );
 
 
 
@@ -98,7 +98,7 @@ do
 	--- Creates a config entry for a module with basic controls.
 	-- @return Settings frame for module.
 	function panel.ModuleRegister ( Module, Label )
-		local Frame = CreateFrame( "Frame", "_NPCScanOverlayModule"..Module.Name, panel.ScrollChild, "OptionsBoxTemplate" );
+		local Frame = CreateFrame( "Frame", "NPCScanOverlayModule"..Module.Name, panel.ScrollChild, "OptionsBoxTemplate" );
 		Frame.Module = Module;
 		setmetatable( Frame, panel.ModuleMeta );
 
@@ -186,7 +186,7 @@ panel.LockSwap.tooltipText = L.CONFIG_LOCKSWAP_DESC;
 
 panel.SetColor:SetPoint( "TOPLEFT", panel.LockSwap, "BOTTOMLEFT", -2, -8 );
 _G[ panel.SetColor:GetName().."Text" ]:SetText( L.CONFIG_SETCOLOR );
-panel.SetColor:SetScript( "OnClick", function() _NPCScanOverlayPathColorList:Show()end);
+panel.SetColor:SetScript( "OnClick", function() NPCScanOverlayPathColorList:Show()end);
 panel.SetColor:SetHeight( 32 );
 panel.SetColor:SetWidth( 150 );
 panel.SetColor.tooltipText = L.CONFIG_SETCOLOR_DESC;
@@ -201,7 +201,7 @@ Texture:SetTexture( 0, 0, 0, 0.5 );
 Texture:SetPoint( "BOTTOMLEFT", 5, 5 );
 Texture:SetPoint( "TOPRIGHT", -5, -5 );
 
-local ScrollFrame = CreateFrame( "ScrollFrame", "_NPCScanOverlayScrollFrame", Background, "UIPanelScrollFrameTemplate" );
+local ScrollFrame = CreateFrame( "ScrollFrame", "NPCScanOverlayScrollFrame", Background, "UIPanelScrollFrameTemplate" );
 ScrollFrame:SetPoint( "TOPLEFT", 4, -4 );
 ScrollFrame:SetPoint( "BOTTOMRIGHT", -4, 4 );
 
@@ -211,8 +211,8 @@ panel.ScrollChild:SetSize( 1, 1 );
 
 
 if ( IsChildAddOn ) then
-	panel.parent = assert( _NPCScan.Config.name, "Couldn't parent configuration to _NPCScan." );
+	panel.parent = assert( NPCScan.Config.name, "Couldn't parent configuration to NPCScan." );
 end
 InterfaceOptions_AddCategory( panel );
 
-SlashCmdList[ "_NPCSCAN_OVERLAY" ] = panel.SlashCommand;
+SlashCmdList[ "NPCSCAN_OVERLAY" ] = panel.SlashCommand;

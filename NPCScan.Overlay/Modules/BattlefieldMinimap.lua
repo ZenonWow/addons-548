@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan.Overlay by Saiket                                                 *
+  * NPCScan.Overlay by Saiket                                                 *
   * Modules/BattlefieldMinimap.lua - Canvas for Blizzard_BattlefieldMinimap.   *
   ****************************************************************************]]
 

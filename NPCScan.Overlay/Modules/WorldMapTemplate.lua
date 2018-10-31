@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan.Overlay by Saiket                                                 *
+  * NPCScan.Overlay by Saiket                                                 *
   * Modules/WorldMapTemplate.lua - Template module for WorldMap-like canvases. *
   ****************************************************************************]]
 
@@ -47,8 +47,8 @@ do
 			self.MapLevelLast = MapLevel;
 			if ( MapLevel ~= 0 ) then
 				private.TextureRemoveAll( self );
-				if ( _NPCScanOverlayKey ~= nil ) then 
-					_NPCScanOverlayKey:Hide();
+				if ( NPCScanOverlayKey ~= nil ) then 
+					NPCScanOverlayKey:Hide();
 				end
 			else
 				return self:Paint( Map );

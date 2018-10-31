@@ -17,19 +17,19 @@ local table = _G.table
 -------------------------------------------------------------------------------
 -- AddOn namespace.
 -------------------------------------------------------------------------------
-_NPCScan = _NPCScan or {}
-local _NPCScan = _NPCScan
+NPCScan = NPCScan or {}
+local NPCScan = NPCScan
 local FOLDER_NAME, private = ...
 local L = private.L
-_G._NPCScan.Overlay = private
+_G.NPCScan.Overlay = private
 
 local LibQTip = LibStub('LibQTip-1.0')
 
-_NPCScanMiniMapIcon = {}
+NPCScanMiniMapIcon = {}
 
 private.Version = _G.GetAddOnMetadata(FOLDER_NAME, "Version"):match("^([%d.]+)")
 
-_NPCScanOverlayOptions = {
+NPCScanOverlayOptions = {
 	Version = private.Version,
 	Modules = {},
 	ModulesAlpha = {},
@@ -588,9 +588,9 @@ local function ConfigEntry_OnMouseUp(tooltipCell, configEntry, button)
 	end
 end
 
-local LDB = _G.LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("_NPCScan.Overlay", {
+local LDB = _G.LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("NPCScan.Overlay", {
 	type = "launcher",
-	text = "_NPCScan.Overlay",
+	text = "NPCScan.Overlay",
 	icon = "Interface\\Icons\\INV_Misc_EngGizmos_20",
 	OnClick = function(_, button)
 		_G.InterfaceOptionsFrame_OpenToCategory(private.Config)
@@ -635,7 +635,7 @@ local LDB = _G.LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("_NPCScan.O
 })
 
 do
-	private.GetMapName = _G.GetMapNameByID -- For backwards compatibility with older versions of _NPCScan
+	private.GetMapName = _G.GetMapNameByID -- For backwards compatibility with older versions of NPCScan
 	local MapIDs = {} -- [ LocalizedZoneName ] = MapID
 
 	-- @return Map ID for localized zone name or nil if unknown.
@@ -659,8 +659,8 @@ do
 		self[eventName] = nil
 		self:UnregisterEvent(eventName)
 
-		private.Options = _G._NPCScanOverlayOptions
-		private.OverlayKeyColors = _G._NPCScanOverlayKeyColors
+		private.Options = _G.NPCScanOverlayOptions
+		private.OverlayKeyColors = _G.NPCScanOverlayKeyColors
 
 		if not private.Options then
 			private.Options = private.OptionsDefault

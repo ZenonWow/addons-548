@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan.Overlay by Saiket                                                 *
+  * NPCScan.Overlay by Saiket                                                 *
   * Locales/Locale-frFR.lua - Localized string constants (fr-FR).              *
   ****************************************************************************]]
 
@@ -801,7 +801,7 @@ private.L.NPCs["9718"] = "Ghok Bounnebaffe"
 private.L.NPCs["9736"] = "Intendant Zigris"
 private.L.NPCs["99"] = "Morgaine la rusée"
 
--- private.L["BUTTON_TOOLTIP_LINE1"] = "|cffffee00 _NPCScan.Overlay|r"
+-- private.L["BUTTON_TOOLTIP_LINE1"] = "|cffffee00 NPCScan.Overlay|r"
 -- private.L["BUTTON_TOOLTIP_LINE2"] = "Toggle World Map paths"
 -- private.L["BUTTON_TOOLTIP_LINE3"] = "Toggle World Map key"
 -- private.L["BUTTON_TOOLTIP_LINE4"] = "Toggle Mini Map paths"

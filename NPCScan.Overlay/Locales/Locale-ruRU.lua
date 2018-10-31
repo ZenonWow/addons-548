@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan.Overlay by Saiket                                                 *
+  * NPCScan.Overlay by Saiket                                                 *
   * Locales/Locale-ruRU.lua - Localized string constants (ru-RU).              *
   ****************************************************************************]]
 
@@ -801,7 +801,7 @@ private.L.NPCs["9718"] = "Гок Крепкобив"
 private.L.NPCs["9736"] = "Интендант Зигрис"
 private.L.NPCs["99"] = "Моргана Лукавая"
 
-private.L["BUTTON_TOOLTIP_LINE1"] = "|cffffee00 _NPCScan.Overlay|r"
+private.L["BUTTON_TOOLTIP_LINE1"] = "|cffffee00 NPCScan.Overlay|r"
 private.L["BUTTON_TOOLTIP_LINE2"] = "|cffd6ff00 Щелчок: |r Переключить отображение маршрутов на карте мира" -- Needs review
 private.L["BUTTON_TOOLTIP_LINE3"] = "|cffd6ff00 Shift+щелчок: |r Переключить отображение списка редких существ на карте мира" -- Needs review
 private.L["BUTTON_TOOLTIP_LINE4"] = "|cffd6ff00 Щелчок правой кнопкой: |r Переключить отображение маршрутов на миникарте" -- Needs review

@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * _NPCScan.Overlay by Saiket                                                 *
+  * NPCScan.Overlay by Saiket                                                 *
   * Modules/WorldMap.lua - Canvas for the WorldMapFrame.                       *
   ****************************************************************************]]
 
@@ -13,23 +13,23 @@ panel.KeyMaxSize = 3; -- If the key takes up more than this fraction of the canv
 
 
 local function WorldMapFrameOnHide()
-	_NPCScanOverlayKey:Hide();
+	NPCScanOverlayKey:Hide();
 end
 
 local function WorldMapFrameOnShow()
 	if private.Options.ShowKey then
-		_NPCScanOverlayKey:Show()
+		NPCScanOverlayKey:Show()
 	end
 end
 
 function panel:OnHide ( ... )
-	_NPCScanOverlayKey:Hide();
+	NPCScanOverlayKey:Hide();
 	return self.super.OnHide( self, ... );
 end
 
 function panel:OnShow ( ... )
 	local keyparentlevel = _G.WorldMapButton:GetFrameLevel()
-	_NPCScanOverlayKey:SetFrameLevel(keyparentlevel + 20)
+	NPCScanOverlayKey:SetFrameLevel(keyparentlevel + 20)
 	return self.super.OnShow( self, ... );
 end
 
@@ -47,20 +47,20 @@ do
 end
 
 do
-	--Adds Cached & Achievement complete marks to key if _NPCScan is loaded.
+	--Adds Cached & Achievement complete marks to key if NPCScan is loaded.
 	local NPCtoAchievement = {};
 	local NPCNameFromCache = nil
-	if IsAddOnLoaded("_NPCScan") then
+	if IsAddOnLoaded("NPCScan") then
 		do
 			local pairs = _G.pairs;
-			local achievements = _NPCScan.ACHIEVEMENTS
+			local achievements = NPCScan.ACHIEVEMENTS
 			local achievement_id, criteria_id, npc_id
 			for achievement_id in pairs(achievements) do
 				for criteria_id, npc_id in pairs(achievements[achievement_id].Criteria) do
 					NPCtoAchievement[npc_id] = { AchievementID = achievement_id, CriteriaID = criteria_id};
 				end
 			end
-			NPCNameFromCache = _NPCScan.NPCNameFromCache
+			NPCNameFromCache = NPCScan.NPCNameFromCache
 		end
 	end
 	local CompletedIcon = [[|TInterface\RaidFrame\ReadyCheck-Ready:0|t]]
@@ -87,7 +87,7 @@ do
 			Line:Show();
 		end
 
-		if IsAddOnLoaded("_NPCScan") then
+		if IsAddOnLoaded("NPCScan") then
 			local _
 			local Completed = false
 			if NPCtoAchievement[NpcID] then
@@ -105,8 +105,8 @@ do
 		Line.Text:SetTextColor( R, G, B );
 		Line:SetScript( "OnEnter", function()
 			if (private.Options.LockSwap and not IsShiftKeyDown()) or (not private.Options.LockSwap and IsShiftKeyDown() )then
-				_NPCScanOverlayKey:ClearAllPoints();
-				_NPCScanOverlayKey:SetPoint( Points[ Point % #Points + 1 ] );
+				NPCScanOverlayKey:ClearAllPoints();
+				NPCScanOverlayKey:SetPoint( Points[ Point % #Points + 1 ] );
 				Point = Point + 1;
 			elseif (private.Options.LockSwap and IsShiftKeyDown()) or (not private.Options.LockSwap and not IsShiftKeyDown() )then
 				private.FlashRoute(NpcID) 
@@ -229,12 +229,12 @@ function private.SetPathIconTexture()
 	else
 		texture= private.PathToggleIconTexture_Disabled
 	end
-	_NPCScanPathToggle.Normal:SetTexture(texture)
+	NPCScanPathToggle.Normal:SetTexture(texture)
 end
 
 --- Toggles the module like a checkbox.
 function private.WorldMapPaths_ToggleOnClick()
-	local enable = _NPCScanOverlayOptions.Modules.WorldMap
+	local enable = NPCScanOverlayOptions.Modules.WorldMap
 	if private.Options.Modules[ "WorldMap" ]  then
 		private.Modules.Disable( "WorldMap" )
 	else
@@ -249,10 +249,10 @@ end
 --Toggles the display of Mpb key frame 
 function private.WorldMapKey_ToggleOnClick()
 	if private.Options.ShowKey then
-		_NPCScanOverlayKey:Hide()
+		NPCScanOverlayKey:Hide()
 		private.Options.ShowKey = false;
 	else
-		_NPCScanOverlayKey:Show()
+		NPCScanOverlayKey:Show()
 		private.Options.ShowKey = true;
 	end
 	private.SetKeyIconTexture()
@@ -266,7 +266,7 @@ local texture
 	else
 		texture= private.KeyToggleIconTexture_Disabled
 	end
-	_NPCScanKeyToggle.KeyNormal:SetTexture(texture)
+	NPCScanKeyToggle.KeyNormal:SetTexture(texture)
 end
 
 
@@ -290,9 +290,9 @@ function panel:Paint ( Map, ... )
 		self.KeyPaint( self.KeyParent.Key, Map );
 		self.RangeRingPaint( self.RangeRing, Map );
 		if private.Options.ShowKey then
-			_NPCScanOverlayKey:Show()
+			NPCScanOverlayKey:Show()
 		else
-			_NPCScanOverlayKey:Hide()
+			NPCScanOverlayKey:Hide()
 		end
 	else
 		self.KeyParent.Key:Hide();
@@ -335,7 +335,7 @@ end
 --- Adds a custom key frame to the world map template.
 function panel:OnLoad ( ... )
 	-- Add key frame to map
-	local KeyParent = CreateFrame( "Frame", "_NPCScanOverlayKeyParent", WorldMapButton )
+	local KeyParent = CreateFrame( "Frame", "NPCScanOverlayKeyParent", WorldMapButton )
 
 	self.KeyParent = KeyParent;
 	KeyParent:Hide();
@@ -345,7 +345,7 @@ function panel:OnLoad ( ... )
 	local KeyContainer = CreateFrame( "Frame", nil, KeyParent );
 	KeyContainer:SetAllPoints();
 
-	local Key = CreateFrame( "Frame", "_NPCScanOverlayKey", KeyContainer );
+	local Key = CreateFrame( "Frame", "NPCScanOverlayKey", KeyContainer );
 	KeyParent.Key = Key;
 	--Key:SetFrameStrata("High");
 	Key.KeyParent, Key.Container = KeyParent, KeyContainer;
@@ -358,7 +358,7 @@ function panel:OnLoad ( ... )
 	Key:EnableMouse( true );
 	Key:SetBackdrop( { edgeFile = [[Interface\AchievementFrame\UI-Achievement-WoodBorder]]; edgeSize = 48; } );
 
-	Key.Font = CreateFont( "_NPCScanOverlayWorldMapKeyFont" );
+	Key.Font = CreateFont( "NPCScanOverlayWorldMapKeyFont" );
 	Key.Font:SetFontObject( ChatFontNormal );
 	Key.Font:SetJustifyH( "LEFT" );
 
@@ -421,7 +421,7 @@ function panel:OnLoad ( ... )
 	end
 
 -- Add path toggle button to world map
-	local Toggle = CreateFrame( "CheckButton", "_NPCScanPathToggle", WorldMapButton );
+	local Toggle = CreateFrame( "CheckButton", "NPCScanPathToggle", WorldMapButton );
 	self.Toggle = Toggle;
 	Toggle:SetScript( "OnClick", panel.ToggleOnClick );
 	Toggle:SetScript( "OnEnter", panel.ToggleOnEnter );
@@ -436,7 +436,7 @@ function panel:OnLoad ( ... )
 	Toggle:SetPoint("BOTTOMLEFT", WorldMapButton, "TOPLEFT", -3,15)
 
 -- Add key toggle button to world map
-	local KeyToggle = CreateFrame( "CheckButton", "_NPCScanKeyToggle", WorldMapButton );
+	local KeyToggle = CreateFrame( "CheckButton", "NPCScanKeyToggle", WorldMapButton );
 	self.KeyToggle = KeyToggle;
 	KeyToggle:SetScript( "OnClick", panel.KeyToggleOnClick );
 	KeyToggle:SetScript( "OnEnter", panel.KeyToggleOnEnter );
