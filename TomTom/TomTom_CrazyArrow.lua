@@ -8,12 +8,20 @@
 
 --[[
 To open arrow configuration copy to chat:
+/run InterfaceOptionsFrame_OpenToCategory("TomTom")
+/run InterfaceOptionsFrame_OpenToCategory("TomTom-CrazyTaxi")
 /run InterfaceOptionsFrame_OpenToCategory("Waypoint Arrow")
+
+function InterfaceOptionsList_DisplayPanel (frame)	  -> frame:Show()
+InterfaceOptionsListButton_OnClick (self, mouseButton)
+function InterfaceOptionsListButton_OnClick (self, mouseButton)
+
 --]]
 
 local sformat = string.format
 local L = TomTomLocals
 local ldb = LibStub("LibDataBroker-1.1")
+local DOUBLECLICK_DELAY = 0.2  -- seconds
 
 local function ColorGradient(perc, ...)
 	local num = select("#", ...)
@@ -60,7 +68,7 @@ wayframe.status:SetPoint("TOP", wayframe.title, "BOTTOM", 0, 0)
 wayframe.tta:SetPoint("TOP", wayframe.status, "BOTTOM", 0, 0)
 
 local function OnDragStart(self, button)
-	if not TomTom.db.profile.arrow.lock or IsControlKeyDown() then
+	if not TomTom.db.profile.arrow.lock or IsModifiedClick('DRAG_ARROW') then
 		self:StartMoving()
 	end
 end
@@ -87,23 +95,27 @@ wayframe.arrow:SetAllPoints()
 
 local active_point, arrive_distance, showDownArrow, point_title
 
-function TomTom:SetCrazyArrow(uid, dist, title)
+function TomTom:SetCrazyArrow(waypoint, dist, title)
 	if active_point and active_point.corpse and self.db.profile.arrow.stickycorpse then
 		-- do not change the waypoint arrow from corpse
 		return
 	end
 
-	active_point = uid
-	arrive_distance = dist
-	point_title = title
+	active_point = waypoint
+	arrive_distance = dist  or  TomTom.profile.arrow.arrival
+	point_title = title  or  waypoint.title
 
 	if self.profile.arrow.enable then
-		wayframe.title:SetText(title or L["Unknown waypoint"])
+		wayframe.title:SetText(point_title or L["Unknown waypoint"])
 		wayframe:Show()
 		if wayframe.crazyFeedFrame then
 			wayframe.crazyFeedFrame:Show()
 		end
 	end
+end
+
+function TomTom:GetCrazyArrow()
+    return active_point
 end
 
 function TomTom:IsCrazyArrowEmpty()
@@ -148,8 +160,9 @@ local function OnUpdate(self, elapsed)
 	local cell
 
 	-- Showing the arrival arrow?
+	--[[
 	if dist <= arrive_distance then
-		if not showDownArrow then
+		if  not showDownArrow then
 			arrow:SetHeight(70)
 			arrow:SetWidth(53)
 			arrow:SetTexture("Interface\\AddOns\\TomTom\\Images\\Arrow-UP")
@@ -175,30 +188,38 @@ local function OnUpdate(self, elapsed)
 		if showDownArrow then
 			arrow:SetHeight(56)
 			arrow:SetWidth(42)
-			arrow:SetTexture("Interface\\AddOns\\TomTom\\Images\\Arrow")
+			--arrow:SetTexture("Interface\\AddOns\\TomTom\\Images\\Arrow")
 			showDownArrow = false
 		end
+	--]]
 
-		local angle = TomTom:GetDirectionToWaypoint(active_point)
-		local player = GetPlayerFacing()
+	local angle = TomTom:GetDirectionToWaypoint(active_point)
+	local player = GetPlayerFacing()
+	angle = angle - player
 
-		angle = angle - player
-
+	repeat
+		if  dist <= arrive_distance  then
+			arrow:SetVertexColor( unpack(TomTom.db.profile.arrow.exactcolor) )
+			break
+		end
+		
 		local perc = math.abs((math.pi - math.abs(angle)) / math.pi)
+		if perc > 0.98 then
+			-- If we're 98% heading in the right direction, then use the exact
+			-- color instead of the gradient. This allows us to distinguish 'good'
+			-- from 'on target'. Thanks to Gregor_Curse for the suggestion.
+			arrow:SetVertexColor( unpack(TomTom.db.profile.arrow.exactcolor) )
+			break
+		end
 
-		local gr,gg,gb = unpack(TomTom.db.profile.arrow.goodcolor)
 		local mr,mg,mb = unpack(TomTom.db.profile.arrow.middlecolor)
+		local gr,gg,gb = unpack(TomTom.db.profile.arrow.goodcolor)
 		local br,bg,bb = unpack(TomTom.db.profile.arrow.badcolor)
 		local r,g,b = ColorGradient(perc, br, bg, bb, mr, mg, mb, gr, gg, gb)
-
-		-- If we're 98% heading in the right direction, then use the exact
-		-- color instead of the gradient. This allows us to distinguish 'good'
-		-- from 'on target'. Thanks to Gregor_Curse for the suggestion.
-		if perc > 0.98 then
-			r,g,b = unpack(TomTom.db.profile.arrow.exactcolor)
-		end
 		arrow:SetVertexColor(r,g,b)
+	until true
 
+	do
 		local cell = floor(angle / twopi * 108 + 0.5) % 108
 		local column = cell % 9
 		local row = floor(cell / 9)
@@ -307,9 +328,10 @@ local dropdown_info = {
 
 				active_point = nil
 				if TomTom.profile.arrow.setclosest then
-					local uid = TomTom:GetClosestWaypoint()
-					if uid and uid ~= prior then
-						TomTom:SetClosestWaypoint()
+					local waypoint = TomTom:GetClosestWaypoint()
+					if waypoint and waypoint ~= prior then
+						--TomTom:SetClosestWaypoint()
+						TomTom:SetCrazyArrow(waypoint)
 						return
 					end
 				end
@@ -319,17 +341,14 @@ local dropdown_info = {
 			-- Remove a waypoint
 			text = L["Remove waypoint"],
 			func = function()
-				local uid = active_point
-				TomTom:RemoveWaypoint(uid)
+				TomTom:RemoveWaypoint(active_point)
 			end,
 		},
         {
             -- Remove all waypoints from this zone
             text = L["Remove all waypoints from this zone"],
             func = function()
-                local uid = active_point
-                local data = uid
-                local mapId = data[1]
+                local mapId = active_point[1]
                 for key, waypoint in pairs(TomTom.waypoints[mapId]) do
                     TomTom:RemoveWaypoint(waypoint)
                 end
@@ -353,16 +372,16 @@ local dropdown_info = {
 			text = "--------",
 		},
 		{
-			-- Automatically set waypoint arrow
-			text = L["Automatically set waypoint arrow"],
+			-- Lock waypoint arrow
+			text = L["Lock waypoint arrow"],
 			checked = function()  return TomTom.db.profile.arrow.lock  end,
 			func = function()
 				TomTom.db.profile.arrow.lock= not TomTom.db.profile.arrow.lock
 			end,
 		},
 		{
-			-- Lock waypoint arrow
-			text = L["Lock waypoint arrow"],
+			-- Automatically set waypoint arrow
+			text = L["Automatically set waypoint arrow"],
 			checked = function()  return TomTom.db.profile.arrow.autoqueue  end,
 			func = function()
 				TomTom.db.profile.arrow.autoqueue= not TomTom.db.profile.arrow.autoqueue
@@ -372,7 +391,9 @@ local dropdown_info = {
 			-- Configuration
 			text = L["Configuration..."],
 			func = function()
-				InterfaceOptionsFrame_OpenToCategory("Waypoint Arrow")
+				TomTom.RegisterConfigFrames()
+				InterfaceOptionsFrame_OpenToCategory(TomTom.ConfigPanels.CrazyTaxi)
+				--InterfaceOptionsFrame_OpenToCategory("Waypoint Arrow")
 			end,
 		},
 		{
@@ -410,17 +431,35 @@ local function init_dropdown(self, level)
 	end
 end
 
+local lastClick
 local function WayFrame_OnClick(self, button)
-	if active_point then
-		if TomTom.db.profile.arrow.menu then
+	if  button == "LeftButton"  then
+		local now = GetTime()
+		if  lastClick  and  now - lastClick < DOUBLECLICK_DELAY  then
+			-- Double Click -> reset to closest waypoint
+			lastClick = nil
+			TomTom:SetClosestWaypoint()
+		else
+			-- LeftClick -> Select next waypoint
+			lastClick = now
+			TomTom:SetClosestWaypoint(true)
+		end
+	elseif  button == "RightButton"  then
+		if  TomTom.db.profile.arrow.menu  or  IsModifiedClick('DROPDOWNMENU')  then
+			if  not active_point  then  return  end
 			UIDropDownMenu_Initialize(TomTom.dropdown, init_dropdown)
 			ToggleDropDownMenu(1, nil, TomTom.dropdown, "cursor", 0, 0)
+		else
+			-- RightClick -> Select previous waypoint
+			TomTom:SetPreviousWaypoint()
 		end
 	end
 end
 
-wayframe:RegisterForClicks("RightButtonUp")
-wayframe:SetScript("OnClick", WayFrame_OnClick)
+--wayframe:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+--wayframe:RegisterForClicks("AnyUp")
+--wayframe:SetScript("OnClick", WayFrame_OnClick)
+wayframe:SetScript("OnMouseUp", WayFrame_OnClick)
 
 local function getCoords(column, row)
 	local xstart = (column * 56) / 512

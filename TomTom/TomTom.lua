@@ -47,20 +47,20 @@ function TomTom:Initialize(event, addon)
                 playeraccuracy = 2,
                 cursorenable = true,
                 cursoraccuracy = 2,
-				throttle = 0.1,
+            throttle = 0.1,
             },
             arrow = {
                 enable = true,
                 goodcolor = {0, 1, 0},
                 badcolor = {1, 0, 0},
                 middlecolor = {1, 1, 0},
-				exactcolor = {0, 1, 0},
+                exactcolor = {0, 1, 0},
                 arrival = 15,
                 lock = false,
                 noclick = false,
                 showtta = true,
-				showdistance = true,
-				stickycorpse = false,
+                showdistance = true,
+                stickycorpse = false,
                 autoqueue = true,
                 menu = true,
                 scale = 1.0,
@@ -70,9 +70,9 @@ function TomTom:Initialize(event, addon)
                 title_scale = 1,
                 title_alpha = 1,
                 setclosest = true,
-				closestusecontinent = false,
+                closestusecontinent = false,
                 enablePing = false,
-				hideDuringPetBattles = true,
+                hideDuringPetBattles = true,
             },
             minimap = {
                 enable = true,
@@ -498,9 +498,8 @@ local dropdown_info = {
         -- set as crazy arrow
         text = L["Set as waypoint arrow"],
         func = function()
-            local uid = TomTom.dropdown.uid
-            local data = uid
-            TomTom:SetCrazyArrow(uid, TomTom.profile.arrow.arrival, data.title or L["TomTom waypoint"])
+            local waypoint = TomTom.dropdown.uid
+            TomTom:SetCrazyArrow(waypoint)
         end,
     },
     {
@@ -803,6 +802,8 @@ function TomTom:AddZWaypoint(c, z, x, y, desc, persistent, minimap, world, callb
         return
     end
 
+    TomTom:Print('TomTom:AddZWaypoint('..c..','..z..','..x..','..y..'): '.. (desc or '') )
+
     return self:AddMFWaypoint(mapId, floor, x/100, y/100, {
         title = desc,
         persistent = persistent,
@@ -872,19 +873,21 @@ function TomTom:DefaultCallbacks(opts)
 end
 
 function TomTom:AddMFWaypoint(m, f, x, y, opts)
-	opts = opts or {}
+		opts = opts or {}
 
-	-- Default values
+		--TomTom:Print('TomTom:AddMFWaypoint('..tostring(m)..','..tostring(f)..','.. format('%.4f',x) ..' '.. format('%.4f',y) ..'): '.. (opts.title or '<no title>') )
+
+		-- Default values
     if opts.persistent == nil then opts.persistent = self.profile.persistence.savewaypoints end
     if opts.minimap == nil then opts.minimap = self.profile.minimap.enable end
     if opts.world == nil then opts.world = self.profile.worldmap.enable end
     if opts.crazy == nil then opts.crazy = self.profile.arrow.autoqueue end
-	if opts.cleardistance == nil then opts.cleardistance = self.profile.persistence.cleardistance end
-	if opts.arrivaldistance == nil then opts.arrivaldistance = self.profile.arrow.arrival end
+		if opts.cleardistance == nil then opts.cleardistance = self.profile.persistence.cleardistance end
+		if opts.arrivaldistance == nil then opts.arrivaldistance = self.profile.arrow.arrival end
 
     if not opts.callbacks then
-		opts.callbacks = TomTom:DefaultCallbacks(opts)
-	end
+			opts.callbacks = TomTom:DefaultCallbacks(opts)
+		end
 
     local zoneName = lmd:MapLocalize(m)
 
@@ -901,32 +904,34 @@ function TomTom:AddMFWaypoint(m, f, x, y, opts)
 
     -- Ensure there isn't already a waypoint at this location
     local key = self:GetKey({m, f, x, y, title = opts.title})
-    if waypoints[m] and waypoints[m][key] then
-        return waypoints[m][key]
+    local existingWaypoint = waypoints[m] and waypoints[m][key]
+		if  existingWaypoint  then
+			TomTom:SetCrazyArrow(existingWaypoint, opts.arrivaldistance, opts.title)
+			return existingWaypoint
     end
 
     -- uid is the 'new waypoint' called this for historical reasons
-    local uid = {m, f, x, y, title = opts.title}
+    local newWaypoint = {m, f, x, y, title = opts.title}
 
     -- Copy over any options, so we have em
     for k,v in pairs(opts) do
-        if not uid[k] then
-            uid[k] = v
+        if not newWaypoint[k] then
+            newWaypoint[k] = v
         end
     end
 
     -- No need to convert x and y because they're already 0-1 instead of 0-100
-    self:SetWaypoint(uid, opts.callbacks, opts.minimap, opts.world)
+    self:SetWaypoint(newWaypoint, opts.callbacks, opts.minimap, opts.world)
     if opts.crazy then
-        self:SetCrazyArrow(uid, opts.arrivaldistance, opts.title)
+        self:SetCrazyArrow(newWaypoint, opts.arrivaldistance, opts.title)
     end
 
     waypoints[m] = waypoints[m] or {}
-    waypoints[m][key] = uid
+    waypoints[m][key] = newWaypoint
 
     -- If this is a persistent waypoint, then add it to the waypoints table
     if opts.persistent then
-        self.waypointprofile[m][key] = uid
+        self.waypointprofile[m][key] = newWaypoint
     end
 
     if not opts.silent and self.profile.general.announce then
@@ -937,7 +942,7 @@ function TomTom:AddMFWaypoint(m, f, x, y, opts)
         ChatFrame1:AddMessage(msg)
     end
 
-    return uid
+    return newWaypoint  -- called  uid  historically
 end
 
 -- Check to see if a given uid/waypoint is actually set somewhere
@@ -1093,56 +1098,109 @@ local function usage()
     ChatFrame1:AddMessage(L["|cffffff78/way list|r - Lists active waypoints in current zone"])
 end
 
-function TomTom:GetClosestWaypoint()
-    local m,f,x,y = self:GetCurrentPlayerPosition()
-	local c = lmd:GetContinentFromMap(m)
 
+TomTom.closestWaypoints = {}
+
+function TomTom:GetClosestWaypoint(getNextWaypoint)
+    local m,f,x,y = self:GetCurrentPlayerPosition()
+		local c = lmd:GetContinentFromMap(m)
+
+		local previous = getNextWaypoint  and  TomTom.closestWaypoints  or  {}
+		--local active_point = getNextWaypoint  and  TomTom:GetCrazyArrow()
+		--local min_dist = active_point  and  TomTom:GetDistanceToWaypoint(active_point)  or  0
     local closest_waypoint = nil
     local closest_dist = nil
 
     if not self.profile.arrow.closestusecontinent then
 		-- Simple search within this zone
 		if waypoints[m] then
-			for key, waypoint in pairs(waypoints[m]) do
+			for  key, waypoint  in  pairs(waypoints[m])  do  if  not previous[waypoint]  then
 				local dist, x, y = TomTom:GetDistanceToWaypoint(waypoint)
-				if (dist and closest_dist == nil) or (dist and dist < closest_dist) then
+				if  dist  and  (not closest_dist  or  dist < closest_dist)  then
 					closest_dist = dist
 					closest_waypoint = waypoint
 				end
-			end
+			end end  -- for + if
 		end
 	else
 		-- Search all waypoints on this continent
 		for map, waypoints in pairs(waypoints) do
 			if c == lmd:GetContinentFromMap(map) then
-				for key, waypoint in pairs(waypoints) do
+				for  key, waypoint  in  pairs(waypoints)  do  if  not previous[waypoint]  then
 					local dist, x, y = TomTom:GetDistanceToWaypoint(waypoint)
-					if (dist and closest_dist == nil) or (dist and dist < closest_dist) then
+					if  dist  and  (not closest_dist  or  dist < closest_dist)  then
 						closest_dist = dist
 						closest_waypoint = waypoint
 					end
-				end
+				end end
 			end
 		end
 	end
 
     if closest_dist then
-        return closest_waypoint
+        return closest_waypoint, closest_dist
     end
 end
 
-function TomTom:SetClosestWaypoint()
-    local uid = self:GetClosestWaypoint()
-    if uid then
-        local data = uid
-        TomTom:SetCrazyArrow(uid, TomTom.profile.arrow.arrival, data.title)
+function TomTom:SetClosestWaypoint(getNextWaypoint)
+    local waypoint, dist = self:GetClosestWaypoint(getNextWaypoint)
+    if waypoint then
+			-- If starting from the first closest waypoint then empty the list of previous waypoints
+			if  not getNextWaypoint  then  TomTom.closestWaypoints = {}  end
+			
+			local previous = TomTom.closestWaypoints
+			if  previous[waypoint]  then
+				TomTom:Print('TomTom:SetClosestWaypoint(true) error: next waypoint found is already in the list')
+			else
+				previous[waypoint] = dist or true
+				previous[#previous+1] = waypoint    -- table.insert(previous, waypoint)
+			end
+			
+			TomTom:SetCrazyArrow(waypoint)
     end
 end
+
+function TomTom:SetPreviousWaypoint()
+	local previous = TomTom.closestWaypoints
+	local last_index = #previous
+	-- If list is empty then do nothing
+	if  0 == last_index  then  return false  end
+	local waypoint = previous[last_index]
+	
+	if  waypoint == TomTom:GetCrazyArrow()  then
+		-- The current waypoint is the last one found by SetClosestWaypoint()
+		-- This one is dropped from the list and the previous waypoint is restored
+		-- If this is the first waypoint in the list then keep it and refresh the arrow with it
+		if  1 == last_index  then
+			TomTom:SetCrazyArrow(waypoint)
+			return nil
+		end
+		-- Drop the last waypoint which is the active_point too
+		previous[waypoint] = nil
+		previous[last_index] = nil
+		waypoint = previous[last_index - 1]    -- previous waypoint
+	else
+		-- SetCrazyArrow() was called from an alternative source
+		-- Restore the last waypoint found by SetClosestWaypoint()
+	end
+	
+	TomTom:SetCrazyArrow(waypoint)
+	return true
+end
+
+
 
 SLASH_TOMTOM_CLOSEST_WAYPOINT1 = "/cway"
 SLASH_TOMTOM_CLOSEST_WAYPOINT2 = "/closestway"
 SlashCmdList["TOMTOM_CLOSEST_WAYPOINT"] = function(msg)
     TomTom:SetClosestWaypoint()
+end
+
+SLASH_TOMTOM_NEXT_CLOSEST_WAYPOINT1 = "/cnext"
+SLASH_TOMTOM_NEXT_CLOSEST_WAYPOINT2 = "/nextclosestway"
+SLASH_TOMTOM_NEXT_CLOSEST_WAYPOINT3 = "/waynext"
+SlashCmdList["TOMTOM_NEXT_CLOSEST_WAYPOINT"] = function(msg)
+    TomTom:SetClosestWaypoint(true)
 end
 
 SLASH_TOMTOM_WAYBACK1 = "/wayb"
@@ -1173,6 +1231,10 @@ local rightseparator =   "%1" .. (tonumber("1.1") and "." or ",") .. "%2"
 local function lowergsub(s) return s:lower():gsub("[^%a%d]", "") end
 
 SlashCmdList["TOMTOM_WAY"] = function(msg)
+    msg = msg:gsub("(%d+),(%d+)$", "%1 %2")  -- /way 11,33
+    msg = msg:gsub("(%d+),(%d+%s)", "%1 %2")  -- /way 11,33 Waypoint
+    msg = msg:gsub("(%d+),(%d+%.%d+)", "%1 %2")  -- /way 11,33.44  -- /way 11.22,33.44
+    msg = msg:gsub("(%d%d)(%d%d)(%d%d)(%d%d)", "%1.%2 %3.%4")  -- /way 11223344 -> 11.22 33.44
     msg = msg:gsub("(%d)[%.,] (%d)", "%1 %2"):gsub(wrongseparator, rightseparator)
     local tokens = {}
     for token in msg:gmatch("%S+") do table.insert(tokens, token) end

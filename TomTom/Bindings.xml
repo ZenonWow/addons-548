@@ -1,0 +1,5 @@
+<Bindings>
+	<!-- Modified Click Actions -->
+	<ModifiedClick action="DRAG_ARROW" default="CTRL"/>
+	<ModifiedClick action="DROPDOWNMENU" default="CTRL"/>
+</Bindings>

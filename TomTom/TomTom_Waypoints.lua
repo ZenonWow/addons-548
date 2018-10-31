@@ -112,6 +112,7 @@ function TomTom:SetWaypoint(waypoint, callbacks, show_minimap, show_world)
         local worldmap = CreateFrame("Button", nil, TomTomMapOverlay)
         worldmap:SetHeight(12)
         worldmap:SetWidth(12)
+        worldmap:SetFrameLevel(10)
         worldmap:RegisterForClicks("RightButtonUp")
         worldmap.icon = worldmap:CreateTexture("ARTWORK")
         worldmap.icon:SetAllPoints()
@@ -199,6 +200,17 @@ end
 
 function TomTom:ShowWaypoint(uid)
     local point = waypointMap[uid]
+    if point then
+        point.minimap.disabled = not point.data.show_minimap
+        point.minimap:Show()
+
+        point.worldmap.disabled = not point.data.show_worldmap
+        point.worldmap:Show()
+    end
+end
+
+function TomTom:CompleteWaypoint(waypoint)
+    local point = waypointMap[waypoint]
     if point then
         point.minimap.disabled = not point.data.show_minimap
         point.minimap:Show()
