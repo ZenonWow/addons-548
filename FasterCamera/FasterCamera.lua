@@ -220,7 +220,7 @@ function f:OnEvent(event, addon)
 	db = FasterCameraDB2
 	ACR:RegisterOptionsTable("FasterCamera", options)
 	ACD:AddToBlizOptions("FasterCamera", NAME)
-	ACD:SetDefaultSize("FasterCamera", 420, 700)
+	ACD:SetDefaultSize("FasterCamera", 420, 510)
 	self:SetScript("OnUpdate", f.OnUpdate)
 	self:UnregisterEvent(event)
 end
