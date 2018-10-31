@@ -120,8 +120,8 @@ ns.modules[name].ontooltip = function(tt)
 
 	if Broker_EverythingDB.showHints then
 		tt:AddLine(" ")
-		tt:AddLine(C("copper",L["Left-click"]).." || "..C("green",L["Open talents pane"]))
-		tt:AddLine(C("copper",L["Right-click"]).." || "..C("green",L["Switch spec."]))
+		tt:AddLine(C("copper",L["Double Click"]).." || "..C("green",L["Switch spec."]))
+		tt:AddLine(C("copper",L["Right-click"]).." || "..C("green",L["Open talents pane"]))
 	end
 end
 
@@ -135,12 +135,16 @@ end
 
 ns.modules[name].onclick = function(self,button)
 	if button == "RightButton" then
-		securecall("SetActiveSpecGroup",abs(GetActiveSpecGroup()-3))
-	else
 		if not PlayerTalentFrame then UIParentLoadAddOn("Blizzard_TalentUI") end
 		securecall("ToggleTalentFrame")
+		--[[
+	elseif button == "RightButton" then
+		securecall("SetActiveSpecGroup",abs(GetActiveSpecGroup()-3))
+		--]]
 	end
 end
 
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
+ns.modules[name].ondblclick = function(self,button)
+	securecall("SetActiveSpecGroup",abs(GetActiveSpecGroup()-3))
+end
 
