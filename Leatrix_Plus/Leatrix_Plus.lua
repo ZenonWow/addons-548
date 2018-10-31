@@ -74,18 +74,20 @@
 		end
 	end
 
-	function LpEvt:SetRawHook(enabled, hookedFunc)
-		LpEvt.hooks = LpEvt.hooks or {}
+	function LpEvt:SetRawHook(enabled, hookedFuncName)
+		self.hooks = self.hooks or {}
 		-- Return if already enabled/disabled
-		if  enabled == not not LpEvt.hooks[hookedFunc]  then  return false  end
-		LeaPlusLC:Print('LpEvt:SetRawHook('.. tostring(enabled) ..','.. hookedFunc ..')')
+		if  not enabled == not self.hooks[hookedFuncName]  then  return false  end
+		--LeaPlusLC:Print('LpEvt:SetRawHook('.. tostring(enabled) ..','.. hookedFuncName ..')')
 		
-		if  enabled  then
-			LpEvt.hooks[hookedFunc] = _G[hookedFunc]
-			_G[hookedFunc] = LpEvt[hookedFunc]
+		if  not self[hookedFuncName]  then
+			LeaPlusLC:Print('LpEvt:SetRawHook(): LpEvt.'.. hookedFuncName ..'() does not exist.')
+		elseif  enabled  then
+			self.hooks[hookedFuncName] = _G[hookedFuncName]
+			_G[hookedFuncName] = self[hookedFuncName]
 		else
-			_G[hookedFunc] = LpEvt.hooks[hookedFunc]
-			LpEvt.hooks[hookedFunc] = nil
+			_G[hookedFuncName] = self.hooks[hookedFuncName]
+			self.hooks[hookedFuncName] = nil
 		end
 	end
 
@@ -5984,6 +5986,7 @@
 			lastEvent.questID = questID
 			lastEvent.timeStamp = now
 		else
+			local title = GetTitleText()
 			LeaPlusLC:Print("Repeated ".. event ..": ".. GetQuestString(questID, title))
 			return true
 		end
