@@ -1,6 +1,10 @@
 <Bindings>
 	<!-- Modified Click Actions -->
+	<!--
 	<ModifiedClick action="ATTACHITEM" default="ALT"/>
 	<ModifiedClick action="ATTACHSIMILAR" default="ALT-BUTTON2"/>
+	-->
+	<ModifiedClick action="ATTACHITEM" default="ALT-BUTTON2"/>
+	<ModifiedClick action="ATTACHSIMILAR" default="ALT"/>
 	<ModifiedClick action="AUTOSEND" default="CTRL-BUTTON2"/>
 </Bindings>
