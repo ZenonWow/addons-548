@@ -1,0 +1,11 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+	<!--Script file="CombatMode.lua"/-->
+	<Frame name="CombatModeFrame" hidden="false" parent="UIParent">
+		<Scripts>
+			<OnUpdate function="CombatMode_OnUpdate"/>
+			<!--OnLoad function="CombatMode_OnLoad"/-->
+			<OnEvent function="CombatMode_OnEvent"/>
+		</Scripts>
+	</Frame>
+</Ui>

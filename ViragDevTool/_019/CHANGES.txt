@@ -1,0 +1,232 @@
+lightweight tag ca5353fe8855b37bedc0118f846ae8d44e101cd5 v0.19
+Author:	Petr Grabovoy <varren@gmail.com>
+Date:	Tue Jun 27 11:32:32 2017 +0300
+
+commit ca5353fe8855b37bedc0118f846ae8d44e101cd5
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Tue Jun 27 11:32:32 2017 +0300
+
+    Now can listen to all events, just add ALL in events menu
+
+commit 23587016ee4ac0a4d7f78ef266a66a471182320f
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Tue Jun 27 10:58:36 2017 +0300
+
+    7.0.0 options color selection fix
+
+commit 6b48949bcf8f5e8fc83c4eeaebd9beaa83ad4ea5
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Tue Jun 27 09:50:16 2017 +0300
+
+    ScrollFrame extra buttons dont go under the invisible are and hide properly now
+
+commit ff26935a2795530b381bb341a194c2c6cc8213a7
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Wed Nov 16 12:45:10 2016 +0300
+
+    All events listener
+
+commit 2f755e6b66de43caca1fc7c34658718371cc07ab
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Sat Jun 25 15:28:24 2016 +0300
+
+    initial wnd size fix
+
+commit 6835d40a7618b3af2c3a52e1dda59632e420a344
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Sat Jun 25 14:36:48 2016 +0300
+
+    Size change menu added, .toc changed
+
+commit 3833758743c7194bd93feebb89fd4f86cbb057c4
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Wed Jun 15 10:27:29 2016 +0300
+
+    Huge refactoring. Color change menu added
+
+commit 138016c8b7443e671f3ea6d476afa7ee14e8a007
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Mon Jun 13 06:04:56 2016 +0300
+
+    Resize working fine now after bugfix
+
+commit f637419eeebbfb920a3b2b63f49e284162d5839e
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Mon Jun 13 05:05:14 2016 +0300
+
+    Resize main frame behavior changed
+
+commit 993d752736db7e499f44c02b69eec7bc0724527a
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Sun Jun 12 17:46:19 2016 +0300
+
+    Resize fixes, still glitching sometimes
+
+commit b89910fa09e31e7e83f4712e0f54ea29e0a81f6f
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Sun Jun 12 15:31:26 2016 +0300
+
+    Added main table last column delimiter
+
+commit 8a7b68f5f534e3076832e80a61c5c3d2c0068558
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Sun Jun 12 11:47:18 2016 +0300
+
+    Add sideFrame drag
+
+commit c755da35614869429fd16d98a89fa8b489cfd293
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Sun Jun 12 11:07:22 2016 +0300
+
+    Design completely changed
+
+commit 32b52e8e98cb7defccd204c2e02893e2682b4c65
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Sat Jun 11 14:24:32 2016 +0300
+
+    UI cleanup and README update
+
+commit 6f93ecd9111ed4ca33cbd758cb8b4f7608e180c0
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Sat Jun 11 12:26:23 2016 +0300
+
+    Can pass tables as function args. need to add t= prefix like t=ViragDevTool
+
+commit aa0e198652e5d763d2ef04b4e669ff248e94dabf
+Author: Petr G <varren@gmail.com>
+Date:   Sat Jun 11 06:47:39 2016 +0300
+
+    Can pass args to functions. Works only for string, number, nil, boolean
+
+commit 0ed4d6db1d42c52ab01832132fe08d9fc09b7536
+Author: Petr G <varren@gmail.com>
+Date:   Sat Jun 11 05:32:24 2016 +0300
+
+    Bugfix after meatatable name changed
+
+commit b1e64b5a6a48450579ca1101358678ede0f963b0
+Author: Petr G <varren@gmail.com>
+Date:   Sat Jun 11 04:42:46 2016 +0300
+
+    Cleanup and refactoring
+
+commit a1cc847bc38b0f18846c8715080910b0414c53d9
+Author: Petr G <varren@gmail.com>
+Date:   Sat Jun 11 03:52:36 2016 +0300
+
+    metatable fixes
+
+commit ae23155b6b729100d1606a596d57ee354070c558
+Author: Petr G <varren@gmail.com>
+Date:   Sat Jun 11 03:25:32 2016 +0300
+
+    Fix if getmetatable(table).__index type is a function. This will execute it and we dont want such behavor
+
+commit c48d92f70a74fccb96fd914fbfc695c41a854960
+Author: Petr G <varren@gmail.com>
+Date:   Sat Jun 11 01:20:39 2016 +0300
+
+    Fn cals names have args in UI
+
+commit 91e66a71d040919793b2f77763c3e14e64d4bd2e
+Author: Petr G <varren@gmail.com>
+Date:   Sat Jun 11 00:57:22 2016 +0300
+
+    Added newproxy() fix after bug from DBM
+
+commit 39e185da19b43ea04f9b59676f196b1c8b440516
+Author: Petr G <varren@gmail.com>
+Date:   Fri Jun 10 15:12:03 2016 +0300
+
+    Huge performance boost for function call monitor-logger
+
+commit d0879eab2b60e56c41c3e54ddbd7981a472b9a69
+Author: Petr G <varren@gmail.com>
+Date:   Fri Jun 10 12:51:51 2016 +0300
+
+    README update
+
+commit e9f72f32152e6936985f50f9f45990c8e03438ff
+Author: Petr G <varren@gmail.com>
+Date:   Fri Jun 10 11:07:33 2016 +0300
+
+    Frame name info added. Function call logger will not accept invalid tables. Raw help button added
+
+commit 61bf7bf1f256adafd8a4697d4a215bd8e0f78290
+Author: Petr G <varren@gmail.com>
+Date:   Fri Jun 10 10:08:08 2016 +0300
+
+    Function call logger added, cmd refactoring and help update
+
+commit 55def35dae47a734fbdaf67d2231fcbfea685492
+Author: Petr G <varren@gmail.com>
+Date:   Thu Jun 9 13:09:04 2016 +0300
+
+    tag commit
+
+commit 01613d34acf3a0c92d79bb6a63ceb4002b4243c6
+Author: Petr G <varren@gmail.com>
+Date:   Thu Jun 9 12:31:10 2016 +0300
+
+    UI cleanup
+
+commit 8a1c6e62cffdfc5e1305e96699c4a939fadea5d3
+Author: Petr G <varren@gmail.com>
+Date:   Thu Jun 9 12:07:30 2016 +0300
+
+    Events start and stop msg colors updated and time added to ui
+
+commit 44b250e2f7bf809e65630c6975bb415ae3c31618
+Author: Petr G <varren@gmail.com>
+Date:   Thu Jun 9 11:57:03 2016 +0300
+
+    Sorting update. Number names will sort like 1,2,10 instead of 1,10,2
+
+commit f5cb44a820fb03768e17bf50bfc9f869e074f1d2
+Author: Petr G <varren@gmail.com>
+Date:   Thu Jun 9 11:20:26 2016 +0300
+
+    Added UI button for Blizzard_DebugTools FrameStack
+
+commit 52e12bef104049110518a8f75730b92aba7ccb24
+Author: Petr G <varren@gmail.com>
+Date:   Thu Jun 9 11:02:57 2016 +0300
+
+    Colors removed from xml
+
+commit 17de8a37adff57ea51d41c397c00c0c7ff707ab3
+Author: Petr G <varren@gmail.com>
+Date:   Thu Jun 9 10:18:19 2016 +0300
+
+    Main UI list rows dividers added. Highlights hoovered row. ACP.L bugfix
+
+commit f4ac07b7b5240423ff8fd0faa01ed12eb1bdb860
+Author: Petr G <varren@gmail.com>
+Date:   Thu Jun 9 08:57:43 2016 +0300
+
+    UI cleanup and buttons texture changes
+
+commit 4d3533347adf7e792ecf0b72457deec22fcaec43
+Author: Petr G <varren@gmail.com>
+Date:   Thu Jun 9 08:35:33 2016 +0300
+
+    Main wnd and sidebar preserve last state(open/closed) on logout or reload ui
+
+commit 118bd9eaee19bf4c3978d5c8361086817ae00721
+Author: Petr G <varren@gmail.com>
+Date:   Thu Jun 9 08:31:21 2016 +0300
+
+    Main UI wnd saves position and size on relog
+
+commit 6af93e66dcb845ce071493175ec013913a006102
+Author: Petr G <varren@gmail.com>
+Date:   Fri Jun 3 10:03:28 2016 +0300
+
+    startswith cmd fix and delete items in history added
+
+commit 8eb87ef0b6d0001c99f78b14b9fae4057adcf443
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Fri Jun 3 03:02:08 2016 +0300
+
+    README changes
+

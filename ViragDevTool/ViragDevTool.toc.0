@@ -1,0 +1,20 @@
+## Interface: 70000
+## Title: ViragDevTool
+## Author: Varren@Azuregos-RU
+## Version: 0.1
+## SavedVariables: ViragDevTool_Settings
+## X-Curse-Packaged-Version: v0.18
+## X-Curse-Project-Name: ViragDevTool
+## X-Curse-Project-ID: varrendevtool
+## X-Curse-Repository-ID: wow/varrendevtool/mainline
+ViragDevTool.lua
+
+Modules/ViragDevToolModulesCore.lua
+Modules/ViragDevToolEvents.lua
+Modules/ViragDevToolFunctionLogger.lua
+Modules/ViragDevToolHistory.lua
+
+ViragDevTool.xml
+
+ViragDevToolOptions.xml
+ViragDevToolOptions.lua

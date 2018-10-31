@@ -1,0 +1,12 @@
+tag fb41bf60987a6286015dc81b18f6044c1bff69c7 v0.21
+Author:	Petr Grabovoy <varren@gmail.com>
+Date:	Mon Jul 24 08:30:03 2017 +0300
+
+small bugfitx
+
+commit 6c26ac87f3e4b75c66a58d1c647cac4953b98f82
+Author: Petr Grabovoy <varren@gmail.com>
+Date:   Mon Jul 24 08:03:25 2017 +0300
+
+    ACP.L bug fix. value.fn could throw the error if value metatable is some function
+

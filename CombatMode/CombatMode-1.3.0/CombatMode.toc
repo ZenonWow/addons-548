@@ -1,0 +1,10 @@
+## Interface: 50400
+## Title: Combat Mode
+## Version: 1.2.9
+## Author: justice7ca
+## Notes: Combat Mode
+## DefaultState: enabled
+## X-Category: Misc
+## LoadOnDemand: 0
+## SavedVariables: CombatModeDB
+CombatMode.xml
