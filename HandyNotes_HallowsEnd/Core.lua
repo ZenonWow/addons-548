@@ -1,20 +1,40 @@
-
 ------------------------------------------
 --  This addon was heavily inspired by  --
 --    HandyNotes_Lorewalkers            --
 --    HandyNotes_LostAndFound           --
 --  by Kemayo                           --
 ------------------------------------------
+--[[
+/run HallowsEnd:CreateContinentWaypoints(  )
+/run HallowsEnd:CreateContinentWaypoints( true )
+/dump select(GetCurrentMapZone(), GetMapZones(GetCurrentMapContinent()))
+/dump HallowsEnd.points[ select(GetCurrentMapZone(), GetMapZones(GetCurrentMapContinent())) ]
+/run a={ GetMapZones( GetCurrentMapContinent () ) }
+/dump GetMapZones(GetCurrentMapContinent())
+/dump GetMapContinents()
+/dump GetCurrentMapAreaID()
+/dump GetAreaMapInfo(GetCurrentMapAreaID())
 
+/dump HandyNotes:GetZoneToMapID('Dread Wastes')  
+/dump HandyNotes:GetMapIDtoMapFile(858)
+--]]
+
+
+local function print(...)  DEFAULT_CHAT_FRAME:AddMessage(...)  end
 
 -- declaration
 local ID, HallowsEnd = ...
 HallowsEnd.points = {}
-
+_G.HallowsEnd = HallowsEnd
+--[[
+/run HallowsEnd.debug = true
+/run HallowsEnd.oldcreateWaypoint = true
+--]]
 
 -- our db and defaults
 local db
 local defaults = { profile = { completed = false, icon_scale = 1.4, icon_alpha = 0.8 } }
+local CLICK_DELAY, DOUBLECLICK_DELAY = 0.1, 0.2  -- seconds
 
 
 -- upvalues
@@ -51,7 +71,9 @@ function HallowsEnd:OnEnter(mapFile, coord)
 		tooltip:SetOwner(self, "ANCHOR_RIGHT")
 	end
 
-	tooltip:SetText("Candy Bucket")
+	local zonePoints = points[mapFile]
+	local questID = zonePoints  and  zonePoints[coord]  or  '<unknown>'
+	tooltip:SetText("Candy Bucket\n[quest="..questID.."]")
 	tooltip:Show()
 end
 
@@ -61,6 +83,95 @@ function HallowsEnd:OnLeave()
 	else
 		GameTooltip:Hide()
 	end
+end
+
+
+
+local function AddWaypoint(mapID, mapFloor, x, y, title)
+	if  TomTom  then  TomTom:AddMFWaypoint( mapID, mapFloor, x, y, {title = title, persistent = false} )  end
+	if  TomTomLite  then  TomTomLite:AddWaypoint( mapID, mapFloor, x, y, {title = title, persistent = false} )  end
+	if  Cartographer_Waypoints  then  Cartographer_Waypoints:AddWaypoint( NotePoint:new(mapID, x, y, title) )  end
+end
+
+local function SetClosestWaypoint()
+	if  TomTom  then  TomTom:SetClosestWaypoint()  end
+	if  TomTomLite  then  TomTomLite:UpdateArrow()  end
+	if  Cartographer_Waypoints  then  end  --Cartographer_Waypoints:SetClosestWaypoint()  end  -- TODO
+end
+
+if  HandyNotes  then
+	AddWaypoint = HandyNotes.AddWaypoint or AddWaypoint ; HandyNotes.AddWaypoint = AddWaypoint
+	SetClosestWaypoint = HandyNotes.SetClosestWaypoint or SetClosestWaypoint ; HandyNotes.SetClosestWaypoint = SetClosestWaypoint
+end
+
+
+
+function HallowsEnd:CreateContinentWaypoints(showCompleted)
+	local continentIdx = GetCurrentMapContinent()
+	print('CreateContinentWaypoints(): continentIdx='.. continentIdx)
+	local count = 0
+	local zones = { GetMapZones(continentIdx) }
+	for  zoneIdx, zoneName  in  ipairs(zones)  do
+		local mapID, mapFloor = HandyNotes:GetZoneToMapID(zoneName), 0
+		local mapFile = HandyNotes:GetMapIDtoMapFile(mapID)
+		mapFile = gsub(mapFile, "_terrain%d+$", "")
+		local zonePoints = points[mapFile]
+		if  not zonePoints  then
+			print('    ==> |cffff8080'.. zoneName .. '|r (|cff33ff99'.. mapFile .. '|r)  has no data')
+			zonePoints = {}
+		elseif  HallowsEnd.debug  then  print('  '.. zoneName .. ' (|cff33ff99'.. mapFile .. '|r)')
+		end
+		for  coord, questID  in  pairs(zonePoints)  do  if  showCompleted  or  not IsQuestFlaggedCompleted(questID)  then
+			local x, y = HandyNotes:getXY(coord)
+			AddWaypoint(mapID, mapFloor, x, y, "Candy Bucket "..questID.." in "..zoneName)  -- .." [quest="..questID.."]")
+			count = count + 1
+		end end
+	end
+	
+	print('CreateContinentWaypoints('..(showCompleted and 'showCompleted' or '')..'): '.. count .. ' waypoints')
+	SetClosestWaypoint()
+	
+	local isHorde = UnitFactionGroup('player') == 'Horde'  and  1  or  0
+	if  continentIdx == 6  then    -- Pandaria
+		AddTrackedAchievement(7601+isHorde)    -- Tricks and Treats of Pandaria
+	elseif  continentIdx == 5  then    -- The Maelstrom
+		AddTrackedAchievement(5837+isHorde)    -- Tricks and Treats of the Cataclysm
+	elseif  continentIdx == 4  then    -- Northrend
+		AddTrackedAchievement(5836-isHorde)    -- Tricks and Treats of Northrend -- consistency: 10 points, Blizzard
+	elseif  continentIdx == 3  then    -- Outland
+		AddTrackedAchievement(969-isHorde)    -- Tricks and Treats of Outland -- consistency: -10 points, Blizzard
+	elseif  continentIdx == 2  then    -- Eastern Kingdoms
+		AddTrackedAchievement(966+isHorde)    -- Tricks and Treats of Eastern Kingdoms
+		AddTrackedAchievement(5837+isHorde)    -- Tricks and Treats of the Cataclysm
+	elseif  continentIdx == 1  then    -- Kalimdor
+		AddTrackedAchievement(963+2*isHorde)    -- Tricks and Treats of Kalimdor
+		AddTrackedAchievement(5837+isHorde)    -- Tricks and Treats of the Cataclysm
+	end
+
+end
+
+
+local function CreateWaypointAt(mapFile, coord)
+	local mapID, mapFloor = HandyNotes:GetMapFiletoMapID(mapFile), 0
+	local x, y = HandyNotes:getXY(coord)
+	
+	local c, z = HandyNotes:GetCZ(mapFile)
+	local zoneName = HandyNotes:GetCZToZone(c,z)
+	
+	--[[
+	local mapIDCurrent = GetCurrentMapAreaID()
+	local zoneNameCurrent = select(GetCurrentMapZone(), GetMapZones(GetCurrentMapcontinentIdx()))  or  '<unknown zone>'
+	--]]
+	
+	local zonePoints = points[mapFile]
+	local questID = zonePoints  and  zonePoints[coord]  or  '<unknown>'
+	
+	if  HallowsEnd.debug  then
+		print(string.format( 'CreateWaypointAt(): mapID=%d, mapIDCurrent=%d, c,z,zone=%d,%d,%s, x,y=%.2f,%.2f coord=%d',
+			mapID, mapIDCurrent or '', c,z,zoneName, x*100, y*100, coord ))
+	end
+	
+	AddWaypoint(mapID, mapFloor, x, y, "Candy Bucket "..questID.." in "..zoneName)  -- .." [quest="..questID.."]")
 end
 
 local function createWaypoint(button, mapFile, coord)
@@ -74,6 +185,8 @@ local function createWaypoint(button, mapFile, coord)
 	end
 end
 
+
+--[[
 do
 	-- context menu generator
 	local info = {}
@@ -83,7 +196,6 @@ do
 		-- we need to do this to avoid "for initial value must be a number" errors
 		CloseDropDownMenus()
 	end
-
 	local function generateMenu(button, level)
 		if not level then return end
 
@@ -138,30 +250,78 @@ do
 		end
 	end
 end
+--]]
+
+
+local lastMouseDown, lastClick
+
+function HallowsEnd:OnClick(self, down, mapFile, coord)
+	local now = GetTime()
+	
+	if  down  then
+		lastMouseDown = now
+		-- Action on mouse UP only
+		return
+  end
+	
+	-- if  not lastMouseDown  then  return  end    -- Button was pressed over some other widget
+	
+	local longClick = lastMouseDown  and  CLICK_DELAY < now - lastMouseDown
+	lastMouseDown = nil
+	if  longClick  then  return  end    -- Holding button for some time is not a click
+	
+	-- Ctrl-Click
+	if  IsModifiedClick('ADDWAYPOINT')  then
+		return HallowsEnd:OnDoubleClick(self, down, mapFile, coord)
+	end
+	
+	-- Double Click
+	if  lastClick  and  (now - lastClick < DOUBLECLICK_DELAY)  then
+		lastClick = nil
+		return HallowsEnd:OnDoubleClick(self, down, mapFile, coord)
+	end
+	
+	lastClick = now
+end
+
+function HallowsEnd:OnDoubleClick(self, down, mapFile, coord)
+	-- Action on mouse UP only
+	if  down  then  return  end
+	
+	--createWaypoint(currentZone, currentCoord)
+	if  HallowsEnd.oldcreateWaypoint  then  createWaypoint(self, mapFile, coord)
+	else  CreateWaypointAt(mapFile, coord)
+	end
+end
+
+
 
 do
 	-- custom iterator we use to iterate over every node in a given zone
-	local function iter(t, prestate)
-		if not t then return nil end
+	local function iter(zonePoints, prevCoord)
+		if not zonePoints then return nil end
 
-		local state, value = next(t, prestate)
+		local nextCoord, questID = next(zonePoints, prevCoord)
 
-		while state do -- have we reached the end of this zone?
-			if value and (db.completed or not IsQuestFlaggedCompleted(value)) then
-				return state, nil, "interface\\icons\\achievement_halloween_candy_01", db.icon_scale, db.icon_alpha
+		while nextCoord do -- have we reached the end of this zone?
+			if questID and (db.completed or not IsQuestFlaggedCompleted(questID)) then
+				return nextCoord, nil, "interface\\icons\\achievement_halloween_candy_01", db.icon_scale, db.icon_alpha
 			end
 
-			state, value = next(t, state) -- get next data
+			nextCoord, questID = next(zonePoints, nextCoord) -- get next data
 		end
 
 		return nil, nil, nil, nil
 	end
 
+	-- Iterator function for HandyNotes
 	function HallowsEnd:GetNodes(mapFile)
+		if  HallowsEnd.debug  then  print('HallowsEnd:GetNodes("|cff33ff99'..mapFile..'|r")')  end
 		mapFile = gsub(mapFile, "_terrain%d+$", "")
 		return iter, points[mapFile], nil
 	end
 end
+
 
 
 -- config
@@ -206,6 +366,7 @@ local options = {
 		},
 	},
 }
+
 
 
 -- initialise
