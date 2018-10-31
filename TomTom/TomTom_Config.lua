@@ -1,8 +1,8 @@
 local L = TomTomLocals
 
-local function createconfig()
-	local options = {}
+local options = {}
 
+do
 	options.type = "group"
 	options.name = "TomTom"
 
@@ -51,7 +51,7 @@ local function createconfig()
 
 	options.args = {}
 
-	options.args.coordblock = {
+	options.args.CoordBlock = {
 		type = "group",
 		order = 2,
 		name = L["Coordinate Block"],
@@ -154,7 +154,7 @@ local function createconfig()
 		},
 	} -- End coordinate block settings
 
-	options.args.crazytaxi = {
+	options.args.CrazyTaxi = {
 		type = "group",
 		order = 3,
 		name = L["Waypoint Arrow"],
@@ -389,7 +389,7 @@ local function createconfig()
 		},
 	} -- End crazy taxi options
 
-	options.args.minimap = {
+	options.args.Minimap = {
 		type = "group",
 		order = 4,
 		name = L["Minimap"],
@@ -433,7 +433,7 @@ local function createconfig()
 		},
 	} -- End minimap options
 
-	options.args.worldmap = {
+	options.args.Worldmap = {
 		type = "group",
 		order = 5,
 		name = L["World Map"],
@@ -551,7 +551,7 @@ local function createconfig()
 	} -- End world map options
 
 	-- LDB Data Feeds
-	options.args.feeds = {
+	options.args.Feeds = {
 		type = "group",
 		order = 8,
 		name = L["Data Feed Options"],
@@ -606,7 +606,7 @@ local function createconfig()
 		},
 	}
 
-	options.args.general = {
+	options.args.General = {
 		type = "group",
 		order = 1,
 		name = L["General Options"],
@@ -684,7 +684,7 @@ local function createconfig()
 		},
 	}
 
-    	options.args.poi = {
+	options.args.POI = {
 		type = "group",
 		order = 6,
 		name = L["Quest Objectives"],
@@ -739,8 +739,63 @@ local function createconfig()
 			},
 		},
 	} -- End POI Integration settings
+	
+end
 
-	options.args.profile = {
+
+
+local config = LibStub("AceConfig-3.0")
+local dialog = LibStub("AceConfigDialog-3.0")
+
+local function initCategory(widget, event)
+	--local appName = widget:GetUserData("appName")
+	local categoryKey = widget.categoryKey
+	local appName = "TomTom-"..categoryKey
+	local category = options.args[categoryKey]
+	config:RegisterOptionsTable(appName, category)
+	-- If OnShow was hooked after this function by something else then this fails miserably,
+	-- removing the later hook from the chain
+	local origOnShow = widget.events.OnShow2
+	widget.events.OnShow = origOnShow
+	widget.events.OnShow2 = nil
+	if  origOnShow  then  origOnShow(widget, event)  end
+end
+
+local function createBlizzOptions()
+	local OptionsProfile = LibStub("AceDBOptions-3.0"):GetOptionsTable(TomTom.db)
+	OptionsProfile.name = L["Options profile"]
+	OptionsProfile.desc = L["Saved profile for TomTom options"]
+	OptionsProfile.order = 12
+	options.args.OptionsProfile = OptionsProfile
+
+	local WaypointsProfile = LibStub("AceDBOptions-3.0"):GetOptionsTable(TomTom.waydb)
+	WaypointsProfile.name = L["Waypoints profile"]
+	WaypointsProfile.desc = L["Save profile for TomTom waypoints"]
+	WaypointsProfile.order = 13
+	options.args.WaypointsProfile = WaypointsProfile
+	
+	local ConfigPanels = {}
+	for  categoryKey,category  in  pairs(options.args)  do
+		local appName = "TomTom-"..categoryKey
+		local frame = dialog:AddToBlizOptions(appName, category.name, "TomTom")
+		local widget = frame.obj
+		widget.categoryKey = categoryKey
+		widget.events.OnShow2 = widget.events.OnShow
+		widget.events.OnShow = initCategory
+		--[[
+		widget.events.OnShow = function (widget, event)
+			config:RegisterOptionsTable(appName, category)
+			local origOnShow = widget.events.OnShow2
+			widget.events.OnShow = origOnShow
+			widget.events.OnShow2 = nil
+			if  origOnShow  then  origOnShow(widget, event)  end
+		end
+		--]]
+		ConfigPanels[categoryKey] = frame
+	end
+	
+	--[[
+	options.args.Profile = {
 		type = "group",
 		order = 7,
 		name = L["Profile Options"],
@@ -750,85 +805,83 @@ local function createconfig()
 				type = "description",
 				name = L["TomTom's saved variables are organized so you can have shared options across all your characters, while having different sets of waypoints for each.  These options sections allow you to change the saved variable configurations so you can set up per-character options, or even share waypoints between characters"],
 			},
-			options = LibStub("AceDBOptions-3.0"):GetOptionsTable(TomTom.db),
-			waypoints = LibStub("AceDBOptions-3.0"):GetOptionsTable(TomTom.waydb)
+			options = OptionsProfile,
+			waypoints = WaypointsProfile
 		}
 	}
-
-	options.args.profile.args.options.name = L["Options profile"]
-	options.args.profile.args.options.desc = L["Saved profile for TomTom options"]
-	options.args.profile.args.options.order = 2
-
-	options.args.profile.args.waypoints.name = L["Waypoints profile"]
-	options.args.profile.args.waypoints.desc = L["Save profile for TomTom waypoints"]
-	options.args.profile.args.waypoints.order = 3
-
-	return options
+	--]]
+	return ConfigPanels
 end
 
-local config = LibStub("AceConfig-3.0")
-local dialog = LibStub("AceConfigDialog-3.0")
-local registered = false;
+-- attempt to garbage-collect init function when all panels are initialised
+initCategory = nil
 
-local options
+
+--[[
 local function createBlizzOptions()
-	options = createconfig()
-
 	-- General Options
-	config:RegisterOptionsTable("TomTom-General", options.args.general)
-	local blizzPanel = dialog:AddToBlizOptions("TomTom-General", options.args.general.name, "TomTom")
+	config:RegisterOptionsTable("TomTom-General", options.args.General)
+	local blizzPanel = dialog:AddToBlizOptions("TomTom-General", options.args.General.name, "TomTom")
 
 	-- Coordinate Block Options
-	config:RegisterOptionsTable("TomTom-CoordBlock", options.args.coordblock)
-	dialog:AddToBlizOptions("TomTom-CoordBlock", options.args.coordblock.name, "TomTom")
+	config:RegisterOptionsTable("TomTom-CoordBlock", options.args.CoordBlock)
+	blizzPanel.CoordBlock = dialog:AddToBlizOptions("TomTom-CoordBlock", options.args.CoordBlock.name, "TomTom")
 
 	-- Crazy Taxi Options
-	config:RegisterOptionsTable("TomTom-CrazyTaxi", options.args.crazytaxi)
-	dialog:AddToBlizOptions("TomTom-CrazyTaxi", options.args.crazytaxi.name, "TomTom")
+	config:RegisterOptionsTable("TomTom-CrazyTaxi", options.args.CrazyTaxi)
+	blizzPanel.CrazyTaxi = dialog:AddToBlizOptions("TomTom-CrazyTaxi", options.args.CrazyTaxi.name, "TomTom")
 
 	-- Minimap Options
-	config:RegisterOptionsTable("TomTom-Minimap", options.args.minimap)
-	dialog:AddToBlizOptions("TomTom-Minimap", options.args.minimap.name, "TomTom")
+	config:RegisterOptionsTable("TomTom-Minimap", options.args.Minimap)
+	blizzPanel.Minimap = dialog:AddToBlizOptions("TomTom-Minimap", options.args.Minimap.name, "TomTom")
 
 	-- World Map Options
-	config:RegisterOptionsTable("TomTom-Worldmap", options.args.worldmap)
-	dialog:AddToBlizOptions("TomTom-Worldmap", options.args.worldmap.name, "TomTom")
+	config:RegisterOptionsTable("TomTom-Worldmap", options.args.Worldmap)
+	blizzPanel.Worldmap = dialog:AddToBlizOptions("TomTom-Worldmap", options.args.Worldmap.name, "TomTom")
 
 	-- World Map Options
-	config:RegisterOptionsTable("TomTom-Feeds", options.args.feeds)
-	dialog:AddToBlizOptions("TomTom-Feeds", options.args.feeds.name, "TomTom")
+	config:RegisterOptionsTable("TomTom-Feeds", options.args.Feeds)
+	blizzPanel.Feeds = dialog:AddToBlizOptions("TomTom-Feeds", options.args.Feeds.name, "TomTom")
 
     -- POI Options
-	config:RegisterOptionsTable("TomTom-POI", options.args.poi)
-	dialog:AddToBlizOptions("TomTom-POI", options.args.poi.name, "TomTom")
+	config:RegisterOptionsTable("TomTom-POI", options.args.POI)
+	blizzPanel.POI = dialog:AddToBlizOptions("TomTom-POI", options.args.POI.name, "TomTom")
 
 	-- Profile Options
-	local p_options = options.args.profile.args.options
-	local w_options = options.args.profile.args.waypoints
-	config:RegisterOptionsTable("TomTom-Profiles-Waypoints", w_options)
-	config:RegisterOptionsTable("TomTom-Profiles-Options", p_options)
-	dialog:AddToBlizOptions("TomTom-Profiles-Waypoints", w_options.name, "TomTom")
-	dialog:AddToBlizOptions("TomTom-Profiles-Options", p_options.name, "TomTom")
+	config:RegisterOptionsTable("TomTom-WaypointsProfile", options.args.WaypointsProfile)
+	blizzPanel.WaypointsProfile = dialog:AddToBlizOptions("TomTom-WaypointsProfile", options.args.WaypointsProfile.name, "TomTom")
+
+	config:RegisterOptionsTable("TomTom-OptionsProfile", options.args.OptionsProfile)
+	blizzPanel.OptionsProfile = dialog:AddToBlizOptions("TomTom-OptionsProfile", options.args.OptionsProfile.name, "TomTom")
+
 	return blizzPanel
 end
+--]]
 
-SLASH_TOMTOM1 = "/tomtom"
-local blizzPanel
-SlashCmdList["TOMTOM"] = function(msg)
-	if not registered then
-		blizzPanel = createBlizzOptions()
-		registered = true
+
+local hijackFrame
+
+function TomTom.RegisterConfigFrames()
+	if  not TomTom.ConfigPanels  then
+		TomTom.ConfigPanels = createBlizzOptions()
+		-- attempt to release init func
+		createBlizzOptions = nil
 	end
-
-	InterfaceOptionsFrame_OpenToCategory("TomTom")
+	if  hijackFrame  then
+		-- attempt to release frame memory
+		hijackFrame:SetScript("OnShow", nil)
+		hijackFrame:SetParent(nil)
+		hijackFrame = nil
+	end
 end
 
-local hijackFrame = CreateFrame("Frame", nil, InterfaceOptionsFrame)
-hijackFrame:SetScript("OnShow", function(self)
-	if not registered then
-		blizzPanel = createBlizzOptions()
-		registered = true
-	end
+hijackFrame = CreateFrame("Frame", nil, InterfaceOptionsFrame)
+hijackFrame:SetScript("OnShow", TomTom.RegisterConfigFrames)
 
-	self:SetScript("OnShow", nil)
-end)
+
+SLASH_TOMTOM1 = "/tomtom"
+SlashCmdList["TOMTOM"] = function(msg)
+	TomTom.RegisterConfigFrames()
+	InterfaceOptionsFrame_OpenToCategory(TomTom.ConfigPanels.General)
+end
+
