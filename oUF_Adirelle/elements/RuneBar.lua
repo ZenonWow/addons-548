@@ -33,13 +33,18 @@ local function RuneUpdate(self, event, index)
 		rune:UpdateRuneColor()
 	end
 	local start, duration, ready = GetRuneCooldown(index)
-	if not ready then
+	if  start  and  duration  and  not ready  then
 		rune.duration = duration
 		rune.readyTime = start + duration
 		rune:SetMinMaxValues(start, start + duration)
 		rune:SetScript('OnUpdate', OnUpdate)
 	else
 		rune:SetScript('OnUpdate', nil)
+		--[[
+		if  not ready  then
+			print('RuneUpdate(index='..tostring(index)..'): unexpected nil, start='..tostring(start)..' duration='..tostring(duration))
+		end
+		--]]
 	end
 end
 
