@@ -373,7 +373,8 @@ local options = {
 function HallowsEnd:OnEnable()
 	local _, month, day = CalendarGetDate()
 
-	if month == 10 and (day >= 18 and day <= 31) then
+	if (month == 10 and (day >= 18 and day <= 31))
+	or (month == 11 and day == 01)  then
 		HandyNotes:RegisterPluginDB("HallowsEnd", self, options)
 		self:RegisterEvent("QUEST_FINISHED", "Refresh")
 
