@@ -1,9 +1,16 @@
+-- Addon private namespace
+local ADDON_NAME, ns = ...
+-- Addon global namespace
+local BagSync = BagSync
+-- Localization
 local L = BAGSYNC_L
-local searchTable = {}
+-- Imported from BagSync.lua
+local Debug =  ns.Debug
+
 local rows, anchor = {}
 local currentRealm = GetRealmName()
 local GetItemInfo = _G['GetItemInfo']
-local currentPlayer = UnitName('player')
+local playerName = UnitName('player')
 
 local ItemSearch = LibStub('LibItemSearch-1.0')
 local bgSearch = CreateFrame("Frame","BagSync_SearchFrame", UIParent)
@@ -21,12 +28,12 @@ ItemSearch:RegisterTypedSearch{
 	end,
 	
 	findItem = function(self, link, _, search)
-		if link:find("battlepet") then return false end
-
-		local itemID = link:match('item:(%d+)')
-		if not itemID then
-			return
-		end
+		--if link:find("battlepet") then return false end
+		--local itemID = link:match('item:(%d+)')
+		
+		-- Also handle battlepet: links
+		local itemID = BagSync.ToItemData(link)
+		if  not itemID  then  return  end
 		
 		local cachedResult = tooltipCache[search][itemID]
 		if cachedResult ~= nil then
@@ -53,6 +60,17 @@ ItemSearch:RegisterTypedSearch{
 		return result
 	end,
 }
+
+
+
+local searchTable = {}
+local searchStr
+local searchStorageName
+local tempList = {}
+local previousGuilds = {}
+--local count = 0
+
+
 
 local function LoadSlider()
 
@@ -162,116 +180,115 @@ local function LoadSlider()
 	end)
 end
 
---do search routine
+
+
+local function SearchBag(bagItems)
+	-- q = storageName, r = storageDB
+	for slotID, itemData in pairs(bagItems) do
+		local linkType, ID, dbcount, dblink = ParseItemData(itemData)
+		if  dblink  and  not tempList[dblink]  then
+			local dName, dItemLink, dRarity = GetItemInfo(dblink)
+			if  not dItemLink  then
+			elseif  searchStorageName  or  ItemSearch:Find(dItemLink, searchStr)  then
+				table.insert(searchTable, { name=dName, link=dItemLink, rarity=dRarity } )
+				tempList[dblink] = dName
+				--count = count + 1
+			end
+		end
+	end
+end
+
+local function SearchStorage(storageDB)
+	--if  type(storageDB[0]) ~= 'table'  then  return SearchBag(storageDB)  end
+
+	--bagID = bag name bagID, bagItems = data of specific bag with bagID
+	for  bagID, bagItems  in pairs(storageDB) do
+		--slotID = slotid for specific bagid, itemValue = data of specific slotid
+		if  type(bagItems) == "table"  then
+			SearchBag(bagItems)
+		end
+	end
+end
+
 local function DoSearch()
 	if not BagSync or not BagSyncDB then return end
-	local searchStr = bgSearch.SEARCHBTN:GetText()
-
+	
+	-- Search query
+	searchStr = bgSearch.SEARCHBTN:GetText()
 	searchStr = searchStr:lower()
+	-- Don't search on empty stomach
+	if  0 == searchStr:len()  then  return  end
 	
-	searchTable = {} --reset
 	
-	local tempList = {}
-	local previousGuilds = {}
-	local count = 0
-	local playerSearch = false
+	-- Empty result table
+	searchTable = {}
 	
-	if strlen(searchStr) > 0 then
+	-- Reset search state
+	tempList = {}
+	previousGuilds = {}
+	--count = 0
+	
+	local allowList = {
+		["bag"] = 0,
+		["bank"] = 0,
+		["equip"] = 0,
+		["mailbox"] = 0,
+		["void"] = 0,
+		["auction"] = 0,
+		["guild"] = 0,
+	}
+	
+	-- Static references into the SavedVariables database for the current realm
+	RealmCharDB      = BagSyncDB[playerRealm]
+	--RealmTokenDB     = BagSyncTOKEN_DB[playerRealm]
+	--RealmCraftDB     = BagSyncCRAFT_DB[playerRealm]
+	RealmGuildDB     = BagSyncGUILD_DB[playerRealm]
+	RealmBlacklistDB = BagSyncBLACKLIST_DB[playerRealm]
+	
+	
+	searchStorageName =  searchStr[1] == "@"  and  searchStr:sub(2)
+	if  not allowList[searchStorageName]  then  searchStorageName = nil  end
+	
+	if  searchStorageName  then
+		-- List a specific storage
+		SearchStorage(RealmCharDB[playerName][searchStorageName])
+	else
 		
-		local playerFaction = UnitFactionGroup("player")
-		local allowList = {
-			["bag"] = 0,
-			["bank"] = 0,
-			["equip"] = 0,
-			["mailbox"] = 0,
-			["void"] = 0,
-			["auction"] = 0,
-			["guild"] = 0,
-		}
-		
-		if string.len(searchStr) > 1 and string.find(searchStr, "@") and allowList[string.sub(searchStr, 2)] ~= nil then playerSearch = true end
+		local playerFaction = UnitFactionGroup('player')
 		
 		--loop through our characters
 		--k = player, v = stored data for player
-		for k, v in pairs(BagSyncDB[currentRealm]) do
-
-			local pFaction = v.faction or playerFaction --just in case ;) if we dont know the faction yet display it anyways
-			
-			--check if we should show both factions or not
-			if BagSyncOpt.enableFaction or pFaction == playerFaction then
-
+		for  charName, charDB  in  pairs(RealmCharDB)  do
+			if  charDB.faction  and  charDB.faction ~= playerFaction  and  not BagSyncOpt.enableFaction  then
+				-- Do not show other factions if not enabled
+				-- If we dont know the faction yet display it anyways
+			else
 				--now count the stuff for the user
-				--q = bag name, r = stored data for bag name
-				for q, r in pairs(v) do
+				-- q = storageName, r = storageDB
+				for storageName, storageDB in pairs(charDB) do
 					--only loop through table items we want
-					if allowList[q] and type(r) == "table" then
-						--bagID = bag name bagID, bagInfo = data of specific bag with bagID
-						for bagID, bagInfo in pairs(r) do
-							--slotID = slotid for specific bagid, itemValue = data of specific slotid
-							if type(bagInfo) == "table" then
-								for slotID, itemValue in pairs(bagInfo) do
-									local dblink, dbcount = strsplit(',', itemValue)
-									if dblink then
-										local dName, dItemLink, dRarity = GetItemInfo(dblink)
-										if dName and dItemLink then
-											--are we checking in our bank,void, etc?
-											if playerSearch and string.sub(searchStr, 2) == q and string.sub(searchStr, 2) ~= "guild" and k == currentPlayer and not tempList[dblink] then
-												table.insert(searchTable, { name=dName, link=dItemLink, rarity=dRarity } )
-												tempList[dblink] = dName
-												count = count + 1
-											--we found a match
-											elseif not playerSearch and not tempList[dblink] and ItemSearch:Find(dItemLink, searchStr) then
-												table.insert(searchTable, { name=dName, link=dItemLink, rarity=dRarity } )
-												tempList[dblink] = dName
-												count = count + 1
-											end
-										end
-									end
-								end
-							end
-						end
+					if allowList[storageName] and type(storageDB) == 'table' then
+						SearchStorage(storageDB)
 					end
 				end
-				
-				if BagSyncOpt.enableGuild then
-					local guildN = v.guild or nil
-				
-					--check the guild bank if the character is in a guild
-					if BagSyncGUILD_DB and guildN and BagSyncGUILD_DB[currentRealm][guildN] then
-						--check to see if this guild has already been done through this run (so we don't do it multiple times)
-						if not previousGuilds[guildN] then
-							--we only really need to see this information once per guild
-							for q, r in pairs(BagSyncGUILD_DB[currentRealm][guildN]) do
-								local dblink, dbcount = strsplit(',', r)
-								if dblink then
-									local dName, dItemLink, dRarity = GetItemInfo(dblink)
-									if dName then
-										if playerSearch and string.sub(searchStr, 2) == q and string.sub(searchStr, 2) == "guild" and k == currentPlayer and not tempList[dblink] then
-											table.insert(searchTable, { name=dName, link=dItemLink, rarity=dRarity } )
-											tempList[dblink] = dName
-											count = count + 1
-										--we found a match
-										elseif not playerSearch and not tempList[dblink] and ItemSearch:Find(dItemLink, searchStr) then
-											table.insert(searchTable, { name=dName, link=dItemLink, rarity=dRarity } )
-											tempList[dblink] = dName
-											count = count + 1
-										end
-									end
-								end
-							end
-							previousGuilds[guildN] = true
-						end
-					end
-				end
-				
 			end
-			
+		end
+				
+		if  true  or  BagSyncOpt.enableGuild  and  RealmGuildDB  then
+			for  guildName, guildDB  in  pairs(RealmGuildDB)  do
+				if  type(guildDB[0]) == 'table'  then
+					SearchStorage(guildDB)
+				else
+					SearchBag(guildDB)
+				end
+				previousGuilds[guildName] = true
+			end
 		end
 		
 		table.sort(searchTable, function(a,b) return (a.name < b.name) end)
 	end
 	
-	bgSearch.totalC:SetText("|cFFFFFFFF"..L["Total:"].." "..count.."|r")
+	bgSearch.totalC:SetText("|cFFFFFFFF"..L["Total:"].." "..#searchTable.."|r")
 	
 	LoadSlider()
 end

@@ -1,5 +1,12 @@
+-- Addon private namespace
+local ADDON_NAME, ns = ...
+-- Addon global namespace
+local BagSync = BagSync
+-- Localization
 local L = BAGSYNC_L
-local currentPlayer = UnitName('player')
+local Debug =  ns.Debug
+
+--local currentPlayer = UnitName('player')
 local currentRealm = GetRealmName()
 local bgProfiles = CreateFrame("Frame","BagSync_ProfilesFrame", UIParent)
 
@@ -117,7 +124,9 @@ bgProfiles.confirmButton:SetScript("OnClick", function()
 		BagSyncOpt.delName = name
 		BagSync:FixDB_Data()
 		BagSync_ProfilesFrame:Hide()
-		ReloadUI()
+		--ReloadUI()
+		-- Just reinitialize the SavedVariables
+		ns.InitSavedDB()
 	else
 		print(L["BagSync: Error user not found!"])
 	end

@@ -17,6 +17,7 @@ libs\tekKonfigScroll.lua
 libs\LibItemSearch-1.0.lua
 libs\LibDataBroker-1.1.lua
 
+BagSync.lua
 BagSync_Minimap.lua
 BagSync_Search.lua
 BagSync_Tokens.lua
@@ -24,4 +25,7 @@ BagSync_Crafts.lua
 BagSync_Blacklist.lua
 BagSync_Profiles.lua
 BagSync_Config.lua
-BagSync.lua
+BagSync_Moneytip.lua
+BagSync_Scan.lua
+BagSync_Tooltip.lua
+BagSync_UI.lua

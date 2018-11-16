@@ -9,6 +9,7 @@
 -- ["Guild: %d"] = "",
 -- ["Mailbox: %d"] = "",
 -- ["Search"] = "",
+-- ["All: %d"] = "",
 -- ["Total:"] = "",
 -- ["Tokens"] = "",
 -- ["Profiles"] = "",
@@ -69,7 +70,16 @@
 -- ["Display modified tooltips ONLY in the BagSync Search window."] = "",
 -- ["Enable BagSync Tooltips"] = "",
 -- ["Enable empty line seperator above BagSync tooltip display."] = "",
-		
+
+BAGSYNC_L = {    -- English or unknown
+	["Equipped: %d"] = "Equip: %d",
+	["Mailbox: %d"] = "Mail: %d",
+	["Sent to: %d"] = "SentTo: %d",
+	["All: %d"] = "sum: %d",
+	--["All: %d"] = "all: %d",
+	--["All: %d"] = "∑: %d",    -- For geeks
+}
+
 BAGSYNC_L = GetLocale() == "zhCN" and {
 	["Bags: %d"] = "背包: %d",
 	["Bank: %d"] = "银行: %d",
@@ -138,7 +148,8 @@ BAGSYNC_L = GetLocale() == "zhCN" and {
 	["/bgs fixdb - Runs the database fix (FixDB) on BagSync."] 						= "/bgs fixdb - Führt eine Reparatur der Datenbank (FixDB) aus.",
 	["Left Click = Search Window"] 													= "Links Klick = Suchen",
 	["Right Click = BagSync Menu"] 													= "Rechts Klick = BagSync Menu",
-} or { }
+
+} or BAGSYNC_L
 
 setmetatable(BAGSYNC_L, {__index = function(self, key) rawset(self, key, key); return key; end})
 
