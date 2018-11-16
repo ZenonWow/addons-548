@@ -14,3 +14,5 @@
 BugGrabber.lua
 locales.lua
 
+DebugChatFrame.lua
+EventTracker.lua
