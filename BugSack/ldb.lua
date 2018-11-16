@@ -18,10 +18,10 @@ function plugin.OnClick(self, button)
 		InterfaceOptionsFrame_OpenToCategory(addonName)
 		InterfaceOptionsFrame_OpenToCategory(addonName)
 	else
-		if IsControlKeyDown() and IsShiftKeyDown() then
-			ReloadUI()
-		elseif IsAltKeyDown() then
-			addon:Reset()
+		if  IsModifiedClick()  then
+			if IsAltKeyDown() then  addon:Reset()  end
+			if IsControlKeyDown() and IsShiftKeyDown() then  ReloadUI()  end
+			
 		elseif BugSackFrame and BugSackFrame:IsShown() then
 			addon:CloseSack()
 		else
