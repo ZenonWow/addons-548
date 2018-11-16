@@ -2197,7 +2197,9 @@ function ArkInventory.OnInitialize( )
 		if ArkInventory.Global.Me.location[loc_id].special then
 			local frame = ArkInventory.Frame_Main_Get( loc_id )
 --			if frame then
-				table.insert( UISpecialFrames, frame:GetName( ) )
+				--table.insert( UISpecialFrames, frame:GetName( ) )
+				local prev_CloseSpecialWindows = _G.CloseSpecialWindows
+				function _G.CloseSpecialWindows()  return  frame:IsShown()  and  frame:Hide()  or  prev_CloseSpecialWindows()  end
 --			end
 		end
 	end
@@ -2535,13 +2537,16 @@ function ArkInventory.OutputSerialize( d )
 	end
 end
 
+
+
 local ArkInventory_TempOutputTable = { }
 
 function ArkInventory.Output( ... )
 	
-	if not DEFAULT_CHAT_FRAME then
-		return
+	if  not ArkInventory.logFrame  then
+		ArkInventory.logFrame = tekDebug  and  tekDebug:GetFrame("ArkInventory")
 	end
+	if  not ArkInventory.logFrame  then  return  end
 	
 	table.wipe( ArkInventory_TempOutputTable )
 	
@@ -2551,7 +2556,7 @@ function ArkInventory.Output( ... )
 		ArkInventory_TempOutputTable[i] = ArkInventory.OutputSerialize( v )
 	end
 	
-	ArkInventory:Print( table.concat( ArkInventory_TempOutputTable ) )
+	ArkInventory:Print( ArkInventory.logFrame, table.concat( ArkInventory_TempOutputTable ) )
 	
 end
 

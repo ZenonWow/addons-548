@@ -20,7 +20,7 @@
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Always: delayed
 
-## OptionalDeps: Blizzard_GuildBankUI, Blizzard_VoidStorageUI, Blizzard_PetJournal, Ace3, AceGUI-3.0-SharedMediaWidgets, LibPeriodicTable-3.1, LibSharedMedia-3.0
+## OptionalDeps: Blizzard_GuildBankUI, Blizzard_VoidStorageUI, Blizzard_PetJournal, Ace3, AceGUI-3.0-SharedMediaWidgets, LibPeriodicTable-3.1, LibSharedMedia-3.0, tekDebug
 
 ## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibPeriodicTable-3.1, LibSharedMedia-3.0
 
