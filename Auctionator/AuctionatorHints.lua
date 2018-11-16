@@ -1,32 +1,10 @@
 
-local addonName, addonTable = ...; 
+local ADDON_NAME, addonTable = ...; 
 local zc = addonTable.zc;
 local zz = zc.md;
 local _
 
 -----------------------------------------
-
-local auctionator_orig_GameTooltip_OnTooltipAddMoney;
-
------------------------------------------
-
-function auctionator_GameTooltip_OnTooltipAddMoney (self, cost, maxcost)
-
-	if (AUCTIONATOR_V_TIPS == 1) then
-		return;
-	end
-
-	auctionator_orig_GameTooltip_OnTooltipAddMoney (self, cost, maxcost);
-end
-
------------------------------------------
-
-function Atr_Hook_OnTooltipAddMoney()
-	auctionator_orig_GameTooltip_OnTooltipAddMoney = GameTooltip_OnTooltipAddMoney;
-	GameTooltip_OnTooltipAddMoney = auctionator_GameTooltip_OnTooltipAddMoney;
-end
-
-------------------------------------------------
 
 local function Atr_AppendHint (results, price, text, volume)
 
@@ -296,140 +274,144 @@ local WHIPTAIL			= 52988;
 local ASHEN_PIGMENT		= 61979;
 ]]--
 
-local engDEnames = {};
+local engDEnames = {
+	[LESSER_MAGIC]		= "Lesser Magic Essence",
+	[GREATER_MAGIC]		= "Greater Magic Essence",
+	[STRANGE_DUST]		= "Strange Dust",
+	
+	[SMALL_GLIMMERING]	= "Small Glimmering Shard",
+	[LESSER_ASTRAL]		= "Lesser Astral Essence",
+	
+	[GREATER_ASTRAL]		= "Greater Astral Essence",
+	[SOUL_DUST]			= "Soul Dust",
+	[LARGE_GLIMMERING]	= "Large Glimmering Essence",
+	
+	[LESSER_MYSTIC]		= "Lesser Mystic Essence",
+	[GREATER_MYSTIC]		= "Greater Mystic Essence",
+	[VISION_DUST]		= "Vision Dust",
+	[SMALL_GLOWING]		= "Small Glowing Shard",
+	[LARGE_GLOWING]		= "Large Glowing Shard",
+	
+	[LESSER_NETHER]		= "Lesser Nether Essence",
+	[GREATER_NETHER]		= "Greater Nether Essence",
+	[DREAM_DUST]			= "Dream Dust",
+	[SMALL_RADIANT]		= "Small Radiant",
+	[LARGE_RADIANT]		= "Large Radiant",
+	
+	[SMALL_BRILLIANT]	= "Small Brilliant Shard",
+	[LARGE_BRILLIANT]	= "Large Brilliant Shard",
+	
+	[LESSER_ETERNAL]		= "Lesser Eternal Essence",
+	[GREATER_ETERNAL]	= "Greater Eternal Essence",
+	[ILLUSION_DUST]		= "Illusion Dust",
+	
+	[NEXUS_CRYSTAL]		= "Nexus Crystal",
+	
+	[ARCANE_DUST]		= "Arcane Dust",
+	[GREATER_PLANAR]		= "Greater Planar Essence",
+	[LESSER_PLANAR]		= "Lesser Planar Essence",
+	[SMALL_PRISMATIC]	= "Small Prismatic Shard",
+	[LARGE_PRISMATIC]	= "Large Prismatic Shard",
+	[VOID_CRYSTAL]		= "Void Crystal",
+	
+	[DREAM_SHARD]		= "Dream Shard",
+	[SMALL_DREAM]		= "Small Dream Shard",
+	
+	[INFINITE_DUST]		= "Infinite Dust",
+	[GREATER_COSMIC]		= "Greater Cosmic Essence",
+	[LESSER_COSMIC]		= "Lesser Cosmic Essence",
+	[ABYSS_CRYSTAL]		= "Abyss Crystal",
+	
+	[HEAVENLY_SHARD]		= "Heavenly Shard",
+	[SMALL_HEAVENLY]		= "Small Heavenly Shard",
+	
+	[HYPN_DUST]			= "Hypnotic Dust",
+	[GREATER_CEL]		= "Greater Celestial Essence",
+	[LESSER_CEL]			= "Lesser Celestial Essence",
+	[MAELSTROM_CRYSTAL]	= "Maelstrom Crystal",
+	
+	[SMALL_ETHEREAL]		= 'Small Ethereal Shard',
+	[ETHEREAL_SHARD]		= 'Ethereal Shard',
+	
+	[SPIRIT_DUST]			= 'Spirit Dust',
+	[MYSTERIOUS_ESS]		= 'Mysterious Essence',
+	[GREATER_MYST_ESS]	= 'Greater Mysterious Essence',
+	[SHA_CRYSTAL]			= 'Sha Crystal',
+}
 
-engDEnames [LESSER_MAGIC]		= "Lesser Magic Essence";
-engDEnames [GREATER_MAGIC]		= "Greater Magic Essence";
-engDEnames [STRANGE_DUST]		= "Strange Dust";
+--[[
+local dustsAndEssences2 = {}
+for  itemID, itemName  in engDEnames  do  dustsAndEssences2[#dustsAndEssences2] = itemID  end
+table.sort(dustsAndEssences2, function (a,b)  return a < b  end)
+--]]
 
-engDEnames [SMALL_GLIMMERING]	= "Small Glimmering Shard";
-engDEnames [LESSER_ASTRAL]		= "Lesser Astral Essence";
-
-engDEnames [GREATER_ASTRAL]		= "Greater Astral Essence";
-engDEnames [SOUL_DUST]			= "Soul Dust";
-engDEnames [LARGE_GLIMMERING]	= "Large Glimmering Essence";
-
-engDEnames [LESSER_MYSTIC]		= "Lesser Mystic Essence";
-engDEnames [GREATER_MYSTIC]		= "Greater Mystic Essence";
-engDEnames [VISION_DUST]		= "Vision Dust";
-engDEnames [SMALL_GLOWING]		= "Small Glowing Shard";
-engDEnames [LARGE_GLOWING]		= "Large Glowing Shard";
-
-engDEnames [LESSER_NETHER]		= "Lesser Nether Essence";
-engDEnames [GREATER_NETHER]		= "Greater Nether Essence";
-engDEnames [DREAM_DUST]			= "Dream Dust";
-engDEnames [SMALL_RADIANT]		= "Small Radiant";
-engDEnames [LARGE_RADIANT]		= "Large Radiant";
-
-engDEnames [SMALL_BRILLIANT]	= "Small Brilliant Shard";
-engDEnames [LARGE_BRILLIANT]	= "Large Brilliant Shard";
-
-engDEnames [LESSER_ETERNAL]		= "Lesser Eternal Essence";
-engDEnames [GREATER_ETERNAL]	= "Greater Eternal Essence";
-engDEnames [ILLUSION_DUST]		= "Illusion Dust";
-
-engDEnames [NEXUS_CRYSTAL]		= "Nexus Crystal";
-
-engDEnames [ARCANE_DUST]		= "Arcane Dust";
-engDEnames [GREATER_PLANAR]		= "Greater Planar Essence";
-engDEnames [LESSER_PLANAR]		= "Lesser Planar Essence";
-engDEnames [SMALL_PRISMATIC]	= "Small Prismatic Shard";
-engDEnames [LARGE_PRISMATIC]	= "Large Prismatic Shard";
-engDEnames [VOID_CRYSTAL]		= "Void Crystal";
-
-engDEnames [DREAM_SHARD]		= "Dream Shard";
-engDEnames [SMALL_DREAM]		= "Small Dream Shard";
-
-engDEnames [INFINITE_DUST]		= "Infinite Dust";
-engDEnames [GREATER_COSMIC]		= "Greater Cosmic Essence";
-engDEnames [LESSER_COSMIC]		= "Lesser Cosmic Essence";
-engDEnames [ABYSS_CRYSTAL]		= "Abyss Crystal";
-
-engDEnames [HEAVENLY_SHARD]		= "Heavenly Shard";
-engDEnames [SMALL_HEAVENLY]		= "Small Heavenly Shard";
-
-engDEnames [HYPN_DUST]			= "Hypnotic Dust";
-engDEnames [GREATER_CEL]		= "Greater Celestial Essence";
-engDEnames [LESSER_CEL]			= "Lesser Celestial Essence";
-engDEnames [MAELSTROM_CRYSTAL]	= "Maelstrom Crystal";
-
-engDEnames[SMALL_ETHEREAL]		= 'Small Ethereal Shard'
-engDEnames[ETHEREAL_SHARD]		= 'Ethereal Shard'
-
-engDEnames[SPIRIT_DUST]			= 'Spirit Dust'
-engDEnames[MYSTERIOUS_ESS]		= 'Mysterious Essence'
-engDEnames[GREATER_MYST_ESS]	= 'Greater Mysterious Essence'
-engDEnames[SHA_CRYSTAL]			= 'Sha Crystal'
-
-
-
-local dustsAndEssences = {};
-
-tinsert (dustsAndEssences, LESSER_MAGIC)
-tinsert (dustsAndEssences, GREATER_MAGIC)
-tinsert (dustsAndEssences, STRANGE_DUST)
-
-tinsert (dustsAndEssences, SMALL_GLIMMERING)
-tinsert (dustsAndEssences, LESSER_ASTRAL)
-
-tinsert (dustsAndEssences, GREATER_ASTRAL)
-tinsert (dustsAndEssences, SOUL_DUST)
-tinsert (dustsAndEssences, LARGE_GLIMMERING)
-
-tinsert (dustsAndEssences, LESSER_MYSTIC)
-tinsert (dustsAndEssences, GREATER_MYSTIC)
-tinsert (dustsAndEssences, VISION_DUST)
-tinsert (dustsAndEssences, SMALL_GLOWING)
-tinsert (dustsAndEssences, LARGE_GLOWING)
-
-tinsert (dustsAndEssences, LESSER_NETHER)
-tinsert (dustsAndEssences, GREATER_NETHER)
-tinsert (dustsAndEssences, DREAM_DUST)
-tinsert (dustsAndEssences, SMALL_RADIANT)
-tinsert (dustsAndEssences, LARGE_RADIANT)
-
-tinsert (dustsAndEssences, SMALL_BRILLIANT)
-tinsert (dustsAndEssences, LARGE_BRILLIANT)
-
-tinsert (dustsAndEssences, LESSER_ETERNAL)
-tinsert (dustsAndEssences, GREATER_ETERNAL)
-tinsert (dustsAndEssences, ILLUSION_DUST)
-
-tinsert (dustsAndEssences, NEXUS_CRYSTAL)
-
-tinsert (dustsAndEssences, ARCANE_DUST)
-tinsert (dustsAndEssences, GREATER_PLANAR)
-tinsert (dustsAndEssences, LESSER_PLANAR)
-tinsert (dustsAndEssences, SMALL_PRISMATIC)
-tinsert (dustsAndEssences, LARGE_PRISMATIC)
-tinsert (dustsAndEssences, VOID_CRYSTAL)
-
-tinsert (dustsAndEssences, DREAM_SHARD)
-tinsert (dustsAndEssences, SMALL_DREAM)
-
-tinsert (dustsAndEssences, INFINITE_DUST)
-tinsert (dustsAndEssences, GREATER_COSMIC)
-tinsert (dustsAndEssences, LESSER_COSMIC)
-tinsert (dustsAndEssences, ABYSS_CRYSTAL)
-
-tinsert (dustsAndEssences, HEAVENLY_SHARD)
-tinsert (dustsAndEssences, SMALL_HEAVENLY)
-                        
-tinsert (dustsAndEssences, HYPN_DUST)
-tinsert (dustsAndEssences, GREATER_CEL)
-tinsert (dustsAndEssences, LESSER_CEL)
-tinsert (dustsAndEssences, MAELSTROM_CRYSTAL)
-
-tinsert (dustsAndEssences, SMALL_ETHEREAL)
-tinsert (dustsAndEssences, ETHEREAL_SHARD)
-                        
-tinsert (dustsAndEssences, SPIRIT_DUST)
-tinsert (dustsAndEssences, MYSTERIOUS_ESS)
-tinsert (dustsAndEssences, GREATER_MYST_ESS)
-tinsert (dustsAndEssences, SHA_CRYSTAL)
+local dustsAndEssences = {
+	LESSER_MAGIC,
+	GREATER_MAGIC,
+	STRANGE_DUST,
+	
+	SMALL_GLIMMERING,
+	LESSER_ASTRAL,
+	
+	GREATER_ASTRAL,
+	SOUL_DUST,
+	LARGE_GLIMMERING,
+	
+	LESSER_MYSTIC,
+	GREATER_MYSTIC,
+	VISION_DUST,
+	SMALL_GLOWING,
+	LARGE_GLOWING,
+	
+	LESSER_NETHER,
+	GREATER_NETHER,
+	DREAM_DUST,
+	SMALL_RADIANT,
+	LARGE_RADIANT,
+	
+	SMALL_BRILLIANT,
+	LARGE_BRILLIANT,
+	
+	LESSER_ETERNAL,
+	GREATER_ETERNAL,
+	ILLUSION_DUST,
+	
+	NEXUS_CRYSTAL,
+	
+	ARCANE_DUST,
+	GREATER_PLANAR,
+	LESSER_PLANAR,
+	SMALL_PRISMATIC,
+	LARGE_PRISMATIC,
+	VOID_CRYSTAL,
+	
+	DREAM_SHARD,
+	SMALL_DREAM,
+	
+	INFINITE_DUST,
+	GREATER_COSMIC,
+	LESSER_COSMIC,
+	ABYSS_CRYSTAL,
+	
+	HEAVENLY_SHARD,
+	SMALL_HEAVENLY,
+	
+	HYPN_DUST,
+	GREATER_CEL,
+	LESSER_CEL,
+	MAELSTROM_CRYSTAL,
+	
+	SMALL_ETHEREAL,
+	ETHEREAL_SHARD,
+	
+	SPIRIT_DUST,
+	MYSTERIOUS_ESS,
+	GREATER_MYST_ESS,
+	SHA_CRYSTAL,
+}
 
 
-gAtr_dustCacheIndex = 1;
+--addonTable.gAtr_dustCacheIndex = 1;
 
 local DUST_CACHE_READY_FOR_NEXT  = 0;
 local DUST_CACHE_WAITING_ON_PREV = 1;
@@ -441,12 +423,14 @@ local dustCacheFound = 0;
 -----------------------------------------
 
 function Atr_GetNextDustIntoCache()		-- make sure all the dusts and essences are in the RAM cache
-										
-	if (gAtr_dustCacheIndex == 0 or AtrScanningTooltip == nil) then
+	local gAtr_dustCacheIndex = addonTable.gAtr_dustCacheIndex
+	if (not gAtr_dustCacheIndex  or  gAtr_dustCacheIndex == 0 or AtrScanningTooltip == nil) then
 		return;
 	end
 
-	local itemID		= dustsAndEssences[gAtr_dustCacheIndex];
+	local itemID		= dustsAndEssences[gAtr_dustCacheIndex]
+	if  not itemID  then  addonTable.gAtr_dustCacheIndex = nil ; return  end
+	
 	local itemString	= "item:"..itemID..":0:0:0:0:0:0:0";
 	
 	local itemName, itemLink = GetItemInfo(itemString);
@@ -460,15 +444,12 @@ function Atr_GetNextDustIntoCache()		-- make sure all the dusts and essences are
 	end
 
 	if (itemLink) then
---		zc.md (itemLink.." is in RAM cache");
+		zc.md (itemLink.." is in RAM cache");
 		dustCacheFound = dustCacheFound + 1;
 		dustCacheState = DUST_CACHE_READY_FOR_NEXT;
 		gAtr_dustCacheIndex = gAtr_dustCacheIndex + 1;
-		
-		if (gAtr_dustCacheIndex > #dustsAndEssences) then
-			gAtr_dustCacheIndex = 0;		-- finished
---			zc.md ("num items pulled into memory: ", dustCacheNotFound, "out of", dustCacheFound);
-		end
+		addonTable.gAtr_dustCacheIndex =  gAtr_dustCacheIndex <= #dustsAndEssences  and  gAtr_dustCacheIndex  or  nil
+		zc.md ("num items pulled into memory: ", dustCacheNotFound, "out of", dustCacheFound);
 	end
 end
 
@@ -926,6 +907,8 @@ function Atr_ShowTipWithPricing (tip, link, num)
 	if (link == nil or zc.IsBattlePetLink(link)) then
 		return;
 	end
+	
+	
 
 	local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, _, _, _, _, itemVendorPrice = GetItemInfo (link);
 
@@ -940,6 +923,7 @@ function Atr_ShowTipWithPricing (tip, link, num)
 	end
 
 
+	Atr_InitScanDB()
 	local vendorPrice, auctionPrice, dePrice = Atr_STWP_GetPrices (link, num, showStackPrices, itemVendorPrice, itemName, itemType, itemRarity, itemLevel);
 
 	-- vendor info
@@ -1101,6 +1085,26 @@ hooksecurefunc (ItemRefTooltip, "SetHyperlink",
 		Atr_ShowTipWithPricing (tip, link);
 	end
 );
+
+
+
+-----------------------------------------
+
+local auctionator_orig_GameTooltip_OnTooltipAddMoney
+
+function auctionator_GameTooltip_OnTooltipAddMoney (self, cost, maxcost)
+	if (AUCTIONATOR_V_TIPS == 1) then  return  end
+	auctionator_orig_GameTooltip_OnTooltipAddMoney (self, cost, maxcost)
+end
+
+function Atr_Hook_OnTooltipAddMoney()
+	auctionator_orig_GameTooltip_OnTooltipAddMoney = GameTooltip_OnTooltipAddMoney
+	GameTooltip_OnTooltipAddMoney = auctionator_GameTooltip_OnTooltipAddMoney
+end
+
+Atr_Hook_OnTooltipAddMoney ()
+
+------------------------------------------------
 
 
 
