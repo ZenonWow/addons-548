@@ -18,7 +18,7 @@ local tinsert = _G.tinsert
 local tsort = _G.table.sort
 --GLOBALS>
 
-local hookedBags = addon.hookedBags
+--local hookedBags = addon.hookedBags
 
 --------------------------------------------------------------------------------
 -- Bag prototype
@@ -29,44 +29,45 @@ local bagProto = setmetatable({
 }, { __index = addon.moduleProto })
 addon.bagProto = bagProto
 
+
 function bagProto:OnEnable()
+	----[[ No need to replace open bags when enabling. Bags were closed by InterfaceOptionsFrame, the only place where it can be enabled.
 	local open = false
-	for id in pairs(self.bagIds) do
-		local frame = addon:GetContainerFrame(id)
-		if frame then
+	for  id in pairs(self.bagIds)  do
+		if  _G.IsBagOpen(id)  then  -- use Blizzard api
 			open = true
-			frame:Hide()
+			_G.CloseBag(id)
 		end
-		hookedBags[id] = self
+		--hookedBags[id] = self
 	end
-	if self.PostEnable then
-		self:PostEnable()
-	end
+	--]]
+	
+	if self.PostEnable then  self:PostEnable()  end
 	self:Debug('Enabled')
 	if open then
+		--self.autoOpened = true
 		self:Open()
 	end
 end
 
+
 function bagProto:OnDisable()
 	local open = self:IsOpen()
 	self:Close()
-	for id in pairs(self.bagIds) do
-		hookedBags[id] = nil
-		if open then
-			addon:GetContainerFrame(id, true)
-		end
+	if open then
+		for  id in pairs(self.bagIds)  do  _G.OpenBag(id)  end
 	end
-	if self.PostDisable then
-		self:PostDisable()
-	end
+	
+	if self.PostDisable then  self:PostDisable()  end
 	self:Debug('Disabled')
+	-- Release frame?
 end
+
 
 function bagProto:Open()
 	if not self:CanOpen() then return end
 	local frame = self:GetFrame()
-	if not frame:IsShown() then
+	if  not frame:IsShown()  then
 		self:Debug('Open')
 		frame:Show()
 		addon:SendMessage('AdiBags_BagOpened', self.bagName, self)
@@ -79,26 +80,25 @@ function bagProto:Close()
 		self:Debug('Close')
 		self.frame:Hide()
 		addon:SendMessage('AdiBags_BagClosed', self.bagName, self)
-		if self.PostClose then
-			self:PostClose()
-		end
+		if self.PostClose then  self:PostClose()  end
 		return true
 	end
 end
 
 function bagProto:IsOpen()
-	return self.frame and self.frame:IsShown()
+	return self.frame and self.frame:IsShown() or false
 end
 
 function bagProto:CanOpen()
-	return self:IsEnabled()
+	--return self:IsEnabled()
+	return true
 end
 
 function bagProto:Toggle()
 	if self:IsOpen() then
-		self:Close()
+		return self:Close()
 	elseif self:CanOpen() then
-		self:Open()
+		return self:Open()
 	end
 end
 
@@ -124,10 +124,13 @@ end
 --------------------------------------------------------------------------------
 
 local bags = {}
+addon.bags = bags
 
+--[[ There are 2 bags: backpack and bank
 local function CompareBags(a, b)
 	return a.order < b.order
 end
+--]]
 
 function addon:NewBag(name, order, bagIds, isBank, ...)
 	self:Debug('NewBag', name, order, bagIds, isBank, ...)
@@ -137,10 +140,11 @@ function addon:NewBag(name, order, bagIds, isBank, ...)
 	bag.isBank = isBank
 	bag.order = order
 	tinsert(bags, bag)
-	tsort(bags, CompareBags)
+	--tsort(bags, CompareBags)
 	return bag
 end
 
+-- There are 2 bags: backpack and bank
 do
 	local function iterateOpenBags(numBags, index)
 		while index < numBags do
@@ -166,9 +170,17 @@ do
 		return onlyOpen and iterateOpenBags or iterateBags, #bags, 0
 	end
 end
+--]]
 
 function addon:IterateDefinedBags()
-	return ipairs(bags)
+	return pairs(bags)
+end
+
+function addon:CloseAll()
+	-- Close all AdiBags
+	local closed = false
+	for  i, bag  in  pairs(bags)  do  closed = bag:Close()  or  closed  end
+	return closed
 end
 
 --------------------------------------------------------------------------------
@@ -178,22 +190,27 @@ end
 do
 	-- L["Backpack"]
 	local backpack = addon:NewBag("Backpack", 10, addon.BAG_IDS.BAGS, false, 'AceHook-3.0')
+	bags.backpack = backpack
 
 	function backpack:PostEnable()
-		self:RegisterMessage('AdiBags_InteractingWindowChanged')
+		--self:RegisterMessage('AdiBags_InteractingWindowChanged', self.CheckAutoOpen)
+		self:CheckAutoOpen(nil)
 	end
 
-	function backpack:AdiBags_InteractingWindowChanged(event, window)
-		if window then
-			if addon.db.profile.autoOpen then
-				self.wasOpen = self:IsOpen()
-				if not self.wasOpen then
-					self:Open()
-				end
+	function backpack:CheckAutoOpen(requesterFrame)
+		local toggled
+		if  next(addon.InteractingWindows)  then
+			-- Opening
+			if  self:IsEnabled()  and  not self:IsOpen()  and  addon.db.profile.autoOpen  then
+				self.autoOpened = true
+				toggled = self:Open()
 			end
-		elseif self:IsOpen() and not self.wasOpen then
-			self:Close()
+		elseif  self.autoOpened  then
+			-- Closing
+			toggled = self:Close()
+			self.autoOpened = nil
 		end
+		return toggled
 	end
 
 end
@@ -205,43 +222,116 @@ end
 do
 	-- L["Bank"]
 	local bank = addon:NewBag("Bank", 20, addon.BAG_IDS.BANK, true, 'AceHook-3.0')
+	bags.bank = bank
 
 	local function NOOP() end
 
 	function bank:PostEnable()
-		self:RegisterMessage('AdiBags_InteractingWindowChanged')
-
-		BankFrame:Hide()
-		self:RawHookScript(BankFrame, "OnEvent", NOOP, true)
-		self:RawHook(BankFrame, "Show", "Open", true)
+		-- Check if bank was opened
+		local open = BankFrame:IsShown()
+		if  open  then
+			-- BankFrame_OnHide() calls CloseBankFrame(), stopping interaction with the banker.
+			-- To avoid this disable CloseBankFrame() momentarily.
+			local CloseBankFrame = _G.CloseBankFrame
+			_G.CloseBankFrame = NOOP
+			BankFrame:Hide()
+			_G.CloseBankFrame = CloseBankFrame
+		end
+		
+		-- Take over the events from builtin BankFrame
+		BankFrame:UnregisterEvent('BANKFRAME_OPENED')
+		BankFrame:UnregisterEvent('BANKFRAME_CLOSED')
+		--self:RegisterEvent('BANKFRAME_OPENED')
+		--self:RegisterEvent('BANKFRAME_CLOSED')
+		--self:RegisterMessage('AdiBags_InteractingWindowChanged')
+		
+		--[[
+		self:RawHookScript(BankFrame, "OnEvent", NOOP, true)    -- Unregistered the events instead
+		self:RawHook(BankFrame, "Show", "Open", true)    -- If some addon forces the BankFrame to show, let it be.
 		self:RawHook(BankFrame, "Hide", "Close", true)
 		--self:RawHook(BankFrame, "IsShown", "IsOpen", true)
+		--]]
 
-		if addon:GetInteractingWindow() == "BANKFRAME" then
-			self:Open()
-		end
+		-- Fake a bank opening event if already open
+		if  open  or  addon.atBank  then  self:BANKFRAME_OPENED()  end
+		
 	end
 
 	function bank:PostDisable()
-		if addon:GetInteractingWindow() == "BANKFRAME" then
-			self.hooks[BankFrame].Show(BankFrame)
+		--self:UnregisterMessage('AdiBags_InteractingWindowChanged')
+		--self:UnregisterEvent('BANKFRAME_OPENED')
+		--self:UnregisterEvent('BANKFRAME_CLOSED')
+		BankFrame:RegisterEvent('BANKFRAME_OPENED')
+		BankFrame:RegisterEvent('BANKFRAME_CLOSED')
+		
+		--[[
+		self:UnhookScript(BankFrame, "OnEvent")
+		self:Unhook(BankFrame, "Show")
+		self:Unhook(BankFrame, "Hide")
+		--]]
+		
+		if  addon.atBank  then
+			-- Fake a bank opening event if already open
+			--BankFrame:SendEvent('BANKFRAME_OPENED')
+			BankFrame_OnEvent(BankFrame, 'BANKFRAME_OPENED')
+			--BankFrame:Show()
 		end
 	end
 
-	function bank:AdiBags_InteractingWindowChanged(event, new, old)
-		if new == 'BANKFRAME' and not self:IsOpen() then
-			self:Open()
-		elseif old == 'BANKFRAME' and self:IsOpen() then
-			self:Close()
+	function bank:PostClose()
+		-- Stop interaction with banker
+		CloseBankFrame()
+		if  self.autoOpened  then
+			_G.CloseAllBags(self)
 		end
 	end
 
 	function bank:CanOpen()
-		return self:IsEnabled() and addon:GetInteractingWindow() == "BANKFRAME"
+		--return addon.InteractingWindows.BANKFRAME
+		return addon.atBank
+		--return self:IsEnabled()
 	end
 
-	function bank:PostClose()
-		CloseBankFrame()
+	--[[
+	function bank:AdiBags_InteractingWindowChanged(event, new, old)
+		if  (not addon.InteractingWindows.BANKFRAME) ~= (not self:IsOpen())  then
+			self:Toggle()
+		end
+	end
+	--]]
+
+	function bank:BANKFRAME_OPENED()
+		--self.atBank = true
+		if  not self:IsOpen()  then
+			self.autoOpened = true
+			self:Open()
+			_G.OpenAllBags(self)
+		end
+	end
+	
+	function bank:BANKFRAME_CLOSED()
+		--self.atBank = false
+		if  self.autoOpened  then
+			_G.CloseAllBags(self)
+			self:Close()
+		end
+		self.autoOpened = nil
+	end
+
+	function bank:CheckAutoOpen(event)
+		local toggled
+		if  addon.atBank  and  not self:IsOpen()  then
+			-- Opening
+			self.autoOpened = true
+			toggled = self:Open()
+			_G.OpenAllBags(self)
+		elseif  not addon.atBank  and  self:IsOpen()  and  self.autoOpened  then
+			-- Closing
+			toggled = self:Close()
+			--_G.CloseAllBags(self)  -- done in PostClose()
+			self.autoOpened = nil
+		end
+		return toggled
 	end
 
 end

@@ -39,10 +39,14 @@ function mod:OnClickSectionHeader(_, header, button)
 end
 
 function mod:AdiBags_InteractingWindowChanged(_, new, old)
-	if new == "BANKFRAME" then
+	if  self.registered == addon.atBank  then  return  end
+	
+	self.registered = addon.atBank
+	if  self.registered  then
 		addon.RegisterSectionHeaderScript(self, 'OnTooltipUpdate', 'OnTooltipUpdateSectionHeader')
 		addon.RegisterSectionHeaderScript(self, 'OnClick', 'OnClickSectionHeader')
-	elseif old == "BANKFRAME" then
+	else
 		addon.UnregisterAllSectionHeaderScripts(self)
 	end
 end
+

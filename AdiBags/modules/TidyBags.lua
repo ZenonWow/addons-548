@@ -102,7 +102,7 @@ function mod:GetOptions()
 end
 
 function mod:AdiBags_InteractingWindowChanged(event, new)
-	if not new then
+	if  not next(addon.InteractingWindows)  then
 		return self:AutomaticTidy(event)
 	end
 end

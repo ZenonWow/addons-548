@@ -3,231 +3,120 @@ AdiBags - Adirelle's bag addon.
 Copyright 2010-2012 Adirelle (adirelle@gmail.com)
 All rights reserved.
 --]]
-
 local addonName, addon = ...
 local L = addon.L
 
---<GLOBALS
-local _G = _G
-local BACKPACK_CONTAINER = _G.BACKPACK_CONTAINER
-local ContainerFrame_GenerateFrame = _G.ContainerFrame_GenerateFrame
-local ContainerFrame_GetOpenFrame = _G.ContainerFrame_GetOpenFrame
-local GetContainerNumSlots = _G.GetContainerNumSlots
-local NUM_BAG_SLOTS = _G.NUM_BAG_SLOTS
-local NUM_BANKBAGSLOTS = _G.NUM_BANKBAGSLOTS
-local NUM_CONTAINER_FRAMES = _G.NUM_CONTAINER_FRAMES
-local pairs = _G.pairs
---GLOBALS>
 
---------------------------------------------------------------------------------
--- Bag-related function hooks
---------------------------------------------------------------------------------
 
-local hookedBags = {}
-addon.hookedBags = hookedBags
-local ContainerFrames = {}
-do
-	for  i = 1,NUM_CONTAINER_FRAMES  do
-		ContainerFrames[i] = _G["ContainerFrame"..i]
-	end
+
+function addon:RegisterHooks()
+	self:RawHook('ToggleAllBags', true)
+	-- Called by keybinding OPENALLBAGS  and  clicks on bagbar if IsModifiedClick('OPENALLBAGS')
+	self:RawHook('ToggleBag', true)
+	-- Called by clicks on bagbar  and  keybindings TOGGLEBAG*, TOGGLEBACKPACK -> ToggleBackpack() -> ToggleBag(0) if opening it
+	self:RawHook('OpenAllBags', true)
+	-- Called by BankFrame_OnShow, MailFrame_OnEvent(MAIL_SHOW), MerchantFrame_OnShow -- only interacting windows
+	self:RawHook('CloseAllBags', true)
+	-- Called by BankFrame_OnHide, MailFrame_OnEvent(MAIL_CLOSED), MerchantFrame_OnHide -- interacting windows
+	-- and  BarberShop_OnShow  and...  FramePositionDelegate:ShowUIPanel(frame, force)  if not GetUIPanelWindowInfo(frame, 'allowOtherPanels')
+	self:RawHook('CloseSpecialWindows', true)
+	
+	--[[ Leave the original functionality in place. User can choose to bind keys to opening backpack with default ui.
+	self:RawHook('ToggleBackpack', true)
+	self:RawHook('OpenBackpack', true)
+	self:RawHook('CloseBackpack', true)
+	--]]
 end
 
-local function GetNumBags()
-	if addon:GetInteractingWindow() == "BANKFRAME" then
-		return NUM_BAG_SLOTS + NUM_BANKBAGSLOTS
-	else
-		return NUM_BAG_SLOTS
-	end
+
+
+
+function addon:ToggleBag(id)
+	-- Called by clicks on bagbar  and  key bindings TOGGLEBAG*, TOGGLEBACKPACK -> ToggleBackpack() -> ToggleBag(0) if opening it
+	print('ToggleBag('..id..')')
+	
+	-- Only hook clicking backpack on bagbar. Alt-Click and TOGGLEBACKPACK keybind opens Blizzard backpack frame.
+	-- User can choose to bind keys to opening individual bags with default ui.
+	local toggleAdiBag =  id == 0  and  GetMouseButtonClicked()  and  not IsModifiedClick('OPENBUILTINBAGS')
+	-- Toggle adibag if conditions are met
+	local toggled = toggleAdiBag  and  addon.bags.backpack:IsEnabled()  and  addon.bags.backpack:Toggle()
+	-- Do original function otherwise
+	return  toggled  or  self.hooks.ToggleBag(id)
 end
 
-local IterateBuiltInContainers
-do
-	local function iter(maxContainer, id)
-		while id < maxContainer do
-			id = id + 1
-			if not hookedBags[id] and GetContainerNumSlots(id) > 0 then
-				return id
-			end
-		end
-	end
 
-	function IterateBuiltInContainers()
-		return iter, GetNumBags(), -1
-	end
-end
-
---[[
-/run for i=1,NUM_CONTAINER_FRAMES do local f=_G['ContainerFrame'..i]; local id=f:GetID(); print(i ..'.: id='.. id ..' slots='.. GetContainerNumSlots(i)) end
---]]
-
-function addon:GetContainerFrame(id, spawn)
-	for i, frame in pairs(ContainerFrames) do
-		if frame:IsShown() and frame:GetID() == id then
-			return frame
-		end
-	end
-	if spawn then
-		local size = GetContainerNumSlots(id)
-		if size > 0 then
-			local frame = ContainerFrame_GetOpenFrame()
-			ContainerFrame_GenerateFrame(frame, size, id)
-		end
-	end
-end
 
 function addon:ToggleAllBags()
-	if  IsShiftKeyDown()  then  return self.hooks.ToggleAllBags()  end
+	-- Called by keybinding OPENALLBAGS  and  clicks on bagbar if IsModifiedClick("OPENALLBAGS")
+	--print('ToggleAllBags()')
 	
-	for i, bag in self:IterateBags() do
-		if  bag:CanOpen() and  not bag:IsOpen() then
-			return self:OpenAllBags()
-		end
-	end
-	
-	--[[
-	local numBags = GetNumBags()
-	local found = {}
-	for  i = 1,NUM_CONTAINER_FRAMES  do
-		local frame = ContainerFrames[i]
-		local id = frame:GetID()
-		if  0 <= id  and  id <= numBags  and  frame:IsShown()  then
-			found[id] = frame
-		end
-	end
-	
-	for  id = 0,numBags  do
-		if  not found[id]  then
-			return self:OpenAllBags()
-		end
-	end
-	--]]
-	----[[
-	for id in IterateBuiltInContainers() do
-		if not self:GetContainerFrame(id) then
-			return self:OpenAllBags()
-		end
-	end
-	--]]
-	
-	-- All bags open so close them
-	return self:CloseAllBags()
+	-- Only want to handle keybinding OPENALLBAGS but _not_ clicks on bagbar if IsModifiedClick('OPENALLBAGS')
+	local toggleAdiBag =  not GetMouseButtonClicked()
+	-- Toggle adibag if conditions are met
+	local toggled = toggleAdiBag  and  addon.bags.backpack:IsEnabled()  and  addon.bags.backpack:Toggle()
+	-- Do original function otherwise
+	return  toggled  or  self.hooks.ToggleAllBags(id)
 end
+
+
+
 
 function addon:OpenAllBags(requesterFrame)
-	if  IsShiftKeyDown()  then  return self.hooks.OpenAllBags(requesterFrame)  end
+	-- Called by BankFrame_OnShow, MailFrame_OnEvent(MAIL_SHOW), MerchantFrame_OnShow -- only interacting windows
+	print('OpenAllBags('.. (requesterFrame and (requesterFrame:GetName() or '<unnamed>') or 'nil') ..')')
 	
-	if requesterFrame then return end -- UpdateInteractingWindow takes care of these cases
-	for _, bag in self:IterateBags() do
-		bag:Open()
+	local backpack = self.bags.backpack
+	if  not backpack:IsEnabled()  then  return self.hooks.OpenAllBags(requesterFrame)  end
+	
+	if  requesterFrame  then
+		local key = requesterFrame:GetName()  or  requesterFrame
+		self.InteractingWindows[key] = requesterFrame
 	end
-	for id in IterateBuiltInContainers() do
-		self:GetContainerFrame(id, true)
-	end
+	
+	-- Notify backpack of the request. Will open if autoOpen is set.
+	local toggled = self.bags.backpack:CheckAutoOpen(requesterFrame)
+	self:SendMessage('AdiBags_InteractingWindowChanged', requesterFrame)
+	return backpack:IsOpen()
 end
+
 
 function addon:CloseAllBags(requesterFrame)
-	if  IsShiftKeyDown()  then  return self.hooks.CloseAllBags(requesterFrame)  end
+	-- Called with requesterFrame ~= nil by BankFrame_OnHide, MailFrame_OnEvent(MAIL_CLOSED), MerchantFrame_OnHide
+	-- and  BarberShop_OnShow  and...  FramePositionDelegate:ShowUIPanel(frame, force)  if not GetUIPanelWindowInfo(frame, 'allowOtherPanels')
+	print('CloseAllBags('.. (requesterFrame and (requesterFrame:GetName() or '<unnamed>') or 'nil') ..')')
 	
-	if requesterFrame then return end -- UpdateInteractingWindow takes care of these cases
-	local found = false
-	for i, bag in self:IterateBags() do
-		if bag:Close() then
-			found = true
-		end
+	local wasRequester
+	if  requesterFrame  then
+		local key = requesterFrame:GetName()  or  requesterFrame
+		wasRequester = self.InteractingWindows[key]
+		self.InteractingWindows[key] = nil
 	end
 	
-	--[[
-	local numBags = GetNumBags()
-	local found = {}
-	for  i = 1,NUM_CONTAINER_FRAMES  do
-		local frame = ContainerFrames[i]
-		local id = frame:GetID()
-		if  0 <= id  and  id <= numBags  and  frame:IsShown()  then
-			frame:Hide()
-			found = 1
-		end
-	end
-	--]]
+	-- Without requesterFrame it is called by FramePositionDelegate:ShowUIPanel() showing main menu and other central frames.
+	-- Don't want to close in this case, just dispatching event to Blizzard bags.
+	if  not wasRequester  then  return self.hooks.OpenAllBags(requesterFrame)  end
 	
-	----[[
-	for id in IterateBuiltInContainers() do
-		local frame = self:GetContainerFrame(id)
-		if frame then
-			frame:Hide()
-			found = 1
-		end
-	end
-	--]]
-	return found
-end
---[[
-function addon:ToggleBag(id)
-	print('ToggleBag('..id..')')
-	if  IsShiftKeyDown()  then  return self.hooks.ToggleBag(id)  end
-	
-	local ourBag = hookedBags[id]
-	if ourBag then
-		return ourBag:Toggle()
-	else
-		local frame = self:GetContainerFrame(id, true)
-		if frame then
-			frame:Hide()
-		end
-	end
-end
---]]
-function addon:OpenBackpack()
-	print('OpenBackpack()')
-	if  IsShiftKeyDown()  then  return self.hooks.OpenBackpack()  end
-	
-	local ourBackpack = hookedBags[BACKPACK_CONTAINER]
-	if ourBackpack then
-		self.backpackWasOpen = ourBackpack:IsOpen()
-		ourBackpack:Open()
-	else
-		local frame = self:GetContainerFrame(BACKPACK_CONTAINER, true)
-		self.backpackWasOpen = not not frame
-	end
-	return self.backpackWasOpen
+	local toggled = self.bags.backpack:Close()
+	self:SendMessage('AdiBags_InteractingWindowChanged', requesterFrame)
+	return true
 end
 
-function addon:CloseBackpack()
-	print('CloseBackpack()')
-	if  IsShiftKeyDown()  then  return self.hooks.CloseBackpack()  end
-	
-	if self.backpackWasOpen then
-		return
-	end
-	local ourBackpack = hookedBags[BACKPACK_CONTAINER]
-	if ourBackpack then
-		return ourBackpack:Close()
-	else
-		local frame = self:GetContainerFrame(BACKPACK_CONTAINER)
-		if frame then
-			frame:Hide()
-		end
-	end
-end
 
-function addon:ToggleBackpack()
-	print('ToggleBackpack()')
-	if  IsShiftKeyDown()  then  return self.hooks.ToggleBackpack()  end
-	
-	local frame = self:GetContainerFrame(BACKPACK_CONTAINER)
-	if frame then  return self.hooks.ToggleBackpack()  end
-	
-	local ourBackpack = hookedBags[BACKPACK_CONTAINER]
-	if ourBackpack then
-		return ourBackpack:Toggle()
-	else
-		return self.hooks.ToggleBackpack()
-		--self:OpenBackpack()
-	end
-end
+
 
 function addon:CloseSpecialWindows()
 	print('CloseSpecialWindows()')
-	local found = self.hooks.CloseSpecialWindows()
-	if  IsShiftKeyDown()  then  return  found  end
-	return self:CloseAllBags() or found
+	-- Close all AdiBags  or  dispatch event to original handler
+	--return  self:CloseAll()  or  self.hooks.CloseSpecialWindows()
+	--[[
+	return  self.bags.bank:Close()
+		or  self.bags.backpack:Close()
+		or  self.hooks.CloseSpecialWindows()
+	--]]
+	return  self.hooks.CloseSpecialWindows()
+		or  self.bags.bank:Close()
+		or  self.bags.backpack:Close()
 end
+
+
+

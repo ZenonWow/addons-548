@@ -138,7 +138,7 @@ function mod:OnTooltipUpdateSectionHeader(_, header, tooltip)
 	if header.section:GetKey() ~= JUNK_KEY then
 		return
 	end
-	if addon:GetInteractingWindow() == "MERCHANT" then
+	if addon.InteractingWindows.MERCHANT then
 		tooltip:AddLine(L['Right-click to sell these items.'])
 	end
 	tooltip:AddLine(L['Alt-right-click to configure the Junk module.'])
@@ -150,7 +150,7 @@ function mod:OnClickSectionHeader(_, header, button)
 	end
 	if IsAltKeyDown() then
 		mod:OpenOptions()
-	elseif addon:GetInteractingWindow() == "MERCHANT" then
+	elseif addon.InteractingWindows.MERCHANT then
 		local stacks = 0
 		for slotId, bag, slot, itemId in header.section:IterateContainerSlots() do
 			local sellPrice = select(11, GetItemInfo(itemId))

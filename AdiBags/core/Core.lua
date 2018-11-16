@@ -111,34 +111,8 @@ function addon:OnEnable()
 
 	self:RegisterEvent('CURRENT_SPELL_CAST_CHANGED')
 
-	self:RawHook("OpenAllBags", true)
-	self:RawHook("CloseAllBags", true)
-	self:RawHook("ToggleAllBags", true)
-	--self:RawHook("ToggleBag", true)
-	self:RawHook("ToggleBackpack", true)
-	self:RawHook("OpenBackpack", true)
-	self:RawHook("CloseBackpack", true)
-	self:RawHook('CloseSpecialWindows', true)
-
-	-- Track most windows involving items
-	self:RegisterEvent('BANKFRAME_OPENED', 'UpdateInteractingWindow')
-	self:RegisterEvent('BANKFRAME_CLOSED', 'UpdateInteractingWindow')
-	self:RegisterEvent('MAIL_SHOW', 'UpdateInteractingWindow')
-	self:RegisterEvent('MAIL_CLOSED', 'UpdateInteractingWindow')
-	self:RegisterEvent('MERCHANT_SHOW', 'UpdateInteractingWindow')
-	self:RegisterEvent('MERCHANT_CLOSED', 'UpdateInteractingWindow')
-	self:RegisterEvent('AUCTION_HOUSE_SHOW', 'UpdateInteractingWindow')
-	self:RegisterEvent('AUCTION_HOUSE_CLOSED', 'UpdateInteractingWindow')
-	self:RegisterEvent('TRADE_SHOW', 'UpdateInteractingWindow')
-	self:RegisterEvent('TRADE_CLOSED', 'UpdateInteractingWindow')
-	self:RegisterEvent('GUILDBANKFRAME_OPENED', 'UpdateInteractingWindow')
-	self:RegisterEvent('GUILDBANKFRAME_CLOSED', 'UpdateInteractingWindow')
-	self:RegisterEvent('VOID_STORAGE_OPEN', 'UpdateInteractingWindow')
-	self:RegisterEvent('VOID_STORAGE_CLOSE', 'UpdateInteractingWindow')
-	self:RegisterEvent('FORGE_MASTER_OPENED', 'UpdateInteractingWindow')
-	self:RegisterEvent('FORGE_MASTER_CLOSED', 'UpdateInteractingWindow')
-	self:RegisterEvent('SOCKET_INFO_UPDATE', 'UpdateInteractingWindow')
-	self:RegisterEvent('SOCKET_INFO_CLOSE', 'UpdateInteractingWindow')
+	self:RegisterHooks()
+	self:RegisterInteractingWindows()
 
 	self:SetSortingOrder(self.db.profile.sortingOrder)
 
@@ -419,24 +393,73 @@ end
 -- Track windows related to item interaction (merchant, mail, bank, ...)
 --------------------------------------------------------------------------------
 
+function addon:RegisterInteractingWindows()
+	-- Track most windows involving items
+	self:RegisterEvent('BANKFRAME_OPENED', 'ShowInteractingWindow')
+	self:RegisterEvent('BANKFRAME_CLOSED', 'HideInteractingWindow')
+	self:RegisterEvent('GUILDBANKFRAME_OPENED', 'ShowInteractingWindow')
+	self:RegisterEvent('GUILDBANKFRAME_CLOSED', 'HideInteractingWindow')
+	self:RegisterEvent('VOID_STORAGE_OPEN', 'ShowInteractingWindow')
+	self:RegisterEvent('VOID_STORAGE_CLOSE', 'HideInteractingWindow')
+	--[[
+	self:RegisterEvent('MAIL_SHOW', 'ShowInteractingWindow')
+	self:RegisterEvent('MAIL_CLOSED', 'HideInteractingWindow')
+	self:RegisterEvent('MERCHANT_SHOW', 'ShowInteractingWindow')
+	self:RegisterEvent('MERCHANT_CLOSED', 'HideInteractingWindow')
+	--]]
+	self:RegisterEvent('AUCTION_HOUSE_SHOW', 'ShowInteractingWindow')
+	self:RegisterEvent('AUCTION_HOUSE_CLOSED', 'HideInteractingWindow')
+	self:RegisterEvent('FORGE_MASTER_OPENED', 'ShowInteractingWindow')
+	self:RegisterEvent('FORGE_MASTER_CLOSED', 'HideInteractingWindow')
+	self:RegisterEvent('SOCKET_INFO_UPDATE', 'ShowInteractingWindow')
+	self:RegisterEvent('SOCKET_INFO_CLOSE', 'HideInteractingWindow')
+	self:RegisterEvent('TRADE_SHOW', 'ShowInteractingWindow')
+	self:RegisterEvent('TRADE_CLOSED', 'HideInteractingWindow')
+end
+
+
 do
 	local current
-	function addon:UpdateInteractingWindow(event, ...)
+	local InteractingWindows = {}
+	addon.InteractingWindows = InteractingWindows
+	
+	function addon:ShowInteractingWindow(event, ...)
+		local name, state = strmatch(event, '^(.+)_([^_]-)$')  -- state matches the shortest possible word at the end
+		print('ShowInteractingWindow', event, current, '=>', name, state, '|', ...)
+		name = name or event
+		current = name
+		self:UpdateInteractingWindow(name, true)
+	end
+	
+	function addon:HideInteractingWindow(event, ...)
+		local name, state = strmatch(event, '^(.+)_([^_]-)$')  -- state matches the shortest possible word at the end
+		print('HideInteractingWindow', event, current, '=>', name, state, '|', ...)
+		if  current == name  then  current = nil  end
+		self:UpdateInteractingWindow(name, nil)
+	end
+	
+	function addon:UpdateInteractingWindow(name, opened)
+		--[[
 		local new = strmatch(event, '^([_%w]+)_OPEN') or strmatch(event, '^([_%w]+)_SHOW$') or strmatch(event, '^([_%w]+)_UPDATE$')
-		self:Debug('UpdateInteractingWindow', event, current, '=>', new, '|', ...)
-		if new ~= current then
-			local old = current
-			current = new
-			self.atBank = (current == "BANKFRAME")
+		local closed = strmatch(event, '^([_%w]+)_CLOSE.?$')  -- or strmatch(event, '^([_%w]+)_CLOSED$')  -- or strmatch(event, '^([_%w]+)_HIDE$')
+		--]]
+		if  InteractingWindows[name] ~= opened  then
+			InteractingWindows[name] = opened
+			self.atBank = InteractingWindows.BANKFRAME
+			
 			if self.db.profile.virtualStacks.notWhenTrading ~= 0 then
 				self:SendMessage('AdiBags_FiltersChanged', true)
 			end
-			self:SendMessage('AdiBags_InteractingWindowChanged', new, old)
+			
+			if  name == 'BANKFRAME'  then  self.bags.bank:CheckAutoOpen(name)  end
+			self.bags.backpack:CheckAutoOpen(current)
+			self:SendMessage('AdiBags_InteractingWindowChanged', current)
 		end
 	end
 
 	function addon:GetInteractingWindow()
-		return current
+		--return current
+		return next(InteractingWindows)
 	end
 end
 
@@ -449,10 +472,10 @@ function addon:ShouldStack(slotData)
 	if not slotData.link then
 		return conf.freeSpace, "*Free*"
 	end
-	local window, unstack = self:GetInteractingWindow(), 0
-	if window then
+	local windows, unstack = self.InteractingWindows, 0
+	if next(windows) then
 		unstack = conf.notWhenTrading
-		if unstack >= 4 and window ~= "BANKFRAME" then
+		if unstack >= 4 and windows.BANKFRAME then
 			return
 		end
 	end

@@ -250,7 +250,7 @@ function containerProto:ConfigChanged(event, name)
 end
 
 function containerProto:OnShow()
-	PlaySound(self.isBank and "igMainMenuOpen" or "igBackPackOpen")
+	--PlaySound(self.isBank and "igMainMenuOpen" or "igBackPackOpen")
 	self:RegisterEvent('EQUIPMENT_SWAP_PENDING', "PauseUpdates")
 	self:RegisterEvent('EQUIPMENT_SWAP_FINISHED', "ResumeUpdates")
 	self:RegisterEvent('AUCTION_MULTISELL_START', "PauseUpdates")
@@ -263,7 +263,7 @@ end
 
 function containerProto:OnHide()
 	containerParentProto.OnHide(self)
-	PlaySound(self.isBank and "igMainMenuClose" or "igBackPackClose")
+	--PlaySound(self.isBank and "igMainMenuClose" or "igBackPackClose")
 	self:PauseUpdates()
 	self:UnregisterAllEvents()
 	self:UnregisterAllMessages()

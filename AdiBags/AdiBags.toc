@@ -33,6 +33,8 @@ libs\LibItemUpgradeInfo-1.0\LibItemUpgradeInfo-1.0.xml
 
 libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 
+libs\LibContainerFrameCleanup.lua
+
 Localization.lua
 core\Constants.lua
 core\Utility.lua

@@ -34,7 +34,7 @@ local dataobj = {
 		if button == "RightButton" then
 			addon:OpenOptions()
 		else
-			addon:OpenAllBags()
+			addon:ToggleAllBags()
 		end
 	end,
 }
