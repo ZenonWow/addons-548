@@ -2,21 +2,20 @@
 
   
    <!-- Frame to handle all core events --> 
-   <Frame name="Atr_core"> 
+   <!--Frame name="Atr_core"> 
       <Scripts> 
          <OnLoad>
-			Atr_RegisterEvents(self);
-			
+			self:RegisterEvents()
 			self.TimeSinceLastUpdate = 0;
          </OnLoad>
 		<OnUpdate>
-			Atr_OnUpdate(self, elapsed);
+			self:OnUpdate(self, elapsed)
 		</OnUpdate>
          <OnEvent> 
-            Atr_EventHandler(self, event, ...);
+            self:OnEvent(event, ...)
          </OnEvent> 
       </Scripts> 
-   </Frame> 
+   </Frame--> 
 
 	<Button name="Atr_SmallButtonTemplate" inherits="UIPanelButtonTemplate" virtual="true">
 		<NormalFont style="GameFontNormalSmall"/>

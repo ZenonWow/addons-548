@@ -5,13 +5,14 @@ AuctionatorAuthor  = "Zirco";
 AuctionatorLoaded = false;
 AuctionatorInited = false;
 
-local addonName, addonTable = ...; 
+local ADDON_NAME, addonTable = ...; 
 local zc = addonTable.zc;
-local zz = zc.md;
-local _
+local Debug = zc.md;
+
+-- Show those debug messages, fam
+--Atr_IsDev = true
 
 gAtrZC = addonTable.zc;		-- share with AuctionatorDev
-
 
 -----------------------------------------
 
@@ -82,7 +83,6 @@ local cslots = {};
 local gEmptyBScached = nil;
 
 local gAutoSingleton = 0;
-local gTradeSkillFrameModded = false
 
 -- set to the last item posted, even after the posting so that message and icon can be displayed
 local gJustPosted = { ItemName=nil, ItemLink=nil, BuyoutPrice=0, StackSize=0, NumStacks=0 }
@@ -124,7 +124,7 @@ local gBattlePetIconCache = {};
 
 local gItemPostingInProgress = false;
 
-gAtr_ptime = nil;		-- a more precise timer but may not be updated very frequently
+--gAtr_ptime = nil;		-- a more precise timer but may not be updated very frequently
 
 gAtr_ScanDB			= nil;
 gAtr_PriceHistDB	= nil;
@@ -145,76 +145,79 @@ local roundPriceDown, ToTightTime, FromTightTime, monthDay;
 
 -----------------------------------------
 
-function Atr_RegisterEvents(self)
 
-	self:RegisterEvent("VARIABLES_LOADED");
-	self:RegisterEvent("ADDON_LOADED");
-	
-	self:RegisterEvent("AUCTION_ITEM_LIST_UPDATE");
-	self:RegisterEvent("AUCTION_OWNED_LIST_UPDATE");
+-- Main event handler frame
+local Atr_core = CreateFrame('Frame', 'Atr_core')
+Atr_core.TimeSinceLastUpdate = 0;
 
-	self:RegisterEvent("AUCTION_MULTISELL_START");
-	self:RegisterEvent("AUCTION_MULTISELL_UPDATE");
-	self:RegisterEvent("AUCTION_MULTISELL_FAILURE");
 
-	self:RegisterEvent("AUCTION_HOUSE_SHOW");
-	self:RegisterEvent("AUCTION_HOUSE_CLOSED");
-
-	self:RegisterEvent("NEW_AUCTION_UPDATE");
-	self:RegisterEvent("CHAT_MSG_ADDON");
-	self:RegisterEvent("PLAYER_ENTERING_WORLD");
-
+if  _G.Auctionator  then
+	print("_G.Auctionator already defined, GetName()=".. tostring(_G.Auctionator.GetName  and  _G.Auctionator:GetName()  or  '<no such method>') )
 end
-
------------------------------------------
-
-function Atr_EventHandler(self, event, ...)
-
-	--if (zc.StringStartsWith (event, "UNIT", "BAG")) then
-	--if (true) then
-	--	zz (event, ...);
-	--end
-
-	if (event == "VARIABLES_LOADED")			then	Atr_OnLoad(); 						end;
-	if (event == "ADDON_LOADED")				then	Atr_OnAddonLoaded(...); 			end;
-	if (event == "AUCTION_ITEM_LIST_UPDATE")	then	Atr_OnAuctionUpdate(...); 			end;
-	if (event == "AUCTION_OWNED_LIST_UPDATE")	then	Atr_OnAuctionOwnedUpdate(); 		end;
-	
-	if (event == "AUCTION_MULTISELL_START")		then	Atr_OnAuctionMultiSellStart(); 		end;
-	if (event == "AUCTION_MULTISELL_UPDATE")	then	Atr_OnAuctionMultiSellUpdate(...); end;
-	if (event == "AUCTION_MULTISELL_FAILURE")	then	Atr_OnAuctionMultiSellFailure();	 end;
-
-	if (event == "AUCTION_HOUSE_SHOW")			then	Atr_OnAuctionHouseShow(); 			end;
-	if (event == "AUCTION_HOUSE_CLOSED")		then	Atr_OnAuctionHouseClosed(); 		end;
-	if (event == "NEW_AUCTION_UPDATE")			then	Atr_OnNewAuctionUpdate(); 			end;
-	if (event == "CHAT_MSG_ADDON")				then	Atr_OnChatMsgAddon(...); 			end;
-	if (event == "PLAYER_ENTERING_WORLD")		then	Atr_OnPlayerEnteringWorld(); 		end;
-
-	if (event == "UNIT_SPELLCAST_SENT")			then	Atr_OnSpellCastSent(...); 		end;
-	if (event == "UNIT_SPELLCAST_SUCCEEDED")	then	Atr_OnSpellCastSucess(...); 		end;
-	if (event == "BAG_UPDATE")					then	Atr_OnBagUpdate(...); 		end;
-
-end
+-- Export event handler frame so delayed load can send dummy Auctionator:PLAYER_ENTERING_WORLD() event.
+_G.Auctionator = Atr_core
 
 
------------------------------------------
+function Atr_core:InitGlobals()
+	AuctionatorVersion = GetAddOnMetadata(ADDON_NAME, "Version");
 
-function Atr_SetupHookFunctionsEarly ()
+	gTimeZero		= time({year=2000, month=1, day=1, hour=0});
+	gTimeTightZero	= time({year=2008, month=8, day=1, hour=0});
 
-	if (Atr_Dev_SetupEarlyHooks) then
-		Atr_Dev_SetupEarlyHooks();
+	local x;
+	for x = 0, NUM_BAG_SLOTS do
+		kBagIDs[x+1] = x;
 	end
-
-	Atr_Hook_OnTooltipAddMoney ();
 	
+	kBagIDs[NUM_BAG_SLOTS+2] = KEYRING_CONTAINER;
+
+	SlashCmdList["Auctionator"] = Atr_SlashCmdFunction;
+	
+	SLASH_Auctionator1 = "/auctionator";
+	SLASH_Auctionator2 = "/atr";
 end
+
+
+Atr_core:InitGlobals()
+
+
+
+function Atr_core:RegisterEvents()
+	self:RegisterEvent('ADDON_LOADED')
+	self:RegisterEvent('VARIABLES_LOADED')
+	self:RegisterEvent('PLAYER_ENTERING_WORLD')
+	
+	self:RegisterEvent('CHAT_MSG_ADDON')
+	
+	-- Registered in EnableDisableDElogging()
+	--if (event == 'BAG_UPDATE')					then	BAG_UPDATE(...) 		end
+	--if (event == 'UNIT_SPELLCAST_SENT')			then	UNIT_SPELLCAST_SENT(...) 		end
+	--if (event == 'UNIT_SPELLCAST_SUCCEEDED')	then	UNIT_SPELLCAST_SUCCEEDED(...) 		end
+
+	self:RegisterEvent('AUCTION_HOUSE_SHOW')
+	self:RegisterEvent('AUCTION_HOUSE_CLOSED')
+
+	self:RegisterEvent('AUCTION_ITEM_LIST_UPDATE')
+	self:RegisterEvent('AUCTION_OWNED_LIST_UPDATE')
+	self:RegisterEvent('NEW_AUCTION_UPDATE')
+
+	self:RegisterEvent('AUCTION_MULTISELL_START')
+	self:RegisterEvent('AUCTION_MULTISELL_UPDATE')
+	self:RegisterEvent('AUCTION_MULTISELL_FAILURE')
+end
+
+
+function Atr_core:OnEvent(event, ...)
+	if  self[event]  then  self[event](self, event, ...)  end
+end
+
 
 
 -----------------------------------------
 
 local auctionator_orig_GetAuctionItemInfo;
 
-function Atr_SetupHookFunctions ()
+local function Atr_SetupHookFunctions ()
 
 	auctionator_orig_AuctionFrameTab_OnClick = AuctionFrameTab_OnClick;
 	AuctionFrameTab_OnClick = Atr_AuctionFrameTab_OnClick;
@@ -235,6 +238,9 @@ function Atr_SetupHookFunctions ()
 	ChatFrame_OnEvent = auctionator_ChatFrame_OnEvent;
 
 end
+
+
+
 
 -----------------------------------------
 
@@ -319,7 +325,7 @@ end
 
 -----------------------------------------
 
-function Atr_VersionReminder ()
+local function Atr_VersionReminder ()
 	if (not versionReminderCalled) then
 		versionReminderCalled = true;
 
@@ -340,7 +346,7 @@ function Atr_SendAddon_VREQ (type, target)
 	VREQ_sent = time();
 
 	if (not zc.StringSame (type, "WHISPER")) then
-		zz ("sending vreq to", type)
+		Debug ("sending vreq to", type)
 	end
 	
 	SendAddonMessage ("ATR", "VREQ_"..AuctionatorVersion, type, target);
@@ -349,7 +355,7 @@ end
 
 -----------------------------------------
 
-function Atr_OnChatMsgAddon (...)
+function Atr_core:CHAT_MSG_ADDON (...)
 
 	local	prefix, msg, distribution, sender = ...;
 	
@@ -359,7 +365,7 @@ function Atr_OnChatMsgAddon (...)
 		local s = string.format ("%s %s |cff88ffff %s |cffffffaa %s|r", prefix, distribution, sender, msg);
 		
 		if (gAtr_echoAddonChat) then
-			zz (s);
+			Debug (s);
 		end
 		
 		if (zc.StringStartsWith (msg, "VREQ_")) then
@@ -369,7 +375,7 @@ function Atr_OnChatMsgAddon (...)
 		if (zc.StringStartsWith (msg, "IREQ_")) then
 			collectgarbage  ("collect");
 			UpdateAddOnMemoryUsage();
-			local mem  = math.floor(GetAddOnMemoryUsage("Auctionator"));
+			local mem  = math.floor(GetAddOnMemoryUsage(ADDON_NAME));
 			SendAddonMessage ("ATR", "I_"..Atr_GetDBsize().."_"..mem.."_"..#AUCTIONATOR_SHOPPING_LISTS.."_"..GetRealmFacInfoString(), "WHISPER", sender)
 		end
 
@@ -401,7 +407,7 @@ function Atr_GetAuctionatorMemString(msg)
 
 	UpdateAddOnMemoryUsage();
 	
-	local mem  = GetAddOnMemoryUsage("Auctionator");
+	local mem  = GetAddOnMemoryUsage(ADDON_NAME);
 	return string.format ("%6i KB", math.floor(mem));
 end
 
@@ -546,7 +552,7 @@ local function Atr_SlashCmdFunction(msg)
 
 	elseif (cmd == "eac") then
 		gAtr_echoAddonChat = not gAtr_echoAddonChat
-		zz ("gAtr_echoAddonChat is now", gAtr_echoAddonChat)
+		Debug ("gAtr_echoAddonChat is now", gAtr_echoAddonChat)
 		
 	elseif (cmd == "showdi") then
 		
@@ -614,7 +620,7 @@ function EnableDisableDElogging ()
 
 		local num = AUCTIONATOR_DE_DATA and #AUCTIONATOR_DE_DATA or 0
 		
-		zz ("Disenchanting info is being logged.  Current number of entries:", num)
+		Debug ("Disenchanting info is being logged.  Current number of entries:", num)
 		
 	else
 
@@ -624,7 +630,7 @@ function EnableDisableDElogging ()
 		Atr_core:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED");
 		Atr_core:UnregisterEvent("BAG_UPDATE");
 
-		zz ("disenchanting info is NOT being logged")
+		Debug ("disenchanting info is NOT being logged")
 	end
 end
 
@@ -636,7 +642,8 @@ local function Atr_OnClickTradeSkillBut()
 		Atr_Error_Display (ZT("When the Auction House is open\nclicking this button tells Auctionator\nto scan for the item and all its reagents."))
 		return
 	end
-
+	
+	Atr_core:InitAuctionFrame()
 	Atr_SelectPane (BUY_TAB);
 
 	local index = GetTradeSkillSelectionIndex()
@@ -656,7 +663,7 @@ local function Atr_OnClickTradeSkillBut()
 		table.insert (items, shoppingListName)
 	end
 	
---	zz (shoppingListName)
+--	Debug (shoppingListName)
 
 	for reagentId = 1, numReagents do
 		local reagentName = GetTradeSkillReagentInfo(index, reagentId)
@@ -670,14 +677,15 @@ end
 
 -----------------------------------------
 
-local function Atr_ModTradeSkillFrame()
-
-	if (gTradeSkillFrameModded) then
+function Atr_core:InitTradeSkillFrame()
+	if  not TradeSkillFrame  then
+		Debug ("TradeSkillFrame not loaded") 
 		return
 	end
-	
-	if (TradeSkillFrame) then
-		gTradeSkillFrameModded = true
+
+	if  TradeSkillFrame.AuctionatorModded  then  return
+	else
+		TradeSkillFrame.AuctionatorModded = true
 --		local button = CreateFrame("BUTTON", "Auctionator_Search", TradeSkillFrame, "UIPanelButtonTemplate");
 --		button:SetPoint("TOPRIGHT", "TradeSkillFrameCloseButton", "TOPLEFT", 0, -8);
 		local button = CreateFrame("BUTTON", "Auctionator_Search", TradeSkillDetailScrollChildFrame, "UIPanelButtonTemplate");
@@ -688,18 +696,18 @@ local function Atr_ModTradeSkillFrame()
 		button:SetHighlightFontObject(_G["GameFontNormalSmall"])
 		button:SetDisabledFontObject(_G["GameFontNormalSmall"])
 		button:SetScript ("OnClick", Atr_OnClickTradeSkillBut)
-		zz ("TradeSkillFrame modded") 
-	else
-		zz ("TradeSkillFrame not loaded") 
+		Debug ("TradeSkillFrame modded") 
 	end
-	
-
-
 end
+
+
 
 -----------------------------------------
 
 function Atr_InitScanDB()
+
+	-- Already initialized?
+	if  gAtr_ScanDB  then  return  end
 
 	local realm_Faction = GetRealmName().."_"..UnitFactionGroup ("player");
 
@@ -790,31 +798,9 @@ function Atr_InitScanDB()
 end
 
 
------------------------------------------
 
-function Atr_OnLoad()
 
-	AuctionatorVersion = GetAddOnMetadata("Auctionator", "Version");
-
-	gTimeZero		= time({year=2000, month=1, day=1, hour=0});
-	gTimeTightZero	= time({year=2008, month=8, day=1, hour=0});
-
-	local x;
-	for x = 0, NUM_BAG_SLOTS do
-		kBagIDs[x+1] = x;
-	end
-	
-	kBagIDs[NUM_BAG_SLOTS+2] = KEYRING_CONTAINER;
-
-	AuctionatorLoaded = true;
-
-	SlashCmdList["Auctionator"] = Atr_SlashCmdFunction;
-	
-	SLASH_Auctionator1 = "/auctionator";
-	SLASH_Auctionator2 = "/atr";
-
-	Atr_InitScanDB ();
-	
+function Atr_core:InitSavedVars()
 	if (AUCTIONATOR_PRICING_HISTORY == nil) then	-- the old history of postings
 		AUCTIONATOR_PRICING_HISTORY = {};
 	end
@@ -860,12 +846,12 @@ function Atr_OnLoad()
 	
 		AUCTIONATOR_OPEN_FIRST = 2;
 	end
+end  -- Atr_core:InitSavedVars()
 
 
-	Atr_SetupHookFunctionsEarly();
 
-	------------------
 
+function Atr_core:InitTooltip()
 	local atrtt1 = CreateFrame( "GameTooltip", "AtrScanningTooltip", nil, "GameTooltipTemplate" ); -- Tooltip name cannot be nil
 	if (atrtt1 == nil) then
 		zc.msg_anm ("Unable to create AtrScanningTooltip");
@@ -888,7 +874,20 @@ function Atr_OnLoad()
 --	AtrScanningTooltip2:AddFontStrings(
 --	AtrScanningTooltip2:CreateFontString( "$parentTextLeft1", nil, "GameTooltipText" ),
 --	AtrScanningTooltip2:CreateFontString( "$parentTextRight1", nil, "GameTooltipText" ) );
+end
 
+
+
+
+function Atr_core:FinishLoad()
+	if  AuctionatorLoaded  then  return  end
+	AuctionatorLoaded = true;
+
+	--Atr_core:InitSavedVars()
+	Atr_InitScanDB()
+	
+	Atr_core:InitTooltip()
+	
 	------------------
 
 	Atr_CheckClassMappings()
@@ -897,58 +896,76 @@ function Atr_OnLoad()
 
 	Atr_ShoppingListsInit();
 
-	zc.msg_anm ("Read the FAQ at |cFF4499FFhttp://auctionatoraddon.com/faq")
+	--zc.msg_anm ("Read the FAQ at |cFF4499FFhttp://auctionatoraddon.com/faq")
 	
 	EnableDisableDElogging ()
 
-	if ( IsAddOnLoaded("Blizzard_AuctionUI") ) then		-- need this for AH_QuickSearch since that mod forces Blizzard_AuctionUI to load at a startup
-		Atr_Init();
-	end
-
-	Atr_ModTradeSkillFrame()
-end
-
------------------------------------------
-
-local gPrevTime = 0;
-
-function Atr_OnAddonLoaded(...)
-
-	local addonName = select (1, ...);
-
-	if (zc.StringSame (addonName, "blizzard_auctionui")) then
-		Atr_Init();
-	end
-
-	Atr_Check_For_Conflicts (addonName);
-
-	local now = time();
-
---	zz (addonName.."   time: "..now - gStartingTime);
-
-	gPrevTime = now;
-
-	if (zc.StringSame (addonName, "blizzard_tradeskillui")) then
-		Atr_ModTradeSkillFrame();
-	end
-
 end
 
 
 
 
 -----------------------------------------
-function Atr_OnPlayerEnteringWorld()
 
-	Atr_InitOptionsPanels();
+function Atr_core:ADDON_LOADED(event, addonName)
+
+	-- Loaded this addon?
+	if  addonName == ADDON_NAME  then
+		Debug("Atr_core:ADDON_LOADED("..tostring(addonName)..")")
+
+		-- need this for AH_QuickSearch since that mod forces Blizzard_AuctionUI to load at a startup
+		--if  IsAddOnLoaded("Blizzard_AuctionUI")  then  self:HookAuctionFrame()  end
+		if  AuctionFrame  then  self:HookAuctionFrame()  end
+
+		-- Auctionator might be loaded later than the profession frames
+		--if  IsAddOnLoaded("Blizzard_TradeSkillUI")  then  self:InitTradeSkillFrame()  end
+		if  TradeSkillFrame  then  self:InitTradeSkillFrame()  end
+
+		-- With delayed loading the event PLAYER_ENTERING_WORLD might not be received so make up for it
+		if  IsLoggedIn()  and  self.PLAYER_ENTERING_WORLD  then  self:PLAYER_ENTERING_WORLD(event)  end
+
+	else
+		Atr_Check_For_Conflicts(addonName)
+	end
+
+	if  addonName == "Blizzard_AuctionUI"  then
+		self:HookAuctionFrame()
+	elseif  addonName == "Blizzard_TradeSkillUI"  then
+		self:InitTradeSkillFrame()
+	end
+
+end
+
+
+
+function Atr_core:VARIABLES_LOADED(event)
+  -- CVARS loaded...  don't need'em
+end
+
+
+
+function Atr_core:PLAYER_ENTERING_WORLD(event)
+	Debug("Atr_core:PLAYER_ENTERING_WORLD("..tostring(event)..")")
+
 	Atr_Install_Error_Handler()
+	--Atr_InitOptionsPanels();
+	Atr_core:HookOptionsFrame()
 	
+	-- Start scanning essences in every OnUpdate()
+	addonTable.gAtr_dustCacheIndex = 1
+	Atr_core:SetScript('OnUpdate', Atr_core.OnUpdate)
+
 	if (RegisterAddonMessagePrefix) then
 		RegisterAddonMessagePrefix ("ATR")
 	end
-	
---	Atr_MakeOptionsFrameOpaque();
+
+	--Atr_MakeOptionsFrameOpaque();
+
+	self:UnregisterEvent('PLAYER_ENTERING_WORLD')
+	self.PLAYER_ENTERING_WORLD = nil
 end
+
+
 
 -----------------------------------------
 
@@ -1007,7 +1024,7 @@ end
 
 -----------------------------------------
 
-function Atr_OnSpellCastSent (...)
+function Atr_core:UNIT_SPELLCAST_SENT (...)
 
 	if (select (2,...) ~= "Disenchant") then
 		return;
@@ -1022,7 +1039,7 @@ end
 
 -----------------------------------------
 
-function Atr_OnSpellCastSucess (...)
+function Atr_core:UNIT_SPELLCAST_SUCCEEDED (...)
 
 	if (select (2,...) ~= "Disenchant") then
 		return;
@@ -1032,21 +1049,21 @@ function Atr_OnSpellCastSucess (...)
 
 --[[	local k, m, g;
 	
-	zz ("-----")
+	Debug ("-----")
 	for k, g in pairs (preDEgear) do
-		zz (g.t, g.s, g.q, g.lev, g.count)
+		Debug (g.t, g.s, g.q, g.lev, g.count)
 	end
 
-	zz ("-----")
+	Debug ("-----")
 	for k, m in pairs (preDEmats) do
-		zz (k, m.count)
+		Debug (k, m.count)
 	end
 ]]--
 end
 
 -----------------------------------------
 
-function Atr_OnBagUpdate (...)
+function Atr_core:BAG_UPDATE (...)
 
 	if (time() - gDisenchantTime > 5) then
 		return;
@@ -1125,7 +1142,7 @@ function Atr_OnBagUpdate (...)
 		tm = math.floor (tm / 3600)
 		
 		local s = tm.."_"..result.matcount.."_"..matname.."_"..itemClassAbbrev.."_"..itemSubclass.."_"..result.q.."_"..result.lev;
---		zz (s);
+--		Debug (s);
 		
 		gDisenchantTime = 0;
 		
@@ -1144,17 +1161,37 @@ end
 
 -----------------------------------------
 
-function Atr_Init()
-
-	if (AuctionatorInited) then
-		return;
+function Atr_core:HookOptionsFrame()
+	if  InterfaceOptionsFrame:IsShown()  then
+		Atr_InitOptionsPanels()
+	else
+		InterfaceOptionsFrame:HookScript('OnShow', Atr_InitOptionsPanels)
 	end
+end
 
+
+function Atr_core:HookAuctionFrame()
+	if  AuctionFrame:IsShown()  then
+		Atr_core.InitAuctionFrame()
+	else
+		AuctionFrame:HookScript('OnShow', Atr_core.InitAuctionFrame)
+	end
+end
+
+
+function Atr_core.InitAuctionFrame()
+	-- AuctionFrame shown
+	-- Make sure long-running initialization was done
+	Atr_core:FinishLoad()
+
+	-- Start background processing
+	Atr_core:SetScript('OnUpdate', Atr_core.OnUpdate)
+	-- Stops after AuctionFrame is hidden
+	
+	if (AuctionatorInited) then  return  end
 	AuctionatorInited = true;
 
-	if (AUCTIONATOR_SAVEDVARS == nil) then
-		Atr_ResetSavedVars()
-	end
+	--if (AUCTIONATOR_SAVEDVARS == nil) then  Atr_ResetSavedVars()  end
 
 	--Bump_MaxButton_Hack();
 
@@ -1215,7 +1252,7 @@ function Atr_GetSellItemInfo ()
 
 	local auctionItemName, auctionTexture, auctionCount, auctionQuality = GetAuctionSellItemInfo();
 
---zz ("GetAuctionSellItemInfo: ", GetAuctionSellItemInfo());
+--Debug ("GetAuctionSellItemInfo: ", GetAuctionSellItemInfo());
 
 	if (auctionItemName == nil) then
 		auctionItemName = "";
@@ -1240,7 +1277,7 @@ function Atr_GetSellItemInfo ()
 		
 			gBattlePetIconCache[auctionItemLink] = auctionTexture;
 			
-			--zz ((auctionItemLink));
+			--Debug ((auctionItemLink));
 		
 		else
 			AtrScanningTooltip:SetAuctionSellItem();
@@ -1255,8 +1292,8 @@ function Atr_GetSellItemInfo ()
 		
 	end
 
---zz (auctionItemName, auctionCount, auctionItemLink);
---zz ("-----------------------------");
+--Debug (auctionItemName, auctionCount, auctionItemLink);
+--Debug ("-----------------------------");
 
 	return auctionItemName, auctionCount, auctionItemLink;
 
@@ -1607,14 +1644,14 @@ local gMS_stacksPrev;
 
 -----------------------------------------
 
-function Atr_OnAuctionMultiSellStart()
+function Atr_core:AUCTION_MULTISELL_START()
 
 	gMS_stacksPrev = 0;
 end
 
 -----------------------------------------
 
-function Atr_OnAuctionMultiSellUpdate(...)
+function Atr_core:AUCTION_MULTISELL_UPDATE(...)
 	
 	if (not gAtr_SellTriggeredByAuctionator) then
 		zc.md ("skipping.  gAtr_SellTriggeredByAuctionator is false");
@@ -1641,7 +1678,7 @@ end
 
 -----------------------------------------
 
-function Atr_OnAuctionMultiSellFailure()
+function Atr_core:AUCTION_MULTISELL_FAILURE()
 
 	if (not gAtr_SellTriggeredByAuctionator) then
 		zc.md ("skipping.  gAtr_SellTriggeredByAuctionator is false");
@@ -1703,7 +1740,7 @@ end
 
 -----------------------------------------
 
-function Atr_OnAuctionOwnedUpdate ()
+function Atr_core:AUCTION_OWNED_LIST_UPDATE ()
 
 	gItemPostingInProgress = false;
 	
@@ -1908,7 +1945,7 @@ end
 
 local aoa_count = 0
 
-function Atr_OnAuctionUpdate (...)
+function Atr_core:AUCTION_ITEM_LIST_UPDATE (...)
 
 	local numBatchAuctions, totalAuctions = Atr_GetNumAuctionItems("list");
 
@@ -1917,7 +1954,7 @@ function Atr_OnAuctionUpdate (...)
 	--	name, texture, count = GetAuctionItemInfo("list", 1);
 	--end
 
-	--zz (aoa_count, "Atr_OnAuctionUpdate", numBatchAuctions, totalAuctions, name, count, ...);
+	--Debug (aoa_count, "AUCTION_ITEM_LIST_UPDATE", numBatchAuctions, totalAuctions, name, count, ...);
 	aoa_count = aoa_count + 1
 
 	if (gAtr_FullScanState == ATR_FS_STARTED) then
@@ -2632,7 +2669,7 @@ end
 
 -----------------------------------------
 
-function Atr_OnAuctionHouseShow()
+function Atr_core:AUCTION_HOUSE_SHOW()
 
 	gOpenAllBags = AUCTIONATOR_OPEN_ALL_BAGS;
 
@@ -2652,7 +2689,7 @@ end
 
 -----------------------------------------
 
-function Atr_OnAuctionHouseClosed()
+function Atr_core:AUCTION_HOUSE_CLOSED()
 
 	Atr_HideAllDialogs();
 	
@@ -2708,11 +2745,10 @@ end
 
 -----------------------------------------
 
-function Atr_OnUpdate(self, elapsed)
+function Atr_core:OnUpdate(elapsed)
 
 	-- update the global "precision" timer
-	
-	gAtr_ptime = gAtr_ptime and gAtr_ptime + elapsed or 0;
+	--gAtr_ptime = gAtr_ptime and gAtr_ptime + elapsed or 0;
 
 	
 	-- check deferred call queue
@@ -2722,10 +2758,12 @@ function Atr_OnUpdate(self, elapsed)
 	end
 
 	-- make sure all dusts and essences are in memory
-
-	if (gAtr_dustCacheIndex > 0) then
-		Atr_GetNextDustIntoCache();
-	end
+	if  addonTable.gAtr_dustCacheIndex  then
+		Atr_GetNextDustIntoCache()
+	elseif  not AuctionFrame  or  not AuctionFrame:IsShown()  then
+		-- If done with dusts and AuctionFrame not visible then stop OnUpdate
+		self:SetScript('OnUpdate', nil)
+  end
 	
 	-- the core Idle routine
 
@@ -2806,7 +2844,7 @@ local gPrevSellItemLink;
 
 -----------------------------------------
 
-function Atr_OnNewAuctionUpdate()
+function Atr_core:NEW_AUCTION_UPDATE()
 	
 	if (not gAtr_ClickAuctionSell) then
 		gPrevSellItemLink = nil;
@@ -2844,7 +2882,7 @@ function Atr_OnNewAuctionUpdate()
 				gSellPane.fullStackSize = 1;
 			end
 
-		--zz (auctionItemName, IDstring, auctionLink, "totalItems ", gSellPane.totalItems)
+		--Debug (auctionItemName, IDstring, auctionLink, "totalItems ", gSellPane.totalItems)
 		
 			local prefNumStacks, prefStackSize = Atr_GetSellStacking (auctionLink, auctionCount, gSellPane.totalItems);
 			
@@ -2858,7 +2896,7 @@ function Atr_OnNewAuctionUpdate()
 				Atr_OnSearchComplete ();
 			end
 			
---	zz (auctionItemName, auctionCount, auctionLink, gPrevSellItemLink);
+--	Debug (auctionItemName, auctionCount, auctionLink, gPrevSellItemLink);
 
 			Atr_SetTextureButton ("Atr_SellControls_Tex", Atr_StackSize(), auctionLink);
 			Atr_SellControls_TexName:SetText (auctionItemName);
@@ -3961,8 +3999,8 @@ function Atr_GetNumItemInBags (targItemLink)
 	
 	local targItemName, targIsBattlePet = zc.ItemNamefromLink (targItemLink)
 	
-	zz (zc.printableLink(targItemLink))
-	zz (zc.printableLink(targItemName), targIsBattlePet)
+	Debug (zc.printableLink(targItemLink))
+	Debug (zc.printableLink(targItemName), targIsBattlePet)
 	
 	for b = 1, #kBagIDs do
 		bagID = kBagIDs[b];
@@ -4149,7 +4187,7 @@ function Atr_Set_StackingPrefs_numstacks (key, numstacks)
 	end
 
 	AUCTIONATOR_STACKING_PREFS[lkey].numstacks = zc.Val (numstacks, 1);            
-	zz ("Setting stacking prefs (numstacks): ", lkey, AUCTIONATOR_STACKING_PREFS[lkey].numstacks)
+	Debug ("Setting stacking prefs (numstacks): ", lkey, AUCTIONATOR_STACKING_PREFS[lkey].numstacks)
 end
 
 -----------------------------------------
@@ -4164,7 +4202,7 @@ function Atr_Set_StackingPrefs_stacksize (key, stacksize)
 
 	AUCTIONATOR_STACKING_PREFS[lkey].stacksize = zc.Val (stacksize, 1);            
 
-	zz ("Setting stacking prefs (stacksize): ", lkey, AUCTIONATOR_STACKING_PREFS[lkey].stacksize)
+	Debug ("Setting stacking prefs (stacksize): ", lkey, AUCTIONATOR_STACKING_PREFS[lkey].stacksize)
 end
 
 -----------------------------------------
@@ -4177,7 +4215,7 @@ function Atr_GetStackingPrefs_ByItem (itemLink)
 	
 		SP_NumStacks, SP_StackSize, isUserSpecified =  Atr_Special_SP_ByItem (itemLink);
 
---zz ("SP_NumStacks, SP_StackSize, isUserSpecified", SP_NumStacks, SP_StackSize, isUserSpecified)
+--Debug ("SP_NumStacks, SP_StackSize, isUserSpecified", SP_NumStacks, SP_StackSize, isUserSpecified)
 
 		if (isUserSpecified) then
 			return SP_NumStacks, SP_StackSize
@@ -4315,14 +4353,14 @@ function Atr_Memorize_Stacking_If ()
 
 	local _, _, isUserSpecified =  Atr_Special_SP_ByItem (gCurrentPane.activeScan.itemLink);
 	if (isUserSpecified) then
---		zz ("Not memorizing stacking for ", gCurrentPane.activeScan.itemLink)
+--		Debug ("Not memorizing stacking for ", gCurrentPane.activeScan.itemLink)
 		return
 	end
 
 	local newNumStacks = Atr_Batch_NumAuctions:GetNumber();
 	local newStackSize = tonumber (Atr_StackSize());
 	
---zz (gInitial_NumStacks, newNumStacks, gInitial_StackSize, newStackSize)	
+--Debug (gInitial_NumStacks, newNumStacks, gInitial_StackSize, newStackSize)	
 
 	local stackSizeChanged = (tonumber (gInitial_StackSize) ~= newStackSize);
 
@@ -4486,7 +4524,7 @@ end
 function Atr_AddHistoricalPrice (itemName, price, stacksize, itemLink, testwhen)
 
 	if (itemName == nil) then
-		zz (" !!!!!!!!!!!!!!   itemName == nil");
+		Debug (" !!!!!!!!!!!!!!   itemName == nil");
 		return;
 	end
 
@@ -5116,4 +5154,16 @@ function FromTightTime(tt)
 	return (tt*60) + gTimeTightZero;
 
 end
+
+
+
+
+
+
+
+Atr_core:RegisterEvents()
+Atr_core:SetScript('OnEvent', Atr_core.OnEvent)
+
+
+
 

@@ -1,5 +1,5 @@
 
-local addonName, addonTable = ...; 
+local ADDON_NAME, addonTable = ...; 
 local zc = addonTable.zc;
 local zz = zc.md;
 local _
@@ -75,7 +75,8 @@ end
 function Atr_SetupOptionsFrame()
 
 	local expText = "<html><body>"
-					.."<p>"..ZT("The latest information on Auctionator can be found at").." auctionator-addon.com.".."</p>"
+					--.."<p>"..ZT("The latest information on Auctionator can be found at").." http://auctionatoraddon.com/".."</p>"
+					.."<p>Read the FAQ at http://auctionatoraddon.com/faq</p>"
 					.."<p><br/>"
 					.."MoP disenchanting data courtesy of the Norganna's AddOns (the Auctioneer folks)"
 					.."</p>"

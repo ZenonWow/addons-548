@@ -4,7 +4,7 @@
 -- This module should contain no globals as it is intended to be "linked" in to each of Zirco's addons
 
 
-local addonName, addonTable = ...; 
+local ADDON_NAME, addonTable = ...; 
 local zc = {};
 local _
 
@@ -636,14 +636,14 @@ end
 
 function zc.msg_anm (...)
 
-	zc.msg_yellow ("|cff00ffff<"..addonName..">|r", ...);
+	zc.msg_yellow ("|cff00ffff<"..ADDON_NAME..">|r", ...);
 end
 
 -----------------------------------------
 
 function zc.msg_badErr (...)
 
-	zc.msg_red ("|cff00ffff<"..addonName..">|r", ...);
+	zc.msg_red ("|cff00ffff<"..ADDON_NAME..">|r", ...);
 end
 
 
@@ -696,7 +696,7 @@ function zc.md (...)
 			aname = fname:sub (0,4)
 			fname = fname:sub (5);
 		else
-			aname = addonName:sub(0,3)..":";
+			aname = ADDON_NAME:sub(0,3)..":";
 		end
 
 		local color = "ffffff";
