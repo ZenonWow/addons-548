@@ -19,10 +19,9 @@ L["Are you sure you want to delete this taboo? This action will also remove the 
 L["A route with that name already exists. Overwrite?"] = "Eine Route mit diesem Name existiert bereits. Überschreiben?"
 L["A taboo with that name already exists. Overwrite?"] = "Ein Tabu mit diesem Namen existiert bereits. Überschreiben?"
 L["Automatic route updating"] = "Automatisches Updaten von Routen"
-L["AUTOMATIC_UPDATE_TEXT"] = [=[
-Routes wird Ihre Routen automatisch aktualisieren und Knotenpunkte einfügen/entfernen wie es von verlangt wird wenn Sie |cffffff78GatherMate|r oder |cffffff78Cartographer_<Profs>|r als Datenquellen nutzen. |cffffff78Gatherer/HandyNotes|r wird nicht unterstützt, da es momentan keine Callbacks liefert.
+L["AUTOMATIC_UPDATE_TEXT"] = [=[Routes wird Ihre Routen automatisch aktualisieren und Knotenpunkte einfügen/entfernen wie es verlangt wird wenn Sie |cffffff78GatherMate|r oder |cffffff78Cartographer_<Profs>|r als Datenquellen nutzen. |cffffff78Gatherer/HandyNotes|r wird nicht unterstützt, da es im moment keine Callbacks liefert.
 
-Wenn Sie in einem dieser Addons einen neuen Knotenpunkt finden, wird Routes die Zonen nach existierenden Routen mit diesem Knotenpunkttyp durchsuchen und ihn in die beste Position in der Route einfügen. Ähnliches passiert, wenn Sie einen Knotenpunkt in diesen Addons entfernen, dann wird Routes den Knotenpunkt auch aus den relevanten Routen entfernen.
+Wenn Sie in einer dieser Addons einen neuen Knotenpunkt finden, wird Routes die Zonen nach existierenden Routen mit diesem Knotenpunkttyp durchsuchen und ihn in die beste Position in der Route einfügen. Ähnliches passiert, wenn Sie einen Knotenpunkt in diesen Addons entfernen, dann wird Routes den Knotenpunkt auch aus den relevanten Routen entfernen.
 
 Das Verschieben eines Knotenpunkts um ein paar Yards wird mit einer Löschung und Wiedereintragung gehandhabt. Das ist die selbe Methode die auch von GatherMate und Cartographer_<Profs> intern verwendet wird.
 
@@ -31,7 +30,7 @@ Um das automatische Aktualisieren zu deaktivieren folgen Sie folgenden Schritten
 |cffffff781.|r Wechseln Sie in das |cffffff78Routes|r-Hauptverzeichnis auf der linken Seite des Konfigurationsfensters.
 
 |cffffff782.|r Entfernen Sie die Haken der Boxen jeder Datenquelle.
-]=]
+]=] -- Needs review
 L["Auto show and hide routes based on your professions"] = "Automatisches Anzeigen und Verstecken in Abhängigkeite ihrer Berufe"
 L["Auto show/hide"] = "Auto. Anzeigen/Verstecken"
 L["Auto Show/Hide per route type"] = "Auto. Anzeigen/Verstecken nach Routentyp"
@@ -214,7 +213,7 @@ L["Fishing"] = "Angeln"
 L["Foreground"] = "Vordergrund"
 L["Foreground Disclaimer"] = "Generiert fast optimalen Weg für alle Knotenpunkte der Route. Bitte beachten Sie, dass dieser Prozess ihr Spiel für kurze Zeit zum hängen bringt, je nachdem wieviele Knotenpunkte (mehrere sorgen für eine fast exponentiale Erhöhung)und wie schnell ihre CPU ist, könnte es sogar sein, dass ihre Verbindung unterbrochen wird, wenn es zulange dauert."
 L["Frequently Asked Questions"] = "Häufig gefragtes"
-L[" Gatherer/HandyNotes currently does not support callbacks, so this is impossible for Gatherer/HandyNotes."] = " Gatherer/HandyNotes unterstützt momentan keine Callbacks, also ist dies unmöglich für Gatherer/HandyNotes"
+L[" Gatherer/HandyNotes currently does not support callbacks, so this is impossible for Gatherer/HandyNotes."] = " Gatherer/HandyNotes unterstützt im moment keine Callbacks, also ist dies unmöglich für Gatherer/HandyNotes" -- Needs review
 L["GathererHERB"] = "Kräuterkunde"
 L["GathererMINE"] = "Bergbau"
 L["GathererOPEN"] = "Schätze"

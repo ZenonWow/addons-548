@@ -1,7 +1,7 @@
 ﻿--[[
 ********************************************************************************
 Routes
-v1.4.2
+v1.4.2-8-g4b93fad
 17 December 2011
 (Written for Live Servers v4.3.0.15050)
 
@@ -179,6 +179,7 @@ local remapMapFile = {
 	["TheLostIsles_terrain1"] = "TheLostIsles",
 	["TheLostIsles_terrain2"] = "TheLostIsles",
 	["Hyjal_terrain1"] = "Hyjal",
+	["Krasarang_terrain1"] = "Krasarang",
 }
 local remapMapID = {
 	[748] = 720,  --["Uldum_terrain1"] = "Uldum",
@@ -189,6 +190,7 @@ local remapMapID = {
 	[681] = 544,  --["TheLostIsles_terrain1"] = "TheLostIsles",
 	[682] = 544,  --["TheLostIsles_terrain2"] = "TheLostIsles",
 	[683] = 606,  --["Hyjal_terrain1"] = "Hyjal",
+	[910] = 857,  --["Krasarang_terrain1"] = "Krasarang",
 }
 
 -- Use local remapped versions of these 2 functions
@@ -256,6 +258,19 @@ function Routes:DrawWorldmapLines()
 	if (not flag1) and (not flag2) then	return end 	-- Nothing to draw
 
 	local mapFile = GetMapInfo()
+	-- microdungeon check
+	local mapName, textureWidth, textureHeight, isMicroDungeon, microDungeonName = RealGetMapInfo()
+	if isMicroDungeon then
+		if not WorldMapFrame:IsShown() then
+			-- return to the main map of this zone
+			ZoomOut()
+		else
+			-- can't do anything while in a micro dungeon and the main map is visible
+			return
+		end
+	end --end check
+
+
 	for route_name, route_data in pairs( db.routes[mapFile] ) do
 		if type(route_data) == "table" and type(route_data.route) == "table" and #route_data.route > 1 then
 			local width = route_data.width or defaults.width
@@ -404,10 +419,23 @@ function Routes:DrawMinimapLines(forceUpdate)
 		G:HideLines(Minimap)
 		return
 	end
-
+	-- microdungeon check
+	local mapName, textureWidth, textureHeight, isMicroDungeon, microDungeonName = RealGetMapInfo()
+	if isMicroDungeon then
+		if not WorldMapFrame:IsShown() then
+			-- return to the main map of this zone
+			ZoomOut()
+		else
+			-- can't do anything while in a micro dungeon and the main map is visible
+			G:HideLines(Minimap)
+			return
+		end
+	end	--end check
 	local zone = GetRealZoneText()
 
 	-- if we are indoors, or the zone we are in is not defined in our tables ... no routes
+	-- double check zoom as onload doesnt get you the map zoom
+	indoors = GetCVar("minimapZoom")+0 == Minimap:GetZoom() and "outdoor" or "indoor"
 	if not zone or self.LZName[zone][1] == "" or (not db.defaults.draw_indoors and indoors == "indoor") then
 		G:HideLines(Minimap)
 		return
@@ -975,9 +1003,10 @@ function Routes:OnInitialize()
 
 	-- Initialize the ace options table
 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Routes", options)
-	self:RegisterChatCommand(L["routes"], Routes.ToggleConfig)
+	self:RegisterChatCommand("rt", Routes.ToggleConfig)
+  self:RegisterChatCommand("routes", Routes.ToggleConfig)
 	if L["routes"] ~= "routes" then
-		self:RegisterChatCommand("routes", Routes.ToggleConfig)
+    self:RegisterChatCommand(L["routes"], Routes.ToggleConfig)
 	end
 
 	-- Upgrade old storage format (which was dependant on LibBabble-Zone-3.0
@@ -2863,7 +2892,7 @@ do
 	end
 
 	GetOrCreateTabooNode = function( route_data, coord )
-		node = next( taboo_cache )
+		local node = next( taboo_cache )
 		if node then
 			taboo_cache[ node ] = nil
 		else
