@@ -1,5 +1,5 @@
 
-local addonName, addonTable = ...
+local ADDON_NAME, addonTable = ...
 local zc = addonTable.zc
 local zz = zc.md
 local _

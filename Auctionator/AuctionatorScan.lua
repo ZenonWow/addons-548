@@ -1,5 +1,5 @@
 
-local addonName, addonTable = ...
+local ADDON_NAME, addonTable = ...
 local zc = addonTable.zc
 local zz = zc.md
 local _
@@ -732,7 +732,7 @@ function AtrSearch:Continue()
 		
 		QueryAuctionItems (queryString, minLevel, maxLevel, nil, itemClass, itemSubclass, self.current_page, nil, nil);
 
-		self.query_sent_when	= gAtr_ptime;
+		--self.query_sent_when	= gAtr_ptime;
 		self.processing_state	= KM_POSTQUERY;
 
 		self.current_page		= self.current_page + 1;
