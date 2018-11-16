@@ -1,0 +1,25 @@
+https://authors.curseforge.com/forums/world-of-warcraft/official-addon-threads/general-addons/218416-addonloader?comment=1
+--
+#1 Aug 1, 2007
+tristan2
+View User Profile
+View Posts
+Send Message
+
+Join Date: 9/30/2008
+Posts: 12
+I've used the search function but can't find an official topic for AddonLoader
+
+I was curious about event loading, I have an AddOn that responds to the Auction House Opening and reacts upon it. I tried by using this:
+X-LoadOn-Events: AUCTION_HOUSE_SHOW
+
+However this doesn't seem to call upon AnAddOn:AUCTION_HOUSE_SHOW() once loaded.
+
+So I tried adding:
+## X-LoadOn-AUCTION_HOUSE_SHOW: local loaded, reason = LoadAddOn("AnAddOn"); if (loaded) then AnAddOn:AUCTION_HOUSE_SHOW(); end
+
+It works fine and responds to the first Open aswell but it gave an error in the BugSack for AddonLoader instead.
+
+Is there any way except checking in OnEnable if I may have missed the event I was after? Like a X-LoadAfter-AUCTION_HOUSE_SHOW :)
+
+
