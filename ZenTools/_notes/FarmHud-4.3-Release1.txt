@@ -1,0 +1,83 @@
+https://wow.curseforge.com/projects/farmhud
+--
+Description
+Turn your minimap into a hud for farming ore / herb.
+ 
+
+Minimap vs. HUD?
+It is impossible to display both at the same time.
+ 
+
+Contains
+gather circle ( color / transparency adjustable )
+direction indicators (cardinal points) ( color / transparency adjustable )
+player coordinations ( color / transparency adjustable )
+minimap button (and broker panel integration) (optional)
+show minimap texture ( transparency adjustable )
+key bindings
+OnScreen buttons ( transparency adjustable )
+Toggle mouseover mode
+Toggle background
+Toggle option panel
+Close HUD
+ 
+
+Option panel
+The option panel are available over  Game Menu > Interface > AddOns > FarmHud 
+or by chat command  /run FarmHud:ToggleOptions() 
+ 
+
+Supports
+GatherMate2
+Routes
+_NPCScan.Overlay Is it outdated?
+Bloodhound2 outdated
+By library LibHijackMinimap
+Magneto
+By library HereBeDragon
+TomTom
+HandyNotes
+ 
+
+Minimap Addon compatibility
+Tested with: (Oct 2018)
+BasicMinimap » Okay
+bdMinimap » Okay
+Chinchilla Minimap » Okay
+ElvUI » Okay
+Mappy » Incompatible
+ObeliskMinimap » Okay
+SexyMap » Okay
+ 
+
+Bug reports, feature requests and Support
+Bug reports & feature requests
+Comments & Criticism
+ 
+
+Localization
+Do you want to help translate this addon?
+See Curseforge localization tool
+ 
+
+Macro functions
+The functions for use in macros has been changed.
+ /run FarmHud:Toggle() 
+ /run FarmHud:ToggleMouse() 
+ /run FarmHud:ToggleBackground() 
+ /run FarmHud:ToggleOptions() 
+ 
+
+Our other projects
+CodeRedLin's projects: https://www.curseforge.com/members/CodeRedLin/projects
+Hizuro's projects: https://www.curseforge.com/members/hizuro/projects
+ 
+
+Donation options
+Paypal
+Patreon
+Pledgie (No longer available. Site has been closed.)
+
+
+
+

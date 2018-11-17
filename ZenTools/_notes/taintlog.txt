@@ -1,0 +1,98 @@
+https://www.townlong-yak.com/taint.log/
+--
+Upload your taint logs
+Someone will do science to them.
+
+
+https://www.townlong-yak.com/taint.log/about.html
+--
+Taint in World of Warcraft
+The taint system was introduced to World of Warcraft UI in Patch 2.0.1, with the goal of preventing addons from automating gameplay in ways the game designers find unacceptable. At the time of release, this primarily included automated debuff removal addons, macros selecting the right rank of healing abilities to cast (and cancelling would-be overheals), and potentially addons automating primary combat rotations.
+
+The system works by designating some API functions (responsible for player actions like casting spells, learning talents, targetting players/mobs) as protected, meaning they only function if called from a secure execution path. All Blizzard UI code is considered secure by default, and can therefore call these functions as it pleases. Addon code, meanwhile, is considered tainted, and may not call these functions directly.
+
+To prevent tainted addon code from manipulating secure code into calling protected functions on its behalf, the secure/tainted classification also applies to most locations that can store values: global variables, local variables, table keys, widget script handler slots, and function closures. Widget attributes are the one exception to this, and are always considered to be secure.
+
+Once the current execution path becomes tainted (by either executing addon code, or accessing a tainted value), any variables it writes to, and any function closures it creates, are also marked as tainted. This can cause other execution paths to become tainted in the future, making it possible for taint to propagate through the UI in non-obvious ways.
+
+Taint errors can manifest in various ways: from mysterious "Interface action failed because of an AddOn" messages in chat, to popups inviting players to disable specific addons (then proceeding to blame a different addon next time, earning the taint system a reputation of blaming the wrong addons*). Most of the errors actually encountered by players are a result of unintended propagation of taint, rather than actual automation behavior being prevented (because most published addons are not trying to automate gameplay). Unfortunately, tracking the root cause of those issues is often not straightforward.
+
+* There are no documented cases of the taint system blaming completely unrelated addons, so this reputation is mostly based on a lacking understanding of how taint can propagate through the UI to block seemingly unrelated functionality.
+
+Enter the taint log
+To assist in fixing taint errors, the World of Warcraft client can log some taint-related information to a text file (World of Warcraft\​Logs\​taint.log). To enable this, type /console taintlog 1 into the chat box and press Enter. There are four different logging levels that you can use in place of the 1 in the chat command:
+
+Level 0Nothing is logged. This is the default. Level 1Actions blocked due to taint are logged. Level 2Also logs tainting or accessing tainted global variables. Level 11Also logs tainting or accessing tainted table entries.
+The client buffers writing to taint.log, so log entries may not appear immediately. Additionally, the entire file is overwritten when the taint log is first written to after an interface reload or log in. If you are debugging a specific issue, it may be useful to set the log level to 0 before reloading the interface after triggering the issue.
+
+Level 1: blocked protected actions
+Level 1 logs consist entirely of stack traces of actions prevented due to taint. For example, if you were to type the /run CastSpellByName("Mark of the Wild") command in chat, the following entry would be added to the log; it consists of the client's best guess at when execution became tainted, and a stack trace at the location of the blocked action:
+
+11/1 00:00:01.042  RunScript()
+11/1 00:00:01.042  An action was blocked of taint from MACRO_TAINT - CastSpellByName()
+11/1 00:00:01.042      CastSpellByName("Mark of the Wild"):1
+11/1 00:00:01.042      RunScript()
+11/1 00:00:01.042      Interface\FrameXML\ChatFrame.lua:2036 ?()
+11/1 00:00:01.042      Interface\FrameXML\ChatFrame.lua:4316 ChatEdit_ParseText()
+11/1 00:00:01.042      Interface\FrameXML\ChatFrame.lua:3962 ChatEdit_SendText()
+11/1 00:00:01.042      Interface\FrameXML\ChatFrame.lua:4008 ChatEdit_OnEnterPressed()
+11/1 00:00:01.042      ChatFrame1EditBox:OnEnterPressed()
+Some actions are only blocked when in combat, which is reflected in the log entry:
+
+11/1 00:00:01.042  Interface\FrameXML\InterfaceOptionsPanels.lua:62
+11/1 00:00:01.042  An action was blocked in combat because of taint from Ressie - MultiBarBottomLeft:Hide()
+11/1 00:00:01.042      Interface\FrameXML\MultiActionBars.lua:41 MultiActionBar_Update()
+11/1 00:00:01.042      Interface\FrameXML\InterfaceOptionsPanels.lua:1077 setFunc()
+11/1 00:00:01.042      Interface\FrameXML\InterfaceOptionsPanels.lua:90
+11/1 00:00:01.042      pcall()
+11/1 00:00:01.042      Interface\FrameXML\InterfaceOptionsFrame.lua:217
+11/1 00:00:01.042      securecall()
+11/1 00:00:01.042      Interface\FrameXML\InterfaceOptionsFrame.lua:252
+11/1 00:00:01.042      InterfaceOptionsFrameCancel:Click()
+11/1 00:00:01.042      Interface\FrameXML\UIParent.lua:3170 ToggleGameMenu()
+11/1 00:00:01.042      TOGGLEGAMEMENU:1
+Level 2: global taint tracing
+Level 2 logs also include stack traces of previously-secure global variables being tainted, and whenever a tainted global variable is accessed.
+
+The following fragment illustrates a global variable being tainted by an addon:
+
+11/1 00:00:02.042  Global variable SLASH_MASQUE1 tainted by Masque - Interface\AddOns\Masque\Masque.lua:77
+11/1 00:00:02.042      xpcall()
+11/1 00:00:02.042      safecall Dispatcher[1]:9
+11/1 00:00:02.042      Interface\AddOns\Masque\Libs\AceAddon-3.0\AceAddon-3.0.lua:514 InitializeAddon()
+11/1 00:00:02.042      Interface\AddOns\Masque\Libs\AceAddon-3.0\AceAddon-3.0.lua:629
+It also logs when tainted global variables tainted are accessed*, which looks like this:
+
+11/1 00:00:03.042  Execution tainted by Masque while reading SLASH_MASQUE1 - Interface\FrameXML\ChatFrame.lua:2347 ChatFrame_ImportListToHash()
+11/1 00:00:03.042      Interface\FrameXML\ChatFrame.lua:2387 ChatFrame_ImportAllListsToHash()
+11/1 00:00:03.042      Interface\FrameXML\ChatFrame.lua:4302 ChatEdit_ParseText()
+11/1 00:00:03.042      Interface\FrameXML\ChatFrame.lua:3962 ChatEdit_SendText()
+11/1 00:00:03.042      Interface\FrameXML\ChatFrame.lua:4008 ChatEdit_OnEnterPressed()
+11/1 00:00:03.042      ChatFrame1EditBox:OnEnterPressed()
+* Actual behavior of logging of access to tainted global variables is somewhat weird.
+
+Level 11: tainted table keys
+This log level can only be enabled on non-Release builds of World of Warcraft — in practice, it is only available on PTR and Beta realms while the next patch is being tested. While log level 2 only tracks tainting and accessing global variables (i.e. string keys in the _G table), log level 11 tracks taining and acessing tainted string keys in all tables.
+
+Messages generated at this log level do not correctly distinguish between _G and other tables, refering to both of these as "global variables", so whether a message refers to tainting a global variable or a table key can only be determined by examining the code referenced by the stack trace.
+
+The correct interpretation of the following fragment is that the key "Mangle" in some table has been tainted:
+
+11/1 00:00:04.042  Global variable Mangle tainted by XFrame - Interface\AddOns\XFrame\XFrame.lua:40 flip()
+11/1 00:00:04.042      Interface\AddOns\XFrame\XFrame.lua:42 flip()
+11/1 00:00:04.042      Interface\AddOns\XFrame\XFrame.lua:42 flip()
+11/1 00:00:04.042      Interface\AddOns\XFrame\XFrame.lua:42 flip()
+11/1 00:00:04.042      Interface\AddOns\XFrame\XFrame.lua:47
+Similarly, the following fragment implies that the current execution path accessed a table key tainted by a different addon:
+
+11/1 00:00:05.042  Execution tainted by Spade while reading noPersistentCA - Interface\AddOns\OPie\OneRingLib.lua:479 OR_PullCAs()
+11/1 00:00:05.042      Interface\AddOns\OPie\OneRingLib.lua:641
+11/1 00:00:05.042      xpcall()
+11/1 00:00:05.042      Interface\AddOns\OPie\EventLib.lua:91 EC_pcall()
+11/1 00:00:05.042      Interface\AddOns\OPie\EventLib.lua:27 EC_Raise()
+11/1 00:00:05.042      Interface\AddOns\OPie\EventLib.lua:141
+What's left unlogged
+None of the taint log levels are sufficient to completely trace the cause of an encountered taint error in all circumstances. In particular, the taint log does not contain traces of tainting, or accessing tainted local variables, script handlers, or non-string table keys.
+
+
+

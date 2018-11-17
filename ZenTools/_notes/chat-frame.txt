@@ -1,0 +1,66 @@
+EMOTE453_TOKEN = "READ"
+local MAXEMOTEINDEX = 453;
+
+
+
+InterfaceOptionsSocialPanelTimestamps_OnEvent
+			CHAT_TIMESTAMP_FORMAT = value;
+				body = BetterDate(CHAT_TIMESTAMP_FORMAT, time())..body;
+
+    -- Disable blizz timestamps
+    SetCVar("showTimestamps", "none")
+    InterfaceOptionsSocialPanelTimestamps.cvar = "none"
+
+	InterfaceOptionsSocialPanelTimestamps_AddTimestampFormat(TIMESTAMP_FORMAT_HHMM, info, selectedValue);
+	InterfaceOptionsSocialPanelTimestamps_AddTimestampFormat(TIMESTAMP_FORMAT_HHMMSS, info, selectedValue);
+	InterfaceOptionsSocialPanelTimestamps_AddTimestampFormat(TIMESTAMP_FORMAT_HHMM_AMPM, info, selectedValue);
+	InterfaceOptionsSocialPanelTimestamps_AddTimestampFormat(TIMESTAMP_FORMAT_HHMMSS_AMPM, info, selectedValue);
+	InterfaceOptionsSocialPanelTimestamps_AddTimestampFormat(TIMESTAMP_FORMAT_HHMM_24HR, info, selectedValue);
+	InterfaceOptionsSocialPanelTimestamps_AddTimestampFormat(TIMESTAMP_FORMAT_HHMMSS_24HR, info, selectedValue);
+
+function InterfaceOptionsSocialPanelTimestamps_AddTimestampFormat(timestampFormat, infoTable, selectedValue)
+	infoTable.text = BetterDate(timestampFormat, time(exampleTime));
+
+
+https://us.battle.net/forums/en/wow/topic/7710221341
+
+http://wowwiki.wikia.com/wiki/API_Logout
+http://wowwiki.wikia.com/wiki/Events/P
+--
+"PLAYER_LEAVING_WORLD"
+Category: System
+Fired when a player logs out and possibly at other situations as well
+
+"PLAYER_LOGOUT"
+Category: System
+Sent when the player logs out or the UI is reloaded, just before SavedVariables are saved. The event fires after PLAYER_LEAVING_WORLD.
+
+
+
+
+https://www.wowinterface.com/forums/showpost.php?p=311609&postcount=2
+--
+local _Quit = Quit
+local _Logout = Logout
+local _ReloadUI = ReloadUI
+local _ConsoleExec = ConsoleExec
+function Quit()
+    -- do something
+    return _Quit()
+end
+function Logout()
+    -- do something
+    return _Logout()
+end
+function ReloadUI()
+    -- do something
+    return _ReloadUI()
+end
+function ConsoleExec(msg)
+    if strlower(msg) == "reloadui" then
+        -- do something
+    end
+    return _ConsoleExec(msg)
+end
+
+CancelLogout()

@@ -1,0 +1,217 @@
+https://wow.gamepedia.com/ItemString
+--
+itemString
+→ API Types
+Item strings are used in World of Warcraft's chat interface to pass item information in item hyperlinks between clients and to pass item information from the client to the user interface. The main purpose of an item string appears to be to designate display information of item tooltips via item hyperlinks (itemLinks).
+
+Contents
+Format
+Item strings consist of the string "item:" followed by additional colon delimited numbers, which describe the item, its stats, and any enchantments or gems applied to the item. As of 7.0.3 unused delimited segments will be empty rather than 0 (the old ":0:0:0:" is now "::::").
+
+item:itemID:enchantID:gemID1:gemID2:gemID3:gemID4:suffixID:uniqueID:linkLevel:specializationID:upgradeTypeID:instanceDifficultyID:numBonusIDs[:bonusID1:bonusID2:...][:upgradeValue1:upgradeValue2:...]:relic1NumBonusIDs[:relic1BonusID1:relic1BonusID2:...]:relic2NumBonusIDs[:relic2BonusID1:relic2BonusID2:...]:relic3NumBonusIDs[:relic3BonusID1:relic3BonusID2:...]
+itemID 
+Item ID that can be used for GetItemInfo calls.
+enchantID
+Permament enchants applied to an item. See list of EnchantIds.
+gemID1, gemID2, gemID3, gemID4 
+Embedded gems re-use EnchantId indices, though gem icons show only for specific values. Added in Patch 2.0.
+suffixID 
+Random enchantment ID; may be negative. See list of SuffixIds.
+uniqueID 
+Data pertaining to a specific instance of the item.
+linkLevel 
+Level of the character supplying the link. This is used to render scaling heirloom item tooltips at the proper level. Added in Patch 3.0.
+specializationID 
+Class specialization ID of the character supplying the link. This is used to display the appropriate primary stat and set bonuses on gear. Added in Patch 6.2.0.
+upgradeTypeID 
+The type of upgrade available on the gear. This is used in conjunction with the upgradeValue. Added in Patch 6.2.0.
+instanceDifficultyID
+Dungeon/raid difficulty in which this item is obtained. Added in Patch 6.0.2.
+numBonusIDs
+The number of bonusIDs. Added in Patch 6.0.2.
+bonusID1, bonusID2, ... 
+Data describing how the item differs from a generic instance of its base Item ID. Added in Patch 6.0.2. See below for more info.
+upgradeValue1, upgradeValue2, ... 
+Item upgrade info used in conjunction with the upgradeTypeID. Added in Patch 5.1 modified for use with upgradeTypeID in Patch 6.2.0. These segments of the item string will be omitted if the upgradeTypeID is 0 or "". See below for various types of upgrade values.
+relic1NumBonusIDs, ... 
+The number of bonusIDs for the socketed artifact relic. Added in Patch 7.0.3.
+relic1BonusID1, relic1BonusID2, ...
+Data describing how the socketed artifact relic differs from a generic instance of its base Item ID. Added in Patch 7.0.3.
+NOTE: ItemStrings obtained from Void Storage links may not be entirely accurate. Shift clicking an item in Void Storage will give you a generic GetItemInfo link without modifier information such as the upgradeType or bonusID's (this remains true as of patch 7.0.3).
+
+Enchant Ids and Suffix Ids
+Adding of enchant, jewel, and bonus stat information to the tooltip appear to be handled on the client side with out any kind of validation. By altering the item string in an item hyperlink you can add any enchant or any bonus stats to any item and still pass it to clients via chat, or display a tooltip for it. The Item name must match that of the itemId combined with the suffix or you will be disconnected if you try to link the item to others. suffixIDs can be negative (see Scaled Random Suffixes below).
+
+NOTE: Even though the EnchantId page lists shaman weapon buffs, player generated Shaman Buffs do not appear in the link when using GetInventoryItemLink().
+
+Unique Ids
+UniqueId contains information on the maker of a crafted item, number of charges or uses if applicable, or other information exclusive to one particular manifestation of an item. Items received from quests frequently have a UniqueId value, and occasionally dropped items have one as well. The numbers don't appear to hold any information in and of themselves, and are not consistent in any way across servers like EnchantIds and SecondaryIds. The value appears to be a link to a database entry on the server or client that contains the unique information such as who made an item, which quest it came from, when the quest was delivered, who sold the item on the Auction House, etc. GMs would then be able to track an item should a petition about one be made. UniqueID can have negative values (see Scaled Random Suffixes below).
+
+Addendum: In-game testing indicates that the UniqueId can change from the first loot to successive loots on the same item. To observe this behavior, Master Looter method was used, an item meeting the loot threshold found, and then the loot window closed without giving the item to a raid member. On re-opening the corpse, the value had changed. For example, on the first loot of Shimmering Trousers of the Eagle, the UniqueId value was 0x00009182. On successive loot attempts it was 0x40679182. Note that the low order bytes were maintained. In at least a few observations, negative UniqueId values did not change in successive looting attempts.
+
+UniqueIds can be repeated (and thus are not truly "unique"). This has been observed when disenchanting items, where the UniqueId was the same for every  [Maelstrom Crystal] "created" by the same player sharding raid loot. Another observed example is a less common occurrence: looting the  [Elementium Gem Cluster] for the rogue legendary daggers quest; the UniqueId field was the same (-534608128) for every gem cluster from every boss across multiple months of raid instance IDs. (It's not known whether the value would be the same for all rogues on that quest, or whether it was a value specific to this rogue on this quest.)
+
+On negative UniqueID's: A negative UniqueID is not special in any way. It seems that (sometimes!) the high 16 bits are simply "random", i.e. 0x0000-0xffff. If this value is >0x8000, it will translate to a negative decimal value (signed 32-bit).
+
+Bonus IDs
+They can be used for storing random suffixes (e.g. "of the Fireflash"), random bonuses (e.g. bonusID 40 is +Avoidance), raid types (see below), dungeon typing, random quest upgrades (see below for epic/rare), crafting upgrades (e.g. bonusID 526 is "Expert") and others.
+
+Some examples of bonusIDs:
+
+448 - Warforged, +6 itemlevel
+449 - Heroic, +13 itemlevel
+450 - Mythic, +26 itemlevel
+451 - LFR, -12 itemlevel
+15 - Epic, +10 itemlevel
+171 - Rare, +5 itemlevel
+BonusIDs can adjust item levels, modify stats, change item quality, add item titles, append words to item names, add sockets, adjust appearance, adjust required equip level, and possibly many more.
+
+Upgrade Type IDs and Values
+These can be used to make various item level scaling adjustments to gear and allow those changes to display to other players.
+
+NOTE: Upgrade IDs were changed in patch 6.2 to expand their use. The existing IDs were moved to the end of the bonus ID's and a new type ID number took their place earlier in the string.
+
+Examples:
+
+Type 4: MoP Item Level Upgrading - the upgradeValue is a traditional 'upgradeID', which specifies the ilvl adjustments already made and/or remaining.
+Legendary Healer Cloak Example:
+  2/4 Upgrades -
+       |cffff8000|Hitem:102247::::::::100:105:4:::493|h[Jina-Kang, Kindness of Chi-Ji]|h|r
+  4/4 Upgrades -
+       |cffff8000|Hitem:102247::::::::100:105:4:::505|h[Jina-Kang, Kindness of Chi-Ji]|h|r
+ 
+Type 512: Timewarped Item Level Adjustments - the upgradeValue will be the level of the character when the gear was acquired. This allows other players to view the gear at the appropriate level rather than their current level. This upgrade type is used in conjunction with bonus ID 615.
+Level 100 BC Timewarped Weapon:
+     |cff0070dd|Hitem:123999::::::::100:105:512:22:1:615:100|h[Lightsworn Hammer]|h|r
+Level 100 WotLK Timewarped Weapon:
+     |cff0070dd|Hitem:127491::::::::100:105:512:22:1:615:100|h[Staff of Wayward Principles]|h|r
+ 
+Mythic Keystones:
+Type 4587520: 0 Affixes
+UpgradeValues - KeystoneDungeon:KeystoneLevel[:LootEligible]
+Type 5111808: 1 Affix
+UpgradeValues - KeystoneDungeon:KeystoneLevel:AffixID1[:LootEligible]
+Type 6160384: 2 Affixes
+UpgradeValues - KeystoneDungeon:KeystoneLevel:AffixID1:AffixID2[:LootEligible]
+Type 4063232: 3 Affixes
+UpgradeValues - KeystoneDungeon:KeystoneLevel:AffixID1:AffixID2:AffixID3[:LootEligible]
+Value 1: KeystoneDungeon - The ID of the dungeon the keystone can modify
+ID	Dungeon
+1456	Eye of Azshara
+1458	Neltharion's Lair
+1466	Darkheart Thicket
+1477	Halls of Valor
+1492	Maw of Souls
+1493	Vault of the Wardens
+1501	Black Rook Hold
+1516	The Arcway
+1571	Court of Stars
+Value 2: KeystoneLevel - The mythic level of the keystone dungeon
+Value 3+: AffixID's - ID #'s representing the affixes applied to the dungeon enemies/bosses. Affix value segments are omitted if there are no affixes.
+ID	Affix
+1	Overflowing
+2	Skittish
+3	Volcanic
+4	Necrotic
+5	Teeming
+6	Raging
+7	Bolstering
+8	Sanguine
+9	Tyrannical
+10	Fortified
+Last Value: LootEligible - Flag representing if the loot can be obtained from the dungeon. 1 if loot eligible or segment omitted if keystone is depleted.
+Example Keystone Strings:
+     0 Affixes, Eye of Azshara, Lvl 3, Non-Depleted
+          |cffa335ee|Hitem:138019::::::::110:105:4587520:::1456:3:1:::|h[Mythic Keystone]|h|r
+     1 Affix, Black Rook Hold, Lvl 4, Bolstering Affix, Non-Depleted
+          |cffa335ee|Hitem:138019::::::::110:62:5111808:::1501:4:7:1:::|h[Mythic Keystone]|h|r
+     2 Affixes, The Arcway, Lvl 7, Raging Affix, Necrotic Affix, Non-Depleted
+          |cffa335ee|Hitem:138019::::::::110:105:6160384:::1516:7:6:4:1:::|h[Mythic Keystone]|h|r
+     3 Affixes, Maw of Souls, Lvl 10, Bolstering Affix, Overflowing Affix, Tyrannical Affix, Depleted
+          |cffa335ee|Hitem:138019::::::::110:105:4063232:::1492:10:7:1:9:::|h[Mythic Keystone]|h|r
+ 
+Scaled Random Suffixes
+Since WoW 2.0, both the SuffixIds and the UniqueIds have the ability to be negative. This indicates a different way of calculating the stats bonuses is being used. Previous to WoW 2.0, every time a new stats bonus was added to a new item, the SuffixId list needed to be updated via a client patch. This limited Blizzard's ability to arbitrarily add new items to the game, since the new data would need to be accompanied by a client patch if it's stats bonus did not already exist.
+
+Post 2.0, a new system of stats bonuses has been implemented via the ItemRandomSuffix table. If the suffixId is negative, it indicates that the suffix of the item is instead one of the new RandomSuffixes, and that the uniqueId will contain an embedded suffixFactor, which can be extracted via the following algorithm.
+
+local suffixFactor = 0
+local linkType, itemId, enchantId,
+    jewelId1, jewelId2, jewelId3, jewelId4,
+    suffixId, uniqueId = strsplit(":", '''itemString''')
+suffixId = tonumber(suffixId) or 0
+uniqueId = tonumber(uniqueId) or 0
+if (linkType == 'item') then
+    if (suffixId < 0) then
+      suffixFactor = bit.band(uniqueId, 65535)
+    end
+end
+To see how this suffixFactor gets applied to get the final stat bonuses, see the ItemRandomSuffix table.
+
+3.2 WotLK random stat items changing their suffix factors
+In 3.2, WotLK random stat items got upgraded, i.e. their scaling factors changed.
+
+This means that the high 16 bits of the uniqueid remained the same, but the low 16 bits changed.
+
+If this was a one-time thing, we could have lived with item databases etc becoming slightly wobbly. But that's not the whole story. As soon as you place an item in mail, or AH, or a guild bank, it gets downgraded again. So the uniqueIDs are no longer constant.
+
+Update: It seems that this only happens with items that were actually looted/spawned/crafted before 3.2.
+
+Examples:
+
+|cff1eff00|Hitem:36050:0:0:0:0:0:-8:-2052980689:76:0:0|h[Crystalsong Bracelets of the Whale]|h|r
+|cff1eff00|Hitem:36050:0:0:0:0:0:-8:-2052980680:76:0:0|h[Crystalsong Bracelets of the Whale]|h|r
+0x85A2002F vs
+0x85A20038
+Difference: 9
+
+|cff1eff00|Hitem:36156:0:0:0:0:0:-18:1209139262:76:0:0|h[Wendigo Boots of Agility]|h|r
+|cff1eff00|Hitem:36156:0:0:0:0:0:-18:1209139275:76:0:0|h[Wendigo Boots of Agility]|h|r
+0x4812003E vs
+0x4812004B
+Difference: 13
+
+|cff0070dd|Hitem:44741:0:0:0:0:0:-26:77201509:76:0:0|h[Mechanized Snow Goggles of Spell Power]|h|r
+|cff0070dd|Hitem:44741:0:0:0:0:0:-26:77201534:76:0:0|h[Mechanized Snow Goggles of Spell Power]|h|r
+0x049A0065 vs
+0x049A007E
+Difference: 25
+
+|cff0070dd|Hitem:44732:0:0:0:0:0:-36:1867317349:76:0:0|h[Azure Dragonleather Helm of the Sorcerer]|h|r
+|cff0070dd|Hitem:44732:0:0:0:0:0:-36:1867317374:76:0:0|h[Azure Dragonleather Helm of the Sorcerer]|h|r
+0x6F4D0065
+0x6F4D007E
+Difference: 25
+
+|cff1eff00|Hitem:36675:0:0:0:0:0:-44:-1664483297:76:0:0|h[Sockeye Dagger of the Elder]|h|r
+|cff1eff00|Hitem:36675:0:0:0:0:0:-44:-1664483292:76:0:0|h[Sockeye Dagger of the Elder]|h|r
+0x9CCA001F
+0x9CCA0024
+Difference: 5
+For added humor, note that GetItemCount() and PickupItem() will work on both the downgraded and upgraded itemstrings (tested for items in bags), but a SecureActionButton using the "target-item" attribute will only work if given the upgraded itemstring.
+
+Examples
+"item:6948::::::::80:105::::::"
+The first number is the ItemID for a [Hearthstone]. The next 7 values are empty, which tells the client it has no enchants, gems, extra stats, and wasn't made by anyone. The 9th number, 80, means that the link applies to level 80 characters.
+"item:18832:2564:::::::80:105::::::"
+The first number is the ItemID for [Brutality Blade]. The second number (enchantId) in this case denotes that it is enchanted with +15 agility.
+"item:10242::::::614::80:105::::::"
+The first number is the ItemID for [Heavy Lamellar Gauntlets]. The seventh number (suffixId) adds to this item's name " of the Monkey" and adds +11 Agility and +11 Stamina.
+"item:4388:::::::210677200:80:105::::::"
+The first number is the ItemID for [Discombobulator Ray]. The eighth number adds the information that this particular item only has 4 uses left and was made by Kirov.
+"item:28484:1503::2946:2945::::80:105::::::"
+The first number is the ItemID for [Bulwark of Kings]. The second number (enchantId) is that of +100 HP. The third number denotes an empty blue jewel socket while the fourth and fifth numbers represent yellow jewel sockets occupied by a [Inscribed Ornate Topaz] and a [Bold Ornate Ruby] respectively. Jewel sockets can also take normal enchantID's. Bulwark of Kings has a socket bonus, but this is not represented within the itemString.
+You can extract identifiers from a given itemString using the following Lua-code:
+
+local _, itemID, enchantID, gemID1, gemID2, gemID3, gemID4, 
+  suffixID, uniqueID, linkLevel, specializationID, upgradeTypeID, instanceDifficultyID, numBonusIDs = strsplit(":", itemString)
+local tempString, unknown1, unknown2, unknown3 = strmatch(itemString, "item:[-%d]-:[-%d]-:[-%d]-:[-%d]-:[-%d]-:[-%d]-:[-%d]-:[-%d]-:[-%d]-:[-%d]-:[-%d]-:[-%d]-:[-%d]-:([-:%d]+):([-%d]-):([-%d]-):([-%d]-)|")
+local bonusIDs, upgradeValue
+if upgradeTypeID and upgradeTypeID ~= "" then
+    upgradeValue = tempString:match("[-:%d]+:([-%d]+)")
+    bonusIDs = {strsplit(":", tempString:match("([-:%d]+):"))}
+else
+    bonusIDs = {strsplit(":", tempString)}
+end
+Patch changes
+ Patch 7.0.3 (2016-07-19): Lone 0's in item strings have been removed so something like ":0:0:0:" has become "::::". 3 new segments have also been added to the end of the item string but their use is unknown at this time.

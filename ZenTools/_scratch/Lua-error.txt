@@ -1,0 +1,225 @@
+1x picoPriority\priorities.lua:80: attempt to concatenate global 'STAT_CRITICAL_STRIKE' (a nil value)
+picoPriority\priorities.lua:80: in main chunk
+
+Locals:
+
+
+
+
+
+
+
+
+10x tekPopbar\Button.lua:151: Usage: SetOverrideBindingClick(owner, isPriority, "KEY", "buttonName"[, "mouseButton"])
+[C]: in function `SetOverrideBindingClick'
+tekPopbar\Button.lua:151: in function <tekPopbar\Button.lua:145>
+
+Locals:
+self = tekPopbar1 {
+ 0 = <userdata>
+ WrapScript = <function> defined @FrameXML\SecureHandlers.lua:704
+ action = 1
+ wascd = false
+ Execute = <function> defined @FrameXML\SecureHandlers.lua:699
+ feedback_action = 1
+ border = <unnamed> {
+ }
+ flash = <unnamed> {
+ }
+ UnwrapScript = <function> defined @FrameXML\SecureHandlers.lua:710
+ count = <unnamed> {
+ }
+ FlyoutBorder = tekPopbar1FlyoutBorder {
+ }
+ SetFrameRef = <function> defined @FrameXML\SecureHandlers.lua:715
+ FlyoutBorderShadow = tekPopbar1FlyoutBorderShadow {
+ }
+ FlyoutArrow = tekPopbar1FlyoutArrow {
+ }
+ icon = <unnamed> {
+ }
+ cooldown = <unnamed> {
+ }
+}
+event = "UPDATE_BINDINGS"
+action = nil
+id = 1
+_ = "COMBATLOGPAGEDOWN"
+_ = nil
+keybind = nil
+UpdateCooldown = <function> defined @tekPopbar\Button.lua:19
+ActionButton_Update = <function> defined @tekPopbar\Button.lua:42
+ActionButton_UpdateState = <function> defined @tekPopbar\Button.lua:25
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+686x AddonLoader\AddonLoader-r126.lua:621: attempt to get length of local 'deps' (a nil value)
+AddonLoader\AddonLoader-r126.lua:621: in function `LoadOneAddon'
+AddonLoader\AddonLoader-r126.lua:740: in function <AddonLoader\AddonLoader.lua:710>
+
+Locals:
+self = AddonLoader {
+ 0 = <userdata>
+ delayNextLoad = 30
+ LoadAddOn = <function> defined @AddonLoader\AddonLoader.lua:485
+ SetDelayNextLoad = <function> defined @AddonLoader\AddonLoader.lua:700
+ ParseConditions = <function> defined @AddonLoader\AddonLoader.lua:265
+ slashes = <table> {
+ }
+ conditiontexts = <table> {
+ }
+ Toast = <function> defined @AddonLoader\AddonLoader.lua:53
+ LoadAndInitialize = <function> defined @AddonLoader\AddonLoader.lua:546
+ OnUpdate = <function> defined @AddonLoader\AddonLoader.lua:710
+ InitConditions = <function> defined @AddonLoader\AddonLoader.lua:310
+ GetAddonsToLoad = <function> defined @AddonLoader\AddonLoader.lua:669
+ IsVariablesLoaded = <function> defined @AddonLoader\AddonLoader.lua:343
+ conditions = <table> {
+ }
+ BeforeLoadAddOn = <function> defined @AddonLoader\AddonLoader.lua:522
+ addonsToLoad = <table> {
+ }
+ ParseConditionFunc = <function> defined @AddonLoader\Conditions.lua:121
+ RunStartupHandlers = <function> defined @AddonLoader\AddonLoader.lua:283
+ lastUpdateGetTime = 132269.499
+ loadReason = <table> {
+ }
+ GetConditionFunc = <function> defined @AddonLoader\Conditions.lua:115
+ GetConditionValue2 = <function> defined @AddonLoader\Conditions.lua:103
+ lastUpdateTime = 1542326315
+ ReadChildConditions = <function> defined @AddonLoader\Conditions.lua:79
+ LoadOverrides = <function> defined @AddonLoader\AddonLoader.lua:233
+ Print = <function> defined @AddonLoader\AddonLoader.lua:49
+ StartCapture = <function> defined @AddonLoader\AddonCapture.lua:45
+ LoadAllMetadata = <function> defined @AddonLoader\AddonLoader.lua:216
+ addonsLoaded = <table> {
+ }
+ LoadConditions = <function> defined @AddonLoader\AddonLoader.lua:300
+ framesDrawn = -5
+ L = <table> {
+ }
+ lastLoadGetTime = 132263.816
+ cachedEvents = <table> {
+ }
+ LoadAddonMetadata = <function> defined @AddonLoader\AddonLoader.lua:203
+ IsSpellsLoaded = <function> defined @AddonLoader\AddonLoader.lua:344
+ elapsedSum = 0
+ addonLoadEvents = <table> {
+ }
+ EvaluateCachedEvent = <function> defined @AddonLoader\AddonLoader.lua:333
+ ConditionManager = <unnamed> {
+ }
+ LoadMetadataField = <function> defined @AddonLoader\AddonLoader.lua:189
+ OnEvent = <function> defined @AddonLoader\AddonLoader.lua:760
+ logFrame = ChatFrame4 {
+ }
+ GetConditionValue = <function> defined @AddonLoader\Conditions.lua:90
+ RegisterDelayedLoad = <function> defined @AddonLoader\AddonLoader.lua:692
+ LoadOneAddon = <function> defined @AddonLoader\AddonLoader.lua:607
+ loadError = <table> {
+ }
+ frame = <unnamed> {
+ }
+ lastLoadTime = 1542326326
+ originals = <table> {
+ }
+}
+elapsed = 0.044000003486872
+now = 132269.499
+fps = 22.556389554635
+spf = 0.044333336129785
+msg = "30 frames: 1.330sec 22.56fps 0.04s/f"
+Debug = <function> defined @AddonLoader\AddonLoader.lua:28
+InCombatLockdown = <function> defined =[C]:-1
+tostring = <function> defined =[C]:-1
+
+
+
+
+
+
+
+
+
+
+
+
+5552x ...aceImprovedFrameStack\ImprovedFrameStack-1.1.lua:235: Attempt to find 'this' in non-framescript object
+[C]: in function `SetParent'
+...aceImprovedFrameStack\ImprovedFrameStack-1.1.lua:235: in function <...aceImprovedFrameStack\ImprovedFrameStack.lua:222>
+...aceImprovedFrameStack\ImprovedFrameStack-1.1.lua:280: in function <...aceImprovedFrameStack\ImprovedFrameStack.lua:256>
+[C]: in function `SetFrameStack'
+...eBlizzard_DebugTools\Blizzard_DebugTools-1.0.lua:701: in function <...eBlizzard_DebugTools\Blizzard_DebugTools.lua:697>
+
+Locals:
+newFrame = nil
+highlighter = <table> {
+}
+highBackdrop = <table> {
+ bgFile = "Interface/Tooltips/UI-Tooltip-Background"
+ tileSize = 0
+ edgeFile = "Interface/Tooltips/UI-Tooltip-Border"
+ tile = true
+ edgeSize = 4
+ insets = <table> {
+ }
+}
+
+1x ...aceImprovedFrameStack\ImprovedFrameStack-1.1.lua:249: Attempt to find 'this' in non-framescript object
+[C]: in function `Hide'
+...aceImprovedFrameStack\ImprovedFrameStack-1.1.lua:249: in function <...aceImprovedFrameStack\ImprovedFrameStack.lua:248>
+[C]: ?
+[C]: in function `Hide'
+...eBlizzard_DebugTools\Blizzard_DebugTools-1.0.lua:685: in function `FrameStackTooltip_Toggle'
+FrameXML\ChatFrame.lua:2284: in function `FRAMESTACK'
+ZenShortcuts\Bindings.lua:131: in function `ToggleFrameStack'
+[string "TOGGLEFRAMESTACK"]:2: in function <[string "TOGGLEFRAMESTACK"]:1>
+
+Locals:
+self = FrameStackTooltip {
+ 0 = <userdata>
+ SetFrameStack = <function> defined =[C]:-1
+ comparing = false
+}
+highlighter = <table> {
+}
+
+
+
+
+
+
+Message: Interface\FrameXML\CompactUnitFrame.lua:317: Usage: UnitHealthMax("unit")
+Time: 10/31/18 04:37:39
+Count: 1
+Stack: [C]: in function `UnitHealthMax'
+Interface\FrameXML\CompactUnitFrame.lua:317: in function `CompactUnitFrame_UpdateMaxHealth'
+Interface\FrameXML\CompactUnitFrame.lua:245: in function `CompactUnitFrame_UpdateAll'
+Interface\FrameXML\CompactUnitFrame.lua:135: in function `CompactUnitFrame_SetUnit'
+...actRaidFrames\Blizzard_CompactRaidFrameContainer.lua:31: in function `releaseFunc'
+...ames\Blizzard_CompactRaidFrameReservationManager.lua:27: in function `CompactRaidFrameReservation_ReleaseUnusedReservations'
+...actRaidFrames\Blizzard_CompactRaidFrameContainer.lua:359: in function `CompactRaidFrameContainer_ReleaseAllReservedFrames'
+...actRaidFrames\Blizzard_CompactRaidFrameContainer.lua:189: in function `CompactRaidFrameContainer_LayoutFrames'
+...actRaidFrames\Blizzard_CompactRaidFrameContainer.lua:130: in function `CompactRaidFrameContainer_TryUpdate'
+...actRaidFrames\Blizzard_CompactRaidFrameContainer.lua:57: in function `CompactRaidFrameContainer_OnEvent'
+[string "*:OnEvent"]:1: in function <[string "*:OnEvent"]:1>
+
+Locals: (*temporary) = nil
+
+
+
+
+
+

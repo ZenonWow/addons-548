@@ -1,0 +1,82 @@
+https://wow.gamepedia.com/World_of_Warcraft_API
+--
+Equipment Manager Functions
+Equipment management was added to the UI in Patch 3.1.2.
+
+CanUseEquipmentSets()
+DeleteEquipmentSet("name") - Forgets an equipment set.
+EquipmentSetContainsLockedItems("name") - Checks if some of the items in the set are currently locked (pending client/server interaction).
+EquipmentManagerIgnoreSlotForSave(slot) - flags the slot to be ignored when saving an equipment set.
+EquipmentManagerIsSlotIgnoredForSave() -
+EquipmentManagerUnignoreSlotForSave(slot) - removes the ignore flag from a slot when saving an equipment set.
+EquipmentManagerClearIgnoredSlotsForSave() - removes the ignore flag from all slots when saving an equipment set.
+UI EquipmentManager_UnpackLocation(location) - Unpacks a location integer to determine the actual inventory location.
+GetContainerItemEquipmentSetInfo()
+GetNumEquipmentSets() - Returns the number of saved equipment sets.
+UI GetEquipmentSetIconInfo(index) - Returns information about available icons.
+GetEquipmentSetIgnoreSlots()
+GetEquipmentSetInfo(index) - Returns information about an equipment set.
+GetEquipmentSetInfoByName("name") - Returns information about an equipment set.
+GetEquipmentSetItemIDs("name"[, returnTable]) - Populates and returns a table with the item IDs.
+GetEquipmentSetLocations("name"[, returnTable]) - Populates and returns a table with the item locations.
+ModifyEquipmentSet()
+PickupEquipmentSet(index) - Places an equipment set on the cursor.
+PickupEquipmentSetByName("name") - Places an equipment set on the cursor.
+SaveEquipmentSet("name", iconIndex) - Saves the currently equipped items in a set.
+NOCOMBAT UseEquipmentSet("name") - Equips an equipment set.
+
+
+
+
+https://wow.gamepedia.com/API_GetEquipmentSetItemIDs
+--
+API GetEquipmentSetItemIDs
+→ WoW API
+Populates a table with item IDs of items in the specified equipment set.
+
+itemArray = GetEquipmentSetItemIDs("name"[, returnTable]);
+Arguments
+"name" 
+String - equipment set name to retrieve information about.
+returnTable 
+Table, optional - if specified, the array portion of the table is populated with item IDs. If not provided, a new table is created
+Returns
+itemArray 
+Table - the array portion of this table contains item IDs of the items in the set.
+0: Ammo
+1: Head
+2: Neck
+3: Shoulder
+4: Shirt
+5: Chest
+6: Belt
+7: Legs
+8: Feet
+9: Wrist
+10: Gloves
+11: Finger 1
+12: Finger 2
+13: Trinket 1
+14: Trinket 2
+15: Back
+16: Main hand
+17: Off hand
+18: Ranged
+19: Tabard
+Example
+To print all items that are part of the first set:
+
+local set = GetEquipmentSetInfo(1);
+local itemArray = GetEquipmentSetItemIDs(set);
+for i=1, 19 do
+  if itemArray[i] then
+    print(i, (GetItemInfo(itemArray[i])));
+  end
+end
+NOTE: If the set is a partial set the method 'for i=1, #itemArray do' will not work, as 'i' can possibly be the wrong ids.
+
+where #itemArray returns 2, items 1, 2 may be nil and items 15, 17 may be the correct array indicies
+
+
+
+

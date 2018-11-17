@@ -1,0 +1,101 @@
+[07:23:20] AddonLoader.frame:OnEvent(PLAYER_ENTERING_WORLD): no more handlers, should not be registered.
+[07:23:20] AddonLoader.frame:OnEvent(VARIABLES_LOADED): no more handlers, should not be registered.
+[07:23:11] BagSync.InitSavedDB()
+[07:23:11] BagSync.InitSavedDB()
+UseEasyChatResizing
+BindingsController:UPDATE_BINDINGS( UPDATE_BINDINGS )
+BagSync:ScanTokens(nil)
+[07:23:20] AddonLoader.frame:OnEvent(VARIABLES_LOADED): no more handlers, should not be registered.
+[07:23:20] AddonLoader.frame:OnEvent(PLAYER_ENTERING_WORLD): no more handlers, should not be registered.
+[07:23:23] Guild Message of the Day: No message set.
+[07:23:23] AddonLoader: Loading addon SavedInstances
+[07:23:23] AddonLoader: Loading addon Broker_CPU
+[07:23:24] AddonLoader: Loading addon Spy
+[07:23:24] AddonLoader: Loading addon Explorer
+[07:23:24] AddonLoader: Loading addon MozzFullWorldMap
+[07:23:25] AddonLoader: Loading addon CoolLine
+[07:23:32] BagSync:ScanTokens(nil)
+[07:23:38] BagSync:ScanContainer(bag, 0)
+[07:23:38] BagSync:ScanContainer(bag, 1)
+[07:23:38] BagSync:ScanContainer(bag, 2)
+[07:23:38] BagSync:ScanContainer(bag, 3)
+[07:23:38] BagSync:ScanContainer(bag, 4)
+[07:23:42] CloseSpecialWindows()
+[07:23:42] CloseAllBags(nil)
+[07:30:28] BagSync:UNIT_INVENTORY_CHANGED(player): ScanEquipment()
+[07:30:31] BagSync:ScanContainer(bag, 0)
+
+
+
+
+
+
+
+
+
+13x attempt to call a string value
+
+
+Locals:
+
+
+
+
+
+6x AddonLoader\AddonLoader-r126.lua:158: attempt to call method 'StopCapture' (a nil value)
+AddonLoader\AddonLoader-r126.lua:158: in function `LoadAddOn'
+AddonLoader\Conditions.lua:323: in function <AddonLoader\Conditions.lua:311>
+AddonLoader\Conditions.lua:343: in function <AddonLoader\Conditions.lua:330>
+
+Locals:
+addon = "SavedInstances"
+select = <function> defined =[C]:-1
+loadOne = <function> defined @AddonLoader\Conditions.lua:311
+delayFrame = <unnamed> {
+ 0 = <userdata>
+ elapsed = -1
+ addons = <table> {
+ }
+}
+AddonLoader = <table> {
+ loadReason = <table> {
+ }
+ LoadAddOn = <function> defined @AddonLoader\AddonLoader.lua:127
+ PLAYER_LOGIN = <table> {
+ }
+ LoadOverrides = <function> defined @AddonLoader\AddonLoader.lua:101
+ Print = <function> defined @AddonLoader\AddonLoader.lua:26
+ AddCondition = <function> defined @AddonLoader\AddonLoader.lua:41
+ slashes = <table> {
+ }
+ conditiontexts = <table> {
+ }
+ Toast = <function> defined @AddonLoader\AddonLoader.lua:36
+ L = <table> {
+ }
+ securehooks = <table> {
+ }
+ RemoveInterfaceOptions = <function> defined @AddonLoader\Conditions.lua:157
+ loadFailed = <table> {
+ }
+ StartCapture = <function> defined @AddonLoader\AddonCapture.lua:44
+ scripts = <table> {
+ }
+ ScanAddons = <function> defined @AddonLoader\AddonLoader.lua:61
+ VARIABLES_LOADED = <table> {
+ }
+ OnEvent = <function> defined @AddonLoader\AddonLoader.lua:218
+ conditions = <table> {
+ }
+ GetConditionFunc = <function> defined @AddonLoader\Conditions.lua:143
+ events = <table> {
+ }
+ GetConditionText = <function> defined @AddonLoader\Conditions.lua:131
+ StartOnEvent = "PLAYER_ENTERING_WORLD"
+ frame = AddonLoaderFrame {
+ }
+ logFrame = <unnamed> {
+ }
+ originals = <table> {
+ }
+}

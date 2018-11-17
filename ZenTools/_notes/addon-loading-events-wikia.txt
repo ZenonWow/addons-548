@@ -1,0 +1,43 @@
+http://wowwiki.wikia.com/wiki/AddOn_loading_process
+--
+Saved variables loading Edit
+After the addon code has been loaded, the loading process can be followed by registering for various events, listed here in order of firing.
+
+ADDON_LOADED
+This event fires whenever an AddOn has finished loading and the SavedVariables for that AddOn have been loaded from their file.
+SPELLS_CHANGED
+This event fires shortly before the PLAYER_LOGIN event and signals that information on the user's spells has been loaded and is available to the UI.
+PLAYER_LOGIN
+This event fires immediately before PLAYER_ENTERING_WORLD.
+Most information about the game world should now be available to the UI.
+All Sizing and Positioning of frames is supposed to be completed before this event fires.
+AddOns that want to do one-time initialization procedures once the player has "entered the world" should use this event instead of PLAYER_ENTERING_WORLD.
+PLAYER_ENTERING_WORLD
+This event fires immediately after PLAYER_LOGIN
+Most information about the game world should now be available to the UI. If this is an interface reload rather than a fresh log in, talent information should also be available.
+All Sizing and Positioning of frames is supposed to be completed before this event fires.
+This event also fires whenever the player enters/leaves an instance and generally whenever the player sees a loading screen
+PLAYER_ALIVE
+This event fires after PLAYER_ENTERING_WORLD
+Quest and Talent information should now be available to the UI
+Until 3.0, VARIABLES_LOADED used to fire upon completion of the addon loading process; since 3.0, it is fired in response to CVars, Keybindings and other associated "Blizzard" variables being loaded, and may therefore be delayed until after PLAYER_ENTERING_WORLD. The event may still be useful to override positioning data stored in layout-cache.txt
+
+Load On Demand behavior Edit
+Load on Demand addons cannot rely on most of the event sequence being fired for them; only ADDON_LOADED is a reliable indication that the saved variables for your LoD addon have been loaded.
+
+
+
+
+General steps Edit
+--
+Initial Scan - When the WoW client first starts, a list of files and AddOn dependencies is built.
+AddOn Load - AddOn code is executed after the player selects a character and chooses to enter the world.
+After all AddOn code has been loaded, the saved variables are executed. ADDON_LOADED fires after each AddOn's SVs have been loaded.
+Initial Scan Edit
+First, the WoW client scans through all of the folders in the Interface\AddOns directory, looking for sub-folders containing a valid TOC file with a '.toc' extension, and in turn then loads each AddOn's TOC file into memory. TOC files that were not found during this step cannot be loaded by the game later and only happens on client start-up. This makes it impossible to install additional AddOns, or load updated TOC files, without restarting the client. For a AddOn to be considered valid, it must have a single word folder directly in the Interface\AddOns folder, and must have a matching named '.toc' file, such as a 'MyAddon' folder with a 'MyAddOn.toc' underneath it. That is all that is required.
+
+AddOn Load Edit
+AddOn loading occurs when the player logs in. The dependency information in the .toc files is used, in part, to compute the order in which the AddOns files will be loaded, as well as the natural order in which the AddOns were discovered during the scan process. For AddOns with dependencies, an individual AddOn may not assume that all of the other AddOns that it depends on will be loaded first, without taking specific steps to ensure its dependencies are already loaded and available. When WoW loads a particular AddOn it uses the information in its TOC file discovered during initial scan and loads each file in order that it is found inside the TOC.
+
+
+

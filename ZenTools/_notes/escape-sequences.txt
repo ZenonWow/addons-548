@@ -1,0 +1,115 @@
+http://wowwiki.wikia.com/wiki/UI_escape_sequences
+--
+UI escape sequences
+
+→ UI Tech. Details
+Many UI elements that display text on the screen support a special escape sequences starting with the pipe character (|).
+
+Supported Escape Sequences Edit
+Coloring Edit
+|cAARRGGBB
+Sets text color. Text following this escape sequence will be drawn in this color. Each pair of digits represents a color value (plus the alpha value, however the alpha value is currently ignored and should always be FF) as a hexadecimal number.
+|cFFFF0000 - Red text
+|cFF00FF00 - Green text
+|cFF0000FF - Blue text
+|cFFFFFF00 - Yellow text
+|r
+Ends the current color change. The color will return to the previously set color (e.g. |cFFFF0000Red |cFF00FF00green|r and back to red.|r).
+Links Edit
+|Hlinktype:linkstring|hLinktext|h
+for hyperlinks: when linktext is clicked, a widget handler is invoked.
+|Hitem:ItemString|hLinktext|h
+for Item Links (ItemString must be the full ItemString, ie. d:d:d:d:d:d:d:d style)
+|Henchant:EnchantID|hLinktext|h
+for Enchant links
+|Hplayer:Name:ChatID|hLinktext|h
+for Player links (Click to whisper, CTRL-click to select and shift-click to do a /who Name. ChatID here refers to spam reporting
+|HBNplayer:??|h
+Placeholder
+|Hunit:GUID|h:Name|h
+for Unit links (Left-click opens the ItemRefTooltip frame, similar as with the Blizzard CombatLog and API_SetItemRef)
+GUID = API_UnitGUID; It accepts both with or without the hex prefix "0x".
+Name = API_UnitName; You can change "Name" to anything you want without breaking the link.
+Right-clicking will return an error, "because it will try to call Blizzard_CombatLog_CreateUnitMenu() and unitName is not given to it, so displayName == nil".
+|Hquest:QuestID:QuestLevel|hLinktext|h
+for Quest links.
+|Hspell:SpellID|hLinktext|h
+for spell links.
+|Htalent:TooltipID:Points
+for talent links.
+TooltipID seems to be a global talent id, not quite sure how it's encoded or stored.
+Points is how many points you've spent in that talent, zero based (3 points in it means '2') and -1 for no points.
+|Htrade:TradeSpellID:CurrentLevel:MaxLevel:PlayerID:Recipes|hLinktext|h
+for Trade links. Note that the TradeSpellID corresponds to the spell id from the spell found in the spellbook (e.g. "Cooking" has id 33359). See also TradeSkillLink.
+CurrentLevel: the current level of the player in the given trade-skill
+MaxLevel: the highest currently achievable skill (an apprentice will have 75 as max level, a grand master 450)
+PlayerID: API_UnitGUID of the player, stripped of all the leading zeroes (unlike GUID for Achievement below where the leading zeroes are included).
+Recipes: Base64-encoded list of learned recipes.
+|Hachievement:AchievementID:GUID:Completed:Month:Day:Year:Unknown1:Unknown2:Unknown3:Unknown4|hLinktext|h
+for achievement links.
+GUID is the API_UnitGUID of the player, without the starting '0x'.
+Completed is 0 for uncompleted achievements and 1 for completed.
+Month/Day/Year is the date the achievement was completed or 0 if not completed. Year is -1 if not completed.
+Unknown1-4 are unknown fields. They're often 0 for non-completed achievements.
+|Hinstancelock:guid:mapID:difficulty:defeatedEncounters|hName|h
+Instance lock links
+GUID: Unit GUID of the player
+Map ID: self explainatory - 650 for ToCh, 649 for ToCr ETC.
+Difficulty: Difficulty id of the instance lock (heroic/nonheroic, 10/25)
+Defeated Encounters: Bitfield indicating the encounters that have been defeated. E.g. 7 means that the first 3 encounters have been done but the subsequent ones have not.
+Grammar Edit
+number |1singular;plural;
+Will choose a word depending on whether the digit preceding it is 0/1 or not (i.e. 1,11,21 return the first string, as will 0,10,40). Note that unlike |4 singular and plural forms are separated by semi-colon.
+|2text
+Before vowels outputs d' (with apostrophe) and removes any leading spaces from text, otherwise outputs de (with trailing space)
+|3-formid(text)
+Displays text declined to the specified form (index ranges from 1 to GetNumDeclensionSets()). Processed by C code, data used for parsing isn't available to UI, all events fire with the data already processed.
+number |4singular:plural; -or- number |4singular:plural1:plural2;
+Will choose a form based on the number preceding it. Client locale dependant. More than two forms (separated by colons) may be required by some locales (i.e. Russian requires 3 forms), if too many forms provided they are ignored, if needed form isn't provided empty string will be used instead. Note that unlike |1 singular and plural forms are separated by colon. (added with 2.4.2)
+Textures Edit
+|TTexturePath:size1:size2:xoffset:yoffset|t
+|TTexturePath:size1:size2:xoffset:yoffset:dimx:dimy:coordx1:coordx2:coordy1:coordy2|t
+Will insert a texture into a font string. Parameter size2 is optional (see below). The offsets are optional and will shift the texture from where it would normally be placed. TextHeight is based on size of the font used - this is used to automatically scale icons based on the size of the text.
+size1 == 0; size2 omitted: Width = Height = TextHeight (always square!)
+size1 > 0;  size2 omitted: Width = Height = size1 (always square!)
+size1 == 0; size2 == 0   : Width = Height = TextHeight (always square!)
+size1 > 0;  size2 == 0   : Width = TextHeight; Height = size1 (size1 is height!!!)
+size1 == 0; size2 > 0    : Width = size2 * TextHeight; Height = TextHeight (size2 is an aspect ratio and defines width!!!)
+size1 > 0;  size2 > 0    : Width = size1; Height = size2
+dimx dimy: Size of the source image, in pixels
+coordx1 coordx2 coordy1 coordy2: Number of pixels to crop the texture by from each edge
+Notes:
+When you need to display square icon in the string (spell/item icon), use only |TTexturePath:0|t
+When you need to display rectangular image in the string (Blizzard logo), use aspect ratio version: |TTexturePath:0:aspectRatio|t
+To prevent potential abuse, raw texture links cannot be sent to other players.[1]
+You can send target markers using texture tags:
+{star}, {rt1} - 
+{circle}, {rt2} - 
+{diamond}, {rt3} - 
+{triangle}, {rt4} - 
+{moon}, {rt5} - 
+{square}, {rt6} - 
+{cross}, {rt7} - 
+{skull}, {rt8} - 
+However, the named target marker tags are localized, so {star} for example will not be parsed on a german client, but {rt#} (i.e. {rt7}) works on all clients.
+Other Edit
+|K[gsf][0-9]+|k[0]+|k
+New in 4.0 - Represents a Battle.net friend's name. The 3rd character indicates given name, surname, or full name. The number which follows it represents the friend's Bnet Presence ID. The zeros between the |k form a string of the same length as the name which will replace it. E.g. if your first name is John and your presence id is 30, your given name (John) would be represented by the string |Kg30|k0000|k .
+|n
+Newline, if the widget supports it.
+||
+Output "|" regardless of if whatever follows it looks like a valid escape.
+|
+A "|" followed by something that is not a valid escape sequence will be displayed as-is.
+ExamplesEdit
+Sequence	Result
+|cFFFF0000This is red text |rthis is normal color	This is red text this is normal color
+|TInterface\\Icons\\INV_Misc_Coin_01:16|t Coins	 Coins
+|TInterface\\...:16:16:0:0:64:64:4:60:4:60|t Coins	 Coins (Cropped 56x56)
+GotchasEdit
+If you are using an in-game text editor, it is not wholly unlikely that the editor is trying to being "helpful" by replacing "|" with "||" for you without you seeing it. If you are trying to use escape sequences and just keep getting pipe chars, that's why. Try using "\124" instead of "|". 124 is the ascii code escape for the pipe character, and will work regardless of what your editor is trying to do.
+
+References Edit
+^ http://forums.worldofwarcraft.com/thread.html?topicId=2968233433&postId=44930053081&sid=1#293 Embedded Textures in FontStrings
+
+

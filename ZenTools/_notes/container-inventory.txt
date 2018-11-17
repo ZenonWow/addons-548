@@ -1,0 +1,384 @@
+GetContainerItemID - Returns the item ID of an item in the player's bags
+GetContainerItemLink - Returns a hyperlink for an item in the player's bags
+GetInventoryItemID - Returns the item ID of an equipped item
+GetInventoryItemLink - Returns an item link for an item in the unit's inventory
+
+GetContainerItemInfo - Returns information about an item in the player's bags
+GetContainerItemQuestInfo - Returns quest information about an item in the player's bags
+
+GetInventorySlotInfo - Returns information about an inventory slot
+BankButtonIDToInvSlotID - Returns the [[docs/api_types#inventoryID|`inventoryID`]] corresponding to a bank item or bag slot
+ContainerIDToInventoryID - Returns the [[docs/api_types#inventoryID|`inventoryID`]] corresponding to a given [[docs/api_types#containerID|`containerID`]]
+
+
+
+
+https://wow.gamepedia.com/BagId
+--
+BACKPACK_CONTAINER	0	The backpack - your intial 16 slots container that you can't change or delete.	ContainerFrame.lua
+BACKPACK_CONTAINER + 1
+to NUM_BAG_SLOTS	1 to 4	The bags on the character (numbered right to left).	ContainerFrame.lua
+BANK_CONTAINER	-1	Bank container. Your intial 28 slots container in the bank that you can't change or delete.	BankFrame.lua
+NUM_BAG_SLOTS + 1
+to NUM_BAG_SLOTS + NUM_BANKBAGSLOTS	5 to 11	Bank bags.	BankFrame.lua
+REAGENTBANK_CONTAINER	-3	Reagent Bank. A reagent-only bank introduced in WoD.	BankFrame.lua
+KEYRING_CONTAINER	-2	Keyring. Removed and obsolete since 4.2.0, but remains in code and constants.
+Trying to use it seems to return equipped items instead.	ContainerFrame.lua
+-4	A 7 slots "container" that holds your bank bags themselves.	BankFrame.lua
+
+
+
+http://wowprogramming.com/docs/api_types.html#containerID
+--
+Type: containerID
+Identifies one of the player's bags or other containers. Possible values:
+
+REAGENTBANK_CONTAINER: Reagent bank (-3)
+KEYRING_CONTAINER: Keyring and currency bag (-2)
+BANK_CONTAINER Main storage area in the bank (-1)
+BACKPACK_CONTAINER: Backpack (0)
+1 through NUM_BAG_SLOTS: Bag slots (as presented in the default UI, numbered right to left)
+NUM_BAG_SLOTS + 1 through NUM_BAG_SLOTS + NUM_BANKBAGSLOTS: Bank bag slots (as presented in the default UI, numbered left to right)
+
+
+
+http://wowprogramming.com/docs/api_types.html#inventoryID
+--
+Type: inventoryID
+This is a numeric identifier that is used by the the inventory system to identify a slot in the player's inventory. In World of Warcraft all items that the player 'owns' are part of the player's inventory, including the items they have equipped, the items in the player's bank, the bags that the player has equipped and equipped in the bank, and the keys stored in the player's key ring.
+
+There is a system of API functions that allow you to map from one of these types of locations into an 'inventorySlot' which uniquely identifies that location. For example:
+
+ GetInventorySlotInfo("MainHandSlot")   -- The player's mainhand weapon
+ BankButtonIDToInvSlotID(3, 1)      -- The third bag in the player's bank
+ BankButtonIDToInvSlotID(5, nil)    -- The fifth slot in the player's bank (not bags)
+ ContainerIDToInventoryID(1)        -- The player's first bag slot
+ KeyRingButtonIDToInvSlotId(4)      -- The fourth slot in the player's key-ring
+In addition and for convenience there are a set of constants defined by the user interface that can be used for the items in the player's 'paper doll' frame. These are defined in FrameXML/Constants.lua and are currently as follows:
+
+-- Inventory slots
+ 0-19 -> gear
+20-23 -> bags 1-4
+24-39 -> 16 backpack contents
+40-67 -> 28 base bank contents
+68-74 -> bankbags 5-11
+-> bags: 1-4 -> 20-23  bankbags: 5-11 -> 68-74
+
+ INVSLOT_AMMO       = 0;
+ INVSLOT_HEAD       = 1; INVSLOT_FIRST_EQUIPPED = INVSLOT_HEAD;
+ INVSLOT_NECK       = 2;
+ INVSLOT_SHOULDER   = 3;
+ INVSLOT_BODY       = 4;
+ INVSLOT_CHEST      = 5;
+ INVSLOT_WAIST      = 6;
+ INVSLOT_LEGS       = 7;
+ INVSLOT_FEET       = 8;
+ INVSLOT_WRIST      = 9;
+ INVSLOT_HAND       = 10;
+ INVSLOT_FINGER1        = 11;
+ INVSLOT_FINGER2        = 12;
+ INVSLOT_TRINKET1   = 13;
+ INVSLOT_TRINKET2   = 14;
+ INVSLOT_BACK       = 15;
+ INVSLOT_MAINHAND   = 16;
+ INVSLOT_OFFHAND        = 17;
+ INVSLOT_RANGED     = 18;
+ INVSLOT_TABARD     = 19;
+ INVSLOT_LAST_EQUIPPED = INVSLOT_TABARD;
+If you choose to use these instead of the appropriate API, you should use the constant name, not the number itself. This ensures that if Blizzard later updates their constants your code should continue to work.
+
+The following are the convenience functions that can be used to obtain inventoryIds:
+
+GetInventorySlotInfo
+BankButtonIDToInvSlotID
+ContainerIDToInventoryID
+KeyRingButtonIDToInvSlotID
+Type: itemID
+Uniquely identifies an item; usable with APIs such as GetItemInfo(). Also useful with database sites; e.g. item ID 19019.
+
+
+
+
+http://wowprogramming.com/docs/api/GetInventorySlotInfo.html
+--
+Returns information about an inventory slot
+id, texture, checkRelic = GetInventorySlotInfo("slotName")
+
+Arguments:
+slotName - Name of an inventory slot to query (string)
+AmmoSlot - Ranged ammunition slot
+BackSlot - Back (cloak) slot
+Bag0Slot - Backpack slot
+Bag1Slot - First bag slot
+Bag2Slot - Second bag slot
+Bag3Slot - Third bag slot
+ChestSlot - Chest slot
+FeetSlot - Feet (boots) slot
+Finger0Slot - First finger (ring) slot
+Finger1Slot - Second finger (ring) slot
+HandsSlot - Hand (gloves) slot
+HeadSlot - Head (helmet) slot
+LegsSlot - Legs (pants) slot
+MainHandSlot - Main hand weapon slot
+NeckSlot - Necklace slot
+RangedSlot - Ranged weapon or relic slot
+SecondaryHandSlot - Off-hand (weapon, shield, or held item) slot
+ShirtSlot - Shirt slot
+ShoulderSlot - Shoulder slot
+TabardSlot - Tabard slot
+Trinket0Slot - First trinket slot
+Trinket1Slot - Second trinket slot
+WaistSlot - Waist (belt) slot
+WristSlot - Wrist (bracers) slot
+
+Returns:
+id - The numeric slotId usable in other Inventory functions (number, inventoryID)
+texture - The path to the texture to be displayed when this slot is empty (string)
+checkRelic - 1 if the slot might be the relic slot; otherwise nil. The ranged slot token is re-used for the relic slot; if this return is 1, UnitHasRelicSlot should be used to determine how the slot should be displayed. (1nil)
+
+Examples:
+-- Get the inventory slot information for the Main Hand weapon slot
+local slotId, texture, checkRelic = GetInventorySlotInfo("MainHandSlot")
+
+-- These returns are used to draw and initialize the 'paper doll' system
+-- but can also be used in the other inventory functions, as shown below
+-- id = 16
+-- texture = "interface\\paperdoll\\UI-PaperDoll-Slot-MainHand.blp"
+-- checkRelic = nil
+
+-- Get the numeric item id of the item in the MainHand slot. This id 
+-- will match the numeric id in the item's hyperlink, and should match
+-- the ids used on wowhead and wowarmoury.
+local itemId = GetInventoryItemID("player", slotId)
+print("My head slot's item id is: ", itemId)
+
+-- The item I had equipped was [Sun Strike], so the value of itemId is the
+-- number 56101. You can see this on http://www.wowhead.com/item=56101/sun-strike
+
+-- Now fetch the hyperlink for the item, so we can print it to our chat frame
+local itemLink = GetInventoryItemLink("player", slotId)
+print("The item link is: ", itemLink)
+
+-- Your results will be slightly different, but the hyperlink for [Sun Strike] 
+-- was printed to my chat frame. If you'd like to see the actual string instead
+-- of the hyperlink, you can 'escape' the `|` characters, using the following code.
+-- This prevents WoW from seeing that the string is a 'hyperlink'.
+
+print("The escaped link is: ", itemLink:gsub("|", "||"))
+-- My result: |cff0070dd|Hitem:56101:0:0:0:0:0:0:0:0|h[Sun Strike]|h|r
+
+
+
+
+http://wowprogramming.com/docs/api/ContainerIDToInventoryID.html
+--
+Returns the inventoryID corresponding to a given containerID. The results of this function can be used with GetInventorySlotInfo() and other related inventory functions.
+It seemingly does not work with containers that are considered special, like backpack, bank or reagent bank (anymore?)! Calling this method for those containerIDs will result in an "invalid container ID" error.
+Signature:
+inventoryID = ContainerIDToInventoryID(container)
+Arguments:
+container - Index of one of the player's bags or other containers (number, containerID)
+Returns:
+inventoryID - Identifier for the container usable with Inventory APIs (number, inventoryID)
+Examples:
+-- Switches the player's first bag (the one immediately left of the backpack)
+-- with the first bank bag (or puts the bag into the bank if the bank bag slot is empty)
+local firstBagSlot = ContainerIDToInventoryID(1)
+local firstBankBagSlot = ContainerIDToInventoryID(5)
+PickupInventoryItem(firstBagSlot)
+PickupInventoryItem(firstBankBagSlot)
+
+
+
+http://wowprogramming.com/docs/api/BankButtonIDToInvSlotID.html
+--
+Returns the inventoryID corresponding to a bank item or bag slot. The results of this function can be used with GetInventorySlotInfo() and other related inventory functions.
+
+
+See also Bank functions, Inventory functions.
+Signature:
+
+inventoryID = BankButtonIDToInvSlotID(buttonID [, isBag])
+
+Arguments:
+
+buttonID - Numeric ID of an item or bag slot in the bank UI. The first item slot is numbered 1, while the first bag slot is numbered 5. (number)
+isBag - 1 if the given ID corresponds to a bank bag slot; nil if the ID corresponds to an item slot (1nil)
+Returns:
+
+inventoryID - An inventory slot ID usable with various Inventory API functions (number, inventoryID)
+Examples:
+
+-- While mousing over a button in the bank
+local button = GetMouseFocus()
+print("Inventory Slot:", BankButtonIDToInvSlotID(button:GetID(), button.isBag))
+
+
+
+
+
+http://wowprogramming.com/docs/api/GetTransmogrifySlotInfo.html
+--
+Return informations about transmogrified items worn by player.
+isTransmogrified, canTransmogrify, cannotTransmogrifyReason, hasPending, hasUndo, visibleItemID, textureName = GetTransmogrifySlotInfo(slot)
+Arguments:
+slot - An inventory slot number, as can be obtained from GetInventorySlotInfo (number, slotID)
+Returns:
+isTransmogrified - Return true when item is transmogrified. (boolean)
+canTransmogrify - Return true if item can be transmogrified. (boolean)
+cannotTransmogrifyReason - If canTransmogrify return false this variable will contain error code. Look for TRANSMOGRIFYINVALIDREASON global inside GlobalStrings.lua for more details. (number)
+hasPending - (boolean)
+hasUndo - (boolean)
+visibleItemID - ItemID of the item used for transmogrification. (itemID)
+textureName - Texture of item used for transmogrification. (textureName)
+
+
+
+
+http://wowprogramming.com/docs/api/GetInventoryItemID.html
+--
+Returns the item ID of an equipped item. The results of this function can be used with GetInventorySlotInfo() and other related inventory functions.
+If the player beign /inspected has used transmorgification on the slot, then the itemID of the transmorgified item is what is returned, not the actual item equipped.
+Signature:
+id = GetInventoryItemID("unit", slot)
+Arguments:
+unit - A unit to query; only valid for 'player' or the unit currently being inspected (string, unitID)
+slot - An inventory slot number, as can be obtained from GetInventorySlotInfo (number, inventoryID)
+Returns:
+id - Numeric ID of the item in the given slot (itemID)
+Examples:
+-- Prints the item id of the item in the Main Hand slot
+print(GetInventoryItemID("player", GetInventorySlotInfo("MainHandSlot")))
+-- Prints the item id of the item in the Ranged/Relic slot
+print(GetInventoryItemID("player", GetInventorySlotInfo("RangedSlot")))
+
+
+
+
+http://wowprogramming.com/docs/api/GetInventoryItemLink.html
+--
+Returns an item link for an item in the unit's inventory. The player's inventory is actually extended to include items in the bank, items in the player's containers and the player's key ring in addition to the items the player has equipped. The appropriate inventoryID can be found by calling the appropriate function.
+
+
+See also Inventory functions, Hyperlink functions.
+Signature:
+
+link = GetInventoryItemLink("unit", slot)
+
+Arguments:
+
+unit - A unit to query; only valid for 'player' or the unit currently being inspected (string, unitID)
+slot - An inventory slot number, as can be obtained from GetInventorySlotInfo. (number, inventoryID)
+Returns:
+
+link - An item link for the given item (string, hyperlink)
+Examples:
+
+-- Prints the item link for the item in the player's first bank slot
+-- This only works when the bank info is cached, or when bank is open
+local inventoryID = BankButtonIDToInvSlotID(1, false)
+local link = GetInventoryItemLink("player", inventoryID)
+print(link:gsub("|", "||"))
+
+-- Prints the item link for the item in the THIRD BAG SLOT in the player's bank
+-- This only works when the bank info is cached, or when the bank is open
+local inventoryID = BankButtonIDToInvSlotID(7, 1)
+local link = GetInventoryItemLink("player", inventoryID)
+print(link:gsub("|", "||"))
+
+-- Prints the item link for the item in the player's left-most bag slot, i.e.
+-- the actual container that is in that slot. This will error if there is no
+-- container in that slot.
+local inventoryID = ContainerIDToInventoryID(4)
+local link = GetInventoryItemLink("player", inventoryID)
+print(link:gsub("|", "||")) 
+
+-- Prints the item link for the item the player is wearing on their legs
+local inventoryID = GetInventorySlotInfo("LegsSlot")
+local link = GetInventoryItemLink("player", inventoryID)
+print(link:gsub("|", "||")) 
+
+-- Prints the item link for the item the player has in the first key-ring slot
+local inventoryID = KeyRingButtonIDToInvSlotID(1)
+local link = GetInventoryItemLink("player", inventoryID)
+print(link:gsub("|", "||")) 
+
+
+
+
+http://wowprogramming.com/docs/api/GetContainerItemID.html
+--
+Returns the item ID of an item in the player's bags
+Signature:
+id = GetContainerItemID(container, slot)
+Arguments:
+container - Index of one of the player's bags or other containers (number, containerID)
+slot - Index of an item slot within the container (number, containerSlotID)
+Returns:
+id - Numeric ID of the item in the given slot (itemID)
+
+
+
+http://wowprogramming.com/docs/api/GetContainerItemLink.html
+--
+Returns a hyperlink for an item in the player's bags
+Signature:
+link = GetContainerItemLink(container, slot)
+Arguments:
+container - Index of one of the player's bags or other containers (number, containerID)
+slot - Index of an item slot within the container (number, containerSlotID)
+Returns:
+link - A hyperlink for the item (string, hyperlink)
+
+
+
+http://wowprogramming.com/docs/api/GetContainerItemInfo.html
+--
+Returns information about an item in the player's bags
+Signature:
+texture, count, locked, quality, readable, lootable, link, isFiltered, hasNoValue, itemID = GetContainerItemInfo(container, slot)
+Arguments:
+container - Index of one of the player's bags or other containers (number, containerID)
+slot - Index of an item slot within the container (number, containerSlotID)
+Returns:
+texture - Path to the icon texture for the item (string)
+count - Number of items in the slot (number)
+locked - 1 if the item is locked; otherwise nil. Items become locked while being moved, split, or placed into other UI elements (such as the mail, trade, and auction windows). (1nil)
+quality - Quality (or rarity) of the item (number, itemQuality)
+readable - 1 if the item is readable; otherwise nil. This value is used by the default UI to show a special cursor over items such as books and scrolls which can be read by right-clicking. (1nil)
+lootable - 1 if the item is a temporary container containing items that can be looted; otherwise nil. Examples include the Bag of Fishing Treasures and Small Spice Bag rewarded by daily quests, lockboxes (once unlocked), and the trunks occasionally found while fishing. (1nil)
+link - A hyperlink for the item (itemLink)
+isFiltered - true if the slot does not match the contents of the item search box, false otherwise. In the default UI, true means the slot is greyed out. (boolean)
+hasNoValue - true if the item has no sale price / merchant won't accept it (boolean)
+itemID - the item's itemID (number, itemID)
+
+
+
+
+
+
+http://wowprogramming.com/docs/api/EquipCursorItem.html
+--
+Puts the item on the cursor into a specific equipment slot. If the item on the cursor can be equipped but does not fit in the given slot, the item is automatically equipped in the first available slot in which it fits (as with AutoEquipCursorItem()). Thus, this function is most useful when dealing with items which can be equipped in more than one slot: containers, rings, trinkets, and (for dual-wielding characters) one-handed weapons.
+Causes an error message (UI_ERROR_MESSAGE) if the item on the cursor cannot be equipped. Does nothing if the cursor does not contain an item.
+Signature:
+EquipCursorItem(slot)
+Arguments:
+slot - An inventory slot number, as can be obtained from GetInventorySlotInfo (number, inventoryID)
+
+
+
+http://wowprogramming.com/docs/api/EquipItemByName.html
+--
+Attempts to equip an arbitrary item. The item is automatically equipped in the first available slot in which it fits. To equip an item in a specific slot, see EquipCursorItem().
+Causes an error message (UI_ERROR_MESSAGE) if the specified item cannot be equipped. Does nothing if the specified item does not exist or is not in the player's possession.
+Signature:
+EquipItemByName(itemID) or EquipItemByName("itemName") or EquipItemByName("itemLink")
+Arguments:
+itemID - An item's ID (number)
+itemName - An item's name (string)
+itemLink - An item's hyperlink, or any string containing the itemString portion of an item link (string)
+
+
+
+

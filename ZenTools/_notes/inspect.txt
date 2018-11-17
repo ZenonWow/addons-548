@@ -1,3 +1,6 @@
+function LGE:ScanUnitItems(unit,statTable,setTable->infoTable)
+
+
 Inspect functions
 CanInspect - Returns whether a unit can be inspected
 ClearInspectPlayer - Ends inspection of another character

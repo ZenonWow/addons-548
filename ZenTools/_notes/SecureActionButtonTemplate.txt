@@ -1,0 +1,131 @@
+https://wow.gamepedia.com/SecureActionButtonTemplate
+--
+SecureActionButtonTemplate
+→ UI Tech. Details
+The SecureActionButtonTemplate was introduced in Patch 2.0 to allow addons to perform protected actions — casting spells, executing macros, etc — by specifying button behavior via its attributes. A non-protected variant, InsecureActionButtonTemplate, was added in Patch 7.2.0, and allows protected actions to be performed only while combat lockdown is not in effect.
+
+Contents
+Creating a SecureActionButton
+To create a SecureActionButton, simply create a button that inherits from the SecureActionButtonTemplate; to make the button instance useful, specify interesting attributes. This can be done in both XML, Lua and a mix of the two:
+
+Using XML:
+
+<Button name="myButton" inherits="SecureActionButtonTemplate" parent="UIParent">
+  <Attributes>
+   <Attribute name="type" value="action" />
+   <Attribute name="action" value="1" type="number" />
+  </Attributes>
+</Button>
+Using Lua:
+
+local btn = CreateFrame("Button", "myButton", UIParent, "SecureActionButtonTemplate")
+btn:SetAttribute("type", "action")
+btn:SetAttribute("action", 1)
+Macro Example in Lua:
+
+local macroBtn = CreateFrame("Button", "myMacroButton", UIParent, "SecureActionButtonTemplate")
+macroBtn:SetAttribute("type1", "macro") -- left click causes macro
+macroBtn:SetAttribute("macrotext1", "/raid zomg a left click!") -- text for macro on left click
+Modified attributes
+Attribute	Used on...
+"type"	Any clicks.
+"*type1"	Any left click.
+"type1"	Unmodified left click.
+"shift-type2"	Shift+right click. (But not Alt+Shift+right click)
+"shift-type*"	Shift+any button click.
+"alt-ctrl-shift-type*"	Alt+Control+Shift+any button click.
+"ctrl-alt-shift-type*"	Invalid, as modifiers are in the wrong order.
+Some attribute may change value based on whether a particular combination of modifier keys is held down and/or a particular button is being clicked. Those attributes are typically called modified attributes, and are resolved by the SecureButton_GetModifiedAttribute function.
+
+The "modified attribute" name takes the form of: modifier-name-button. The modifier is one of "alt-", "ctrl-", "shift-", or a combination of them in that order, and the button is a normally number from 1 through 5 or hyphen followed by an arbitrary string. Both the prefix and the suffix can be "*" to signify no regard to the modifier/button; "*attribute*" is thus equivalent to "attribute". Some examples are shown in the table to the right; both the modifier and the button must match the click details in order for the attribute value to be used.
+
+A limited precedence order is defined by the Frame:GetAttribute method.
+
+Button remapping
+SecureActionButtons are also able to change the button being clicked in response to whether your target can be assisted ([help]) or attacked ([harm]) by you; the two relevant attributes are "helpbutton" and "harmbutton". The value of those attributes, should they match, will be used as the button to resolve the "type" and other required arguments.
+
+For example, suppose we wanted to create a button that would alter behavior based on whether you can attack your target. Setting the following attributes has the desired effect:
+
+Attribute	Value	Purpose
+"unit"	"target"	Make all actions target the player's target.
+"*harmbutton1"	"nuke1"	Remap any left clicks to "nuke1" clicks when target is hostile.
+"*harmbutton2"	"nuke2"	Remap any right clicks to "nuke2" clicks when target is hostile.
+"helpbutton1"	"heal1"	Remap unmodified left clicks to "heal1" clicks when target is friendly.
+"type"	"spell"	Make all clicks cast a spell.
+"spell-nuke1"	"Mind Flay"	Cast Mind Flay on "hostile" left click.
+"spell-nuke2"	"Shadow Word: Death"	Cast Shadow Word: Death on "hostile" right click.
+"alt-spell-nuke2"	"Mind Blast"	Cast Mind Blast on "hostile" alt-right click.
+"spell-heal1"	"Flash Heal"	Cast Flash Heal on "friendly" left click.
+If the button is remapped by the "harmbutton" or "helpbutton" attributes, the value of the "unit" attribute is reevaluated with the new button suffix: it is therefore to make a button that would check the hostility of one unit, and perform a reactive action on an entirely different unit.
+
+Action types
+The action the SecureActionButtonTemplate-inheriting frame actually performs is dependent on the value of its modified type attribute, and possibly additional attributes specific to a type.
+
+The table below lists all valid type values and the attributes they use to perform their actions. All relevant attributes can be modified as previously described; and, to the extent possible, all types respect the "unit" attribute for targeting. Generally, variable names are used to refer to the value of the modified attribute sharing their name.
+
+SecureActionButtonTemplate "type" attributes
+Type	Used attributes	Behavior
+"actionbar"	"action"	Switches the current action bar depending on the value of the "action" attribute:
+A number: switches to a the bar specified by the number.
+"increment" or "decrement": move one bar up/down.
+"a, b", where a, and b are numeric, switches between bars a and b.
+"action"	"unit", "action"
+["actionpage"]	Performs an action specified by the "action" attribute (a number).
+If the button:GetID() > 0, paging behavior is supported; see the ActionButton_CalculateAction FrameXML function.
+
+"pet"	"unit", "action"	Calls CastPetAction(action, unit);
+"spell"	"unit", "spell"	Calls CastSpellByName(spell, unit);
+"item"	"unit"
+"item" OR
+["bag", "slot"]	Equips or uses the specified item, as resolved by SecureCmdItemParse.
+"item" attribute value may be a macro conditioned string, item name, or "bag slot" string (e.g. "1 3").
+If "item" is nil, the "bag" and "slot" attributes are used; those are deprecated -- use a "bag slot" item string.
+"macro"	"macro" OR
+"macrotext"	If "macro" attribute is specified, calls RunMacro(macro, button); otherwise, RunMacroText(macrotext, button);
+"flyout"	"spell"[, "flyoutDirection"]	Toggles the specified spell flyout (flyout ID in the spell attribute), with the specified direction ("UP", "DOWN", "LEFT", RIGHT"; defaults to "UP").
+"glyph"	"glyph", "slot"	Applies a glyph specified by the glyph attribute (either by name or ID) to the specified slot ("minor1", "major1", ...)
+"worldmarker"	"marker", "action"	Sets, clears, or toggles the world marker specified by the marker attribute if the action is "set", "clear", or "toggle" respectively.
+"cancelaura"	"unit", "spell"[, "rank"]
+"target-slot"
+"index"[, "filter"]	Performs the first of the following actions that applies:
+If the "spell" attribute is set, calls CancelUnitBuff(unit, spell, rank).
+If the "target-slot" attribute is set to a weapon (main or secondary) slot ID, calls CancelItemTempEnchantment for the appropriate slot.
+If the "index" attribute is set, calls CancelUnitBuff("player", index, filter)
+"stop"	 	Calls SpellStopTargeting().
+"target"	"unit"	Changes target, targets a unit for a spell, or trades unit an item on the cursor.
+If "unit" attribute value is "none", your target is cleared.
+
+"focus"	"unit"	Calls FocusUnit(unit).
+"assist"	"unit"	Calls AssistUnit(unit).
+"mainassist"	"action", "unit"	Performs a main assist status on the unit based on the value of the "action" attribute:
+nil or "set": the unit is assigned main assist status. (SetPartyAssignment)
+"clear": the unit is stripped main assist status. (ClearPartyAssignment)
+"toggle": the main assist status of the unit is inverted.
+"maintank"	"action", "unit"	As "mainassist", but for main tank status.
+"click"	"clickbutton"	Calls clickbutton:Click(button)
+"attribute"	["attribute-frame",]
+"attribute-name"
+"attribute-value"	Calls frame:SetAttribute(attributeName, attributeValue). If "attribute-frame" is not specified, the button itself is assumed.
+"togglemenu"	"unit"	Opens a unit popup menu at the cursor for this button's unit. [New in 5.2]
+"multispell"	"spell"[, "action"],
+["actionpage", ID]	(Deprecated shaman multi-totem summoning spells?)
+Any other value	"_type"	Action depends on the value of the modified ("_" .. type) attribute, or rawget(button, type), in that order.
+If the value is a function, it is called with (self, unit, button, actionType) arguments
+If the value is a string, a restricted snippet stored in the attribute specified by the value on the button is executed as if it was OnClick.
+Additionally, the "target-item" or "target-bag", "target-slot" attributes allow you to create a button that would target a specific item in your inventory for a spell being cast. This targeting is performed after the main type processing, and only if a spell is currently being targetted. It is therefore possible to create a button that would cast a specific spell on a specific item by setting the relevant attributes. For instance, to disenchant an item in bag 1, slot 1:
+
+btn:SetAttribute("type", "spell");
+btn:SetAttribute("spell", "Disenchant");
+btn:SetAttribute("target-item", "1 1"); -- ("bag slot")
+Other attributes
+A few more attributes can affect how the button functions:
+
+Attribute	Values	Function
+"downbutton"	Any string	Remaps the mouse button if this is a "down" click. This transformation is applied before all others.
+"unitsuffix"	"pet", "target", etc.	Appends the attribute's value to the "unit" attribute value when resolving units.
+"toggleForVehicle"	true, false	When the unit's owner is in a vehicle, remap the pet to its owner, and its owner to its pet (the vehicle). Based on the original unit:
+If it was a pet unit ("raidpetX", "pet", etc), and owner is in a vehicle, remap to owner.
+If it did not contain "target", or "allowVehicleTarget" attribute is set to true, remap the original unit to its pet.
+"allowVehicleTarget"	true, false	If true, allows "toggleForVehicle" to remap units like "party1target" to "partypet1target".
+"checkselfcast"	true, false	If true, and the SELFCAST modifier is held down, resolves the unit to "player".
+"checkfocuscast"	true, false	If true, and the FOCUSCAST modifier is held down, resolves the unit to "focus".

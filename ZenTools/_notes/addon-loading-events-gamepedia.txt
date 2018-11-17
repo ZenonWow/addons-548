@@ -1,0 +1,56 @@
+https://wow.gamepedia.com/AddOn_loading_process
+--
+Order of events fired during loading
+After the addon code has been loaded, the loading process can be followed by registering for various events, listed here in order of firing. This information is very important because many addons rely on information that is not available when addons first load, such as buffs, spells, talents, quests, pets, pvp information, etc. By monitoring one of the following events with a blank frame, you can trigger the appropriate "OnEvent" handler and execute code that is dependent on that information as soon as it is available.
+
+ADDON_LOADED
+This event fires whenever an addon has finished loading and the SavedVariables for that addon have been loaded from their file.
+SAVED_VARIABLES_TOO_LARGE (Error Condition)
+Generally will not fire. This event indicates an error state where the SavedVariables of an addon failed to load due to an out-of-memory error. (The old error state was a client crash!)
+The upshot here is that your addon could be in a state where the saved variables did not load. This event's purpose is to indicate that you are in this error state.
+If you are in this state your addon's SavedVariables will NOT be saved back to disk at the next logout. This was done with the reasoning that it will prevent valid data from accidentally being wiped by defaults.
+It is possible for an addon's account wide SavedVariables to load, but for the character specific SavedVariables to fail, or vice versa. There is no way to detect the difference between no variables loaded and some.
+SPELLS_CHANGED
+This event fires shortly before the PLAYER_LOGIN event and signals that information on the user's spells has been loaded and is available to the UI.
+PLAYER_LOGIN
+This event fires immediately before PLAYER_ENTERING_WORLD.
+Most information about the game world should now be available to the UI.
+All sizing and positioning of frames is supposed to be completed before this event fires.
+Addons that want to do one-time initialization procedures once the player has "entered the world" should use this event instead of PLAYER_ENTERING_WORLD.
+PLAYER_ENTERING_WORLD
+This event fires immediately after PLAYER_LOGIN
+Most information about the game world should now be available to the UI. If this is an interface reload rather than a fresh log in, talent information should also be available.
+All sizing and positioning of frames is supposed to be completed before this event fires.
+This event also fires whenever the player enters/leaves an instance and generally whenever the player sees a loading screen
+Since Patch 3.0.2, VARIABLES_LOADED has not been a reliable part of the addon loading process. It is now fired only in response to CVars, Keybindings and other associated "Blizzard" variables being loaded, and may therefore be delayed until after PLAYER_ENTERING_WORLD. The event may still be useful to override positioning data stored in layout-cache.txt.
+
+Somewhere around Patch 5.4.0, PLAYER_ALIVE stopped being fired on login. It now only fires when a player is resurrected (before releasing spirit) or when a player releases spirit. Previously, PLAYER_ALIVE was used to by addons to signal that quest and talent information were available because it was the last event to fire (fired after PLAYER_ENTERING_WORLD), but this is no longer accurate.
+
+Load On Demand behavior
+Load on Demand addons cannot rely on most of the event sequence being fired for them; only ADDON_LOADED is a reliable indication that the saved variables for your LoD addon have been loaded.
+
+
+
+
+Order of addon loading
+--
+The client scans through the Interface\addons directory, storing a list of present files, and loading all .toc files into memory; files that were not found during this step cannot be loaded by the game later. This step only happens on client start-up, which makes it impossible to install additional addons / add additional graphics and/or data files to addons without restarting the client.
+
+The alphabetical name of the addon and dependency information in the addon's .toc files are used to compute the order in which addons will be loaded when the player logs in. In most cases, an individual addon may assume that all of the addons that it depends on will be loaded first. The order begins alphabetically, but it will branch off to follow the dependencies of loading addons as needed. The load order can therefore branch many times if addons depend on addons which in turn have their own dependencies. This makes alphabetical order a rather unreliable method of knowing when your addon will be loaded relative to other addons (which can be important for hooking functionality). A few addons prefix the true name of the addon with a symbol that Blizzard ranks 'higher' than the letter 'A' (such as "!MyAddon"). This almost completely ensures that that addon will be one of the first addons loaded.
+
+
+
+http://wowwiki.wikia.com/wiki/AddOn_loading_process
+General steps Edit
+--
+Initial Scan - When the WoW client first starts, a list of files and AddOn dependencies is built.
+AddOn Load - AddOn code is executed after the player selects a character and chooses to enter the world.
+After all AddOn code has been loaded, the saved variables are executed. ADDON_LOADED fires after each AddOn's SVs have been loaded.
+Initial Scan Edit
+First, the WoW client scans through all of the folders in the Interface\AddOns directory, looking for sub-folders containing a valid TOC file with a '.toc' extension, and in turn then loads each AddOn's TOC file into memory. TOC files that were not found during this step cannot be loaded by the game later and only happens on client start-up. This makes it impossible to install additional AddOns, or load updated TOC files, without restarting the client. For a AddOn to be considered valid, it must have a single word folder directly in the Interface\AddOns folder, and must have a matching named '.toc' file, such as a 'MyAddon' folder with a 'MyAddOn.toc' underneath it. That is all that is required.
+
+AddOn Load Edit
+AddOn loading occurs when the player logs in. The dependency information in the .toc files is used, in part, to compute the order in which the AddOns files will be loaded, as well as the natural order in which the AddOns were discovered during the scan process. For AddOns with dependencies, an individual AddOn may not assume that all of the other AddOns that it depends on will be loaded first, without taking specific steps to ensure its dependencies are already loaded and available. When WoW loads a particular AddOn it uses the information in its TOC file discovered during initial scan and loads each file in order that it is found inside the TOC.
+
+
+

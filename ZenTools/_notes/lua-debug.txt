@@ -1,0 +1,92 @@
+https://stackoverflow.com/a/10839291/1675066
+--
+You could use debug.traceback():
+
+function a()
+    print(debug.traceback())
+end 
+
+
+function b()
+    a() 
+end 
+
+b()
+which would print:
+
+stack traceback:
+    ./test.lua:45: in function 'a'
+    ./test.lua:50: in function 'b'
+    ./test.lua:53: in main chunk
+    [C]: in ?
+
+
+
+
+https://stackoverflow.com/a/10839573/1675066
+--
+you can use debug.sethook() to set up a hook that gets called each time certain special events happen in lua. it can be useful for things like this.
+
+local debugInfo = { caller = nil, callee = nil }
+function hook()
+    local info = debug.getinfo(2)
+    if info == nil then
+        debugInfo.callee = nil
+        return
+    end
+
+    -- we only want to watch lua function calls (not C functions)
+    if info.what ~= "Lua" then
+        debugInfo.callee = "C function"
+        return
+    end
+
+    debugInfo.caller = debugInfo.callee
+    debugInfo.callee = info.name
+end
+
+
+debug.sethook(hook, "c")
+
+function caller1()
+    if debugInfo.caller ~= nil and debugInfo.callee ~= nil then
+        msg = debugInfo.callee.. " was called by ".. debugInfo.caller.. "!"
+        print(msg)
+    end
+end
+
+function caller2()
+    caller1()
+end
+
+
+caller2()
+this prints 'caller1 was called from caller2!'
+
+debug.sethook can handle 3 different characters in the second parameter so you can let it know when to notify you. 'c' means call your hook function any time a function is called in lua, 'r' means call your hook function every time a function returns in lua, and 'l' means call your hook function whenever lua processes a new line of code.
+
+you could set this up to build your own custom stack trace if you really wanted to, and you could also use debug.getlocal() within your hook to even try to work out what arguments were passed to your called function.
+
+edit for lhf. this is actually a much simpler way of doing what you're asking, if you don't need to track this and just need to know the context of how the function was called.
+
+function caller1()
+    local current_func = debug.getinfo(1)
+    local calling_func = debug.getinfo(2)
+    print(current_func.name.. " was called by ".. calling_func.name.. "!")
+end
+
+function caller2()
+    caller1()
+end
+
+
+
+--
+You don't need to call debug.getinfo inside a hook. You can call debug.getinfo inside your function directly. – lhf Jun 1 '12 at 0:17 
+
+With tail-call optimization, the simpler version might give incorrect results if caller2's call to caller1 ends up tail-call optimized, since it prevents an addition to the call stack. – Lucien Greathouse Feb 27 '15 at 7:57
+
+
+
+
+

@@ -1,0 +1,133 @@
+http://wowprogramming.com/docs/api/GetCurrentKeyBoardFocus.html
+--
+Returns the frame currently handling keyboard input. Typically an EditBox
+frame = GetCurrentKeyBoardFocus()
+Returns:
+frame - Frame currently handling keyboard input, or nil if no frame is currently focused (table)
+Examples:
+# put this in a macro and try running it (from an action bar or somesuch)
+# while typing in different text boxes
+/run frame = GetCurrentKeyBoardFocus () print(frame and frame:GetName() or "no focus")
+
+
+
+
+http://wowprogramming.com/docs/api/GetMouseFocus.html
+--
+Returns the frame that is currently under the mouse, and has mouse input enabled.
+frame = GetMouseFocus()
+Returns:
+frame - The frame that currently has the mouse focus (table)
+Examples:
+-- Returns the name of the frame under the mouse, if it's named
+local frame = GetMouseFocus()
+if not frame then
+  ChatFrame1:AddMessage("There is no mouse enabled frame under the cursor")
+else
+  local name = frame:GetName() or tostring(frame)
+  ChatFrame1:AddMessage(name .. " has the mouse focus")
+end
+
+
+
+
+http://wowprogramming.com/docs/api/GetNumFrames.html
+--
+Returns the number of existing Frame objects (and derivatives). Only counts Frame objects and derivatives thereof (e.g. Button, Minimap, and StatusBar; but not FontString, AnimationGroup, and Texture).
+numFrames = GetNumFrames()
+Returns:
+numFrames - Number of existing Frame objects (and derivatives) (number)
+
+
+
+
+http://wowprogramming.com/docs/api/EnumerateFrames.html
+--
+Returns the next frame following the frame passed, or nil if no more frames exist
+nextFrame = EnumerateFrames([currentFrame])
+Arguments:
+currentFrame - The current frame to get the next frame, or nil to get the first frame (table)
+Returns:
+nextFrame - The frame following currentFrame or nil if no more frames exist, or the first frame if nil was passed (table)
+Examples:
+-- Print all visible frames under the mouse cursor
+local frame = EnumerateFrames(); -- Get the first frame
+while frame do
+  if ( frame:IsVisible() and MouseIsOver(frame) ) then
+    print(frame:GetName() or string.format("[Unnamed Frame: %s]", tostring(frame)));
+  end
+  frame = EnumerateFrames(frame); -- Get the next frame
+end
+
+
+
+
+http://wowprogramming.com/docs/api/GetFramesRegisteredForEvent.html
+--
+Returns all frames registered for a given event
+... = GetFramesRegisteredForEvent("event")
+Arguments:
+event - An event name (string)
+Returns:
+... - A list of tables, each a reference to a frame registered for the event (list)
+Examples:
+-- Print the names of any named frames registered for an event
+local function printFrameNames(...)
+  for i=1,select("#", ...) do
+    local frame = select(i, ...)
+    local name = frame:GetName()
+    if name then
+      ChatFrame1:AddMessage(name)
+    end
+  end
+end
+
+printFrameNames(GetFramesRegisteredForEvent("UNIT_HEALTH"))
+
+
+
+
+http://wowprogramming.com/docs/widgets/Region/IsMouseOver.html
+--
+Returns whether the mouse cursor is over the given region. This function replaces the previous MouseIsOver FrameXML function.
+If provided, the arguments are treated as offsets by which to adjust the hit rectangle when comparing it to the mouse. They are in screen coordinates; positive offsets move an edge right or up, negative values move it left or down. No frame edges are actually moved. For example:
+ if button:IsMouseOver(2, -2, -2, 2) then
+will return true if the mouse is within 2 pixels of the given frame.
+Signature:
+isOver = Region:IsMouseOver([topOffset [, leftOffset [, bottomOffset [, rightOffset]]]])
+Arguments:
+topOffset - The amount by which to displace the top edge of the test rectangle (number)
+leftOffset - The amount by which to displace the left edge of the test rectangle (number)
+bottomOffset - The amount by which to displace the bottom edge of the test rectangle (number)
+rightOffset - The amount by which to displace the right edge of the test rectangle (number)
+Returns:
+isOver - true if the mouse is over the region; otherwise false (boolean)
+
+
+
+
+http://wowprogramming.com/docs/widgets/Region/IsProtected.html
+--
+Returns whether the region is protected. Non-secure scripts may change certain properties of a protected region (e.g. showing or hiding it, changing its position, or altering frame attributes) only while the player is not in combat. Regions may be explicitly protected by Blizzard scripts or XML; other regions can become protected by becoming children of protected regions or by being positioned relative to protected regions.
+Signature:
+isProtected, explicit = Region:IsProtected()
+Returns:
+isProtected - 1 if the region is protected; otherwise nil (value, 1nil)
+explicit - 1 if the region is explicitly protected; nil if the frame is only protected due to relationship with a protected region (value, 1nil)
+
+
+
+
+
+
+http://wowprogramming.com/docs/api/debuglocals.html
+--
+Returns information about the local variables at a given stack depth
+localsInfo = debuglocals(stackLevel)
+Arguments:
+stackLevel - The stack level to query (number)
+Returns:
+localsInfo - A string detailing the local variables at the given stack depth. (string)
+
+
+

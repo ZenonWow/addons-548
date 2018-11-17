@@ -1,0 +1,28 @@
+[03:32:12] BagSync:ScanTokens(nil)
+[03:32:25] ToggleBag(4)
+[03:32:42] BagSync:ScanTokens(nil)
+[03:32:43] BagSync:ScanTokens(nil)
+[03:33:47] AddonLoader: Loading Auctionator
+[03:33:48] AddonLoader: Loading AuctionMaster
+[03:33:48] (DEBUG) Vendor:[03:33:48. 44] OnInitialize
+[03:33:48] (DEBUG) Vendor:[03:33:48. 44] OnInitialize exit
+[03:33:50] (DEBUG) Vendor:[03:33:50. 44] Enable module [Disenchant]
+[03:33:50] (DEBUG) Vendor:[03:33:50. 44] Enable module [AuctionHouse]
+[03:33:50] (DEBUG) Vendor:[03:33:50. 44] Enable module [Statistic]
+[03:33:50] (DEBUG) Vendor:[03:33:50. 44] Enable module [SearchTab]
+[03:33:51] (DEBUG) Vendor:[03:33:51. 44] Enable module [TaskQueue]
+[03:33:51] (DEBUG) Vendor:[03:33:51. 44] Enable module [OwnAuctions]
+[03:33:51] (DEBUG) Vendor:[03:33:51. 44] Enable module [Items]
+[03:33:51] (DEBUG) Vendor:[03:33:51. 44] Enable module [Config]
+[03:33:51] (DEBUG) Vendor:[03:33:51. 44] Enable module [Help]
+[03:33:51] (DEBUG) Vendor:[03:33:51. 44] Enable module [Gatherer]
+[03:33:51] (DEBUG) Vendor:[03:33:51. 44] Enable module [Sniper]
+[03:33:51] (DEBUG) Vendor:[03:33:51. 44] Enable module [ItemSettings]
+[03:33:51] (DEBUG) Vendor:[03:33:51. 44] Enable module [Scanner]
+[03:33:52] (DEBUG) Vendor:[03:33:52. 44] Enable module [Seller]
+[03:33:52] ShowInteractingWindow AUCTION_HOUSE_SHOW nil => AUCTION_HOUSE SHOW |
+[03:33:55] BagSync:ScanAuctionHouse()
+[03:34:22] OpenAllBags(nil)
+[03:34:56] HideInteractingWindow AUCTION_HOUSE_CLOSED AUCTION_HOUSE => AUCTION_HOUSE CLOSED |
+[03:34:56] HideInteractingWindow AUCTION_HOUSE_CLOSED nil => AUCTION_HOUSE CLOSED |
+[03:34:56] CloseSpecialWindows()

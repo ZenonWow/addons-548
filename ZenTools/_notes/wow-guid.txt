@@ -1,0 +1,39 @@
+https://wow.gamepedia.com/GUID
+--
+GUIDs uniquely identify almost everything the player character can interact with in World of Warcraft -- including players, pets, vehicle, and interactive world objects (think Midsummer bonfires). GUIDs are represented in WoW as a long string of hex numbers separated by hyphens.
+
+GUIDs are intended to provide a unique way to identify units; the following general rules apply:
+
+A monster has a single GUID from spawn until death (or despawn). When it respawns it gets a new GUID.
+Pets get a new GUID each time they are summoned.
+Monster and pet GUIDs can be recycled after server (or instance) restart.
+Players keep their GUID forever, and are unique even in cross-server battlegrounds.
+However, units that "transform" into other units may not switch GUID immediately.
+Contents
+Formats
+For players: Player-[server ID]-[player UID] (Example: "Player-970-0002FD64")
+For creatures, pets, objects, and vehicles: [Unit type]-0-[server ID]-[instance ID]-[zone UID]-[ID]-[spawn UID] (Example: "Creature-0-970-0-11-31146-000136DF91")
+Unit Type Names: "Creature", "Pet", "GameObject", "Vehicle", and "Vignette"
+For items: Item-[server ID]-0-[spawn UID] (Example: "Item-970-0-400000076620BFF4") (Please note that this tells you nothing useful about the item, like the ID)
+Cross-server and GUID "uniqueness"
+Player GUIDs are local on a per-server basis, making the "global" scope to be bound to the specific server. Every time a character is created, a new GUID is assigned from a simple +1 counter and then given to that character. It should be noted that the act of transferring characters, either server to server, account to account, or even account to account while remaining on the same server will generate a new character GUID, because of how the process works (the character "ceases to exist" for a short period, and is then recreated). This act erases friend and ignore lists. Renaming a character does not trigger a new GUID, as that process is much simpler than a full character move.
+
+Uniqueness is guaranteed in cross-realm battlegrounds by masking the player GUID with a server specific unique identifier, when needed.
+
+NPC GUID collisions have also been observed. It is unknown why or when in specific they occur, but differing mob types have had a NPC ID number which corresponded to an entirely different NPC. This is considered a very rare phenomenon.
+
+Related API
+UnitGUID
+GetPlayerInfoByGUID
+Patch changes
+ Patch 6.0.2 (2014-10-14): New format:
+For players: Player-[server ID]-[player UID] (Example: "Player-976-0002FD64")
+For creatures, pets, objects, and vehicles: [Unit type]-0-[server ID]-[instance ID]-[zone UID]-[ID]-[Spawn UID] (Example: "Creature-0-976-0-11-31146-000136DF91")
+Unit Type Names: "Creature", "Pet", "GameObject", and "Vehicle"
+For vignettes: Vignette-0-[server ID]-[instance ID]-[zone UID]-0-[spawn UID] (Example: "Vignette-0-970-1116-7-0-0017CAE465" for rare mob Sulfurious)
+ Patch 5.1.0 (2012-11-27): Bits shifted. NPCID is now characters 6-9, not 7-10 (counting from 1).
+ Patch 4.0.1 (2010-10-12): Bits shifted. NPCID is now characters 5-8, not 7-10 (counting from 1).
+ Patch 3.3.0 (2009-12-08): Bits shifted. NPCID is now characters 7-10, not 6-9 (counting from 1).
+ Patch 2.4.0 (2008-03-25): Added.
+ 
+ 

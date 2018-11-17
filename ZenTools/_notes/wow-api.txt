@@ -1,0 +1,5 @@
+https://www.townlong-yak.com/framexml/live/Blizzard_APIDocumentation#
+
+https://www.oreilly.com/library/view/beginning-lua-with/9781430223719/
+Beginning Lua with World of Warcraft Addons by Paul Emmerich
+

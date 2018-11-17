@@ -1,4 +1,178 @@
-14:48] Joyous: There are two ways, the second one might not work in combat.
+http://wowwiki.wikia.com/wiki/RestrictedEnvironment
+http://wowwiki.wikia.com/wiki/SecureHandlers
+http://wowwiki.wikia.com/wiki/Secure_Execution_and_Tainting
+
+https://wow.gamepedia.com/SecureActionButtonTemplate
+
+
+https://us.battle.net/forums/en/wow/topic/15699096987
+https://us.battle.net/forums/en/wow/topic/20760847675
+
+https://www.wowinterface.com/forums/showthread.php?t=52075
+https://www.wowinterface.com/forums/showthread.php?t=53487
+
+
+
+https://wow.gamepedia.com/SecureActionButtonTemplate
+--
+SecureActionButtonTemplate
+→ UI Tech. Details
+The SecureActionButtonTemplate was introduced in Patch 2.0 to allow addons to perform protected actions — casting spells, executing macros, etc — by specifying button behavior via its attributes. A non-protected variant, InsecureActionButtonTemplate, was added in Patch 7.2.0, and allows protected actions to be performed only while combat lockdown is not in effect.
+
+Contents
+Creating a SecureActionButton
+To create a SecureActionButton, simply create a button that inherits from the SecureActionButtonTemplate; to make the button instance useful, specify interesting attributes. This can be done in both XML, Lua and a mix of the two:
+
+Using XML:
+
+<Button name="myButton" inherits="SecureActionButtonTemplate" parent="UIParent">
+  <Attributes>
+   <Attribute name="type" value="action" />
+   <Attribute name="action" value="1" type="number" />
+  </Attributes>
+</Button>
+Using Lua:
+
+local btn = CreateFrame("Button", "myButton", UIParent, "SecureActionButtonTemplate")
+btn:SetAttribute("type", "action")
+btn:SetAttribute("action", 1)
+Macro Example in Lua:
+
+local macroBtn = CreateFrame("Button", "myMacroButton", UIParent, "SecureActionButtonTemplate")
+macroBtn:SetAttribute("type1", "macro") -- left click causes macro
+macroBtn:SetAttribute("macrotext1", "/raid zomg a left click!") -- text for macro on left click
+
+
+
+
+
+https://us.battle.net/forums/en/wow/topic/20760847675
+InsecureActionButtonTemplate - use Oversized Bobber
+
+
+
+
+https://www.wowinterface.com/forums/showthread.php?t=46227
+--
+local manager = CreateFrame("Frame", addon, UIP, "SecureHandlerStateTemplate")
+RegisterStateDriver(manager, "visibility", "[group:party][group:raid] show; hide")
+
+
+--frame
+local hoverFrame = CF("BUTTON", addon.."HoverFrame", manager, "SecureHandlerClickTemplate")
+hoverFrame:SetAttribute("_onclick", [=[
+	local ref = self:GetFrameRef("manager")
+	if not ref:GetAttribute("state") then
+		ref:SetAttribute("state","closed")
+	end
+	local state = ref:GetAttribute("state")
+	if state == "closed" then
+		ref:SetAlpha(1)
+		ref:SetWidth(275)
+		ref:SetAttribute("state","open")
+	else
+		ref:SetAlpha(0.4)
+		ref:SetWidth(200)
+		ref:SetAttribute("state","closed")
+	end
+]=])
+hoverFrame:SetFrameRef("manager", manager)
+
+
+
+
+
+https://us.battle.net/forums/en/wow/topic/7198960875#post-12
+--
+Is it possible to make a target cycle macro?
+Nov 23, 2012
+1
+Use Choonster's code.
+
+If you find it's not working at the start of a match, replace core.lua with this:
+
+local header = FocusSequenceHeader or CreateFrame("Frame", "FocusSequenceHeader", nil, "SecureHandlerBaseTemplate")
+local button = FoSeq or CreateFrame("Button", "FoSeq", nil, "SecureActionButtonTemplate")
+button:SetAttribute("type", "focus")
+
+local PreClickSnippet = [==[
+	for i=1,5 do
+		CURRENT_IND = (CURRENT_IND or 0)%5 + 1
+		local unit = "arena"..CURRENT_IND
+		if UnitExists(unit) then
+			self:SetAttribute("unit",unit)
+			break
+		end
+	end
+]==]
+
+header:WrapScript(button, "OnClick", PreClickSnippet)
+
+
+
+
+https://us.battle.net/forums/en/wow/topic/7198960875#post-2
+--
+Nov 22, 2012
+ (Edited)
+1
+It's possible, but the supporting code is slightly too long to fit in a 255 character macro.
+
+If you can make macros longer than 255 characters and want a single-macro solution, use this:
+/run if not InCombatLockdown() then FoSeq = FoSeq or CreateFrame("Button", "FoSeq", nil, "SecureActionButtonTemplate,SecureHandlerBaseTemplate") FoSeq:SetAttribute("type", "focus") if not FoSW then FoSW = 1 FoSeq:WrapScript(button, "OnClick", [[ C = C or 1; self:SetAttribute("unit","arena"..C); C = C % (SecureCmdOptionParse("[@arena5,exists]5;[@arena3,exists]3;[@arena2,exists]2;0")) + 1 ]]) end end
+/click FoSeq
+
+
+You need to use this macro out of combat at least once to allow it to create the invisible action button.
+
+If you want the supporting code in an AddOn instead, copy/paste the code blocks below into their own empty text documents and save them with the specified name/extension (capitalisation is important). Make sure you don't save them as .txt files. Once you have both files, move them to a new folder called FocusSequence in your Interface\AddOns\ folder.
+
+With this AddOn, you can simply use /click FoSeq in a macro to focus the next arena enemy.
+
+FocusSequence.toc
+## Interface: 50001
+## Title: FocusSequence
+## Author: Choonster
+## Notes: Sequences your focus between arena enemies.
+## Version: 1.0
+
+core.lua
+
+
+core.lua
+local header = FocusSequenceHeader or CreateFrame("Frame", "FocusSequenceHeader", nil, "SecureHandlerBaseTemplate")
+local button = FoSeq or CreateFrame("Button", "FoSeq", nil, "SecureActionButtonTemplate")
+button:SetAttribute("type", "focus")
+
+local PreClickSnippet = [==[
+	CURRENT_IND = CURRENT_IND or 1
+
+	MAX_IND = tonumber( (SecureCmdOptionParse("[@arena5,exists]5;[@arena3,exists]3;[@arena2,exists]2;1")) )
+
+	self:SetAttribute("unit", "arena" .. CURRENT_IND)
+	-- print("CURRENT_IND", CURRENT_IND)
+
+	CURRENT_IND = CURRENT_IND % MAX_IND + 1
+]==]
+
+header:WrapScript(button, "OnClick", PreClickSnippet)
+
+
+Edit: Fixed the "nesting of [[...]] is deprecated" error.
+Edit 2: Fixed the "argument #2 to 'tonumber' (number expected, got string)" error.
+Edit 3: Hopefully fixed the code properly.
+
+
+
+
+
+
+
+
+
+
+
+[14:48] Joyous: There are two ways, the second one might not work in combat.
 1.
 http://wowprogramming.com/docs/secure_template/SecureActionButtonTemplate.html
 http://wowwiki.wikia.com/wiki/SecureActionButtonTemplate
@@ -36,3 +210,6 @@ end)
 http://wowprogramming.com/docs/api/RunMacroText.html
 http://wowprogramming.com/docs/widgets/Button.html
 http://wowprogramming.com/docs/scripts/OnClick.html
+
+
+
