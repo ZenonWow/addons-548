@@ -6,9 +6,8 @@
 	<Binding name="TOGGLEBLACKMARKET"
 		header="ZenTools"
     >
-		-- description="Open the Black Market without updating auctions"
-		BlackMarket_LoadUI()
-		BlackMarketFrame_Show()
+		-- description="Show/hide the Black Market without updating auctions"
+		ToggleBlackMarket()
 	</Binding>
 	
 	

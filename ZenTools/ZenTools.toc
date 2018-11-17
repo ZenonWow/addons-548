@@ -3,19 +3,22 @@
 ## Notes: Personal development addon
 ## Author: Mongusious
 ## X-Email: 
-## SavedVariables: BlackMarketTrackerAuctionData, BlackMarketTrackerArchive
+## SavedVariables: BlackMarketTrackerAuctionData, BlackMarketTrackerArchive, NoLoginMusicDB, UnitAurasDB
+
+NoLoginMusic.lua
+Media.lua
 
 # ActionBarChatLink.lua
-
-Media.lua
 # PlaySoundOverride.lua
 
+LibContainerFrameCleanup.lua
 BlackMarketTracker.lua
 PrintUnitAuras.lua
 TargetWatcherMop.lua
 MacroClicks.lua
+MouseWheelHandlers.lua
 
-ItemRefHook.lua  # taints logout in 7.3.5?
+LinkClicks.lua  # taints logout in 7.3.5?
 # MyDebug.lua
 # MyMouseEventDemo.lua
 # TargetWatcher.lua
