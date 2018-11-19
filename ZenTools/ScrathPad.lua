@@ -106,10 +106,13 @@ SpellBookFrame:SetPoint('TOPLEFT',10,-20)
 -- TradeFrame:SetPoint('TOPLEFT',10,-20)
 MerchantFrame:SetPoint('TOPLEFT',10,-20)
 MailFrame:SetPoint('TOPLEFT',10,-20)
+--DressUpFrame:SetPoint('TOPRIGHT',-10,-20)
 FriendsFrame:SetPoint('TOPRIGHT',-10,-20)
 
+Examiner:ClearAllPoints() Examiner:SetPoint('TOPLEFT', 20, -20)
+
 -- BFBindingMode is UISpecialFrames[8], it's Shown but not visible (offscreen)
-BFBindingMode:Hide()
+if  BFBindingMode  then  BFBindingMode:Hide()  end
 --BFBindingMode:SetPoint('TOPLEFT',10,-20)
 --tDeleteItem(UISpecialFrames, BFBindingMode)
 
@@ -132,11 +135,12 @@ end
 local prev_CloseSpecialWindows = CloseSpecialWindows
 function CloseSpecialWindows(...)
 	-- Press Shift-Esc to close those nasty windows.  Ctrl-Esc and Alt-Esc will do also... bet you need to disable those in windose (try AutoHotKey).
-	if  not IsModifierKeyDown()  then  return  end
+	--if  not IsModifierKeyDown()  then  return  end    -- modify TOGGLEGAMEMENU keybinding instead to remain consistent with addons also hooking CloseSpecialWindows
 	
 	for index, frameName in pairs(UISpecialFrames) do
 		local frame = _G[frameName];
-		if ( frame and frame:IsVisible() ) then
+		-- frame:GetLeft() is a simple on-screen check. Returns nil if the frame was not positioned. If it was, then its most probably on-screen.
+		if ( frame and frame:IsVisible() and frame:GetLeft() ) then
 			print("CloseSpecialWindows(): "..index..". "..frameName)
 			frame:Hide()
 			-- Close ONE special window

@@ -4,8 +4,19 @@
 ## Author: Mongusious
 ## X-Email: 
 
-#Bindings.xml  -- implicit
+X-NoComma
+X-JustComma:
+X-CommaUndSpace: 
+X-CommaUnd4Space:    
+X-CommaUndTab:	
+X-CommaUnd2Tab:		
+X-Trimm:    		    <-4s2t4s    		    4s2t4s->    		    
+X-Dupli: 1
+X-Dupli: 2
+X-Dupli: 3
 
+
+LuaTests.lua
 Scratchy.lua
 
 

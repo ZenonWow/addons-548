@@ -1,8 +1,9 @@
 ## Interface: 50400
-## Title: MyAdd
+## Title: ZenTools
 ## Notes: Personal development addon
 ## Author: Mongusious
 ## X-Email: 
+
 ## SavedVariables: BlackMarketTrackerAuctionData, BlackMarketTrackerArchive, NoLoginMusicDB, UnitAurasDB
 
 NoLoginMusic.lua
