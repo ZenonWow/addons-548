@@ -88,6 +88,10 @@ MFWM_PlayerData =
 	MapData  = {};	-- if the dumpData option is enabled, this is where we'll store the map cache data
 };
 
+local function Debug(message)
+	if  MFWM_PlayerData.Options.debug  then  table.insert(MFWM_PlayerData.Debug, message)  end
+end
+
 ------------------------------------------------------------------------------------------------
 -- build a map of zone names per continent as a quick lookup table
 -- for handling errata while the player is busy
@@ -760,7 +764,7 @@ local function OnEvent( self, event, ... )
 		
 		local mfwm_version = GetAddOnMetadata( arg1, "Version" );
 		local wowBuild = MFWM_PlayerData.Options.wowBuild or {};
-		local version, build, date, toc = GetBuildInfo();
+		local version, build, buildDate, toc = GetBuildInfo();
 		
 		if MFWM_PlayerData.Options.version ~= mfwm_version
 		or wowBuild.version ~= version
@@ -769,7 +773,7 @@ local function OnEvent( self, event, ... )
 				
 			wowBuild.version     = version;
 			wowBuild.build       = build;
-			wowBuild.date        = date;
+			wowBuild.date        = buildDate;
 			wowBuild.toc         = toc;
 			MFWM_PlayerData.Errata = {};		
 			
@@ -790,9 +794,11 @@ local function OnEvent( self, event, ... )
 			for i,errata in ipairs( MFWM_PlayerData.Errata ) do
 				MergeErrata( errata );
 			end
+    end
 
+		if #MFWM_PlayerData.Errata > 0  and  not MFWM_PlayerData.ErrataNotified  then
 			-- encourage the user to share their errata with us
-						
+			MFWM_PlayerData.ErrataNotified = date()
 			local formatString = MFWM.L["ERRATA1"].." "..MFWM.L["ERRATA2"].." "..MFWM.L["ERRATA3"].." "..MFWM.L["ERRATA4"];
 			
 			DEFAULT_CHAT_FRAME:AddMessage( 
@@ -816,8 +822,8 @@ local function OnEvent( self, event, ... )
    
 		-- and we're ready to roll
 				
-		if arg1 == "MozzFullWorldMap" then
-			DEFAULT_CHAT_FRAME:AddMessage( MFWM.L["LOADED"].." |c0000FF00"..mfwm_version.."|r", 0.64, 0.21, 0.93 );
+		if arg1 == "MozzFullWorldMap" and MFWM_PlayerData.Options.debug then
+			print( MFWM.L["LOADED"].." |c0000FF00"..mfwm_version.."|r", 0.64, 0.21, 0.93 );
 		end
 		
 		MFWM.isLoaded = true;

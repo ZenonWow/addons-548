@@ -1318,7 +1318,7 @@ function Spy:OnInitialize()
 	Spy:LockWindows(Spy.db.profile.Locked)
 	Spy:BuildZoneIDTable(0, GetMapContinents())
 	ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", Spy.FilterNotInParty)
-	DEFAULT_CHAT_FRAME:AddMessage(L["LoadDescription"])
+	--DEFAULT_CHAT_FRAME:AddMessage(L["LoadDescription"])
 end
 
 function Spy:ZoneChangedEvent()

@@ -37,7 +37,7 @@ hooksecurefunc(addon, "UpdateDisplay", function()
 end)
 
 do
-	local hint = L["|cffeda55fClick|r to open BugSack with the last bug. |cffeda55fShift-Click|r to reload the user interface. |cffeda55fAlt-Click|r to clear the sack."]
+	local hint = L["|cffeda55fClick|r to open BugSack with the last bug. |cffeda55fCtrl+Shift-Click|r to reload the user interface. |cffeda55fAlt-Click|r to clear the sack."]
 	local line = "%d. %s (x%d)"
 	function plugin.OnTooltipShow(tt)
 		local errs = addon:GetErrors(BugGrabber:GetSessionId())

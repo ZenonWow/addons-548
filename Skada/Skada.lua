@@ -40,7 +40,7 @@ do
 		insets = {left = 1, right = 1, top = 1, bottom = 1}}
 	)
 	popup:SetSize(250, 70)
-	popup:SetPoint("CENTER", UIParent, "CENTER")
+	popup:SetPoint("TOP", UIParent, "TOP", 0, -200)
 	popup:SetFrameStrata("DIALOG")
 	popup:Hide()
 

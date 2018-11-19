@@ -1,4 +1,4 @@
-
+local ADDON_NAME, private = ...
 local tinypad = TinyPad
 local editBox = TinyPadEditBox
 
@@ -22,6 +22,7 @@ tinypad.fonts = {
 }
 
 function tinypad:PLAYER_LOGIN()
+  self.PLAYER_LOGIN = nil
 	-- savedvars
 	pages = TinyPadPages
 	settings = TinyPadSettings
@@ -31,10 +32,10 @@ function tinypad:PLAYER_LOGIN()
 	BINDING_NAME_TINYPAD_TOGGLE = "Show/Hide TinyPad"
 	BINDING_NAME_TINYPAD_SEARCH = "Search within TinyPad"
 	-- slash command stuff
-	SlashCmdList["TINYPADSLASH"] = tinypad.SlashHandler
-	SLASH_TINYPADSLASH1 = "/pad"
-	SLASH_TINYPADSLASH2 = "/tinypad"
-	SLASH_TINYPADSLASH3 = "/tp"
+	SlashCmdList["TINYPAD"] = tinypad.SlashHandler
+	SLASH_TINYPAD1 = "/tp"
+	SLASH_TINYPAD2 = "/pad"
+	SLASH_TINYPAD3 = "/tinypad"
 	-- setup the rest
 	editBox:SetHyperlinksEnabled(true)
 	self:SetMinResize(268,96)
@@ -136,6 +137,9 @@ end
 
 -- to insert tradeskills and achievements links, their hooks need to wait until those LoD bits load
 function tinypad:ADDON_LOADED(addon)
+  if  addon == ADDON_NAME  then
+    if  IsLoggedIn()  then  self:PLAYER_LOGIN()  end
+  end
 	if addon=="Blizzard_TradeSkillUI" then
 		local old_TradeSkillLinkButton_OnClick = TradeSkillLinkButton:GetScript("OnClick")
 		TradeSkillLinkButton:SetScript("OnClick",function(self,...)
@@ -186,14 +190,14 @@ function tinypad:OnMouseUp()
 end
 
 function tinypad:OnShow()
-	self:UpdateESCable()
+	--self:UpdateESCable()
 	self:ShowPage(current)
 end
 
 function tinypad:OnHide()
 	tinypad:SaveCurrentPage()
 	tinypad.panel:Hide()
-	self:UpdateESCable()
+	--self:UpdateESCable()
 end
 
 function tinypad:OnTextChanged()
@@ -250,6 +254,15 @@ function tinypad:OnHyperlinkClick(link,text,button)
 	end
 end
 
+local prev_CloseSpecialWindows = _G.CloseSpecialWindows
+function _G.CloseSpecialWindows()
+	local frameToClose =  tinypad.bookmarks:IsVisible()  and  tinypad.bookmarks
+	return  tinypad.bookmarks:IsVisible()  and  tinypad.bookmarks:Hide()
+		or  not settings.Lock  and  tinypad:IsVisible()  and   tinypad:Hide()
+		or  prev_CloseSpecialWindows()
+end
+
+--[[ Hooked CloseSpecialWindows() instead
 -- at most only one entry from TinyPad should be in UISpecialFrames, and only when visible:
 -- TinyPadBookmarks > TinyPad
 -- this will go through UISpecialFrames and ensure only the topmost frame is in the table and remove others
@@ -270,6 +283,7 @@ function tinypad:UpdateESCable()
 		tinsert(UISpecialFrames,specialFrame)
 	end
 end
+--]]
 
 -- when the window is locked, the border is black, grey when unlocked
 function tinypad:UpdateLock()
@@ -423,7 +437,7 @@ end
 
 function tinypad:ToggleLock()
 	settings.Lock = not settings.Lock
-	tinypad:UpdateESCable()
+	--tinypad:UpdateESCable()
 	tinypad:UpdateLock()
 end
 

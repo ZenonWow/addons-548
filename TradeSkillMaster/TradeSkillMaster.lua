@@ -712,7 +712,7 @@ function TSM:GetAuctionPlayer(player, player_full)
 		return player
 	end
 end
-
+--[[
 function TSM:ScanBMAH()
 	TSM.db.factionrealm.bmah = nil
 	local items = {}
@@ -733,3 +733,4 @@ function TSM:ScanBMAH()
 	end
 	TSM.db.factionrealm.blackMarket = {lastUpdate=time(), items=items, version=1}
 end
+--]]

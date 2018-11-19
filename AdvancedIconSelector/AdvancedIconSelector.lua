@@ -1,4 +1,4 @@
-﻿--[[========================================================================================
+--[[========================================================================================
       AdvancedIconSelector, a World of Warcraft icon selector replacement with search
       functionality.
       
@@ -34,11 +34,11 @@ local AIS = AdvancedIconSelector
 --[[
 /run AIS.debug=true
 --]]
-AIS.debug=true
+--AIS.debug=true
 --local DEBUG = false
 function AIS:Debug(...)
 	if AIS.debug then
-		print("|cff00ff00[AIS] [Debug]|r", ...)
+		print("|cff00ff00[AdvancedIconSelector]|r", ...)
 	end
 end
 

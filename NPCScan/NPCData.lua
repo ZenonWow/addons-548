@@ -824,7 +824,7 @@ for npc_id, data in pairs(NPC_DATA) do
 	private.NPC_ID_TO_WORLD_NAME[npc_id] = data.world_id
 	local name = L.NPCs[tostring(npc_id)]
 	if  name  then  private.NPC_NAME_TO_ID[name] = npc_id
-	else  print("Missing name from NPCs database of npc=".. npc_id)   end
+	else  print("[NPCScan] missing name of npc=".. npc_id)   end
 
 	if data.is_tamable then
 		private.TAMABLE_ID_TO_MAP_NAME[npc_id] = data.map_name

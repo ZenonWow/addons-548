@@ -6,9 +6,12 @@
 VdtLauncher= {
 	type = "launcher",
 	label= 'DevTool',
-	text= '/VDT',
+	--text= '/VDT',
+	--text= '💐',
+	text= [[🌷]],
+	-- or any of the following:  ✾❀⚘🍀🌷💐
 	--value= '/VDT',
-	--icon = "Interface\\AddOns\\ViragDevTool\\icon",
+	--icon = [[Interface\AddOns\ViragDevTool\icon]],
 	OnClick = function(self, button)
 		if  button == "LeftButton"  then
 			if  IsControlKeyDown()  then  ViragDevTool:ToggleFrameStack()

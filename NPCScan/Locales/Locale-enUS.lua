@@ -558,6 +558,7 @@ select( 2, ... ).L = setmetatable( {
 	["51077"] = "Bushtail",
 	["51078"] = "Ferdinand",
 	["51079"] = "Captain Foulwind",
+	["51236"] = "Blood Seeker",
 	["51401"] = "Madexx - Red",
 	["51402"] = "Madexx - Green",
 	["51403"] = "Madexx - Black",
