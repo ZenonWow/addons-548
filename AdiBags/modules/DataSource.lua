@@ -63,6 +63,12 @@ function mod:OnEnable()
 	self:Update()
 end
 
+function mod:OnDisable()
+	--self:UnregisterEvent('BANKFRAME_OPENED')
+	--self:UnregisterEvent('BANKFRAME_CLOSED')
+	self:BANKFRAME_CLOSED()
+end
+
 function mod:BANKFRAME_OPENED()
 	self.atBank = true
 	return self:Update()

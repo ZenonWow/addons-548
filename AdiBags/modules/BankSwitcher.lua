@@ -18,12 +18,30 @@ mod.uiName = L['Bank Switcher']
 mod.uiDesc = L['Move items from and to the bank by right-clicking on section headers.']
 
 function mod:OnEnable()
-	self:RegisterMessage('AdiBags_InteractingWindowChanged')
-	self:AdiBags_InteractingWindowChanged('OnEnable', addon:GetInteractingWindow())
+	self:RegisterEvent('BANKFRAME_OPENED')
+	self:RegisterEvent('BANKFRAME_CLOSED')
+	-- if  addon.bags.bank.atBank  then  self:BANKFRAME_OPENED()  end
 end
 
 function mod:OnDisable()
-	addon.UnregisterAllSectionHeaderScripts(self)
+	self:UnregisterEvent('BANKFRAME_OPENED')
+	self:UnregisterEvent('BANKFRAME_CLOSED')
+	self:BANKFRAME_CLOSED()
+end
+
+function mod:BANKFRAME_OPENED()
+	if  not self.registered  then
+		addon.RegisterSectionHeaderScript(self, 'OnTooltipUpdate', 'OnTooltipUpdateSectionHeader')
+		addon.RegisterSectionHeaderScript(self, 'OnClick', 'OnClickSectionHeader')
+		self.registered = true
+	end
+end
+
+function mod:BANKFRAME_CLOSED()
+	if  self.registered  then
+		addon.UnregisterAllSectionHeaderScripts(self)
+		self.registered = false
+	end
 end
 
 function mod:OnTooltipUpdateSectionHeader(_, _, tooltip)
@@ -38,15 +56,5 @@ function mod:OnClickSectionHeader(_, header, button)
 	end
 end
 
-function mod:AdiBags_InteractingWindowChanged(_, new, old)
-	if  self.registered == addon.atBank  then  return  end
-	
-	self.registered = addon.atBank
-	if  self.registered  then
-		addon.RegisterSectionHeaderScript(self, 'OnTooltipUpdate', 'OnTooltipUpdateSectionHeader')
-		addon.RegisterSectionHeaderScript(self, 'OnClick', 'OnClickSectionHeader')
-	else
-		addon.UnregisterAllSectionHeaderScripts(self)
-	end
-end
+
 

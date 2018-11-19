@@ -193,15 +193,15 @@ do
 	bags.backpack = backpack
 
 	function backpack:PostEnable()
-		--self:RegisterMessage('AdiBags_InteractingWindowChanged', self.CheckAutoOpen)
 		self:CheckAutoOpen(nil)
 	end
 
-	function backpack:CheckAutoOpen(requesterFrame)
+	function backpack:CheckAutoOpen(requesterFrame, opened)
 		local toggled
 		if  next(addon.InteractingWindows)  then
 			-- Opening
 			if  self:IsEnabled()  and  not self:IsOpen()  and  addon.db.profile.autoOpen  then
+				--print("backpack:CheckAutoOpen("..(requesterFrame:GetName() or "?")..", "..tostring(opened)..")")
 				self.autoOpened = true
 				toggled = self:Open()
 			end
@@ -238,67 +238,52 @@ do
 			_G.CloseBankFrame = CloseBankFrame
 		end
 		
-		-- Take over the events from builtin BankFrame
+		-- Take over the events from builtin BankFrame.
+		self:RegisterEvent('BANKFRAME_OPENED')
+		self:RegisterEvent('BANKFRAME_CLOSED')
 		BankFrame:UnregisterEvent('BANKFRAME_OPENED')
-		BankFrame:UnregisterEvent('BANKFRAME_CLOSED')
-		--self:RegisterEvent('BANKFRAME_OPENED')
-		--self:RegisterEvent('BANKFRAME_CLOSED')
-		--self:RegisterMessage('AdiBags_InteractingWindowChanged')
+		--BankFrame:UnregisterEvent('BANKFRAME_CLOSED')
 		
-		--[[
-		self:RawHookScript(BankFrame, "OnEvent", NOOP, true)    -- Unregistered the events instead
-		self:RawHook(BankFrame, "Show", "Open", true)    -- If some addon forces the BankFrame to show, let it be.
-		self:RawHook(BankFrame, "Hide", "Close", true)
-		--self:RawHook(BankFrame, "IsShown", "IsOpen", true)
+		--[[ This is enough to disable the BankFrame, while retaining its functionality.
+		-- It can be optionally opened with:
+/run BankFrame:Show()
+/run TogglePanel(BankFrame)
 		--]]
-
+		
 		-- Fake a bank opening event if already open
-		if  open  or  addon.atBank  then  self:BANKFRAME_OPENED()  end
+		if  open  or  self.atBank  then  self:BANKFRAME_OPENED()  end
 		
 	end
 
 	function bank:PostDisable()
-		--self:UnregisterMessage('AdiBags_InteractingWindowChanged')
+		-- Keep listening to bank events to update self.atBank
 		--self:UnregisterEvent('BANKFRAME_OPENED')
 		--self:UnregisterEvent('BANKFRAME_CLOSED')
+		-- Re-enable opening builtin BankFrame
 		BankFrame:RegisterEvent('BANKFRAME_OPENED')
-		BankFrame:RegisterEvent('BANKFRAME_CLOSED')
+		--BankFrame:RegisterEvent('BANKFRAME_CLOSED')
 		
-		--[[
-		self:UnhookScript(BankFrame, "OnEvent")
-		self:Unhook(BankFrame, "Show")
-		self:Unhook(BankFrame, "Hide")
-		--]]
-		
-		if  addon.atBank  then
+		if  self.atBank  then
 			-- Fake a bank opening event if already open
-			--BankFrame:SendEvent('BANKFRAME_OPENED')
 			BankFrame_OnEvent(BankFrame, 'BANKFRAME_OPENED')
+			--BankFrame:GetScript('OnEvent')('BANKFRAME_OPENED')
 			--BankFrame:Show()
 		end
 	end
 
 	function bank:PostClose()
 		-- Stop interaction with banker
-		CloseBankFrame()
 		if  self.autoOpened  then
+			CloseBankFrame()
 			_G.CloseAllBags(self)
 		end
 	end
 
 	function bank:CanOpen()
 		--return addon.InteractingWindows.BANKFRAME
-		return addon.atBank
+		return self.atBank
 		--return self:IsEnabled()
 	end
-
-	--[[
-	function bank:AdiBags_InteractingWindowChanged(event, new, old)
-		if  (not addon.InteractingWindows.BANKFRAME) ~= (not self:IsOpen())  then
-			self:Toggle()
-		end
-	end
-	--]]
 
 	function bank:BANKFRAME_OPENED()
 		--self.atBank = true
@@ -317,23 +302,7 @@ do
 		end
 		self.autoOpened = nil
 	end
-
-	function bank:CheckAutoOpen(event)
-		local toggled
-		if  addon.atBank  and  not self:IsOpen()  then
-			-- Opening
-			self.autoOpened = true
-			toggled = self:Open()
-			_G.OpenAllBags(self)
-		elseif  not addon.atBank  and  self:IsOpen()  and  self.autoOpened  then
-			-- Closing
-			toggled = self:Close()
-			--_G.CloseAllBags(self)  -- done in PostClose()
-			self.autoOpened = nil
-		end
-		return toggled
-	end
-
+	
 end
 
 --------------------------------------------------------------------------------
