@@ -189,7 +189,10 @@ function BagSync.ToItemData(link, count, metaDataType, metaData)
 	-- Store item linkRef without name
 	itemData =  itemData  or  link:match("item:[^\124]*")
 	-- Store battlepet with name, strip link escape at ends, shorten battlepet: -> pet:
-	itemData =  itemData  or  link:match("battle(pet:[^\124]+\124h[^\124]*)\124h")
+	local petData =  not itemData  and  link:match("battle(pet:[^\124]+\124h[^\124]*)\124h")
+	petData =  petData  and  petData:gsub(":0x0000000000000000\124","\124")
+	itemData =  itemData  or  petData
+	--itemData =  itemData  or  link:match("battle(pet:[^\124]+\124h[^\124]*)\124h")
 	-- Unknown links (not item: or battlepet:) store all information, including the name. Link escape at ends is stripped.
 	itemData =  itemData  or  link:match("\124H([^\124]+\124h[^\124]*)\124h")
 	-- If it's not a full link then see if it quacks like the reference part of a link
@@ -313,17 +316,13 @@ function BagSync.MatchItemData(itemData, searchData)
 	if  searchData ~= itemData:sub(1, searchDataLen)  then  return false  end
 	
 	-- 50% of BagSync.ParseItemData() copied here
-	local itemLink = tonumber(itemData[0])
+	local itemLink = tonumber(itemData[1])
 	local COUNT_SEP =  itemLink  and  COUNT_SEP_LIST  or  COUNT_SEP
 
-	local metaPart, sepIdx = nil, itemData:find(METADATA_SEP)
-	if  sepIdx  then
-		-- Split off:  (METADATA_SEP..metaDataType..metaData)*
-		itemData = itemData:sub(1, sepIdx - 1)
-	end
-	local linkPart, countstr, auctionstr, checkNil = strsplit(COUNT_SEP, itemData)
+	local itemPart, metaPart = strsplit(METADATA_SEP, itemData, 2)
+	local linkPart, countstr, auctionstr, checkNil = strsplit(COUNT_SEP, itemPart)
 
-	local count = tonumber(countstr)
+	local count = not countstr  and  1  or  tonumber(countstr)
 	if  countstr  and  not count  then
 		reportDataError("BagSync.MatchItemData(): Malformed item data has non-numeric count value '"..countstr.."', itemData='"..itemData.."'.")
 		-- BagSync.ParseItemData() returns the string if it can't parse countstr
@@ -442,6 +441,7 @@ local function GetEquippedBags(bagIDFirst, bagIDLast)
 end
 
 --[[
+/dump BagSync.tmoggableSlotIDs
 /run for i=1,19 do print(i,":",pcall(GetTransmogrifySlotInfo,i)) end
 2,4,11-14,18-19 fails
 [03:10:53] true true true 0 false false 8113 Interface\Icons\INV_Chest_Cloth_01
@@ -929,7 +929,7 @@ function BagSync:PLAYER_MONEY()
 end
 
 function BagSync:BAG_UPDATE(event, bagID)
-	Debug("BagSync:BAG_UPDATE("..event..", "..bagID..")")
+	print("BagSync:BAG_UPDATE("..event..", "..bagID..")")
 	self.BagsToScan = self.BagsToScan  or  {}
 	self.BagsToScan[bagID] = true
 	self:Schedule( self.ScanNextContainer )

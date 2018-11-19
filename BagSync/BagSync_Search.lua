@@ -39,7 +39,7 @@ ItemSearch:RegisterTypedSearch{
 		if cachedResult ~= nil then
 			return cachedResult
 		end
-	
+		
 		tooltipScanner:SetOwner(UIParent, 'ANCHOR_NONE')
 		tooltipScanner:SetHyperlink(link)
 

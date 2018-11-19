@@ -105,7 +105,7 @@ local storageL = {
 }
 
 
--- Last item's searchData (stringified itemID if item  or  shortened link if battlepet or unknown)
+-- Last item's searchData (stringified itemID if item  or  shortened link if battlepet or full link)
 local lastQuery
 -- Last displayed tooltip lines
 local itemLines = {}
@@ -622,7 +622,16 @@ local function hookTip(tooltip)
 	end)
 end
 
+local function hookPetTip()
+	local modified = false
+	-- BattlePetTooltipTemplate_SetBattlePet(BattlePetTooltip, BATTLE_PET_TOOLTIP);
+	hooksecurefunc('BattlePetToolTip_Show', function (speciesID, level, breedQuality, maxHealth, power, speed, customName)
+		modified = BagSync.AddItemToTooltip( self, "battlepet:"..speciesID )
+	end)
+end
+
 hookTip(GameTooltip)
 hookTip(ItemRefTooltip)
+hookPetTip()
 
 
