@@ -2,5 +2,9 @@
 ## Title: Explorer!
 ## Notes: Marks areas on the world map that you have left to explore for Exploration achievements!
 ## Version: 1.01A
+
+## LoadManagers: AddonLoader
+## X-LoadOn-FrameShown: WorldMapFrame
+
 overlays.lua
 Explorer.lua

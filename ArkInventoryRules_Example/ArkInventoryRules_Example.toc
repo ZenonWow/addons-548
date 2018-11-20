@@ -1,22 +1,24 @@
 ﻿## Interface: 50400
+## Title: ArkInventory [Rules] Example
+## Version: 10000
+## Notes: Example rule for ArkInventory
+## Author: Arkayenro
+
 ## X-Curse-Packaged-Version: 3.03.36
 ## X-Curse-Project-Name: ArkInventory
 ## X-Curse-Project-ID: ark-inventory
 ## X-Curse-Repository-ID: wow/ark-inventory/mainline
 
-## Title: ArkInventory [Rules] Example
-## Notes: Example rule for ArkInventory
-## Author: Arkayenro
-## Version: 10000
-
 ## DefaultState: Disabled
-## LoadOnDemand: 0
 ## RequiredDeps: ArkInventoryRules
+## OptionalDeps: InsertAnyModsHereThatYourRuleMightNeed
+
+##- LoadOnDemand: 1
+##- LoadWith: ArkInventoryRules
 
 ## LoadManagers: AddonLoader
-## X-LoadOn-Always:delayed
-
-## OptionalDeps: InsertAnyModsHereThatYourRuleMightNeed
+## X-LoadOn-Login:  LowPrio
+## X-LoadOn-Always: delayed
 
 
 ArkInventoryRules_Example.lua

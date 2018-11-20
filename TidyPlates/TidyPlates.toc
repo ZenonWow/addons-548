@@ -1,8 +1,14 @@
 ## Interface: 50400
 ## Title: Tidy Plates
+## Version: 6.14.Beta2
 ## Notes: Yes!
 ## Author: Binbwen and Friends
-## Version: 6.14.Beta2
+
 ## SavedVariablesPerCharacter: TidyPlatesOptions
+
+##- LoadManagers: AddonLoader
+## X-LoadOn-Login:  UserInterface
+## X-LoadOn-Always: delayed
+
 
 TidyPlates.xml

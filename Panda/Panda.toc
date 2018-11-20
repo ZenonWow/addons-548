@@ -1,20 +1,19 @@
 ## Interface: 50200
-
 ## Title: Panda
+## Version: 5.2.0.46
 ## Notes: Prospecting and Disenchanting Aide
 ## Author: Tekkub Stoutwrithe
-## Version: 5.2.0.46
 ## X-Website: http://code.google.com/p/tekkub-wow/
 ## X-Email: tekkub-wow@googlegroups.com
 ## X-Category: Tradeskills
 
 ## SavedVariablesPerCharacter: PandaDBPC
-
 ## OptionalDeps: tekDebug
 
 ## LoadManagers: AddonLoader
-## X-LoadOn-slash: /panda
-## X-LoadOn-LDB-Launcher: Interface\AddOns\Panda\icon
+## X-LoadOn-Slash:  /panda
+## X-LoadOn-LDB-Launcher:  Interface\AddOns\Panda\icon
+
 
 LibStub.lua
 CallbackHandler-1.0.lua

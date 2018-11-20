@@ -1,10 +1,16 @@
 ## Interface: 50400
-## Notes: Minimap and world map enhancements
 ## Title: Mappy
-## Author: John Stephen
 ## Version: 3.3.4
+## Notes: Minimap and world map enhancements
+## Author: John Stephen
+
 ## SavedVariables: gMappy_Settings
 ## OptionalDeps: QuestHelper, Gatherer, GatherMate, GatherMate2
+
+##- LoadManagers: AddonLoader
+## X-LoadOn-Login:  UserInterface
+## X-LoadOn-Always: delayed
+
 
 MC2AddonLib.lua
 MC2DebugLib.lua

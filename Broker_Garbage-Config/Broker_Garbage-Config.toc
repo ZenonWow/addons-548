@@ -23,7 +23,7 @@
 ## Notes-zhTW: Broker_Garbage的設置面板與它的掛件
 ## Notes-ptBR: Configuration panels for Broker_Garbage and its plugins
 
-## LoadManagers: AddonLoader, Addon Control Panel
+## LoadManagers: AddonLoader
 ## X-LoadOn-InterfaceOptions: Broker_Garbage
 ## X-LoadOn-Slash: /garbage, /garb, /junk
 

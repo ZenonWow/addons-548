@@ -1,20 +1,18 @@
 ## Interface: 50400
-## Author: LaoTseu
 ## Title: AllPlayed
+## Version: 50400-1 $Revision$
 ## Notes: Track time played, rested XP and money for all characters
 ## Notes-deDE: Verfolge Spielzeit, Erholt-XP und Gold für alle Charaktere
 ## Notes-frFR: Suivi du temps de jeu, le nombre d'XP restant ainsi que l'argent pour tous les personnages
 ## Notes-koKR: 모든 캐릭터의 플레이 시간, 휴식경험치, 금전현황 기록
 ## Notes-zhCN: 追踪所有角色的在线时间，双倍经验与金钱
 ## Notes-zhTW: 追蹤所有角色的在線時間，雙倍經驗與金錢
-## Version: 50400-1 $Revision$
+## Author: LaoTseu
+
 ## X-Curse-Packaged-Version: v50400-1
 ## X-Curse-Project-Name: AllPlayed
 ## X-Curse-Project-ID: all-played-laotseu
 ## X-Curse-Repository-ID: wow/all-played-laotseu/mainline
-
-## LoadManagers: AddonLoader
-## X-LoadOn-Always: delayed
 
 ## X-Credits: Thanks to Riboflavin for creating Titan_AllPlayed that inspired this addon. Thanks to next96, chkid and maknea for the koKR, kuja and AngudBeef1 for deDE, RoyalHawk, Mars1491 and wowuicn for zhCN, s8095324 and Mars1491 for zhTW and Orbital Digital, oXid_FoX and Beltza for frFR localizations.
 ## X-Website: http://www.wowace.com/projects/all-played-laotseu/
@@ -29,9 +27,13 @@
 
 ## DefaultState: enabled
 
+## SavedVariables: AllPlayedDB
 ## OptionalDeps: Ace3, LibAbacus-3.0, LibCrayon-3.0, !ClassColors, LibQTip-1.0, LibDBIcon-1.0
 
-## SavedVariables: AllPlayedDB
+## LoadManagers: AddonLoader
+## X-LoadOn-Login:  Broker
+## X-LoadOn-Always: delayed
+
 
 # Libraries that should not be de-embeded
 LibStub.lua

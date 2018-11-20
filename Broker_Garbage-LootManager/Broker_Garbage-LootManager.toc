@@ -12,7 +12,6 @@
 ## Version: 5.1v6release
 ## Notes: Plugin for Broker_Garbage. Selective looting and more!
 ## Notes-deDE: Plugin für Broker_Garbage. Selektives Plündern und mehr!
-
 ## Notes-frFR: Plugin for Broker_Garbage. Selective looting and more!
 ## Notes-itIT: Plugin for Broker_Garbage. Selective looting and more!
 ## Notes-koKR: Plugin for Broker_Garbage. Selective looting and more!
@@ -23,7 +22,8 @@
 ## Notes-zhTW: Broker_Garbage的掛件，選擇性拾取與更多功能！
 ## Notes-ptBR: Plugin for Broker_Garbage. Selective looting and more!
 
-## LoadManagers: AddonLoader, Addon Control Panel
+##-- LoadManagers: AddonLoader, Addon Control Panel
+## LoadOnDemand: 1
 ## LoadWith: Broker_Garbage, Broker_Garbage-Config
 
 ## X-Category: Inventory

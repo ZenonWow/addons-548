@@ -1,14 +1,28 @@
 ## Interface: 60200
-## Title: |cff00ff00TradeSkillMaster_Shopping|r
+## Title: TradeSkillMaster_Shopping|r
+## Version: v2.4.6
 ## Notes: Provides an interface for easily viewing, buying, and posting items.
 ## Author: Sapu94, Bart39
-## Dependencies: TradeSkillMaster
-## Version: v2.4.6
-## SavedVariables: TradeSkillMaster_ShoppingDB
+
 ## X-Curse-Packaged-Version: v2.4.6
 ## X-Curse-Project-Name: TradeSkillMaster_Shopping
 ## X-Curse-Project-ID: tradeskillmaster_shopping
 ## X-Curse-Repository-ID: wow/tradeskillmaster_shopping/mainline
+
+## SavedVariables: TradeSkillMaster_ShoppingDB
+## Dependencies: TradeSkillMaster
+
+### TradeSkillMaster is the hub loading the dependent addons as needed
+## LoadManagers: AddonLoader, TradeSkillMaster
+### Slash command also loads TradeSkillMaster if necessary
+## X-LoadOn-Slash: /tsms
+### Autoloading happens only if TradeSkillMaster is already loaded
+## X-Load-Condition:  IsAddOnLoaded('TradeSkillMaster')
+## X-LoadOn-AuctionHouse-If: IsAddOnLoaded('TradeSkillMaster')
+### Load with TradeSkillMaster if AuctionFrame is open
+## X-LoadOn-Addon:     TradeSkillMaster
+## X-LoadOn-Addon-If:  IsFrameShown(AuctionFrame)
+
 
 Locale\enUS.lua
 Locale\deDE.lua

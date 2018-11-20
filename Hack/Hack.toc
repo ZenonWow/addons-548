@@ -10,6 +10,9 @@
 ## X-Curse-Project-ID: hack
 ## X-Curse-Repository-ID: wow/hack/mainline
 
+## LoadManagers: AddonLoader
+## X-LoadOn-Slash: /hack
+
 HackExamples.lua
 Hack.lua
 Hack.xml

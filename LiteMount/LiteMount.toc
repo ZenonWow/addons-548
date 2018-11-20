@@ -2,14 +2,25 @@
 ## Title: LiteMount
 ## Version: 5.4.1
 ## Author: Xodiv of Proudmoore
-## OptionalDeps: Blizzard_PetBattleUI
 ## Email: mib@post.com
-## SavedVariables: LM_UseGlobalOptions, LM_GlobalOptionsDB
-## SavedVariablesPerCharacter: LM_OptionsDB
+
 ## X-Curse-Packaged-Version: 5.4.1
 ## X-Curse-Project-Name: LiteMount
 ## X-Curse-Project-ID: litemount
 ## X-Curse-Repository-ID: wow/litemount/mainline
+
+## SavedVariables: LM_UseGlobalOptions, LM_GlobalOptionsDB
+## SavedVariablesPerCharacter: LM_OptionsDB
+##- OptionalDeps: Blizzard_PetBattleUI    -- TogglePetJournal(1) will load it, no need at startup
+
+##- LoadManagers: AddonLoader
+## X-LoadOn:  Login
+## X-LoadOn-Login:  LowPrio
+## X-LoadOn-Login-Delay:  30 sec
+## X-LoadOn-Click:  LiteMount
+##- X-LoadOn-Script:  LiteMount:OnClick
+##- X-LoadOn-InterfaceOptions:  LiteMount
+
 
 Localization.lua
 

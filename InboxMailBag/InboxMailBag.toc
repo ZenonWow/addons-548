@@ -10,6 +10,9 @@
 ## X-Curse-Project-ID: inbox-mailbag
 ## X-Curse-Repository-ID: wow/inbox-mailbag/mainline
 
+## LoadManagers: AddonLoader
+## X-LoadOn-Mailbox: true
+
 #@no-lib-strip@
 # Libs\LibStub\LibStub.lua
 # Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml

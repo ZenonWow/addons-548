@@ -32,11 +32,11 @@ Libs\LibAdvancedIconSelector-1.0\LibAdvancedIconSelector-1.0.xml
 
 # If AddonLoader is installed, make sure the addon isn't loaded until one of the relevant panes is opened, or a chat command is entered.
 ## LoadManagers: AddonLoader
-## X-LoadOn-Hooks: MacroFrame_LoadUI, CharacterFrame_Expand, GuildBankFrame_LoadUI
-## X-LoadOn-MacroFrame_LoadUI: LoadAddOn("AdvancedIconSelector"); AdvancedIconSelector.MacroPopup:ReplaceMacroPopup()
-## X-LoadOn-CharacterFrame_Expand: LoadAddOn("AdvancedIconSelector"); AdvancedIconSelector.EquipmentSetPopup:ReplaceEquipmentSetPopup()
-## X-LoadOn-GuildBankFrame_LoadUI: LoadAddOn("AdvancedIconSelector"); AdvancedIconSelector.GuildBankPopup:ReplaceGuildBankPopup()
-## X-LoadOn-Slash: /icons, /ais
+## X-LoadOn-Hooks:  MacroFrame_LoadUI, CharacterFrame_Expand, GuildBankFrame_LoadUI
+## X-LoadOn-MacroFrame_LoadUI-Init:      AdvancedIconSelector.MacroPopup:ReplaceMacroPopup()
+## X-LoadOn-CharacterFrame_Expand-Init:  AdvancedIconSelector.EquipmentSetPopup:ReplaceEquipmentSetPopup()
+## X-LoadOn-GuildBankFrame_LoadUI-Init:  AdvancedIconSelector.GuildBankPopup:ReplaceGuildBankPopup()
+## X-LoadOn-Slash: /icons /ais
 
 # Certain addons such as ArkInventory never load the guild bank UI.  Therefore, we must install special hooks.
 ## X-LoadOn-Execute: local function f() if ArkInventory and ArkInventory.LISTEN_VAULT_ENTER then LoadAddOn("AdvancedIconSelector"); hooksecurefunc(ArkInventory, "LISTEN_VAULT_ENTER", AdvancedIconSelector_ReplaceGuildBankPopup) end end; f(); AIS_EventFrame = CreateFrame("Frame"); AIS_EventFrame:RegisterEvent("ADDON_LOADED"); AIS_EventFrame:SetScript("OnEvent", function(self,e,a) if a == "ArkInventory" then f() end end)

@@ -2,12 +2,20 @@
 ### Interface: 70300
 ## Interface-Compatible: 50400, 60200, 70300
 ## Title: Binder
-## Author: Tensai
 ## Version: 3.0.0
 ## Notes: Addon that allows user to create Keybinding Profiles, for easy switching between different sets.
-## OptionalDeps: LibKeyBound-1.0, Dominos, Bartender4
+## Author: Tensai
+
 ## SavedVariablesPerCharacter: BinderMinimapSettings
 ## SavedVariables: Binder_Settings, BinderSettingsDB, BinderProfilesDB
+## OptionalDeps: LibKeyBound-1.0, Dominos, Bartender4
+
+##- LoadManagers: AddonLoader
+##- X-LoadOn-Login:  LowPrio
+##- X-LoadOn-Login-Delay:  1 min
+## X-LoadOn-Slash: /binder
+## X-LoadOn-LDB-Launcher:  Interface\MacroFrame\MacroFrame-Icon
+
 
 # Libs\LibStub\LibStub.lua
 # Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua

@@ -1,12 +1,19 @@
 ## Interface: 50400
 ## Title: Ellipsis (|cff67b1e9K|cff4779ceith|cff67b1e9M|cff4779ceod|r)
+## Version: 3.0.5
 ## Notes: A full-featured, multi-target Aura (DoTs and HoTs) timer and Cooldown tracker.
 ## Author: Kith (Kithulhu)
-## Version: 3.0.5
-## SavedVariables: EllipsisDB
-## OptionalDeps: Ace3, LibSharedMedia-3.0, LibSink-2.0
+
 ## X-Embeds: Ace3, LibSharedMedia-3.0, LibSink-2.0
 ## X-Category: Interface Enhancements
+
+## SavedVariables: EllipsisDB
+## OptionalDeps: Ace3, LibSharedMedia-3.0, LibSink-2.0
+
+##- LoadManagers: AddonLoader
+## X-LoadOn-Login:  UserInterface
+## X-LoadOn-Always: delayed
+
 
 embeds.xml 
 

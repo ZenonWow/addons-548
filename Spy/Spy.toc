@@ -1,14 +1,24 @@
-## Interface: 50400
 ## Title: Spy
+## Interface: 50400
 ## Version: 3.1.6
+
 ## Notes: Detects and alerts you to the presence of nearby enemy players.
 ## Notes-ptBR: Detecta e alerta você da presença de jogadores inimigos.
+
 ## Creator: Immolation
 ## Author: Slipjack
 ## X-Credits-ptBR: Localization: Kasth
+
 ## OptionalDeps:  Ace3, LibSharedMedia-3.0, 
 ## SavedVariables: SpyDB
 ## SavedVariablesPerCharacter: SpyPerCharDB
+
+##- LoadManagers: AddonLoader
+##- X-LoadOn-Always: delayed
+##- X-LoadOn-Login
+## X-LoadOn:  PvPFlagged
+## X-LoadOn-Slash:  /spy
+
 
 #@no-lib-strip@
 Embeds.xml

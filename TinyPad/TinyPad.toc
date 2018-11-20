@@ -1,8 +1,15 @@
 ## Interface: 50400
 ## Title: TinyPad
+## Version: 2.0.1
 ## Notes: A notepad mod.
 ## Author: Gello
-## Version: 2.0.1
+
 ## SavedVariables: TinyPadPages, TinyPadSettings
+
+## LoadManagers: AddonLoader
+## X-LoadOn-Slash:  /tp /pad /tinypad
+## X-LoadOn-LDB-Launcher:  Interface/AddOns/ViragDevTool/icon
+
+
 TinyPad.xml
 TinyPad.lua

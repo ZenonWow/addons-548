@@ -1,14 +1,23 @@
 ## Interface: 60200
-## Title: |cff00ff00TradeSkillMaster_Warehousing|r
+## Title: TradeSkillMaster_Warehousing|r
+## Version: v2.1.4
 ## Notes: Manages your inventory by allowing you to easily move predefined groups of items between your bags, bank, and guild bank.
 ## Author: Sapu94, Bart39
-## Version: v2.1.4
-## SavedVariables: TradeSkillMaster_WarehousingDB
-## Dependency: TradeSkillMaster
+
 ## X-Curse-Packaged-Version: v2.1.4
 ## X-Curse-Project-Name: TradeSkillMaster_Warehousing
 ## X-Curse-Project-ID: tradeskillmaster_warehousing
 ## X-Curse-Repository-ID: wow/tradeskillmaster_warehousing/mainline
+
+## SavedVariables: TradeSkillMaster_WarehousingDB
+## Dependency: TradeSkillMaster
+
+### TradeSkillMaster is the hub loading the dependent addons as needed
+## LoadManagers: AddonLoader, TradeSkillMaster
+### Slash command also loads TradeSkillMaster if necessary
+## X-LoadOn-Slash: /tsmw
+### Autoloading happens only if TradeSkillMaster is already loaded
+## X-Load-Condition:  IsAddOnLoaded('TradeSkillMaster')
 
 
 Locale\enUS.lua

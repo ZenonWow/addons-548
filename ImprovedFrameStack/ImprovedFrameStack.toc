@@ -1,15 +1,22 @@
 ﻿## Interface: 50400
 ## Title: Improved FrameStack
 ## Version: 1.0
-## Author: Cybeloras
 ## Notes: Resolves addresses of anonymous frames in the /framestack tooltip to their first named ancestor and the path in between.
+## Author: Cybeloras
 ## X-Curse-Packaged-Version: 1.1
 ## X-Curse-Project-Name: Improved FrameStack
 ## X-Curse-Project-ID: improved-framestack
 ## X-Curse-Repository-ID: wow/improved-framestack/mainline
 
+## SavedVariables: IFS_MaxDepth
+## RequiredDeps: Blizzard_DebugTools
+
+## LoadOnDemand: 1
 ## LoadWith: Blizzard_DebugTools
 
-## SavedVariables: IFS_MaxDepth
+##- LoadManagers: AddonLoader
+##- X-LoadOn-FrameShown: FrameStackTooltip
+## X-LoadOn-Slash: /fstack /framestack
+
 
 ImprovedFrameStack.lua

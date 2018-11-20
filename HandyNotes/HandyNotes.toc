@@ -1,22 +1,25 @@
 ﻿## Interface: 50400
 ## Title: HandyNotes
+## Version: 1.2.0
 ## Notes: Handy notes for your maps
 ## Notes-frFR: Notes pratiques pour vos cartes.
 ## Author: Xinhuan
-## Version: 1.2.0
 ## DefaultState: enabled
+
 ## X-Category: Map
 ## X-eMail: xinhuan @ gmail DOT com
-## OptionalDeps: Ace3, TomTom
 ## X-Curse-Packaged-Version: v1.2.1
 ## X-Curse-Project-Name: HandyNotes
 ## X-Curse-Project-ID: handynotes
 ## X-Curse-Repository-ID: wow/handynotes/mainline
 
-## LoadManagers: AddonLoader
-## X-LoadOn-Always: delayed
-
 ## SavedVariables: HandyNotesDB, HandyNotes_HandyNotesDB
+## OptionalDeps: Ace3, TomTom
+
+## LoadManagers: AddonLoader
+## X-LoadOn-FrameShown: WorldMapFrame
+## X-LoadOn-Slash: /hn /hnnew /handy /handynotes
+
 
 # Library files
 #@no-lib-strip@

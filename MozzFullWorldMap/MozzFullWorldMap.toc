@@ -5,15 +5,20 @@
 ## eMail: kscottpiel@gmail.com
 ## URL: http://forums.nUIaddon.com
 ## Notes: (Fan's Update)|nShows unexplored areas of zone maps.|n|n kscottpiel@nUIaddon.com
-## SavedVariables: MFWM_PlayerData
-## Dependencies: Blizzard_BattlefieldMinimap
-## OptionalDeps: nUI6
 ## X-CompatibleLocales: enUS, enGB, deDE, esES, frFR, zhTW, zhCN
 ## X-Donate: PayPal:kscottpiel AT gmail DOT com
 ## X-Email: kscottpiel@nUIaddon.com
 ## X-Feedback: http://forums.nUIaddon.com
 ## X-Localizations: enUS, deDE, esES, frFR, zhTW
 ## X-Website: http://www.nUIaddon.com
+
+## SavedVariables: MFWM_PlayerData
+## Dependencies: Blizzard_BattlefieldMinimap
+## X-DontEnableWith: nUI6
+
+## LoadManagers: AddonLoader
+## X-LoadOn-FrameShown: WorldMapFrame
+
 
 # MozzFullWorldMap(Fan's Update)
 

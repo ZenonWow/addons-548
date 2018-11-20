@@ -1,14 +1,35 @@
 ## Interface: 60200
-## Title: |cff00ff00TradeSkillMaster_Mailing|r
+## Title: TradeSkillMaster_Mailing|r
+## Version: v2.2.13
 ## Notes: Provides Auto-Opening and Auto-Sending features to the mailbox.
 ## Author: Sapu94, Bart39
-## Version: v2.2.13
-## SavedVariables: TradeSkillMaster_MailingDB
-## Dependency: TradeSkillMaster
+
 ## X-Curse-Packaged-Version: v2.2.13
 ## X-Curse-Project-Name: TradeSkillMaster_Mailing
 ## X-Curse-Project-ID: tradeskillmaster_mailing
 ## X-Curse-Repository-ID: wow/tradeskillmaster_mailing/mainline
+
+## SavedVariables: TradeSkillMaster_MailingDB
+
+### TradeSkillMaster is the hub loading the dependent addons as needed
+## Dependency: TradeSkillMaster
+## LoadManagers: AddonLoader, TradeSkillMaster
+## LoadOnDemand: 1
+
+### Slash command also loads TradeSkillMaster if necessary
+## X-LoadOn-Slash: /tsmm
+
+### Autoloading happens only if TradeSkillMaster is already loaded
+##- X-Load-Condition:     IsAddOnLoaded('TradeSkillMaster')
+## X-LoadOn-Mailbox-If:  IsAddOnLoaded('TradeSkillMaster')
+##- X-LoadOn-Addon:       TradeSkillMaster
+##- X-LoadOn-TradeSkillMaster-If:  MailFrame:IsShown()
+
+## X-LoadOn-Mailbox
+##- X-LoadOn-Addon: TradeSkillMaster
+##- X-Load-Condition:  IsAddOnLoaded('TradeSkillMaster')  and  MailFrame:IsShown()
+### X-Load-Condition  applies to event-triggered conditions only. Slash and Launcher as explicit user request will ignore this condition.
+
 
 Locale\enUS.lua
 Locale\frFR.lua

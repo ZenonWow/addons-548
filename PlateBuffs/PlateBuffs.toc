@@ -1,11 +1,10 @@
 ## Interface: 50400
-## X-Compatible-With: 50400
 ## Title: Plate Buffs - MoP
 ## Version: 1.17.2
 ## Notes: Show buffs on nameplates. FanUpd by Alea
 ## Author: Cyprias
-## SavedVariables: PB_DB
-## OptionalDeps: LibStub, CallbackHandler-1.0, Ace3, LibNameplate-1.0, LibNameplateRegistry-1.0
+
+## X-Compatible-With: 50400
 ## X-Curse-Packaged-Version: r228
 ## X-Curse-Project-Name: PlateBuffs
 ## X-Curse-Project-ID: platebuffs
@@ -15,8 +14,14 @@
 ## X-Donate: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=D6SUMPTFUATY6
 ## X-License: All Rights Reserved
 
+## SavedVariables: PB_DB
+## OptionalDeps: LibStub, CallbackHandler-1.0, Ace3, LibNameplate-1.0, LibNameplateRegistry-1.0
+
 ## LoadManagers: AddonLoader
+## X-Load-OnlyOne:  NameplateBuffs
 ## X-LoadOn-Always: true
+## X-LoadOn-Login:  UserInterface
+
 
 #@no-lib-strip@
 libs\embeds.xml

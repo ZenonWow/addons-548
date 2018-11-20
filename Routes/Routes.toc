@@ -1,10 +1,10 @@
 ﻿## Interface: 50200
 ## Title: Routes
+## Version: v1.4.2-8-g4b93fad
 ## Notes: Routes on your worldmap and minimap!
 ## Notes-frFR: Routes sur votre carte du monde et minicarte !
 ## Notes-zhCN:Routes可以在已有采集相关数据的基础上形成采集路线，并可以优化路线，提高采集效率。
 ## Author: Grum, Xinhuan
-## Version: v1.4.2-8-g4b93fad
 ## DefaultState: enabled
 ## X-Category: Map
 ## X-eMail: routes @ grum DOT nl & xinhuan @ gmail DOT com
@@ -17,10 +17,10 @@
 ## OptionalDeps: Ace3, LibMapData-1.0, Cartographer, Cartographer_Notes, GatherMate, GatherMate2, Gatherer, HandyNotes
 ## SavedVariables: RoutesDB
 
-##- LoadManagers: AddonLoader
+## LoadManagers: AddonLoader
 ## X-LoadOn-Slash: /rt, /routes
 ## X-LoadOn-LDB-Launcher: Interface\Addons\Routes\icon.tga
-##-- X-LoadOn-FrameShown: WorldMapFrame
+##- X-LoadOn-FrameShown: WorldMapFrame
 
 
 # Library files

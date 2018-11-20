@@ -6,9 +6,13 @@
 ## X-Credits: Knapster alias Baaras (For the original TomTomPing)
 ## X-Category: Interface Enhancements
 ## Dependencies:
-## RequiredDeps: TomTom 
 ## OptionalDeps: Ace3
 ## SavedVariables: TomTomPing_DB
+
+## RequiredDeps: TomTom
+## LoadOnDemand: 1
+## LoadWith: TomTom
+
 
 ## X-Embeds: Ace3
 #@no-lib-strip@

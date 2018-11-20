@@ -1,14 +1,39 @@
 ## Interface: 50400
-## Title: |cff00ff00TradeSkillMaster_Accounting|r
+## Title: TradeSkillMaster_Accounting
+## Version: r334
 ## Notes: Tracks your gold-flow/sales/purchases and provides you with detailed summaries and lists of this information.
 ## Author: Sapu94, Bart39
-## Version: r334
-## SavedVariables: TradeSkillMaster_AccountingDB
-## Dependency: TradeSkillMaster
+
 ## X-Curse-Packaged-Version: r334
 ## X-Curse-Project-Name: TradeSkillMaster_Accounting
 ## X-Curse-Project-ID: tradeskillmaster_accounting
 ## X-Curse-Repository-ID: wow/tradeskillmaster_accounting/mainline
+
+## SavedVariables: TradeSkillMaster_AccountingDB
+## Dependency: TradeSkillMaster
+
+### TradeSkillMaster is the hub loading the dependent addons as needed
+## LoadManagers: AddonLoader, TradeSkillMaster
+### Slash command also loads TradeSkillMaster if necessary
+## X-LoadOn-Slash: /tsma /tsmauc
+### Autoloading happens only if TradeSkillMaster is already loaded
+## X-Load-Condition:  IsAddOnLoaded('TradeSkillMaster')
+## X-LoadOn:  AuctionHouse, Mailbox, Crafting, Merchant
+
+##- X-LoadOn-AuctionHouse-If:  IsAddOnLoaded('TradeSkillMaster')    -- AuctionFrame
+##- X-LoadOn-Mailbox-If:       IsAddOnLoaded('TradeSkillMaster')    -- MailFrame
+##- X-LoadOn-Crafting-If:      IsAddOnLoaded('TradeSkillMaster')    -- TradeSkillFrame
+##- X-LoadOn-Merchant-If:      IsAddOnLoaded('TradeSkillMaster')    -- MerchantFrame
+##-- LibStub("AceAddon-3.0"):GetAddon('TradeSkillMaster')
+
+### Load with TradeSkillMaster if AuctionFrame is open
+##- X-LoadOn-Addon:     TradeSkillMaster
+##- X-LoadOn-Addon-If:  IsFrameShown(AuctionFrame, MailFrame, TradeSkillFrame, MerchantFrame)
+
+##- X-LoadOn-Hooks: 
+##- X-LoadOn-Frames: 
+##- X-AfterLoad-Init:
+
 
 Locale\enUS.lua
 Locale\frFR.lua

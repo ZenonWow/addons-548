@@ -1,13 +1,19 @@
 ## Interface: 70000
-### Compatible with 50400
+## X-Compatible-With: 50400
 ## Title: Combat Mode
 ## Version: 1.3.1
 ## Author: justice7ca
 ## Notes: Combat Mode
 ## DefaultState: enabled
 ## X-Category: Misc
-## LoadOnDemand: 0
+
 ## SavedVariables: CombatModeDB
+## OptionalDeps: Ace3, tekDebug
+
+##- LoadManagers: AddonLoader
+## X-LoadOn-Login:  UserInterface
+## X-LoadOn-Always: delayed
+
 
 # Libs\libs.xml
 CombatMode.lua

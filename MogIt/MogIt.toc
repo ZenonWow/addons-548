@@ -1,9 +1,7 @@
 ﻿## Interface: 50400
 ## Title: MogIt
-## Author: Aelobin (The Maelstrom EU) & Lombra (Defias Brotherhood EU)
 ## Version: 3.3.2
-## SavedVariables: MogItDB, MogItWishlist
-## OptionalDeps: DataStore_Containers
+## Author: Aelobin (The Maelstrom EU) & Lombra (Defias Brotherhood EU)
 ## Notes: Transmogrification Assistant
 ## Notes-frFR: Transmogrification Assistante
 ## Notes-deDE: Transmogrifikation Assistentin
@@ -15,6 +13,7 @@
 ## Notes-zhTW: 塑形 助理
 ## Notes-ptBR: Assistente Transmogrification
 ## Notes-itIT: Transmogrification Assistant
+
 ## X-Category: Roleplay & Transmogrification
 ## X-Website: http://www.curse.com/addons/wow/mogit
 ## X-Email: aelobin@gmail.com
@@ -23,6 +22,16 @@
 ## X-Curse-Project-Name: MogIt
 ## X-Curse-Project-ID: mogit
 ## X-Curse-Repository-ID: wow/mogit/mainline
+
+## SavedVariables: MogItDB, MogItWishlist
+## OptionalDeps: DataStore_Containers
+
+## LoadManagers: AddonLoader
+## X-LoadOn-Login:  LowPrio
+## X-LoadOn-Login-Delay:  30 sec
+## X-LoadOn-Slash: /mog /mogit
+## X-LoadOn-LDB-Launcher:  Interface\Icons\INV_Enchant_EssenceCosmicGreater
+
 
 Libs\Embeds.xml
 Locale\Locale.xml

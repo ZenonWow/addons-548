@@ -1,14 +1,22 @@
 ## Interface: 50400
-## Title: |cff00ff00TradeSkillMaster_Auctioning|r
+## Title: TradeSkillMaster_Auctioning
 ## Notes: Manages the posting, canceling, and resetting of auctions.
 ## Author: Sapu94, Bart39
 ## Version: v2.4.1
-## Dependency: TradeSkillMaster
-## SavedVariables: TradeSkillMaster_AuctioningDB
 ## X-Curse-Packaged-Version: v2.4.1
 ## X-Curse-Project-Name: TradeSkillMaster_Auctioning
 ## X-Curse-Project-ID: tradeskillmaster_auctioning
 ## X-Curse-Repository-ID: wow/tradeskillmaster_auctioning/mainline
+
+## SavedVariables: TradeSkillMaster_AuctioningDB
+
+## Dependency: TradeSkillMaster
+## LoadManagers: AddonLoader
+## X-LoadOn-Slash: /tsma, /tsmauc
+
+##- X-LoadOn-AuctionHouse: if  IsAddOnLoaded('TradeSkillMaster')
+##- X-LoadOn-AuctionHouse-If:  IsAddOnLoaded('TradeSkillMaster')
+
 
 Locale\enUS.lua
 Locale\deDE.lua

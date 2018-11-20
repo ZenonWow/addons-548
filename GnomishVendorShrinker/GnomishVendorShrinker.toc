@@ -13,7 +13,7 @@
 ## X-Category: Misc
 ## X-Icon: Interface\Icons\INV_Misc_Toy_07
 
-## LoadManagers: AddonLoader
+##- LoadManagers: AddonLoader
 ## X-LoadOn-Merchant: true
 ## X-LoadOn-InterfaceOptions: GnomishVendorShrinker
 

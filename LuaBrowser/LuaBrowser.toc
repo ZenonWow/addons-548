@@ -3,5 +3,9 @@
 ## Title: Lua Browser
 ## Author: Aezay (Earthen Ring EU)
 ## Notes: Lua Browser
+
+## LoadManagers: AddonLoader
+## X-LoadOn-Slash: /lb, /luabrowser
+
 Libs\AzDropDown.lua
 core.lua

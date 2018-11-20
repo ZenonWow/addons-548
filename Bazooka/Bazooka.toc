@@ -1,12 +1,8 @@
 ## Interface: 50400
 ## Title: Bazooka
-## Author: mitch0
 ## Version: r261
+## Author: mitch0
 ## Notes: Data Broker Display similar to FuBar
-## LoadManagers: AddonLoader
-## X-LoadOn-Always: true
-## SavedVariables: BazookaDB
-## OptionalDeps: LibStub, CallbackHandler-1.0, Ace3, LibSharedMedia-3.0, LibDualSpec-1.0 LibJostle-3.0
 
 ## X-License: Public Domain
 ## X-RelSite-WoWI: 14767
@@ -15,6 +11,14 @@
 ## X-Curse-Project-Name: Bazooka
 ## X-Curse-Project-ID: bazooka
 ## X-Curse-Repository-ID: wow/bazooka/mainline
+
+## SavedVariables: BazookaDB
+## OptionalDeps: LibStub, CallbackHandler-1.0, Ace3, LibSharedMedia-3.0, LibDualSpec-1.0 LibJostle-3.0
+
+##- LoadManagers: AddonLoader
+## X-LoadOn-Login:  UserInterface
+## X-LoadOn-Always: delayed
+
 
 #@no-lib-strip@
 # libs\LibStub-1.0\LibStub.lua

@@ -1,14 +1,31 @@
 ## Interface: 50400
-## Title: |cff00ff00TradeSkillMaster_Destroying|r
+## Title: TradeSkillMaster_Destroying|r
+## Version: v2.1.2
 ## Notes: Makes bulk and one-off milling, prospecting, and disenchanting easier.
 ## Author: Sapu94, Bart39
-## Version: v2.1.2
-## SavedVariables: TradeSkillMaster_DestroyingDB
-## Dependency: TradeSkillMaster
+
 ## X-Curse-Packaged-Version: v2.1.2
 ## X-Curse-Project-Name: TradeSkillMaster_Destroying
 ## X-Curse-Project-ID: tradeskillmaster_destroying
 ## X-Curse-Repository-ID: wow/tradeskillmaster_destroying/mainline
+
+## SavedVariables: TradeSkillMaster_DestroyingDB
+
+### TradeSkillMaster is the hub loading the dependent addons as needed
+## Dependency: TradeSkillMaster
+## LoadManagers: AddonLoader, TradeSkillMaster
+## LoadOnDemand: 1
+
+### Slash command also loads TradeSkillMaster if necessary
+## X-LoadOn-Slash: /tsmd
+
+### Autoloading happens only if TradeSkillMaster is already loaded
+##- X-Load-Condition:        IsAddOnLoaded('TradeSkillMaster')
+## X-LoadOn-Crafting-If:    IsAddOnLoaded('TradeSkillMaster')
+
+##- X-LoadOn-Hooks: 
+##- X-LoadOn-Frames: 
+
 
 Locale\enUS.lua
 Locale\deDE.lua

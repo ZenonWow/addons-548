@@ -3,13 +3,19 @@
 ## Notes: Core addon for the TradeSkillMaster suite. Does nothing without modules installed.
 ## Author: Sapu94, Bart39
 ## Version: r1245
-## SavedVariables: TradeSkillMasterAppDB, TradeSkillMasterDB
-## OptionalDeps: AccurateTime, Ace3, LibDataBroker-1.1, LibDBIcon-1.0, LibExtraTip, TipHelper, LibParse, LibCompress, LibGraph-2.0, Auc-Advanced, Auctionator
+
 ## X-Embeds: AccurateTime, Ace3, LibDataBroker-1.1, LibDBIcon-1.0, LibExtraTip, TipHelper, LibParse, LibCompress, LibGraph-2.0
 ## X-Curse-Packaged-Version: r1245
 ## X-Curse-Project-Name: TradeSkillMaster
 ## X-Curse-Project-ID: tradeskill-master
 ## X-Curse-Repository-ID: wow/tradeskill-master/mainline
+
+## SavedVariables: TradeSkillMasterAppDB, TradeSkillMasterDB
+## OptionalDeps: AccurateTime, Ace3, LibDataBroker-1.1, LibDBIcon-1.0, LibExtraTip, TipHelper, LibParse, LibCompress, LibGraph-2.0, Auc-Advanced, Auctionator
+
+##- LoadManagers: AddonLoader
+## X-LoadOn-Slash: /tsm
+
 
 #@no-lib-strip@
 # Libs\LibStub\LibStub.lua

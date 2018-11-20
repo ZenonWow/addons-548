@@ -4,8 +4,11 @@
 ## Title-zhTW: Dominos 設置
 ## Notes: GUI based configuration for Dominos
 ## Author: Tuller
+
 ## Dependencies: Dominos
 ## LoadOnDemand: 1
+
+
 localization.xml
 menu.lua
 panel.lua

@@ -1,19 +1,9 @@
 ## Interface: 50100
-## Dependencies:
-## OptionalDeps: LibPeriodicTable-3.1, Auctionator, AuctionLite, Auc-Advanced, Enchantrix, WOWEcon_PriceMod, Auctional, ArkInventoryRules, Bagnon
-## SavedVariables: BG_GlobalDB
-## SavedVariablesPerCharacter: BG_LocalDB
-## X-Curse-Packaged-Version: 5.1v6release
-## X-Curse-Project-Name: Broker_Garbage
-## X-Curse-Project-ID: broker_garbage
-## X-Curse-Repository-ID: wow/broker_garbage/mainline
-
 ## Title: Broker_Garbage
-## Author: ckaotik
 ## Version: 5.1v6release
+## Author: ckaotik
 ## Notes: Full bags no more! Distinguish between junk and treasure, find items to drop quickly.
 ## Notes-deDE: Unterscheide Trödel von Schätzen und finde billigen Müll zum Platzschaffen.
-
 ## Notes-frFR: Full bags no more! Distinguish between junk and treasure, find items to drop quickly.
 ## Notes-itIT: Full bags no more! Distinguish between junk and treasure, find items to drop quickly.
 ## Notes-koKR: Full bags no more! Distinguish between junk and treasure, find items to drop quickly.
@@ -24,9 +14,11 @@
 ## Notes-zhTW: 不再背包過滿！區別垃圾與寶物，並且找到物品以快速丟棄。
 ## Notes-ptBR: Full bags no more! Distinguish between junk and treasure, find items to drop quickly.
 
-## LoadManagers: AddonLoader, Addon Control Panel
-## X-LoadOn-Always: delayed
 ## X-Version: 2
+## X-Curse-Packaged-Version: 5.1v6release
+## X-Curse-Project-Name: Broker_Garbage
+## X-Curse-Project-ID: broker_garbage
+## X-Curse-Repository-ID: wow/broker_garbage/mainline
 
 ## X-Website: http://wow.curseforge.com/addons/broker_garbage/
 ## X-RelSite-WoWI: 15531
@@ -34,6 +26,16 @@
 ## X-Localizations: enUS, deDE, zhTW
 ## X-Credits: GarbageFu, tekkub, Mirroar
 ## X-License: BSD
+
+## SavedVariables: BG_GlobalDB
+## SavedVariablesPerCharacter: BG_LocalDB
+## Dependencies:
+## OptionalDeps: LibPeriodicTable-3.1, Auctionator, AuctionLite, Auc-Advanced, Enchantrix, WOWEcon_PriceMod, Auctional, ArkInventoryRules, Bagnon
+
+## LoadManagers: AddonLoader
+## X-LoadOn-Login:  Broker
+## X-LoadOn-Always: delayed
+
 
 # libraries
 #@no-lib-strip@

@@ -1,17 +1,21 @@
-## Interface: 70000
+## Interface: 50400
+##- Interface: 70000
 ## Title: ViragDevTool
 ## Author: Varren@Azuregos-RU
 ## Version: 0.1
-## SavedVariables: ViragDevTool_Settings
 ## X-Curse-Packaged-Version: v0.18
 ## X-Curse-Project-Name: ViragDevTool
 ## X-Curse-Project-ID: varrendevtool
 ## X-Curse-Repository-ID: wow/varrendevtool/mainline
-## OptionalDeps: LibStub, CallbackHandler-1.0, LibDataBroker-1.1, TinyPad
 ## X-Embeds: LibStub, CallbackHandler-1.0, LibDataBroker-1.1
 
+## SavedVariables: ViragDevTool_Settings
+## OptionalDeps: LibStub, CallbackHandler-1.0, LibDataBroker-1.1
+## X-OptionalUse: TinyPad
+
 ## LoadManagers: AddonLoader
-## X-LoadOn-Always: delayed
+## X-LoadOn-Slash: /vdt
+## X-LoadOn-LDB-Launcher:  Interface/AddOns/ViragDevTool/icon  { label="/VDT" }
 
 
 # libs\LibStub\LibStub.lua
@@ -30,3 +34,4 @@ ViragDevTool.xml
 
 ViragDevToolOptions.xml
 ViragDevToolOptions.lua
+

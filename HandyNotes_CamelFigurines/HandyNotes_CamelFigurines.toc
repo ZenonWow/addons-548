@@ -1,12 +1,14 @@
 ## Interface: 70300
 ## Title: HandyNotes_CamelFigurines
+## Version: 1
 ## Notes: Shows location of Mysterious Camel Figurines in Uldum
 ## Author: AdmiralBlackfur
-## Version: 1
 ## DefaultState: enabled
 ## X-Category: Achievements
+
 ## SavedVariables: HandyNotes_CamelFigurinesDB
 ## RequiredDeps: HandyNotes
+
 
 handler.lua
 config.lua

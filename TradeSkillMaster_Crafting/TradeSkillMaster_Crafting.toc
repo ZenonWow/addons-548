@@ -1,14 +1,32 @@
 ﻿## Interface: 50400
-## Title: |cff00ff00TradeSkillMaster_Crafting|r
+## Title: TradeSkillMaster_Crafting|r
 ## Notes: Provides a rich profession interface complete with a powerful crafting queue.
-## Author: Sapu94, Bart39
 ## Version: v2.5.2
-## SavedVariables: TradeSkillMaster_CraftingDB
-## Dependency: TradeSkillMaster, TradeSkillMaster_ItemTracker
+## Author: Sapu94, Bart39
+
 ## X-Curse-Packaged-Version: v2.5.2
 ## X-Curse-Project-Name: TradeSkillMaster_Crafting
 ## X-Curse-Project-ID: tradeskillmaster_crafting
 ## X-Curse-Repository-ID: wow/tradeskillmaster_crafting/mainline
+
+## SavedVariables: TradeSkillMaster_CraftingDB
+
+### TradeSkillMaster is the hub loading the dependent addons as needed
+## Dependency: TradeSkillMaster
+## LoadManagers: AddonLoader, TradeSkillMaster
+## LoadOnDemand: 1
+
+### Slash command also loads TradeSkillMaster if necessary
+## X-LoadOn-Slash: /tsmc
+
+### Autoloading happens only if TradeSkillMaster is already loaded
+##- X-Load-Condition:        IsAddOnLoaded('TradeSkillMaster')
+## X-LoadOn-Crafting-If:    IsAddOnLoaded('TradeSkillMaster')
+## X-LoadOn-Crafting-Init:  LibStub("AceAddon-3.0"):GetAddon("TSM_Crafting"):OnEvent("TRADE_SKILL_SHOW")
+
+##- X-LoadOn-Hooks: 
+##- X-LoadOn-Frames: 
+
 
 Locale\enUS.lua
 Locale\deDE.lua
