@@ -244,6 +244,12 @@ function ViragDevToolLinkedList:AddNodesAfter(nodeList, parentNode)
     end
 end
 
+function ViragDevToolLinkedList:AddNodeFunc(updateFunc, dataName)
+  local node = self:AddNode(nil, dataName)
+  node.updateFunc = updateFunc
+  return node
+end
+
 function ViragDevToolLinkedList:AddNode(data, dataName)
     local node = self:NewNode(data, dataName)
 
@@ -258,6 +264,7 @@ function ViragDevToolLinkedList:AddNode(data, dataName)
     end
 
     self.size = self.size + 1;
+    return node
 end
 
 function ViragDevToolLinkedList:NewNode(data, dataName, padding, parent)
@@ -349,12 +356,7 @@ ViragDevTool.list = ViragDevToolLinkedList:new()
 -- @param dataName (string or nil) - name tag to show in UI for you variable.
 -- Main purpose is to give readable names to objects you want to track.
 function ViragDevTool_AddData(data, dataName)
-    if dataName == nil then
-        dataName = tostring(data)
-    end
-
-    ViragDevTool.list:AddNode(data, tostring(dataName))
-    ViragDevTool:UpdateMainTableUI()
+    ViragDevTool:Add(data, dataName)
 end
 _G.VdtAdd = ViragDevTool_AddData
 _G.VdtDump = ViragDevTool_AddData
@@ -362,41 +364,84 @@ _G.Vdt = ViragDevTool_AddData
 _G.Dump = _G.DevTools_Dump	-- Blizzard_DebugTools
 
 function ViragDevTool:Add(data, dataName)
-    ViragDevTool_AddData(data, dataName)
+    if dataName == nil then
+        dataName = tostring(data)
+    end
+
+    self.list:AddNode(data, tostring(dataName))
+    self:UpdateMainTableUI()
 end
 
 function ViragDevTool:ExecuteCMD(msg, bAddToHistory)
     if  not msg  or  msg == ""  then  msg = "_G"  end
-		--self:print('ExecuteCMD("' .. msg .. '", ' .. tostring(bAddToHistory) .. ')')
+    --self:print('ExecuteCMD("' .. msg .. '", ' .. tostring(bAddToHistory) .. ')')
     local resultTable
 
-    local msgs = self.split(msg, " ")
+    local msgs = self.split(msg, " ", 3)
     local cmd = self.CMD[string.upper(msgs[1])]
 
-    if cmd then
+    if not cmd then
+        self:AddWatch(msg)
+    else
         local title
         resultTable, title = cmd(msgs[2], msgs[3])
-
-        if title then msg = title end
-    else
-        resultTable = self:FromStrToObject(msg)
-        if not resultTable then
-            self:print("_G." .. msg .. " == nil, so can't add")
-        end
+        self:Add(resultTable, msg)
     end
 
-    if resultTable then
-        if bAddToHistory and ViragDevTool.AddToHistory then
-            ViragDevTool:AddToHistory(msg)
-        end
-
-        self:Add(resultTable, msg)
+    if bAddToHistory and ViragDevTool.AddToHistory then
+        ViragDevTool:AddToHistory(msg)
     end
 end
 
-function ViragDevTool:FromStrToObject(str)
+local function packSkipOne(one, ...)
+  return one, { ..., n = select('#', ...) }
+end
 
-    if str == "_G" then return _G end
+local function tequals(t1,t2)
+  if  type(t1) ~= 'table'  or  type(t2) ~= 'table'  then  return  t1 == t2  end
+  for  k,v  in pairs(t1) do  if  not tequals(v, t2[k])  then  return false  end end
+  for  k,v  in pairs(t2) do  if  not t1[k]  then  return false  end end
+  return true
+end
+
+--[[
+/run ViragDevTool.CheckPack()
+--]]
+function ViragDevTool.CheckPack()
+  assert( tequals( _pack(1,nil,3) , { 1,nil,3,n=3 })
+  assert( tequals( _pack(1,nil) , { 1,nil,n=2 })
+end
+
+function ViragDevTool.RunUnsafeFunc(updateFunc, bodyStr)
+  local ran, results = packSkipOne( xpcall(updateFunc, geterrorhandler()) )
+  if  not ran  then  self:print('"'..bodyStr..'" update error:  '.. results[1])  end
+  
+  if  results.n <= 1  then  return ran, results[1]  end
+  return ran, results
+end
+
+function ViragDevTool:AddWatch(str)
+  local updateFunc = self:FromStrToFunc(str)
+  self.list:AddNodeFunc(updateFunc, tostring(dataName))
+  self:UpdateMainTableUI()
+end
+
+function ViragDevTool:FromStrToFunc(str)
+	local body = "return "..str
+	local ran, compiled = pcall(loadstring, body)
+	if  not ran  then  self:print('"'..body..'" failed to compile:  ".. compiled)  end
+	return  ran  and  compiled
+end
+
+function ViragDevTool:FromStrToObject(str)
+	local compiled = self:FromStrToFunc(str)
+	local ran, result = self.RunUnsafeFunc(compiled)
+	return  ran  and  result
+end
+
+function ViragDevTool:FromStrToObject2(str)
+
+    --if str == "_G" then return _G end
     local vars = self.split(str, ".") or {}
 
     local var = _G
@@ -691,6 +736,11 @@ function ViragDevTool:ScrollBar_AddChildren(scrollFrame, strTemplate)
 end
 
 function ViragDevTool:UIUpdateMainTableButton(node, info, id)
+    if  info.updateFunc  then
+      local ran, result = self.RunUnsafeFunc(updateFunc)
+      if  ran  then  info.value = result  end
+    end
+    
     local color = self.colors[type(info.value)]
     if not color then color = self.colors.default end
     if type(info.value) == "table" and self:IsMetaTableNode(info) then
