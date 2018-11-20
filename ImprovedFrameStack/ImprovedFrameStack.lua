@@ -1,5 +1,6 @@
 ﻿-- Better framestack
 
+
 local function insert(t, k)
 	
 	tinsert(t, 1, k)
@@ -197,6 +198,62 @@ local function getFramesToResolve(...)
 	return numToFind
 end
 
+
+
+
+--[[ Highlight the frame under the mouse
+/run a= GetMouseFocus()
+/dump GetMouseFocus()
+/dump GetMouseFocus():GetBackdrop()
+/dump GetMouseFocus():GetBackdropColor()
+/dump GetMouseFocus():GetBackdropBorderColor()
+/run GetMouseFocus():SetBackdropColor()
+--]]
+
+local highlighter
+local highBackdrop = { 
+	bgFile = "Interface/Tooltips/UI-Tooltip-Background", 
+	edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+	tile = true, tileSize = 0,
+	edgeSize = 4, 
+	insets = { left = 0, right = 0, top = 0, bottom = 0 }
+}
+
+local function HighlightFrame(newFrame)
+	if  newFrame == WorldFrame  then  newFrame = nil  end
+	if  not highlighter  then
+		if  not newFrame  then  return  end
+		highlighter = CreateFrame('Frame', "HighlighterFrame")
+		--  https://wow.gamepedia.com/API_Frame_SetBackdrop
+		--  https://wow.gamepedia.com/API_Frame_SetBackdropColor
+		highlighter:SetBackdrop(highBackdrop)
+		highlighter:SetBackdropColor(0.3,0.3,0.3,0.5)
+		highlighter:SetBackdropBorderColor(0.5,1,0.5,0.75)
+		
+	end
+	
+	--highlighter:SetParent(newFrame)
+	local ran, res = pcall(highlighter.SetParent, highlighter, newFrame)
+	if  not ran  then  print("Frame "..(newFrame.GetName and newFrame:GetName() or "?").." not a good parent") ; highlighter:SetParent(nil) ; newFrame = nil  end
+	
+	if  newFrame  then
+		highlighter:SetAllPoints()
+		highlighter:Show()
+	else
+		highlighter:Hide()
+		highlighter:ClearAllPoints()
+	end
+end
+
+
+
+local function FrameStackTooltip_OnHide(self)
+	highlighter:Hide()
+	highlighter:SetParent(nil)
+	highlighter = nil
+end
+
+
 -- Figure out what frames to resolve, search for those frames, and then modify the tooltip.
 local function hook(self, doHidden)
 	local numToFind = getFramesToResolve(self:GetRegions())
@@ -221,26 +278,28 @@ local function hook(self, doHidden)
 	if maxLen > FrameStackTooltip:GetWidth() then
 		FrameStackTooltip:SetWidth(maxLen + 20)
 	end
+	
+	HighlightFrame( GetMouseFocus() )
 end
 
 
 
-local function load()
+local function load(when)
 	hooksecurefunc(FrameStackTooltip, "SetFrameStack", hook)
-
-	print("|cff33ff99ImprovedFrameStack|r: Loaded and hooked.")
+	FrameStackTooltip:HookScript("OnHide", FrameStackTooltip_OnHide)
+	if  IsLoggedIn()  then  print("|cff33ff99ImprovedFrameStack|r: Loaded "..when.." Blizzard_DebugTools.")  end
 end
 
 
 if IsAddOnLoaded("Blizzard_DebugTools") then
-	load()
+	load("with")
 else
 	-- The .toc is set to ##LoadWith: Blizzard_DebugTools, so this should never happen.
 	local f = CreateFrame("Frame")
 	f:RegisterEvent("ADDON_LOADED")
 	f:SetScript("OnEvent", function(self, event, addon)
 		if addon == "Blizzard_DebugTools" then
-			load()
+			load("after")
 			f:UnregisterAllEvents()
 		end
 	end)

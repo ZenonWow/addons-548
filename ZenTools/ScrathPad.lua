@@ -111,6 +111,9 @@ FriendsFrame:SetPoint('TOPRIGHT',-10,-20)
 
 Examiner:ClearAllPoints() Examiner:SetPoint('TOPLEFT', 20, -20)
 
+LossOfControlFrame:SetPoint('CENTER', 0, 100)
+
+
 -- BFBindingMode is UISpecialFrames[8], it's Shown but not visible (offscreen)
 if  BFBindingMode  then  BFBindingMode:Hide()  end
 --BFBindingMode:SetPoint('TOPLEFT',10,-20)
@@ -192,7 +195,6 @@ WhoFrame:SetScript('OnUpdate', WhoMonitor.OnUpdate)
 
 
 
-LossOfControlFrame:SetPoint('CENTER', 0, 100)
 
 
 function GetActionButtonName(id)
@@ -242,13 +244,14 @@ end
 /run MainMenuBarBackpackButton:Hide()
 /run MainMenuBarBackpackButton:SetScript('OnEvent',nil)
 --]]
+--[[ This definitely disabled the button.
 MainMenuBarBackpackButton:SetScript('OnLoad',nil)
 MainMenuBarBackpackButton:SetScript('OnClick',nil)
 MainMenuBarBackpackButton:SetScript('OnReceiveDrag',nil)
 MainMenuBarBackpackButton:SetScript('OnEnter',nil)
 MainMenuBarBackpackButton:SetScript('OnLeave',nil)
 MainMenuBarBackpackButton:SetScript('OnEvent',nil)
-
+--]]
 
 
 
@@ -272,7 +275,7 @@ local postBody = nil
 
 
 --[[
-Auctionator -> taints  CompactRaidFrame2:Show()
+Auctionator -> creeping taints  CompactRaidFrame2:Show()
 4x [ADDON_ACTION_BLOCKED] AddOn 'Auctionator' tried to call the protected function 'CompactRaidFrame2:Show()'.
 !BugGrabber\BugGrabber.lua:586: in function <!BugGrabber\BugGrabber.lua:586>
 [C]: in function `Show'

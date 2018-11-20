@@ -42,6 +42,9 @@ x.frames = {
 	["errors"] = _G.UIErrorsFrame,
 }
 
+LossOfControlFrame:SetUserPlaced(true)
+--UIErrorsFrame:SetUserPlaced(true)
+
 -- Static frame lookup
 local frameIndex = {
 	[1] = "general",
@@ -609,6 +612,7 @@ end
 
 local function Frame_Moving_OnMouseDown(self, button)
 	if button == "LeftButton" then
+		print('Frame_Moving_OnMouseDown('..(self.parent:GetName() or '?')..')')
 		self.parent:StartMoving()
 		self:SetScript("OnUpdate", Frame_Moving_OnUpdate)
 		self.isMoving = true

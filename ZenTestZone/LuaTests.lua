@@ -25,17 +25,28 @@ local fields = {
 "X-Dupli" -- 1 \n 2 \n 3
 }
 
+
+--[[
+/dump 'MissingAddon', LoadAddOn('MissingAddon')
+/dump 'DisabledAddon', LoadAddOn('tekChat'), 'Loaded?', IsAddOnLoaded('tekChat')
+/dump SlashCmdList  -- is wiped after hashing the contents
+/run LuaTests.SlashTest()
+/st 1 2 3    4		5    		
+/run LuaTests.FieldTest()
+/run LuaTests.SetScript()
+/run LuaTests.HookScript()
+--]]
+
+function LuaTests.SlashTest()
+	SlashCmdList.SlashTest = function(...)  print(strjoin("|",...))  end
+	_G.SLASH_SlashTest1 = "/st"
+end
+
 function LuaTests.FieldTest()
 	for i,fi in ipairs(fields) do
 		print("## "..fi..": '"..GetAddOnMetadata(ADDON_NAME, fi).."'")
 	end
 end
-
---[[
-/run LuaTests.FieldTest()
-/run LuaTests.SetScript()
-
---]]
 
 function LuaTests.SetScript()
 	local fOnShow(self, ...)  print("fOnShow():", ...)  end
@@ -44,20 +55,41 @@ function LuaTests.SetScript()
 	print("f.OnShow = "..tostring(f:GetScript('OnShow')))
 	f:Hide()
 	
-	print(0)
+	print("0: SetScript")
 	f:SetScript('OnShow', fOnShow)
 	print("f.OnShow = "..tostring(f:GetScript('OnShow')))
 	f:Show() f:Hide()
-	print(1)
+	print("0: SetScript, 1")
 	f:SetScript('OnShow', fOnShow, 1)
 	print("f.OnShow = "..tostring(f:GetScript('OnShow')))
 	f:Show() f:Hide()
-	print(2)
+	print("0: SetScript, 1, 2")
 	f:SetScript('OnShow', fOnShow, 1, 2)
 	print("f.OnShow = "..tostring(f:GetScript('OnShow')))
 	f:Show() f:Hide()
 end
 
+
+function LuaTests.HookScript()
+	local fOnShowHook(self, ...)  print("fOnShowHook():", ...)  end
+	local f=CreateFrame('Frame')
+	print("f:IsShown() = "..tostring(f:IsShown()))
+	print("f.OnShow = "..tostring(f:GetScript('OnShow')))
+	f:Hide()
+	
+	print("0: Hooked once")
+	f:HookScript('OnShow', fOnShowHook)
+	print("f.OnShow = "..tostring(f:GetScript('OnShow')))
+	f:Show() f:Hide()
+	print("0: Hooked 2 times")
+	f:HookScript('OnShow', fOnShowHook)
+	print("f.OnShow = "..tostring(f:GetScript('OnShow')))
+	f:Show() f:Hide()
+	print("2: Hooked 3 times")
+	f:HookScript('OnShow', fOnShowHook)
+	print("f.OnShow = "..tostring(f:GetScript('OnShow')))
+	f:Show() f:Hide()
+end
 
 
 

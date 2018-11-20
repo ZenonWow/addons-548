@@ -752,6 +752,7 @@ local function initCategory(widget, event)
 	local categoryKey = widget.categoryKey
 	local appName = "TomTom-"..categoryKey
 	local category = options.args[categoryKey]
+	print("TomTom_Config.initCategory(widget, "..tostring(event).."): appName="..appName.." category.name="..(category and category.name or "<missing>") )
 	config:RegisterOptionsTable(appName, category)
 	-- If OnShow was hooked after this function by something else then this fails miserably,
 	-- removing the later hook from the chain
@@ -780,6 +781,7 @@ local function createBlizzOptions()
 		local frame = dialog:AddToBlizOptions(appName, category.name, "TomTom")
 		local widget = frame.obj
 		widget.categoryKey = categoryKey
+		print('TomTom.createBlizzOptions(): appName='..appName..' widget.events.OnShow='..tostring(widget.events.OnShow))
 		widget.events.OnShow2 = widget.events.OnShow
 		widget.events.OnShow = initCategory
 		--[[
@@ -856,6 +858,11 @@ local function createBlizzOptions()
 
 	return blizzPanel
 end
+--]]
+
+--[[
+/vdt TomTom.ConfigPanels
+.*.widget.events.OnShow
 --]]
 
 
