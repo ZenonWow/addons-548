@@ -488,7 +488,7 @@ local function UpdateFrameCritical(self)
                 addon:StoreGUID(self, 'target')
 
                 -- move this frame above others
-                self:SetFrameLevel(10)
+                self:SetFrameLevel(addon.db.profile.general.frameleveltarget or 1)
 
                 if addon.db.profile.hp.mouseover then
                     self.health.p:Show()
@@ -512,7 +512,7 @@ local function UpdateFrameCritical(self)
             -- or it was, but no longer is.
             self.target = nil
 
-            self:SetFrameLevel(0)
+            self:SetFrameLevel(addon.db.profile.general.framelevel or 0)
 
             if self.targetGlow then
                 self.targetGlow:Hide()
@@ -669,7 +669,7 @@ function addon:InitFrame(frame)
     end
 
     f:SetFrameStrata(self.db.profile.general.strata)
-    f:SetFrameLevel(0)
+    f:SetFrameLevel(self.db.profile.general.framelevel or 0)
 
     f:SetCentre()
 

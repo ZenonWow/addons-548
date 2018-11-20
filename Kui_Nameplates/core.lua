@@ -69,6 +69,8 @@ local defaults = {
             leftie      = false,
             glowshadow  = true,
             strata      = 'BACKGROUND',
+            framelevel  = 0,
+            frameleveltarget = 1,
 			reactioncolours = {
 				hatedcol    = { .7, .2, .1 },
 				neutralcol  = {  1, .8,  0 },
@@ -403,6 +405,14 @@ end
 
 addon.configChangedFuncs.strata = function(frame,val)
     frame:SetFrameStrata(val)
+end
+
+addon.configChangedFuncs.framelevel = function(frame,val)
+    if  not frame.target  then  frame:SetFrameLevel(val)  end
+end
+
+addon.configChangedFuncs.frameleveltarget = function(frame,val)
+    if  frame.target  then  frame:SetFrameLevel(val)  end
 end
 ------------------------------------------- Listen for LibSharedMedia changes --
 function addon:LSMMediaRegistered(msg, mediatype, key)

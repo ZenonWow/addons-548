@@ -7,6 +7,7 @@ local addon = LibStub('AceAddon-3.0'):GetAddon('KuiNameplates')
 ------------------------------------------------------------------ Ace config --
 local AceConfig = LibStub('AceConfig-3.0')
 local AceConfigDialog = LibStub('AceConfigDialog-3.0')
+local KuiNameplatesConfig
 
 --------------------------------------------------------------- Options table --
 do
@@ -25,17 +26,17 @@ do
 
     -- called by handler:Set when configuration is changed
     local function ConfigChangedSkeleton(mod, key, profile)
-        if mod.configChangedFuncs.runOnce and
-           mod.configChangedFuncs.runOnce[key]
-        then
+        local changeFunc = mod.configChangedFuncs.runOnce  and  mod.configChangedFuncs.runOnce[key]
+        if  changeFunc  then
             -- call runOnce function
-            mod.configChangedFuncs.runOnce[key](profile[key])
+            changeFunc(profile[key])
         end
 
-        if mod.configChangedFuncs[key] then
+        changeFunc = mod.configChangedFuncs[key]
+        if changeFunc then
             -- iterate frames and call
             for _, frame in pairs(addon.frameList) do
-                mod.configChangedFuncs[key](frame.kui, profile[key])
+                changeFunc(frame.kui, profile[key])
             end
         end
     end
@@ -207,6 +208,24 @@ do
                         type = 'select',
                         values = StrataSelectList,
                         order = 17
+                    },
+                    framelevel = {
+                        name = 'Frame level',
+                        order = 17,
+                        type = 'range',
+                        step = 1,
+                        min = -50,
+                        softMin = -10,
+                        softMax = 50
+                    },
+                    frameleveltarget = {
+                        name = 'Target Frame level',
+                        order = 17,
+                        type = 'range',
+                        step = 1,
+                        min = -50,
+                        softMin = -10,
+                        softMax = 50
                     },
 					reactioncolours = {
 						name = 'Reaction colours',
@@ -480,15 +499,22 @@ do
     end
 
     AceConfig:RegisterOptionsTable('kuinameplates', options)
-    AceConfigDialog:AddToBlizOptions('kuinameplates', 'Kui Nameplates')
+    KuiNameplatesConfig = AceConfigDialog:AddToBlizOptions('kuinameplates', 'Kui Nameplates')
 end
 
 --------------------------------------------------------------- Slash command --
 SLASH_KUINAMEPLATES1 = '/kuinameplates'
 SLASH_KUINAMEPLATES2 = '/knp'
+SLASH_KUINAMEPLATES3 = '/kui'
+local appName = 'Kui Nameplates'
 
 function SlashCmdList.KUINAMEPLATES()
+  if  not KuiNameplatesConfig:IsVisible()  then
     -- twice to workaround an issue introduced with 5.3
-    InterfaceOptionsFrame_OpenToCategory('Kui Nameplates')
-    InterfaceOptionsFrame_OpenToCategory('Kui Nameplates')
+    InterfaceOptionsFrame_Show()
+    InterfaceOptionsFrame_OpenToCategory(appName)
+    InterfaceOptionsFrame_OpenToCategory(appName)
+  else
+    InterfaceOptionsFrame:Hide()
+  end
 end
