@@ -43,7 +43,11 @@ function private:CreateMailTab()
 	frame:EnableMouse(true)
 	
 	local function OnTabClick(self)
-		PanelTemplates_SetTab(MailFrame, self:GetID())
+		-- Notify other addons of selecting this tab
+		MailFrameTab_OnClick(self)
+		-- Done by MailFrameTab_OnClick():
+		--PanelTemplates_SetTab(MailFrame, self:GetID())
+		
 		ButtonFrameTemplate_HideButtonBar(MailFrame)
 		InboxFrame:Hide()
 		OpenMailFrame:Hide()
@@ -80,8 +84,13 @@ function private:CreateMailTab()
 		end
 	end
 	
-	local function OnOtherTabClick()
+	local function OnOtherTabClick(tabButton, tabID)
 		if not private.frame then return end
+		-- Ignore clicking our own tab button.
+		-- In this case this func is called by OnTabClick(tabButton)
+		-- which handles showing the frame.
+		if  tabButton == private.frame.tab  then  return  end
+		
 		private.frame:Hide()
 		MailFrameLeftBorder:Show()
 		MailFrameTopBorder:Show()

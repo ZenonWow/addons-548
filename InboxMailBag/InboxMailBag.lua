@@ -2,6 +2,8 @@
 --  ... finer detail for how long items may stay in the inbox
 --  ... PUSH_ITEM event based queue operation
 
+local ADDON_NAME, private = ...
+
 NUM_BAGITEMS_PER_ROW = 6;
 NUM_BAGITEMS_ROWS = 7;
 
@@ -97,10 +99,6 @@ function InboxMailbagSearch_OnEditFocusGained(self, ...)
 end
 
 function InboxMailbag_OnLoad(self)
-	-- We have things to do after everything is loaded
-	self:RegisterEvent("PLAYER_LOGIN");
-	self:RegisterEvent("MAIL_SHOW");
-
 	-- Hook our tab to play nicely with MailFrame tabs
 	hooksecurefunc("MailFrameTab_OnClick", InboxMailbag_Hide); -- Adopted from Sent Mail as a more general solution, and plays well with Sent Mail
 
@@ -141,6 +139,11 @@ function InboxMailbag_OnLoad(self)
 	-- properly align Blizzard's default BattlePetTooltip
 	BattlePetTooltip.Name:ClearAllPoints();
 	BattlePetTooltip.Name:SetPoint("TOPLEFT", 10, -10);
+
+	-- We have things to do after everything is loaded
+	self:RegisterEvent("ADDON_LOADED");
+	self:RegisterEvent("PLAYER_LOGIN");
+	self:RegisterEvent("MAIL_SHOW");
 end
 
 function InboxMailbag_OnPlayerLogin(self, event, ...)
@@ -184,6 +187,7 @@ function InboxMailbag_OnHide(self)
 end
 
 function InboxMailbag_OnEvent(self, event, ...)
+	local arg1 = ...
 	if ( event == "MAIL_INBOX_UPDATE" ) then
 		InboxMailbag_Consolidate();
 	elseif( event == "ITEM_PUSH" or event == "PLAYER_MONEY" ) then
@@ -201,8 +205,14 @@ function InboxMailbag_OnEvent(self, event, ...)
 		if MAILBAGDB["MAIL_DEFAULT"] then
 			InboxMailbagTab_OnClick(MB_Tab);
 		end
-	elseif( event == "PLAYER_LOGIN" ) then
+	elseif  event == "PLAYER_LOGIN"  and  InboxMailbag_OnPlayerLogin  then
 		InboxMailbag_OnPlayerLogin(self, event, ...);
+		InboxMailbag_OnPlayerLogin = nil
+	elseif  event == "ADDON_LOADED"  and  arg1 == ADDON_NAME  then
+		-- In case of delayed loading: send missed events to ourself
+		--if  IsLoggedIn()  and  InboxMailbag_OnPlayerLogin  then  InboxMailbag_OnPlayerLogin(self, event)  end
+		if  IsLoggedIn()  then  InboxMailbag_OnEvent(self, 'PLAYER_LOGIN')  end
+		if  MailFrame:IsShown()  then  InboxMailbag_OnEvent(self, 'MAIL_SHOW')  end
 	end
 end
 
@@ -472,8 +482,14 @@ function InboxMailbag_Update()
 	FauxScrollFrame_Update(InboxMailbagFrameScrollFrame, ceil(#MB_Items / NUM_BAGITEMS_PER_ROW) , NUM_BAGITEMS_ROWS, BAGITEMS_ICON_ROW_HEIGHT );
 end
 
-function InboxMailbag_Hide()
-	InboxMailbagFrame:Hide();
+function InboxMailbag_Hide(tabButton, tabID)
+	if  tabButton ~= MB_Tab  then  InboxMailbagFrame:Hide()  end
+	--[[ Alternatively:
+	-- This is in line with the original MailFrameTab_OnClick().
+	-- If some other tab erroneously takes MB_Tab:GetID() too then this will conflict.
+	tabID = tabID  or  tabButton:GetID()
+	if  tabID ~= MB_Tab:GetID()  then  InboxMailbagFrame:Hide()  end
+	--]]
 end
 
 function InboxMailbag_ResetQueue()
@@ -633,13 +649,15 @@ function InboxMailbagTab_Create()
 	local index = MailFrame.numTabs + 1;
 	
 	MB_Tab = CreateFrame("Button", "MailFrameTab"..index, _G["MailFrame"], "MailFrameTabInboxMailbagTemplate", index);
+	MB_Tab:SetID(index)
 	MB_Tab:SetPoint("LEFT", _G["MailFrameTab"..MailFrame.numTabs], "RIGHT", -8, 0);
 	
 	-- We want to run our frame's inherited OnShow first
 	MB_Tab:HookScript("OnShow", InboxMailbagTab_TabBoundsCheck);
 	
 	PanelTemplates_SetNumTabs(MailFrame, index);
-	PanelTemplates_SetTab(MailFrame, 1);
+	-- Do not SetTab, just Enable: calls PanelTemplates_UpdateTabs(MailFrame)
+	PanelTemplates_EnableTab(MailFrame, index)
 end
 
 -- Adapted from Blizzard's CharacterFrame_TabBoundsCheck
@@ -695,8 +713,11 @@ function InboxMailbagTab_TabBoundsCheck()
 end
 
 function InboxMailbagTab_OnClick(self)
-	-- Adapted from MailFrameTab_OnClick
-	PanelTemplates_SetTab(MailFrame, self:GetID());
+	-- Notify other addons of selecting this tab
+	MailFrameTab_OnClick(self)
+	-- Done by MailFrameTab_OnClick():
+	--PanelTemplates_SetTab(MailFrame, self:GetID());
+
 	ButtonFrameTemplate_HideButtonBar(MailFrame)
 	MailFrameInset:SetPoint("TOPLEFT", 4, -58);
 	InboxFrame:Hide();
