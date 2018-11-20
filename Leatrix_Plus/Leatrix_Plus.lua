@@ -35,17 +35,23 @@
 -- 	Leatrix Plus
 ----------------------------------------------------------------------
 
+-- Addon keyword for registering hooks
+	local LEAPLUS = 'LeaPlus'
+
 --  Create global tables if they don't exist
-	LeaPlus = LeaPlus or {}
-	local LeaPlus = LeaPlus
+	_G.LeaPlus = _G.LeaPlus or {}
+	local LeaPlus = _G.LeaPlus
 	LeaPlusDB = LeaPlusDB or {}
 	LeaPlusDC = LeaPlusDC or {}
 
 -- 	Create local tables to store configuration and frames
+	-- Local Config
 	local LeaPlusLC = {}
+	-- Config Button
 	local LeaPlusCB = {}
 	local LeaDropList = {}
 	local void
+	local private = {}
 
 --	Version control
 	LeaPlusLC["AddonVer"] = "5.4.14"
@@ -2634,21 +2640,75 @@
 		----------------------------------------------------------------------
 		--	Use easy chat frame resizing
 		----------------------------------------------------------------------
-
-		if LeaPlusLC["UseEasyChatResizing"] then
-			ChatFrame1Tab:HookScript("OnMouseDown", function(self,arg1)
-				if arg1 == "LeftButton" then
+--[[
+/run ChatFrame1:StartSizing("TOP")
+/run ChatFrame1:StopMovingOrSizing("TOP")
+/run ChatFrame2:StartSizing("TOP")
+/run ChatFrame2:StopMovingOrSizing("TOP")
+--]]
+		if  not LeaPlusLC["UseEasyChatResizing"]  ==  not private.hookedChatFrameTabs  then
+			-- Registered as requested, nothing to do
+		else
+			local enable = LeaPlusLC["UseEasyChatResizing"]
+			private.hookedChatFrameTabs = enable
+			
+			local function ChatFrameTab_OnMouseDown(tab, button)
+				--print("ChatFrameTab_OnMouseDown("..tab:GetName()..","..button..")")
+				local ChatFrame1 = DEFAULT_CHAT_FRAME
+				if  LeaPlusLC["UseEasyChatResizing"]  and  button == "LeftButton"  and  not IsModifiedClick()  then
 					if select(8, GetChatWindowInfo(1)) then
 						ChatFrame1:StartSizing("TOP")
+						ChatFrame1.sizingTop = true
+						-- Consume MouseDown event
+						return true
 					end
 				end
-			end)
-			ChatFrame1Tab:SetScript("OnMouseUp", function(self,arg1)
-				if arg1 == "LeftButton" then
+				return  tab.hookedOnMouseDown  and  tab.hookedOnMouseDown()
+			end
+			local function ChatFrameTab_OnMouseUp(tab, button)
+				print("ChatFrameTab_OnMouseUp("..tab:GetName()..","..button..")")
+				local ChatFrame1 = DEFAULT_CHAT_FRAME
+				--if  IsControlKeyDown()  and  IsShiftKeyDown()  then
+				if  IsModifiedClick('CLEARCHAT1')  and  IsModifiedClick('CLEARCHAT2')  and  tab:IsMouseOver()  then
+					local frame = _G[tab:GetName():match('(.*)Tab')]
+					frame:Clear()
+				end
+				if  button == "LeftButton"  and  ChatFrame1.sizingTop  then
 					ChatFrame1:StopMovingOrSizing()
 					FCF_SavePositionAndDimensions(ChatFrame1)
+					--ChatFrame1.sizingTop = nil
+					-- Consume click event so the tab will not be selected in case it wasn't. But it does not work. Not javascript.
+					return true
 				end
-			end)
+			end
+			local function ChatFrameTab_OnClick(tab, button)
+				print("ChatFrameTab_OnClick("..tab:GetName()..","..button..")")
+				if  button == "LeftButton"  and  ChatFrame1.sizingTop  then
+					ChatFrame1.sizingTop = nil
+				elseif  tab.hookedOnClick  then
+					print("tab.hookedOnClick("..tab:GetName()..","..button..")")
+					tab.hookedOnClick(tab, button)
+				end
+			end
+			
+			for i = 1, NUM_CHAT_WINDOWS do
+				local tab = _G['ChatFrame'..i..'Tab']
+				if  not tab  then
+					assert(tab, "LeaPlus.UseEasyChatResizing: ChatFrame"..i.."Tab is missing.")
+				elseif  enable  then
+					--tab:HookScript('OnMouseDown', ChatFrameTab_OnMouseDown)
+					tab.hookedOnMouseDown = tab:GetScript('OnMouseDown')
+					tab.hookedOnClick = tab:GetScript('OnClick')
+					tab:SetScript('OnMouseDown', ChatFrameTab_OnMouseDown)
+					tab:SetScript('OnMouseUp', ChatFrameTab_OnMouseUp)
+					--tab:SetScript('OnClick', ChatFrameTab_OnClick)
+				else
+					--if  tab.UnhookScript  then  tab:UnhookScript('OnMouseDown', ChatFrameTab_OnMouseDown, LEAPLUS)  end
+					tab:SetScript('OnMouseDown', tab.hookedOnMouseDown)
+					tab:SetScript('OnMouseUp', nil)
+					tab:SetScript('OnClick', tab.hookedOnClick)
+				end
+			end
 		end
 
 		----------------------------------------------------------------------
@@ -2658,16 +2718,18 @@
 		if LeaPlusLC["MaxChatHstory"] then
 			-- Process normal chat frames
 			for i = 1, NUM_CHAT_WINDOWS, 1 do
-				if (_G["ChatFrame" .. i]:GetMaxLines() ~= 4096) then
-					_G["ChatFrame" .. i]:SetMaxLines(4096);
+				local frame = _G["ChatFrame" .. i]
+				if (frame:GetMaxLines() < 1000) then
+					frame:SetMaxLines(1000)
 				end
 			end
 			-- Process temporary chat frames
 			hooksecurefunc("FCF_OpenTemporaryWindow", function()
 				local cf = FCF_GetCurrentChatFrame():GetName() or nil
 				if cf then
-					if (_G[cf]:GetMaxLines() ~= 4096) then
-						_G[cf]:SetMaxLines(4096);
+					local frame = _G[cf]
+					if (frame:GetMaxLines() < 1000) then
+						frame:SetMaxLines(1000)
 					end
 				end
 			end)
@@ -5979,8 +6041,9 @@
 
 	local function CheckRepeatedEvent(event, questID)
 		local now = GetTime()
-		LeaPlus[event] = LeaPlus[event] or { timeStamp = 0 }
-		local lastEvent = LeaPlus[event]
+		LeaPlus.lastEvent = LeaPlus.lastEvent or {}
+		LeaPlus.lastEvent[event] = LeaPlus.lastEvent[event] or { timeStamp = 0 }
+		local lastEvent = LeaPlus.lastEvent[event]
 		
 		if  lastEvent.questID ~= questID  or  1 < now - lastEvent.timeStamp  then
 			lastEvent.questID = questID
@@ -6314,9 +6377,10 @@
 		if event == "QUEST_FINISHED" then
 			if  IsDebugLogging()  then  LeaPlusLC:Print(event)  end
 			local now = GetTime()
-			LeaPlus.QUEST_DETAIL   = { timeStamp = now }
-			LeaPlus.QUEST_PROGRESS = { timeStamp = now }
-			LeaPlus.QUEST_COMPLETE = { timeStamp = now }
+			LeaPlus.lastEvent = LeaPlus.lastEvent or {}
+			LeaPlus.lastEvent.QUEST_DETAIL   = { timeStamp = now }
+			LeaPlus.lastEvent.QUEST_PROGRESS = { timeStamp = now }
+			LeaPlus.lastEvent.QUEST_COMPLETE = { timeStamp = now }
 			LeaPlus.tempDisableAutoQuest = nil
 			LeaPlus.questAcceptID = nil
 		end
@@ -7058,7 +7122,9 @@
 
 	-- Create a standard button (using standard button template)
 	function LeaPlusLC:CreateButton(name, frame, label, anchor, x, y, width, height, reskin, tip)
-		local mbtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+		local globalName = frame:GetName()
+		globalName = globalName  and  globalName..label
+		local mbtn = CreateFrame("Button", globalName, frame, "UIPanelButtonTemplate")
 		LeaPlusCB[name] = mbtn
 		mbtn:SetWidth(width)
 		mbtn:SetHeight(height) 
@@ -7067,7 +7133,8 @@
 		mbtn:SetText(label) 
 		mbtn:RegisterForClicks("AnyUp") 
 		mbtn:SetHitRectInsets(0, 0, 0, 0);
-		mbtn:SetFrameStrata("FULLSCREEN_DIALOG");
+		-- Use parent's strata
+		--mbtn:SetFrameStrata("FULLSCREEN_DIALOG");
 		mbtn:SetScript("OnEnter", LeaPlusLC.ShowTooltip)		
 		mbtn:SetScript("OnLeave", GameTooltip_Hide)
 		mbtn.tiptext = tip
@@ -7203,7 +7270,11 @@
 
 		-- Create the options panel frame
 		local PageF = CreateFrame("Frame", "LeaPlusGlobalPanel", UIParent);
-		table.insert(UISpecialFrames, "LeaPlusGlobalPanel")
+		
+		--table.insert(UISpecialFrames, "LeaPlusGlobalPanel")
+		local prev_CloseSpecialWindows = _G.CloseSpecialWindows
+		function _G.CloseSpecialWindows()  return  PageF:IsShown()  and  PageF:Hide()  or  prev_CloseSpecialWindows()  end
+
 		LeaPlusLC["PageF"] = PageF
 		PageF:SetSize(570,370)
 		PageF:Hide();

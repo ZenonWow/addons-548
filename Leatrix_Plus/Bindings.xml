@@ -1,0 +1,8 @@
+<Bindings>
+	
+	<!-- Modified Click Actions -->
+	<ModifiedClick action="CLEARCHAT1" default="CTRL-BUTTON2"/>
+	<ModifiedClick action="CLEARCHAT2" default="SHIFT"/>
+	
+</Bindings>
+
