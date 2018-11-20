@@ -39,8 +39,6 @@ local defaults = {
 		SortType = MQ.SORT_TYPE;
 		AllowFly = true;
 		Scale = 1;
-	},
-	char = {
 		LastVersion = MQ.VERSION;
 		FavoriteMount = nil;
 		DisplayType = MQ.DISPLAY_GROUND;
@@ -71,8 +69,8 @@ end
 -- Saved variables change from version to version
 -- Clean them up
 function MQ.CleanUpOldData()
-	if MQ.db.char.LastVersion ~= MQ.VERSION then
-		MQ.db.char.LastVersion = MQ.VERSION
+	if profile.LastVersion ~= MQ.VERSION then
+		profile.LastVersion = MQ.VERSION
 	end
 	if MQ.db.global.modother == nil then
 		MQ.db.global.modother = 1
@@ -80,19 +78,17 @@ function MQ.CleanUpOldData()
 	if MQ.db.global.mod == nil then
 		MQ.db.global.mod = 1
 	end
-	if MQ.db.char.GroundList == nil then
-		MQ.db.char.GroundList = {};
-		MQ.bd.char.FlyList = {};
-	end
-	if MQ.db.char.MountQList ~= nil then
+	if profile.MountQList ~= nil then
 		-- COPY OLD LIST TO GROUND / FLY HERE!
-		for i,j in pairs(MQ.db.char.MountQList) do
-			table.insert(MQ.db.char.FlyList, 1, j);
-			table.insert(MQ.db.char.GroundList, 1, j);
+		profile.GroundList = {};
+		profile.FlyList = {};
+		for i,j in pairs(profile.MountQList) do
+			table.insert(profile.FlyList, 1, j);
+			table.insert(profile.GroundList, 1, j);
 		end
-		table.sort(MQ.db.char.FlyList, function(a,b) return a < b end)
-		table.sort(MQ.db.char.GroundList, function(a,b) return a < b end)
-		MQ.db.char.MountQList = nil;
+		table.sort(profile.FlyList, function(a,b) return a < b end)
+		table.sort(profile.GroundList, function(a,b) return a < b end)
+		profile.MountQList = nil;
 	end
 end
 
@@ -194,7 +190,7 @@ function MountQ:OnEnable()
 	-- Favorites secure Button
 	CreateFrame("Button", "MountQFav", UIParent, "SecureActionButtonTemplate");
 	MountQFav:SetScript('PreClick', function (_, btn) 
-		MountQ:SecurePreClick(btn, MountQFav, MQ.db.char.FavoriteMount);
+		MountQ:SecurePreClick(btn, MountQFav, MQ.db.profile.FavoriteMount);
 	end);
 	MountQFav:SetScript('PostClick', function (_, btn) 
 		MountQ:SecurePostClick(MountQFav);
@@ -288,14 +284,15 @@ function MountQ:UpdateKnownMounts()
 end
 
 function MountQ:UpdateIcon()
+	local profile = MQ.db.profile
 	-- Update broker icon
-	local mount = MQ.db.char.FavoriteMount;
+	local mount = profile.FavoriteMount;
 
-	if mount == nil and #MQ.db.char.FlyList > 0 then
-		mount = MQ.db.char.FlyList[random(#MQ.db.char.FlyList)];
+	if mount == nil and #profile.FlyList > 0 then
+		mount = profile.FlyList[random(#profile.FlyList)];
 	end
-	if mount == nil and #MQ.db.char.GroundList > 0 then
-		mount = MQ.db.char.GroundList[random(#MQ.db.char.GroundList)];
+	if mount == nil and #profile.GroundList > 0 then
+		mount = profile.GroundList[random(#profile.GroundList)];
 	end
 	if mount == nil and #MQ.KnownMounts > 0 then
 		mount = MQ.KnownMounts[random(#MQ.KnownMounts)][1]
@@ -308,32 +305,33 @@ end
 
 -- Removes a mount that's in our favorite list, but is no longer valid.
 function MountQ:RemoveBadMounts()
+  local profile = MQ.db.profile
 	local ValidMounts = {};
 	for i, j in pairs(MQ.KnownMounts) do
 		table.insert(ValidMounts, 1, j[1]);
 	end
-	for i, j in pairs(MQ.db.char.FlyList) do
+	for i, j in pairs(profile.FlyList) do
 		local flying = MountQData_IsFlier(j);
 		if tContains(ValidMounts, j) == nil or flying == false then
 			MQ.Debug("Removing mount "..j..", which is no longer valid.");
-			table.remove(MQ.db.char.FlyList, i);
+			table.remove(profile.FlyList, i);
 			MountQ:RemoveBadMounts();
 			return;
 		end
 	end
-	for i, j in pairs(MQ.db.char.GroundList) do
+	for i, j in pairs(profile.GroundList) do
 		local ground = MountQData_IsGround(j);
 		if tContains(ValidMounts, j) == nil or ground == false then
 			MQ.Debug("Removing mount "..j..", which is no longer valid.");
-			table.remove(MQ.db.char.GroundList, i);
+			table.remove(profile.GroundList, i);
 			MountQ:RemoveBadMounts();
 			return;
 		end
 	end
-	if MQ.db.char.FavoriteMount ~= nil then
-		if tContains(ValidMounts, MQ.db.char.FavoriteMount) == nil then
-			MQ.Debug("Removing favorite mount "..MQ.db.char.FavoriteMount..", which is no longer valid.");
-			MQ.db.char.FavoriteMount = nil;
+	if profile.FavoriteMount ~= nil then
+		if tContains(ValidMounts, profile.FavoriteMount) == nil then
+			MQ.Debug("Removing favorite mount "..profile.FavoriteMount..", which is no longer valid.");
+			profile.FavoriteMount = nil;
 		end
 	end
 end
@@ -354,14 +352,15 @@ end
 
 function MountQ:CallRandom()
 	MQ.Debug("CallRandom");
-	if MountQ:CanFlyNow() == true and #MQ.db.char.FlyList > 0 then
-		local val = MQ.db.char.FlyList[random(#MQ.db.char.FlyList)]
+	local profile = MQ.db.profile
+	if MountQ:CanFlyNow() == true and #profile.FlyList > 0 then
+		local val = profile.FlyList[random(#profile.FlyList)]
 		return val;
 	else
-		if #MQ.db.char.GroundList == 0 then
+		if #profile.GroundList == 0 then
 			return
 		end
-		return MQ.db.char.GroundList[random(#MQ.db.char.GroundList)];
+		return profile.GroundList[random(#profile.GroundList)];
 	end
 end
 
@@ -401,13 +400,15 @@ function MountQ:CheckFalling()
 end
 
 function MountQ:CallFavorite(secure)
-	if MQ.db.char.FavoriteMount ~= nil then
-		MQ.SelectMount(self, MQ.db.char.FavoriteMount, secure);
+  local FavoriteMount = MQ.db.profile.FavoriteMount
+	if  FavoriteMount  then
+		MQ.SelectMount(self, FavoriteMount, secure);
 	end
 end
 
 function MountQ:ButtonClick(button)
 	MQ.Debug("Button Click");
+  local profile = MQ.db.profile
 
 	if button == "RightButton" then
 		AceConfigDialog:Open(appName);
@@ -416,7 +417,7 @@ function MountQ:ButtonClick(button)
 		if tooltip ~= nil then
 			tooltip:Hide();
 		end
-		return MQ.db.char.FavoriteMount;
+		return profile.FavoriteMount;
 	elseif button == "LeftButton" then
 		if tooltip ~= nil then
 			tooltip:Hide();
@@ -540,14 +541,15 @@ function MQ.SecureTooltipEnter(self, mount)
 end
 
 function MQ.UpdateTooltip(tooltip, fly)
+  local profile = MQ.db.profile
 	local format = "%s";
 	format = "|cffffc1c1"..format.."|r";
 	local Mounts;
 	
 	if fly == true then
-		Mounts = MQ.db.char.FlyList;
+		Mounts = profile.FlyList;
 	else
-		Mounts = MQ.db.char.GroundList;
+		Mounts = profile.GroundList;
 	end
 	for i, j in pairs(Mounts) do
 		local line = tooltip:AddLine();
@@ -628,11 +630,12 @@ function MQ.OpenConfig(self, button)
 end
 
 function MQ.ToggleDisplayType()
-	if MQ.db.char.DisplayType == MQ.DISPLAY_GROUND then
-		MQ.db.char.DisplayType = MQ.DISPLAY_FLYING;
+  local profile = MQ.db.profile
+	if profile.DisplayType == MQ.DISPLAY_GROUND then
+		profile.DisplayType = MQ.DISPLAY_FLYING;
 		MQ.Debug("Show Flying");
 	else
-		MQ.db.char.DisplayType = MQ.DISPLAY_GROUND;
+		profile.DisplayType = MQ.DISPLAY_GROUND;
 		MQ.Debug("Show Ground");
 	end
 	AceConfigReg:NotifyChange(appName);
@@ -650,16 +653,17 @@ function MQ.ToggleSortType()
 end
 
 function MQ.ToggleCatMounts(key)
+  local profile = MQ.db.profile
 	local category = key["arg"];
 	local category_count = 0;
 	local ToggleOnList = {};
 	local ToggleOffList = {};
 	local name;
 	local MountList;
-	if MQ.db.char.DisplayType == MQ.DISPLAY_FLYING then
-		MountList = MQ.db.char.FlyList;
+	if profile.DisplayType == MQ.DISPLAY_FLYING then
+		MountList = profile.FlyList;
 	else
-		MountList = MQ.db.char.GroundList;
+		MountList = profile.GroundList;
 	end
 
 	MQ.Debug("Toggle category "..category.." on/off");
@@ -700,11 +704,12 @@ function MQ.ToggleCatMounts(key)
 end
 
 function MQ.ToggleAll()
+  local profile = MQ.db.profile
 	local MountList;
-	if MQ.db.char.DisplayType == MQ.DISPLAY_FLYING then
-		MountList = MQ.db.char.FlyList;
+	if profile.DisplayType == MQ.DISPLAY_FLYING then
+		MountList = profile.FlyList;
 	else
-		MountList = MQ.db.char.GroundList;
+		MountList = profile.GroundList;
 	end
 	if #MountList > 0 then
 		table.wipe(MountList);
@@ -714,26 +719,27 @@ function MQ.ToggleAll()
 			local flying = MountQData_IsFlier(j[1]);
 			local ground = MountQData_IsGround(j[1]);
 
-			if flying == true and MQ.db.char.DisplayType == MQ.DISPLAY_FLYING then
-				table.insert(MQ.db.char.FlyList, 1, j[1]);
-			elseif ground == true and MQ.db.char.DisplayType == MQ.DISPLAY_GROUND then
-				table.insert(MQ.db.char.GroundList, 1, j[1]);
+			if flying == true and profile.DisplayType == MQ.DISPLAY_FLYING then
+				table.insert(profile.FlyList, 1, j[1]);
+			elseif ground == true and profile.DisplayType == MQ.DISPLAY_GROUND then
+				table.insert(profile.GroundList, 1, j[1]);
 			end
 		end
-		if MQ.db.char.DisplayType == MQ.DISPLAY_FLYING then
-			table.sort(MQ.db.char.FlyList, function(a,b) return a < b end)
+		if profile.DisplayType == MQ.DISPLAY_FLYING then
+			table.sort(profile.FlyList, function(a,b) return a < b end)
 		else
-			table.sort(MQ.db.char.GroundList, function(a,b) return a < b end)
+			table.sort(profile.GroundList, function(a,b) return a < b end)
 		end
 	end
 end
 
 function MQ.GetMountToggle(key)
+  local profile = MQ.db.profile
 	local MountList;
-	if MQ.db.char.DisplayType == MQ.DISPLAY_FLYING then
-		MountList = MQ.db.char.FlyList;
+	if profile.DisplayType == MQ.DISPLAY_FLYING then
+		MountList = profile.FlyList;
 	else
-		MountList = MQ.db.char.GroundList;
+		MountList = profile.GroundList;
 	end
 	if tContains(MountList, key["arg"]) ~= nil then
 		return true;
@@ -743,17 +749,18 @@ function MQ.GetMountToggle(key)
 end
 
 function MQ.SetMountToggle(key, val)
+  local profile = MQ.db.profile
 	local MountList;
-	if MQ.db.char.DisplayType == MQ.DISPLAY_FLYING then
-		MountList = MQ.db.char.FlyList;
+	if profile.DisplayType == MQ.DISPLAY_FLYING then
+		MountList = profile.FlyList;
 	else
-		MountList = MQ.db.char.GroundList;
+		MountList = profile.GroundList;
 	end
 	local ClickedMount = key["arg"];
 	local favorite = false;
 	if IsControlKeyDown() then
-		MQ.db.char.FavoriteMount = key["arg"];
-		MQ.Debug("Select Favorite as "..MQ.db.char.FavoriteMount);
+		profile.FavoriteMount = key["arg"];
+		MQ.Debug("Select Favorite as "..profile.FavoriteMount);
 		favorite = true;
 	end
 	if val then
@@ -837,11 +844,12 @@ function MountQ:OnProfileChanged()
 end
 
 function MountQ:CreateOpt()
+  local profile = MQ.db.profile
 	local options = { name = "MountQ", type = "group", childGroups = "tab", order = OrderConf(0) };
 
 	local optargs = {};
 
-	optargs["header1"] = { name = "MountQ Configuration - "..MQ.VERSION.." - "..#MQ.KnownMounts.." Total Mounts - "..#MQ.db.char.GroundList+#MQ.db.char.FlyList.." Favored", type = "header", order = OrderConf() }
+	optargs["header1"] = { name = "MountQ Configuration - "..MQ.VERSION.." - "..#MQ.KnownMounts.." Total Mounts - "..#profile.GroundList+#profile.FlyList.." Favored", type = "header", order = OrderConf() }
 
 	optargs["mounts"] = { name = "Mounts", type = "group", childGroups = "tree", order = OrderConf(), get = MQ.GetMountToggle, set = MQ.SetMountToggle }
 	optargs["config"] = { name = "Config", type = "group", childGroups = "tree", order = OrderConf() }
@@ -856,6 +864,7 @@ function MountQ:CreateOpt()
 end
 
 function MountQ:CreateOptMounts()
+  local profile = MQ.db.profile
 	local SortString = "";
 	if MQ.db.profile.SortType == MQ.SORT_ALPHABETIC then
 		SortString = "Sort by Type";
@@ -865,17 +874,17 @@ function MountQ:CreateOptMounts()
 
 	local DisplayString = "";
 	local DisplayText = "";
-	if MQ.db.char.DisplayType == MQ.DISPLAY_FLYING then
+	if profile.DisplayType == MQ.DISPLAY_FLYING then
 		DisplayString = "Show Ground Mounts";
 		DisplayText = "Currently Showing Flying Mounts";
-	elseif MQ.db.char.DisplayType == MQ.DISPLAY_GROUND then
+	elseif profile.DisplayType == MQ.DISPLAY_GROUND then
 		DisplayString = "Show Flying Mounts";
 		DisplayText = "Currently Showing Ground Mounts";
 	end
 
 	local optmounts = {};
 
-	local favorite = MQ.db.char.FavoriteMount;
+	local favorite = profile.FavoriteMount;
 	if favorite == nil then
 		favorite = "(ctrl click a mount below to set)	"..DisplayText;
 	else
@@ -895,7 +904,7 @@ function MountQ:CreateOptMounts()
 		for i, j in pairs(MQ.KnownMounts) do
 			local flying = MountQData_IsFlier(j[1]);
 			local ground = MountQData_IsGround(j[1]);
-			if (flying == true and MQ.db.char.DisplayType == MQ.DISPLAY_FLYING) or (ground == true and MQ.db.char.DisplayType == MQ.DISPLAY_GROUND) then
+			if (flying == true and profile.DisplayType == MQ.DISPLAY_FLYING) or (ground == true and profile.DisplayType == MQ.DISPLAY_GROUND) then
 				local mount = j[1];
 				local icon = MountQData_GetIcon(j[1]);
 				optmounts[mount] = {name = mount, type = "toggle", order = OrderConf(), arg = mount, image = icon }
@@ -911,7 +920,7 @@ function MountQ:CreateOptMounts()
 			local mounticon = MountQData_GetIcon(j[1]);
 			local flying = MountQData_IsFlier(j[1]);
 			local ground = MountQData_IsGround(j[1]);
-			if (flying == true and MQ.db.char.DisplayType == MQ.DISPLAY_FLYING) or (ground == true and MQ.db.char.DisplayType == MQ.DISPLAY_GROUND) then
+			if (flying == true and profile.DisplayType == MQ.DISPLAY_FLYING) or (ground == true and profile.DisplayType == MQ.DISPLAY_GROUND) then
 				local categories = MountQData_GetCatList(spellid, j[1]);
 				local _
 				for _, mounttype in pairs(categories) do
