@@ -463,16 +463,29 @@ Prat:AddModuleToLoad(function()
       },
     },
   })
+	
+
+	local TimestampsOption = InterfaceOptionsSocialPanelTimestamps
 
   function module:OnModuleEnable()
     -- For this module to work, it must hook before Prat
-    for _, v in pairs(Prat.HookedFrames) do
-      self:RawHook(v, "AddMessage", true)
+		self.hookedFrames = self.hookedFrames or {}
+    for  frameName, chatFrame  in pairs(Prat.HookedFrames) do
+			-- Save the original as AddMessageRaw. Addons knowing this can use it for custom timestamp formating.
+			if  not chatFrame.AddMessageRaw  then  chatFrame.AddMessageRaw = chatFrame.AddMessage  end
+      self.hookedFrames[frameName] = chatFrame
+      self:RawHook(chatFrame, "AddMessage", true)
     end
 
     -- Disable blizz timestamps
+		self:SecureHook('InterfaceOptionsSocialPanelTimestamps_OnEvent')
+		self:PatchTimestampsOption(TimestampsOption)
+		--[[
+    self.showTimestamps = GetCVar("showTimestamps")
+    self.optionsPanelTimestampsCVar = TimestampsOption.cvar
     SetCVar("showTimestamps", "none")
-    InterfaceOptionsSocialPanelTimestamps.cvar = "none"
+    TimestampsOption.cvar = "none"
+		--]]
 
     self:RawHook("ChatChannelDropDown_PopOutChat", true)
 
@@ -482,28 +495,97 @@ Prat:AddModuleToLoad(function()
     Prat.RegisterChatEvent(self, Prat.Events.FRAMES_UPDATED)
     Prat.RegisterChatEvent(self, Prat.Events.FRAMES_REMOVED)
   end
+	
+	
+	function module.InterfaceOptionsSocialPanelTimestamps_OnEvent(self, event, ...)
+		if  not module:IsEnabled()  then  return  end
+		if ( event == "VARIABLES_LOADED" ) then
+			module:PatchTimestampsOption(self)
+		end
+	end
 
-  local hookedFrames = {}
+  function module:PatchTimestampsOption(TimestampsOption)
+		_G.CHAT_TIMESTAMP_FORMAT = nil
+		if  not module:IsHooked(TimestampsOption, 'SetValue')  then  module:RawHook(TimestampsOption, 'SetValue', module.TimestampsOptionSetValue, true)  end
+  end
+	
+	function module.TimestampsOptionSetValue(self, value)
+		if  not module:IsEnabled()  then
+			local origFunc =  module.hooks[self]  and  module.hooks[self].SetValue
+			return  origFunc  and  origFunc(self, value)
+		end
+		
+		self.value = value;
+		-- Freely modify the cvar, but don't modify the effective runtime value in CHAT_TIMESTAMP_FORMAT
+		SetCVar(self.cvar, self.value);
+		UIDropDownMenu_SetSelectedValue(self, self.value);
+	end
+
+
+  function module:OnModuleDisable()
+    for  frameName, chatFrame  in pairs(hookedFrames) do
+      self:Unhook(chatFrame, "AddMessage")
+    end
+		self.hookedFrames = nil
+		
+		-- Restore settings dropdown
+		if  module:IsHooked(TimestampsOption, 'SetValue')  then  module:Unhook(TimestampsOption, 'SetValue')  end
+		
+    -- Restore blizz timestamps
+		CHAT_TIMESTAMP_FORMAT = GetCVar("showTimestamps")
+		if  CHAT_TIMESTAMP_FORMAT == "none"  then  CHAT_TIMESTAMP_FORMAT = nil  end
+		--[[
+    self.showTimestamps = GetCVar("showTimestamps")
+    self.optionsPanelTimestampsCVar = InterfaceOptionsSocialPanelTimestamps.cvar
+    SetCVar("showTimestamps", "none")
+    InterfaceOptionsSocialPanelTimestamps.cvar = "none"
+		--]]
+	end
+
+--[[
+  function module:OnLogout()
+    -- Restore blizz timestamps for the next login until Prat is loaded
+    --SetCVar("showTimestamps", self.showTimestamps)
+    --InterfaceOptionsSocialPanelTimestamps.cvar = self.optionsPanelTimestampsCVar or "showTimestamps"
+  end
+
+	-- Register for PLAYER_LOGOUT event
+	local eventFrame = CreateFrame("Frame")
+	eventFrame:RegisterEvent("PLAYER_LOGOUT")
+	eventFrame:SetScript("OnEvent", function(self, event, ...)  module:OnLogout()  end)
+	eventFrame:Show()
+--]]
 
   function module:Prat_FramesUpdated(info, name, chatFrame, ...)
-    if not hookedFrames[chatFrame:GetName()] then
-      hookedFrames[chatFrame:GetName()] = true
+		-- Should not be called when disabled
+		if  not self.hookedFrames  then  return  end
+		
+		local frameName = chatFrame:GetName()
+    if  not self.hookedFrames[frameName]  then
+      self.hookedFrames[frameName] = chatFrame
       self:RawHook(chatFrame, "AddMessage", true)
     end
   end
 
+
   function module:Prat_FramesRemoved(info, name, chatFrame)
-    if hookedFrames[chatFrame:GetName()] then
-      hookedFrames[chatFrame:GetName()] = nil
+		-- Should not be called when disabled
+		if  not self.hookedFrames  then  return  end
+		
+		local frameName = chatFrame:GetName()
+    if  self.hookedFrames[frameName]  then
+      self.hookedFrames[frameName] = nil
       self:Unhook(chatFrame, "AddMessage")
     end
   end
+
 
   function module:ChatChannelDropDown_PopOutChat(...)
     Prat.loading = true
     self.hooks["ChatChannelDropDown_PopOutChat"](...)
     Prat.loading = nil
   end
+
 
   --[[------------------------------------------------
       Core Functions
@@ -537,10 +619,11 @@ Prat:AddModuleToLoad(function()
       local space = db.space
       local fmt = db.formatpre .. db.formatcode .. db.formatpost
 
+			timeStr = self:GetTime(fmt)
       if cf and cf:GetJustifyH() == "RIGHT" then
-        text = text .. (space and " " or "") .. Timestamp(self:GetTime(fmt))
+        text = text .. (space and " " or "") .. Timestamp(timeStr)
       else
-        text = Timestamp(self:GetTime(fmt)) .. "|c00000000|r" .. (space and " " or "") .. text
+        text = Timestamp(timeStr) .. "|c00000000|r" .. (space and " " or "") .. text
       end
     end
 
