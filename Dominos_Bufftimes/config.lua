@@ -220,12 +220,13 @@ function Dominos_BuffTimes:InitOptions()
 		},
 	}
 	
-	self:UpdateSpellOptions(self.options.args.ignored.args, self.db.char.ignored, self.ignoreOptions)
-	self:UpdateSpellOptions(self.options.args.yourbuffs.args, self.db.char.yourbuffs, self.yourBuffOptions)
-	self:UpdateSpellOptions(self.options.args.alldebuffs.args, self.db.char.alldebuffs, self.allDebuffOptions)
-	self:UpdateSpellOptions(self.options.args.selfbuffs.args, self.db.char.selfbuffs, self.selfBuffOptions)
-	self:UpdateSpellPairOptions(self.options.args.translated.args, self.db.char.translated, self.translatedOptions)
-	self:UpdateSpellOptions(self.options.args.override.args, self.db.char.override, self.overrideOptions)
+	local profile = self.db.profile
+	self:UpdateSpellOptions(self.options.args.ignored.args, profile.ignored, self.ignoreOptions)
+	self:UpdateSpellOptions(self.options.args.yourbuffs.args, profile.yourbuffs, self.yourBuffOptions)
+	self:UpdateSpellOptions(self.options.args.alldebuffs.args, profile.alldebuffs, self.allDebuffOptions)
+	self:UpdateSpellOptions(self.options.args.selfbuffs.args, profile.selfbuffs, self.selfBuffOptions)
+	self:UpdateSpellPairOptions(self.options.args.translated.args, profile.translated, self.translatedOptions)
+	self:UpdateSpellOptions(self.options.args.override.args, profile.override, self.overrideOptions)
 end
 
 function Dominos_BuffTimes:UpdateSpellOptions(optionList, spellList, options)
@@ -290,52 +291,52 @@ end
 
 function Dominos_BuffTimes:AddSpellToIgnored(info, value)
 	self:AddIgnored(value)
-	self:UpdateSpellOptions(self.options.args.ignored.args, self.db.char.ignored, self.ignoreOptions)
+	self:UpdateSpellOptions(self.options.args.ignored.args, self.db.profile.ignored, self.ignoreOptions)
 end
 
 function Dominos_BuffTimes:AddSpellToYourBuff(info, value)
 	self:AddYourBuff(value)
-	self:UpdateSpellOptions(self.options.args.yourbuffs.args, self.db.char.yourbuffs, self.yourBuffOptions)	
+	self:UpdateSpellOptions(self.options.args.yourbuffs.args, self.db.profile.yourbuffs, self.yourBuffOptions)	
 end
 
 function Dominos_BuffTimes:AddSpellToAnyDebuff(info, value)
 	self:AddAllDebuff(value)
-	self:UpdateSpellOptions(self.options.args.alldebuffs.args, self.db.char.alldebuffs, self.allDebuffOptions)
+	self:UpdateSpellOptions(self.options.args.alldebuffs.args, self.db.profile.alldebuffs, self.allDebuffOptions)
 end
 
 function Dominos_BuffTimes:AddSpellToSelfBuff(info, value)
 	self:AddSelfBuff(value)
-	self:UpdateSpellOptions(self.options.args.selfbuffs.args, self.db.char.selfbuffs, self.selfBuffOptions)
+	self:UpdateSpellOptions(self.options.args.selfbuffs.args, self.db.profile.selfbuffs, self.selfBuffOptions)
 end
 
 function Dominos_BuffTimes:AddSpellToOverride(info, value)
 	self:AddOverride(value)
-	self:UpdateSpellOptions(self.options.args.override.args, self.db.char.override, self.overrideOptions)
+	self:UpdateSpellOptions(self.options.args.override.args, self.db.profile.override, self.overrideOptions)
 end
 
 function Dominos_BuffTimes:RemoveSpellFromIgnored(info)
 	self:RemoveIgnored(self.options.args.ignored.args[info[#info - 1]].name)
-	self:UpdateSpellOptions(self.options.args.ignored.args, self.db.char.ignored, ignoreOptions)
+	self:UpdateSpellOptions(self.options.args.ignored.args, self.db.profile.ignored, ignoreOptions)
 end
 
 function Dominos_BuffTimes:RemoveSpellFromYourBuff(info)
 	self:RemoveYourBuff(self.options.args.yourbuffs.args[info[#info - 1]].name)
-	self:UpdateSpellOptions(self.options.args.yourbuffs.args, self.db.char.yourbuffs, yourBuffOptions)
+	self:UpdateSpellOptions(self.options.args.yourbuffs.args, self.db.profile.yourbuffs, yourBuffOptions)
 end
 
 function Dominos_BuffTimes:RemoveSpellFromAnyDebuff(info)
 	self:RemoveAllDebuff(self.options.args.alldebuffs.args[info[#info - 1]].name)
-	self:UpdateSpellOptions(self.options.args.alldebuffs.args, self.db.char.alldebuffs, allDebuffOptions)
+	self:UpdateSpellOptions(self.options.args.alldebuffs.args, self.db.profile.alldebuffs, allDebuffOptions)
 end
 
 function Dominos_BuffTimes:RemoveSpellFromSelfBuff(info)
 	self:RemoveSelfBuff(self.options.args.selfbuffs.args[info[#info - 1]].name)
-	self:UpdateSpellOptions(self.options.args.selfbuffs.args, self.db.char.selfbuffs, selfBuffOptions)
+	self:UpdateSpellOptions(self.options.args.selfbuffs.args, self.db.profile.selfbuffs, selfBuffOptions)
 end
 
 function Dominos_BuffTimes:RemoveSpellFromOverride(info, value)
 	self:RemoveOverride(self.options.args.override.args[info[#info - 1]].name)
-	self:UpdateSpellOptions(self.options.args.override.args, self.db.char.override, self.overrideOptions)
+	self:UpdateSpellOptions(self.options.args.override.args, self.db.profile.override, self.overrideOptions)
 end
 
 function Dominos_BuffTimes:SetLeftTranslatedSpell(info, value)
@@ -356,7 +357,7 @@ end
 
 function Dominos_BuffTimes:AddPairToTranslated(info)
 	self:AddTranslatedSpellPair(self.leftTranslatedSpell, self.rightTranslatedSpell)
-	self:UpdateSpellPairOptions(self.options.args.translated.args, self.db.char.translated, self.translatedOptions)
+	self:UpdateSpellPairOptions(self.options.args.translated.args, self.db.profile.translated, self.translatedOptions)
 end
 
 function Dominos_BuffTimes:RemovePairFromTranslated(info)
@@ -364,27 +365,28 @@ function Dominos_BuffTimes:RemovePairFromTranslated(info)
 	local checkName = string.gsub(self.options.args.translated.args[info[#info - 1]].name, ' %-> ', '!')
 	local name1, name2 = string.split('!', checkName)
 	self:RemoveTranslatedSpellPair(name1, name2)
-	self:UpdateSpellPairOptions(self.options.args.translated.args, self.db.char.translated, self.translatedOptions)
+	self:UpdateSpellPairOptions(self.options.args.translated.args, self.db.profile.translated, self.translatedOptions)
 end
 
 function Dominos_BuffTimes:ResetOptions()
-	self.db.char.ignored = nil
-	self.db.char.yourbuffs = nil
-	self.db.char.alldebuffs = nil
-	self.db.char.selfbuffs = nil
-	self.db.char.translated = nil
-	self.db.char.override = nil
+	local profile = self.db.profile
+	profile.ignored = nil
+	profile.yourbuffs = nil
+	profile.alldebuffs = nil
+	profile.selfbuffs = nil
+	profile.translated = nil
+	profile.override = nil
 	
 	self:CheckDB()
 	
 	self:Print('Options reset to their default values.')
 	
-	self:UpdateSpellOptions(self.options.args.yourbuffs.args, self.db.char.yourbuffs, yourBuffOptions)
-	self:UpdateSpellOptions(self.options.args.selfbuffs.args, self.db.char.selfbuffs, selfBuffOptions)
-	self:UpdateSpellOptions(self.options.args.alldebuffs.args, self.db.char.alldebuffs, allDebuffOptions)
-	self:UpdateSpellOptions(self.options.args.ignored.args, self.db.char.ignored, ignoreOptions)
-	self:UpdateSpellOptions(self.options.args.translated.args, self.db.char.translated, self.translatedOptions)
-	self:UpdateSpellOptions(self.options.args.override.args, self.db.char.override, overrideOptions)
+	self:UpdateSpellOptions(self.options.args.yourbuffs.args, profile.yourbuffs, yourBuffOptions)
+	self:UpdateSpellOptions(self.options.args.selfbuffs.args, profile.selfbuffs, selfBuffOptions)
+	self:UpdateSpellOptions(self.options.args.alldebuffs.args, profile.alldebuffs, allDebuffOptions)
+	self:UpdateSpellOptions(self.options.args.ignored.args, profile.ignored, ignoreOptions)
+	self:UpdateSpellOptions(self.options.args.translated.args, profile.translated, self.translatedOptions)
+	self:UpdateSpellOptions(self.options.args.override.args, profile.override, overrideOptions)
 end
 
 --[[ Slash Commands ]]--
@@ -476,172 +478,174 @@ function Dominos_BuffTimes:PrintHelp(cmd)
 	PrintCmd('resetoptions', 'Resets all buff/debuff options to thier defaults. Defaults depend on class and race.')
 end
 
+function Dominos_BuffTimes.ShowSpells(spells)
+	for spellName in pairs(spells) do
+		self:Print(spellName)
+	end
+end
+
 function Dominos_BuffTimes:ShowIgnored()
 	self:Print('Spells that will not show times on the buttons')
-	if next(self.db.char.ignored) then
-		for i in pairs(self.db.char.ignored) do
-			self:Print(i)
-		end
-	end
+	self.ShowSpells(self.db.profile.ignored)
 end
 
 function Dominos_BuffTimes:ShowYourBuffs()
 	self:Print('Buffs that will only show times for your casted spells')
-	if next(self.db.char.yourbuffs) then
-		for i in pairs(self.db.char.yourbuffs) do
-			self:Print(i)
-		end
-	end
+	self.ShowSpells(self.db.profile.yourbuffs)
 end
 
 function Dominos_BuffTimes:ShowAllDebuffs()
 	self:Print('Spells that will not show times on the buttons')
-	if next(self.db.char.alldebuffs) then
-		for i in pairs(self.db.char.alldebuffs) do
-			self:Print(i)
-		end
-	end
+	self.ShowSpells(self.db.profile.alldebuffs)
 end
 
 function Dominos_BuffTimes:ShowSelfBuffs()
 	self:Print('Spells that will show times for you only and will override the cooldown')
-	if next(self.db.char.selfbuffs) then
-		for i in pairs(self.db.char.selfbuffs) do
-			self:Print(i)
-		end
-	end
+	self.ShowSpells(self.db.profile.selfbuffs)
 end
 
 function Dominos_BuffTimes:ShowOverride()
 	self:Print('Spells that will override the cooldown')
-	if next(self.db.char.override) then
-		for i in pairs(self.db.char.override) do
-			self:Print(i)
-		end
-	end
+	self.ShowSpells(self.db.profile.override)
+end
+
+local function tableKeysSorted(t)
+	local n, keys = 0, {}
+	for k,v in pairs(tab) do  n = n+1 ; keys[n] = k  end
+	if  2 <= n  then  table.sort(keys)  end
+	return keys
 end
 
 function Dominos_BuffTimes:ShowTranslated()
 	self:Print('Spells translation list')
-	if next(self.db.char.translated) then
-		for i in pairs(self.db.char.translated) do
-			for j in pairs(self.db.char.translated[i]) do
-				self:Print(i .. ' -> ' .. j)
-			end
-		end
+	local translated = self.db.profile.translated
+	for  fromSpell, toSpells  in pairs(translated) do
+		self:Print(fromSpell .. ' -> ' .. strjoin(', ', tableKeysSorted(toSpells)) )
 	end
 end
 
 function Dominos_BuffTimes:AddIgnored(spell)
 	local lowerSpell = string.lower(spell)
-	self.db.char.ignored[lowerSpell] = 1
+	self.db.profile.ignored[lowerSpell] = 1
 	self:Print(lowerSpell .. ' will no longer show buff/debuffs times on buttons')
 end
 
 function Dominos_BuffTimes:RemoveIgnored(spell)
 	local lowerSpell = string.lower(spell)
-	self.db.char.ignored[lowerSpell] = nil
+	self.db.profile.ignored[lowerSpell] = nil
 	self:Print(lowerSpell .. ' will now show buff/debuffs times on buttons')
 end
 		
 function Dominos_BuffTimes:AddYourBuff(spell)
 	local lowerSpell = string.lower(spell)
-	self.db.char.yourbuffs[lowerSpell] = 1
+	self.db.profile.yourbuffs[lowerSpell] = 1
 	self:Print(lowerSpell .. ' will now only show buff times on buttons when casted by you')
 end
 
 function Dominos_BuffTimes:RemoveYourBuff(spell)
 	local lowerSpell = string.lower(spell)
-	self.db.char.yourbuffs[lowerSpell] = nil
+	self.db.profile.yourbuffs[lowerSpell] = nil
 	self:Print(lowerSpell .. ' will now show buff times on buttons regardless of the caster')
 end
 
 function Dominos_BuffTimes:AddAllDebuff(spell)
 	local lowerSpell = string.lower(spell)
-	self.db.char.alldebuffs[lowerSpell] = 1
+	self.db.profile.alldebuffs[lowerSpell] = 1
 	self:Print(lowerSpell .. ' will now show debuff times on buttons regardless of the caster')
 end
 
 function Dominos_BuffTimes:RemoveAllDebuff(spell)
 	local lowerSpell = string.lower(spell)
-	self.db.char.alldebuffs[lowerSpell] = nil
+	self.db.profile.alldebuffs[lowerSpell] = nil
 	self:Print(lowerSpell .. ' will now only show debuff times on buttons when casted by you')
 end
 
 function Dominos_BuffTimes:AddSelfBuff(spell)
 	local lowerSpell = string.lower(spell)
-	self.db.char.selfbuffs[lowerSpell] = 1
+	self.db.profile.selfbuffs[lowerSpell] = 1
 	self:Print(lowerSpell .. ' will now show for you only, and will override the cooldown')
 end
 
 function Dominos_BuffTimes:RemoveSelfBuff(spell)
 	local lowerSpell = string.lower(spell)
-	self.db.char.selfbuffs[lowerSpell] = nil
+	self.db.profile.selfbuffs[lowerSpell] = nil
 	self:Print(lowerSpell .. ' will now show for anyone, and will not override the cooldown')
 end
 
 function Dominos_BuffTimes:AddOverride(spell)
 	local lowerSpell = string.lower(spell)
-	self.db.char.override[lowerSpell] = 1
+	self.db.profile.override[lowerSpell] = 1
 	self:Print(lowerSpell .. ' will now override the cooldown')
 end
 
 function Dominos_BuffTimes:RemoveOverride(spell)
 	local lowerSpell = string.lower(spell)
-	self.db.char.override[lowerSpell] = nil
+	self.db.profile.override[lowerSpell] = nil
 	self:Print(lowerSpell .. ' will no longer override the cooldown')
 end
 
 function Dominos_BuffTimes:AddTranslatedSpellPair(firstSpell, secondSpell)
 	local lowerSpell = string.lower(firstSpell)
 	local lowerOtherSpell = string.lower(secondSpell)
-	if not self.db.char.translated[lowerSpell] then
-		self.db.char.translated[lowerSpell] = {}
+	local translated = self.db.profile.translated
+	if not translated[lowerSpell] then
+		translated[lowerSpell] = {}
 	end 
 		
-	self.db.char.translated[lowerSpell][lowerOtherSpell] = 1
+	translated[lowerSpell][lowerOtherSpell] = 1
 	self:Print(lowerSpell .. ' will now show a cooldown if ' .. lowerOtherSpell .. ' is detected')
 end
 
 function Dominos_BuffTimes:RemoveTranslatedSpellPair(firstSpell, secondSpell)
 	local lowerSpell = string.lower(firstSpell)
 	local lowerOtherSpell = string.lower(secondSpell)
-	if self.db.char.translated[lowerSpell] then
-		self.db.char.translated[lowerSpell][lowerOtherSpell] = nil
+	local translated = self.db.profile.translated
+	if translated[lowerSpell] then
+		translated[lowerSpell][lowerOtherSpell] = nil
 	end
 	
 	self:Print(lowerSpell .. ' will no longer show a cooldown if ' .. lowerOtherSpell .. ' is detected')
 end
 
 function Dominos_BuffTimes:IsIgnored(spell)
-	return self.db.char.ignored[spell]
+	return self.db.profile.ignored[spell]
 end
 
 function Dominos_BuffTimes:IsYourBuff(spell)
-	return self.db.char.yourbuffs[spell]
+	return self.db.profile.yourbuffs[spell]
 end
 
 function Dominos_BuffTimes:IsAllDebuff(spell)
-	return self.db.char.alldebuffs[spell]
+	return self.db.profile.alldebuffs[spell]
 end
 
 function Dominos_BuffTimes:IsSelfBuff(spell)
-	return self.db.char.selfbuffs[spell]
+	return self.db.profile.selfbuffs[spell]
 end
 
 function Dominos_BuffTimes:IsOverride(spell)
-	return self.db.char.override[spell]
+	return self.db.profile.override[spell]
 end
 
-function Dominos_BuffTimes:GetSpellTranslations(spell)
+-- Returns only the translated spells _without_ the main spell in an array (values are the lowered spellnames)
+function Dominos_BuffTimes:GetSpellTranslationsArray(spell)
+	return self.db.profile.translated[spell]
+end
+
+--[[
+-- Returns the translated spells _and_ the main spell in a map (keys are the lowered spellnames)
+-- Recreates the map on each call
+function Dominos_BuffTimes:GetSpellTranslations(fromSpell)
 	local ret = {}
-	ret[spell] = 1
+	ret[fromSpell] = 1
 	
-	if self.db.char.translated[spell] then
-		for i in pairs(self.db.char.translated[spell]) do
-			ret[i] = 1
+	local toSpells = self.db.profile.translated[spell]
+	if  toSpells  then
+		for toSpell in pairs(toSpells) do
+			ret[toSpell] = 1
 		end
 	end
 	
 	return ret
 end
+--]]

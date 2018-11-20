@@ -15,203 +15,229 @@ local PLAYER_UNITS = {
 
 --[[ Dominos_BuffTimes functions ]]--
 
+function Dominos_BuffTimes:MigrateCharDB(charDB, profile)
+	-- Migrate previous character-specific settings to profile
+	for  category, charSpells  in pairs(charDB) do
+		local profileSpells = profile[category]
+		if  not profileSpells  then
+			-- Move the whole category
+			profile[category] = charSpells
+			charDB[category] = nil
+		else
+			-- Migrate the entries (fields)
+			for  spellName, enabled  in pairs(charSpells)  do
+				if  not profileSpells[spellName]  then  profileSpells[spellName] = charSpells[spellName]  end
+				if  charSpells[spellName] == profileSpells[spellName]  then  profileSpells[spellName] = nil  end
+			end
+			if  not next(charSpells)  then  charDB[category] = nil  end
+		end
+	end
+	if  not next(charDB)  then  self.db.char = nil  end
+end
+
 function Dominos_BuffTimes:CheckDB()
 	-- populate db with default values if none are present
 	local _, playerClass = UnitClass("player")
 	local _, playerRace = UnitRace("player")
+	local profile = self.db.profile
 	
-	if not self.db.char.ignored then
-		self.db.char.ignored = {}
+	self:MigrateCharDB(self.db.char, profile)
+	
+	if not profile.ignored then
+		profile.ignored = {}
 		
 		if playerClass == 'WARRIOR' then
-			self.db.char.ignored['mortal strike'] = 1
+			profile.ignored['mortal strike'] = 1
 		elseif playerClass == 'PALADIN' then
-			self.db.char.ignored['judgement of light'] = 1
+			profile.ignored['judgement of light'] = 1
 		end
 		
 		
-		self.db.char.yourbuffs = {}
+		profile.yourbuffs = {}
 		
 		if playerClass == 'PRIEST' then
-			self.db.char.yourbuffs['renew'] = 1
+			profile.yourbuffs['renew'] = 1
 		end
 		
-		self.db.char.alldebuffs = {}
+		profile.alldebuffs = {}
 		
 		if playerClass == 'WARLOCK' then
-			self.db.char.alldebuffs['banish'] = 1
-			self.db.char.alldebuffs['fear'] = 1
+			profile.alldebuffs['banish'] = 1
+			profile.alldebuffs['fear'] = 1
 		end
 	end
 	
-	if not self.db.char.selfbuffs then
-		self.db.char.selfbuffs = {}
+	if not profile.selfbuffs then
+		profile.selfbuffs = {}
 		
 		if playerClass == 'WARRIOR' then
-			self.db.char.selfbuffs['bloodrage'] = 1
-			self.db.char.selfbuffs['retaliation'] = 1
-			self.db.char.selfbuffs['shield wall'] = 1
-			self.db.char.selfbuffs['berserker rage'] = 1
-			self.db.char.selfbuffs['recklessness'] = 1
-			self.db.char.selfbuffs['spell reflection'] = 1
-			self.db.char.selfbuffs['enraged regeneration'] = 1
-			self.db.char.selfbuffs['death wish'] = 1
-			self.db.char.selfbuffs['rampage'] = 1
-			self.db.char.selfbuffs['sweeping strikes'] = 1
-			self.db.char.selfbuffs['bladestorm'] = 1
-			self.db.char.selfbuffs['last stand'] = 1
+			profile.selfbuffs['bloodrage'] = 1
+			profile.selfbuffs['retaliation'] = 1
+			profile.selfbuffs['shield wall'] = 1
+			profile.selfbuffs['berserker rage'] = 1
+			profile.selfbuffs['recklessness'] = 1
+			profile.selfbuffs['spell reflection'] = 1
+			profile.selfbuffs['enraged regeneration'] = 1
+			profile.selfbuffs['death wish'] = 1
+			profile.selfbuffs['rampage'] = 1
+			profile.selfbuffs['sweeping strikes'] = 1
+			profile.selfbuffs['bladestorm'] = 1
+			profile.selfbuffs['last stand'] = 1
 		elseif playerClass == 'DEATHKNIGHT' then
-			self.db.char.selfbuffs['icebound fortitude'] = 1
-			self.db.char.selfbuffs['anti-magic shell'] = 1
-			self.db.char.selfbuffs['vampiric blood'] = 1
-			self.db.char.selfbuffs['dancing rune weapon'] = 1
-			self.db.char.selfbuffs['lichborne'] = 1
-			self.db.char.selfbuffs['deathchill'] = 1
-			self.db.char.selfbuffs['unbreakable armor'] = 1
-			self.db.char.selfbuffs['bone shield'] = 1
+			profile.selfbuffs['icebound fortitude'] = 1
+			profile.selfbuffs['anti-magic shell'] = 1
+			profile.selfbuffs['vampiric blood'] = 1
+			profile.selfbuffs['dancing rune weapon'] = 1
+			profile.selfbuffs['lichborne'] = 1
+			profile.selfbuffs['deathchill'] = 1
+			profile.selfbuffs['unbreakable armor'] = 1
+			profile.selfbuffs['bone shield'] = 1
 		elseif playerClass == 'DRUID' then
-			self.db.char.selfbuffs['berserk'] = 1
-			self.db.char.selfbuffs['survival instincts'] = 1
-			self.db.char.selfbuffs['enrage'] = 1
-			self.db.char.selfbuffs['frenzied regeneration'] = 1
-			self.db.char.selfbuffs['tiger\'s fury'] = 1
-			self.db.char.selfbuffs['dash'] = 1
-			self.db.char.selfbuffs['barkskin'] = 1
+			profile.selfbuffs['berserk'] = 1
+			profile.selfbuffs['survival instincts'] = 1
+			profile.selfbuffs['enrage'] = 1
+			profile.selfbuffs['frenzied regeneration'] = 1
+			profile.selfbuffs['tiger\'s fury'] = 1
+			profile.selfbuffs['dash'] = 1
+			profile.selfbuffs['barkskin'] = 1
 		elseif playerClass == 'HUNTER' then
-			self.db.char.selfbuffs['eyes of the beast'] = 1
-			self.db.char.selfbuffs['deterrence'] = 1
-			self.db.char.selfbuffs['rapid fire'] = 1
+			profile.selfbuffs['eyes of the beast'] = 1
+			profile.selfbuffs['deterrence'] = 1
+			profile.selfbuffs['rapid fire'] = 1
 		elseif playerClass == 'MAGE' then
-			self.db.char.selfbuffs['frost armor'] = 1
-			self.db.char.selfbuffs['slow fall'] = 1
-			self.db.char.selfbuffs['evocation'] = 1
-			self.db.char.selfbuffs['fire ward'] = 1
-			self.db.char.selfbuffs['mana shield'] = 1
-			self.db.char.selfbuffs['frost ward'] = 1
-			self.db.char.selfbuffs['ice armor'] = 1
-			self.db.char.selfbuffs['molten armor'] = 1
-			self.db.char.selfbuffs['invisibility'] = 1
-			self.db.char.selfbuffs['arcane power'] = 1
-			self.db.char.selfbuffs['icy veins'] = 1
-			self.db.char.selfbuffs['ice barrier'] = 1
+			profile.selfbuffs['frost armor'] = 1
+			profile.selfbuffs['slow fall'] = 1
+			profile.selfbuffs['evocation'] = 1
+			profile.selfbuffs['fire ward'] = 1
+			profile.selfbuffs['mana shield'] = 1
+			profile.selfbuffs['frost ward'] = 1
+			profile.selfbuffs['ice armor'] = 1
+			profile.selfbuffs['molten armor'] = 1
+			profile.selfbuffs['invisibility'] = 1
+			profile.selfbuffs['arcane power'] = 1
+			profile.selfbuffs['icy veins'] = 1
+			profile.selfbuffs['ice barrier'] = 1
 		elseif playerClass == 'PALADIN' then
-			self.db.char.selfbuffs['seal of righteousness'] = 1
-			self.db.char.selfbuffs['divine protection'] = 1
-			self.db.char.selfbuffs['righteous fury'] = 1
-			self.db.char.selfbuffs['seal of justice'] = 1
-			self.db.char.selfbuffs['seal of light'] = 1
-			self.db.char.selfbuffs['divine shield'] = 1
-			self.db.char.selfbuffs['seal of wisdom'] = 1
-			self.db.char.selfbuffs['seal of blood'] = 1
-			self.db.char.selfbuffs['seal of vengeance'] = 1
-			self.db.char.selfbuffs['seal of the martyr'] = 1
-			self.db.char.selfbuffs['avenging wrath'] = 1
-			self.db.char.selfbuffs['divine illumination'] = 1
-			self.db.char.selfbuffs['seal of command'] = 1
+			profile.selfbuffs['seal of righteousness'] = 1
+			profile.selfbuffs['divine protection'] = 1
+			profile.selfbuffs['righteous fury'] = 1
+			profile.selfbuffs['seal of justice'] = 1
+			profile.selfbuffs['seal of light'] = 1
+			profile.selfbuffs['divine shield'] = 1
+			profile.selfbuffs['seal of wisdom'] = 1
+			profile.selfbuffs['seal of blood'] = 1
+			profile.selfbuffs['seal of vengeance'] = 1
+			profile.selfbuffs['seal of the martyr'] = 1
+			profile.selfbuffs['avenging wrath'] = 1
+			profile.selfbuffs['divine illumination'] = 1
+			profile.selfbuffs['seal of command'] = 1
 		elseif playerClass == 'PRIEST' then
-			self.db.char.selfbuffs['inner fire'] = 1
-			self.db.char.selfbuffs['dispersion'] = 1
+			profile.selfbuffs['inner fire'] = 1
+			profile.selfbuffs['dispersion'] = 1
 		elseif playerClass == 'ROGUE' then
-			self.db.char.selfbuffs['evasion'] = 1
-			self.db.char.selfbuffs['sprint'] = 1
-			self.db.char.selfbuffs['slice and dice'] = 1
-			self.db.char.selfbuffs['vanish'] = 1
-			self.db.char.selfbuffs['cloak of shadows'] = 1
-			self.db.char.selfbuffs['hunger for blood'] = 1
-			self.db.char.selfbuffs['blade flurry'] = 1
-			self.db.char.selfbuffs['adrenaline rush'] = 1
-			self.db.char.selfbuffs['shadow dance'] = 1
+			profile.selfbuffs['evasion'] = 1
+			profile.selfbuffs['sprint'] = 1
+			profile.selfbuffs['slice and dice'] = 1
+			profile.selfbuffs['vanish'] = 1
+			profile.selfbuffs['cloak of shadows'] = 1
+			profile.selfbuffs['hunger for blood'] = 1
+			profile.selfbuffs['blade flurry'] = 1
+			profile.selfbuffs['adrenaline rush'] = 1
+			profile.selfbuffs['shadow dance'] = 1
 		elseif playerClass == 'SHAMAN' then
-			self.db.char.selfbuffs['rockbiter weapon'] = 1
-			self.db.char.selfbuffs['lightning shield'] = 1
-			self.db.char.selfbuffs['flametongue weapon'] = 1
-			self.db.char.selfbuffs['frostbrand weapon'] = 1
-			self.db.char.selfbuffs['water shield'] = 1
-			self.db.char.selfbuffs['far sight'] = 1
-			self.db.char.selfbuffs['earthliving weapon'] = 1
-			self.db.char.selfbuffs['shamanistic rage'] = 1
-			self.db.char.selfbuffs['bloodlust'] = 1
-			self.db.char.selfbuffs['heroism'] = 1
+			profile.selfbuffs['rockbiter weapon'] = 1
+			profile.selfbuffs['lightning shield'] = 1
+			profile.selfbuffs['flametongue weapon'] = 1
+			profile.selfbuffs['frostbrand weapon'] = 1
+			profile.selfbuffs['water shield'] = 1
+			profile.selfbuffs['far sight'] = 1
+			profile.selfbuffs['earthliving weapon'] = 1
+			profile.selfbuffs['shamanistic rage'] = 1
+			profile.selfbuffs['bloodlust'] = 1
+			profile.selfbuffs['heroism'] = 1
 		elseif playerClass == 'WARLOCK' then
-			self.db.char.selfbuffs['demon skin'] = 1
-			self.db.char.selfbuffs['demon armor'] = 1
-			self.db.char.selfbuffs['eye of kilrogg'] = 1
-			self.db.char.selfbuffs['shadow ward'] = 1
-			self.db.char.selfbuffs['fel armor'] = 1
-			self.db.char.selfbuffs['demonic sacrifice'] = 1
-			self.db.char.selfbuffs['soul link'] = 1
-			self.db.char.selfbuffs['metamorphosis'] = 1
-			self.db.char.selfbuffs['soul swap'] = 1
+			profile.selfbuffs['demon skin'] = 1
+			profile.selfbuffs['demon armor'] = 1
+			profile.selfbuffs['eye of kilrogg'] = 1
+			profile.selfbuffs['shadow ward'] = 1
+			profile.selfbuffs['fel armor'] = 1
+			profile.selfbuffs['demonic sacrifice'] = 1
+			profile.selfbuffs['soul link'] = 1
+			profile.selfbuffs['metamorphosis'] = 1
+			profile.selfbuffs['soul swap'] = 1
 		elseif playerClass == 'MONK' then
-			self.db.char.selfbuffs['tiger power'] = 1
-			self.db.char.selfbuffs['energizing brew'] = 1
-			self.db.char.selfbuffs['nimble brew'] = 1
+			profile.selfbuffs['tiger power'] = 1
+			profile.selfbuffs['energizing brew'] = 1
+			profile.selfbuffs['nimble brew'] = 1
 		end
 		
 		if playerRace == 'Troll' then
-			self.db.char.selfbuffs['berserking'] = 1
+			profile.selfbuffs['berserking'] = 1
 		elseif playerRace == 'Dwarf' then
-			self.db.char.selfbuffs['stoneform'] = 1
+			profile.selfbuffs['stoneform'] = 1
 		elseif playerRace == 'NightElf' then
-			self.db.char.selfbuffs['shadowmeld'] = 1
+			profile.selfbuffs['shadowmeld'] = 1
 		elseif playerRace == 'Orc' then
-			self.db.char.selfbuffs['blood fury'] = 1
+			profile.selfbuffs['blood fury'] = 1
 		end
 	end
 	
-	if not self.db.char.translated then
-		self.db.char.translated = {}
+	if not profile.translated then
+		profile.translated = {}
 		if playerClass == 'DEATHKNIGHT' then
-			self.db.char.translated['plague strike'] = {}
-			self.db.char.translated['plague strike']['blood plague'] = 1
-			self.db.char.translated['icy touch'] = {}
-			self.db.char.translated['icy touch']['frost fever'] = 1
+			profile.translated['plague strike'] = {}
+			profile.translated['plague strike']['blood plague'] = 1
+			profile.translated['icy touch'] = {}
+			profile.translated['icy touch']['frost fever'] = 1
 		elseif playerClass == 'WARRIOR' then
-			self.db.char.translated['devastate'] = {}
-			self.db.char.translated['devastate']['sunder armor'] = 1
+			profile.translated['devastate'] = {}
+			profile.translated['devastate']['sunder armor'] = 1
 		elseif playerClass == 'MAGE' then
-			self.db.char.translated['scorch'] = {}
-			self.db.char.translated['scorch']['improved scorch'] = 1
+			profile.translated['scorch'] = {}
+			profile.translated['scorch']['improved scorch'] = 1
 		elseif playerClass == 'WARLOCK' then
-			self.db.char.translated['soul swap exhale'] = {}
-			self.db.char.translated['soul swap exhale']['soul swap'] = 1
+			profile.translated['soul swap exhale'] = {}
+			profile.translated['soul swap exhale']['soul swap'] = 1
 		elseif playerClass == 'MONK' then
-			self.db.char.translated['tiger palm'] = {}
-			self.db.char.translated['tiger palm']['tiger power'] = 1
+			profile.translated['tiger palm'] = {}
+			profile.translated['tiger palm']['tiger power'] = 1
 		end
 	else
 		-- convert existing spell translations to lower case
 		local newTranslatedSpells = {}
-		for spell in pairs(self.db.char.translated) do
+		for spell in pairs(profile.translated) do
 			local lowerSpell = string.lower(spell)
 			newTranslatedSpells[lowerSpell] = {}
 			
-			for newSpell in pairs(self.db.char.translated[spell]) do
+			for newSpell in pairs(profile.translated[spell]) do
 				local newLowerSpell = string.lower(newSpell)
 				newTranslatedSpells[lowerSpell][newLowerSpell] = 1
 			end
 		end
-		self.db.char.translated = newTranslatedSpells
+		profile.translated = newTranslatedSpells
 	end
 	
 	-- buffs that will show even if CD is greater
-	if not self.db.char.override then
-		self.db.char.override = {}
+	if not profile.override then
+		profile.override = {}
 		if playerClass == 'WARLOCK' then
-			self.db.char.override['death coil'] = 1
-			self.db.char.override['shadowflame'] = 1
+			profile.override['death coil'] = 1
+			profile.override['shadowflame'] = 1
 		elseif playerClass == 'ROGUE' then
-			self.db.char.override['vendetta'] = 1
+			profile.override['vendetta'] = 1
 		elseif playerClass == 'MONK' then
-			self.db.char.override['tiger\'s lust'] = 1
-			self.db.char.override['energizing brew'] = 1
-			self.db.char.override['nimble brew'] = 1
+			profile.override['tiger\'s lust'] = 1
+			profile.override['energizing brew'] = 1
+			profile.override['nimble brew'] = 1
 		end
 	end
 end
 
 function Dominos_BuffTimes:OnInitialize()
-	self.db = LibStub("AceDB-3.0"):New("Dominos_BuffTimesDB")
+	local classLocalized, playerClass = UnitClass("player")
+	local classProfile =  Dominos_BuffTimesDB  and  Dominos_BuffTimesDB.profileKeys  and  Dominos_BuffTimesDB.profileKeys[playerClass]
+	local defaultProfile =  classProfile  or  classLocalized
+	self.db = LibStub("AceDB-3.0"):New("Dominos_BuffTimesDB", nil, defaultProfile)
 	self:CheckDB()
 	self:RegisterSlashCommands()
 	
@@ -489,30 +515,31 @@ local function ShouldShowTimer(spell, buff, spellBuff, cdstart, cdduration)
 	return nil
 end
 
+local function LongerLastingBuff(buff1, buff2)
+	if  not buff1  or  not buff2  then  return  buff1 or buff2  end
+	return  buff2.start + buff2.duration > buff1.start + buff1.duration
+		and  buff2
+		or  buff1
+end
+
+local EMPTY = {}
 local function ActionButton_UpdateBorder(self, spell)
 	local buff = 1
 	local showBorder = nil
 	
 	if spell then
-	    local unit = self.unit
-		local spellBuff = nil
+		local unit = self.unit
 		
 		-- translate spells
 		spell = string.lower(spell)
-		local spellsToCheck = Dominos_BuffTimes:GetSpellTranslations(spell)
+		local spellsToCheck = Dominos_BuffTimes:GetSpellTranslationsArray(spell)  or  EMPTY
+		-- Update: main spell has to be checked separately as it is not part of spellsToCheck
 		
 		if Dominos_BuffTimes:IsSelfBuff(spell) then
-			for i in pairs(spellsToCheck) do
-				local thisSpellBuff = Updater:PlayerHasBuff(i)
-				
-				if thisSpellBuff then
-					local start, duration, enabled
-					
-					if not spellBuff or thisSpellBuff.start + thisSpellBuff.duration > spellBuff.start + spellBuff.duration then
-						spellBuff = thisSpellBuff
-					end
-				end
-			end
+			-- Check main spell
+			local spellBuff = Updater:PlayerHasBuff(spell)    -- check main spell separately
+			-- Check alt spells
+			for  altSpell  in pairs(spellsToCheck) do  spellBuff = LongerLastingBuff( spellBuff, Updater:PlayerHasBuff(altSpell) )  end
 						
 			if spellBuff and spellBuff.duration == 0 then
 				if self.DBTCooldown and self.DBTCooldown:IsShown() then
@@ -529,17 +556,10 @@ local function ActionButton_UpdateBorder(self, spell)
 		else
 			if UnitExists(unit) then
 				if UnitIsFriend('player', unit) then
-					for i in pairs(spellsToCheck) do
-						local thisSpellBuff = Updater:GetTargetBuff(unit, i)
-						
-						if thisSpellBuff then
-							local start, duration, enabled
-							
-							if not spellBuff or thisSpellBuff.start + thisSpellBuff.duration > spellBuff.start + spellBuff.duration then
-								spellBuff = thisSpellBuff
-							end
-						end
-					end
+					-- Check main spell
+					local spellBuff = Updater:GetTargetBuff(unit, spell)    -- check main spell separately
+					-- Check alt spells
+					for  altSpell  in pairs(spellsToCheck) do  spellBuff = LongerLastingBuff( spellBuff, Updater:GetTargetBuff(unit, altSpell) )  end
 					
 					if spellBuff then
 						self:GetCheckedTexture():SetVertexColor(0, 1, 0)
@@ -548,17 +568,10 @@ local function ActionButton_UpdateBorder(self, spell)
 				else
 					buff = 0
 					
-					for i in pairs(spellsToCheck) do
-						local thisSpellBuff = Updater:GetTargetDebuff(unit, i)
-						
-						if thisSpellBuff then
-							local start, duration, enabled
-							
-							if not spellBuff or thisSpellBuff.start + thisSpellBuff.duration > spellBuff.start + spellBuff.duration then
-								spellBuff = thisSpellBuff
-							end
-						end
-					end
+					-- Check main spell
+					local spellBuff = Updater:GetTargetDebuff(unit, spell)
+					-- Check alt spells
+					for  altSpell  in pairs(spellsToCheck) do  spellBuff = LongerLastingBuff( spellBuff, Updater:GetTargetDebuff(unit, altSpell) )  end
 					
 					if spellBuff and spellBuff.duration == 0 then 
 						return false
@@ -711,6 +724,14 @@ hooksecurefunc('ActionButton_UpdateCooldown', ActionButton_CheckCooldown)
 
 --[[ Events ]]--
 
+-- Functions to register actionbuttons of specific addons, populated below
+local RegisterAddon = {}
+function RegisterAddons()
+	for  addonName, registerFunc  in pairs(RegisterAddon) do
+		if  _G[addonName]  and  registerFunc()  then  RegisterAddon[addonName] = nil  end
+	end
+end
+
 --buff and debuff updating stuff
 Updater:SetScript('OnEvent', function(self, event, unit)
 	if event == 'PLAYER_TARGET_CHANGED' then
@@ -729,6 +750,15 @@ Updater:SetScript('OnEvent', function(self, event, unit)
 		self:UpdatePlayerBuffs()
 	elseif event == 'ACTIONBAR_UPDATE_COOLDOWN' or event == 'ACTIONBAR_UPDATE_STATE' then
 		self.shouldUpdateBuffs = true
+	elseif event == 'ADDON_LOADED' then
+		local registerFunc = RegisterAddon[unit]
+		if  registerFunc  then
+			-- Loaded addon has a register function, run it
+			if  registerFunc()  then  RegisterAddon[unit] = nil  end
+		else
+			-- If the addon folder was renamed looking for the addon's global object might still work
+			RegisterAddons()
+		end
 	end
 end)
 
@@ -763,23 +793,38 @@ local function LAB_Update(self)
 	self:UpdateAction(true)
 end
 
-local DominosButtonPrefix = 'DominosActionButton'
 
-if Dominos then
+function RegisterAddon.Dominos()
+	--if  not Dominos  then  return false  end
+	local DominosButtonPrefix = 'DominosActionButton'
+	local found = 0
 	for id = 1, 120 do
 		if _G[DominosButtonPrefix .. id] then
 			RegisterButton(_G[DominosButtonPrefix .. id], ActionButton_UpdateState)
+			found = found + 1
 		end
 	end
+	--print("RegisterAddon.Dominos(): found "..found.." ActionButton")
+	--return  60 <= found
+	return  true
 end
 
-if Bartender4 then
+function RegisterAddon.Bartender4()
+	--if  not Bartender4  then  return false  end
+	local found = 0
 	for id = 1, 120 do
 		if _G[BT4ButtonPrefix .. id] then
 			RegisterButton(_G[BT4ButtonPrefix .. id], LAB_Update)
+			found = found + 1
 		end
 	end
+	--print("RegisterAddon.Bartender4(): found "..found.." ActionButton")
+	return  true
 end
+
+-- Call RegisterAddon.* functions if the respective global object is found
+RegisterAddons()
+
 
 --register any stock action buttons created after this addon is loaded
 hooksecurefunc('ActionButton_OnLoad', function(self)
