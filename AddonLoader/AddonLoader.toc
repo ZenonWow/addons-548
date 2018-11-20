@@ -31,6 +31,7 @@ LibDataBroker-1.1\LibDataBroker-1.1.lua
 
 AddonLoader.lua
 AddonCapture.lua
+ConditionManager.lua
 
 locale\enUS.lua
 locale\deDE.lua

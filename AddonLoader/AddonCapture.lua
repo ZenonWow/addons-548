@@ -12,8 +12,11 @@
 
 local ADDON_NAME, private = ...
 local AddonLoader = AddonLoader
-local AddonCapture = {}
 local Debug = private.Debug
+local AddonCapture = {}
+-- Export to AddonLoader
+private.AddonCapture = AddonCapture
+
 
 
 
@@ -27,27 +30,20 @@ function AddonCapture:SaveEventHandlers(eventName)
 	self.framesBefore[eventName] = arrayToMap({ GetFramesRegisteredForEvent(eventName) })
 end
 
-function AddonCapture:New()
-	return setmetatable({}, { __index = self })
-end
-
 function AddonCapture:StartCapture()
-	self.framesBefore = {}
+	local new = setmetatable({}, { __index = self })
+	new.framesBefore = {}
 	-- If this is after the PLAYER_LOGIN event then make up for the missed one-time event
+	
+	--[[
 	if  AddonLoader:IsVariablesLoaded()  then  self:SaveEventHandlers('VARIABLES_LOADED')  end
 	if  AddonLoader:IsSpellsLoaded()  then  self:SaveEventHandlers('SPELLS_CHANGED')  end
 	if  IsLoggedIn()  then  self:SaveEventHandlers('PLAYER_LOGIN')  end
 	if  IsPlayerInWorld()  then  self:SaveEventHandlers('PLAYER_ENTERING_WORLD')  end
-	return self
+	--]]
+	return new
 end
 
-
-function AddonLoader:StartCapture()
-	--return AddonCapture:StartCapture()
-	AddonCapture:StartCapture()
-	return AddonCapture
-	--return (AddonCapture:New()):StartCapture()
-end
 
 
 
@@ -72,23 +68,22 @@ end
 
 
 
-function SendFrameEvent(frame, eventName, ...)
+function SendFrameEvent(frame, ...)
 	if  not frame  then  return nil  end
 	local OnEvent = frame:GetScript('OnEvent')
 	if  not OnEvent  then  return nil  end
-	local ran, result = safecall(OnEvent, frame, eventName, ...)
-	return ran, result
+	return safecall(OnEvent, frame, ...)
 end
 
-function AddonCapture:SendEvent(eventName)  -- ?
+function AddonCapture:FireEvent(...)  -- ?
+	local eventName = ...
+	Debug("AddonCapture:FireEvent(".. strjoin(", ", tostringall(...)) ..")")
 	local newFrames = self.newFrames[eventName]
 	if  not newFrames  then  return  end
-	Debug("AddonCapture:SendEvent("..eventName..")")
 	
-	local eventParams = AddonLoader[eventName] or {}
 	for  i, frame  in ipairs(newFrames) do
 		Debug("SendFrameEvent("..eventName..") to ".. (frame:GetName() or tostring(frame)) )
-		local ran, result = SendFrameEvent(frame, eventName, unpack(eventParams))
+		local ran, result = SendFrameEvent(frame, ...)
 		if  not ran  then
 			self.frameErrors = self.frameErrors or {}
 			self.frameErrors[#self.frameErrors+1] = { frame, eventName }
@@ -100,10 +95,13 @@ function AddonCapture:SendEvent(eventName)  -- ?
 end
 
 function AddonCapture:SendAddOnLoadEvents()
-	self:SendEvent('VARIABLES_LOADED')
-	self:SendEvent('SPELLS_CHANGED')
-	self:SendEvent('PLAYER_LOGIN')
-	self:SendEvent('PLAYER_ENTERING_WORLD')
+	AddonLoader:ReplayCachedEvents(self)
+	--[[
+	self:FireEvent('VARIABLES_LOADED')
+	self:FireEvent('SPELLS_CHANGED')
+	self:FireEvent('PLAYER_LOGIN')
+	self:FireEvent('PLAYER_ENTERING_WORLD')
+	--]]
 	return self
 end
 

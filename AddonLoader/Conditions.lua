@@ -1,9 +1,36 @@
+--[[
+## X-LoadOn:  Login
+## X-Load-OnlyOne:  Crafting
+## X-Load-OnlyOne:  ToolTip
+## X-Load-OnlyOne:  Nameplate
+## X-Load-OnlyOne:  UnitFrame
+-- TODO: 'Synchronous'  'Instant'  'UserInterface'  'Quick'  'Queued'  'Broker'  'LowPrio'  "N sec"  "N min"
+## X-LoadOn-Login:  UserInterface
+## X-LoadOn-Login:  Broker
+## X-LoadOn-Login:  LowPrio
+## X-LoadOn-Login-Delay:  30 sec
+## X-LoadOn-Login-Delay:  1 min
+## X-LoadOn-Addon:
+## X-LoadOn-Slash:
+## X-LoadOn-LDB-Launcher:
+## X-Load-Delay:
+## X-Load-Condition:
+## X-Load-Early:  BeforeAddonLoader, BeforeSavedVariables, AfterAddonLoader, OptionalBeforeAddon (in X-Load-Before)
+## X-Load-Before:
+--]]
+
 local ADDON_NAME, private = ...
-local _G = _G
 local AddonLoader = AddonLoader
+local tostrjoin = private.tostrjoin
+local Debug = private.Debug
 local safecall = private.safecall
+local ConditionManager = AddonLoader.ConditionManager
+local _G, tostringall, tonumber, tostring, string, strjoin, type, pairs, ipairs, tremove, select, next, pcall, xpcall = 
+      _G, tostringall, tonumber, tostring, string, strjoin, type, pairs, ipairs, tremove, select, next, pcall, xpcall
+local EMPTY = {}  -- constant empty object to use in place of nil table reference
 
-
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
 -- GLOBALS: INTERFACEOPTIONS_ADDONCATEGORIES InterfaceOptionsFrame_OpenToCategory InterfaceOptions_AddCategory
 -- GLOBALS: IsInInstance InCombatLockdown GetNumRaidMembers GetNumPartyMembers
 -- GLOBALS: GetRealmName IsInGuild UnitIsPVP UnitClass IsResting UnitLevel
@@ -11,123 +38,70 @@ local safecall = private.safecall
 -- GLOBALS: CreateFrame hooksecurefunc geterrorhandler LibStub UIParent setfenv
 -- GLOBALS: IsAddOnLoaded
 
-local tonumber, string, type, next, select, ipairs, tremove, tostring, pcall, loadstring = 
-      tonumber, string, type, next, select, ipairs, tremove, tostring, pcall, loadstring
-
-local function dontParse()  return false  end
-
-local function formatError(errorMessage, addonName, condName, handler)
-	return ("In "..addonName..".toc / ## "..condName..": "..handler.. "\n\n" .. errorMessage)
-end
 
 
-
-
--- There should be a cleaner way to handle this
-local hookenv = setmetatable({}, {__index = getfenv(0)})
-function hookenv.LoadAddOn(addonName)
-	return AddonLoader:LoadAddOn(addonName)
-end
-
-local function LoadWithMetadataFunc(condition, event, ...)
-	-- Evaluate the metadata provided code
-	local ran, result =  condition.metadataFunc  and  safecall(condition.metadataFunc, ...)
-	-- If it ran and returned false then stop.
-	if  ran  and  result == false  then  return false  end
-	
-	-- If the metadata code returned a function then call it AFTER the addon was loaded.
-	--local afterLoadFunc =  ran  and  type(result) == 'function'  and  result  or  condition.afterLoadFunc
-	
-	-- Load the addon
-	return  result  or  true
-	--[[
-	local loaded = AddonLoader:LoadAddOn(condition.addonName)
-	
-	-- If the metadata code returned a function then call it AFTER the addon was loaded.
-	if  loaded  and  afterLoadFunc  then  safecall(postLoadFunc)  end
-	--]]
-end
-
-
-local function AddCondition(eventsTable, addonName, frameName, eventName, condName, metadataFunc)
-	if  metadataFunc  then  setfenv(metadataFunc, hookenv)  end
-	
-	local eventObj = eventsTable:GetEventObj(frameName, eventName)
-	local conditions = eventObj[addonName] or {}
-	eventObj[addonName] = conditions
-	conditions[condName] = {
-		handler = LoadWithMetadataFunc,
-		metadataFunc = metadataFunc,
-	}
-end
-
-local function RegisterEventHook(addonName, eventName, condName, metadataFunc)
-	return AddCondition(ConditionManager.EventHooks, addonName, nil, eventName, condName, metadataFunc)
-end
-
-local function RegisterFrameHook(addonName, frameName, scriptName, condName, metadataFunc)
-	return AddCondition(ConditionManager.scriptHooks, addonName, frameName, scriptName, condName, metadataFunc)
-end
-
-local function RegisterSecureHook(addonName, objectName, hookedFuncName, condName, metadataFunc)
-	return AddCondition(ConditionManager.secureHooks, addonName, objectName, hookedFuncName, condName, metadataFunc)
-end
-
-
-
-
-function AddonLoader:ReadChildConditions(addonName, condName, condValue)
-	-- special handling for condName == "X-LoadOn-Events" or condName == "X-LoadOn-Hooks"
-	for event in condValue:gmatch("[^ ,]+") do
-		local childCondValue = GetAddOnMetadata(addonName, "X-LoadOn-"..event)
-		if childCondValue then
-			self.conditiontexts[addonName] = self.conditiontexts[addonName].."X-LoadOn-"..event..": "..childCondValue.."\n"
-		end
+-- Called from metadata: global function to check if any frame is shown from the parameters
+function _G.IsFrameShown(...)
+	for  i = 1,select('#', ...)  do
+		local f = select(i, ...)
+		-- Accept name of frame
+		if  type(f) == 'string'  then  f = _G[f]  end
+		-- If it looks like a frame then check if shown
+		if  type(f) == 'object'  and  type(f.IsShown) == 'function'  and  f:IsShown()  then  return true  end
 	end
+	return false
 end
 
 
-function AddonLoader:GetConditionValue(addonName, conditionName)
-	local conditiontext = self.conditiontexts[addonName]
-	for  _, line  in ipairs({strsplit("\n", conditiontext)}) do
-		--local condName, condValue = string.match(line, "^([^:]*):? ?(.*)$")
-		-- conditionName has no special/escape characters
-		local condName, condValue = string.match(line, "^("..conditionName.."):? ?(.*)$")
-		if  condValue  and  condName == conditionName  then
-			return condValue
-		end
-	end
-	return nil
+
+
+
+--local function dontParse(fieldValue)  return fieldValue  end
+local dontParse = nil
+
+local function  tindexof(arr, item)
+	for  i= 1,#arr	do  if  arr[i] == item  then  return i  end end
 end
 
-function AddonLoader:GetConditionValue2(addonName, conditionName)
-	local conditiontext = self.conditiontexts[addonName]
-	for line in conditiontext:gmatch("[^\n]+") do
-		local condName, condValue = string.match(line, "^([^:]*):? ?(.*)$")
-		if  condValue  and  condName == conditionName  then
-			return condValue
-		end
-	end
-	return nil
+local function strsplitObjectKey(hookedName)
+	local object, key = strsplit(".:", hookedName)
+	if  not key  then  return nil, object  end
+	return object, key
 end
 
+local packNonEmpty = private.packNonEmpty
 
-function AddonLoader:GetConditionFunc(addonName, condName)
-	local condValue = self:GetConditionValue(addonName, condName)
-	return self.ParseConditionFunc(nil, addonName, condName, condValue)
+--[[
+local function strsplitPack(separator, str)
+	return packNonEmpty(strsplit( separator, str ))
 end
 
+local function strsplitSkipEmpty(separator, str)
+	return unpack(packNonEmpty(strsplit( separator, str )))
+end
+--]]
 
-function AddonLoader.ParseConditionFunc(condition, addonName, condName, condValue)
-	if  not condValue  then  return nil  end
-	--local ran, result = pcall(loadstring, condValue)
-	local ran, result = safecall(loadstring, condValue)
-	if  ran  then  return result  end
+local function parseLuaObject(str)
+	if  not str  or  str[1] ~= '{'  or  str[#str] ~= '}'  then  return nil  end
 	
-	geterrorhandler()( formatError(result, addonName, condName, condValue) )
-	return nil
+	local body = "return "..str
+	local ran, result = safecall(loadstring, body)
+	local ran, object =  ran  and  type(result) == 'function'  and  safecall(result)
+	return  ran  and  object
 end
 
+
+
+
+local function DeleteDataObject(dataobj)
+	-- Will this break? DataBrokers still have the reference.
+	-- Hopefully they overwrite it when the addon creates the real DataObject.
+	local ldb = LibStub:GetLibrary("LibDataBroker-1.1")
+	local name = ldb.namestorage[dataobj]
+	if  name  then  ldb.proxystorage[name] = nil  end
+	ldb.namestorage[dataobj] = nil
+	ldb.attributestorage[dataobj] = nil
+end
 
 
 
@@ -145,125 +119,279 @@ local function InterfaceOptions_OnShow(self)
 		-- remove from options frame
 		RemoveInterfaceOptions(self)
 		self:Hide()
-		-- load addon
-		AddonLoader:LoadAddOn(self.addonName)
-		-- refresh optionsframe
-		InterfaceOptionsFrame_OpenToCategory(self.name)
-		InterfaceOptionsFrame_OpenToCategory(self.name)
+		-- Load addon without delay
+		AddonLoader:LoadAddOn(self.addonName, self.loadCondition)
+		
+		-- refresh InterfaceOptionsFrame
+		safecall(InterfaceOptionsFrame_OpenToCategory, self.name)
+		safecall(InterfaceOptionsFrame_OpenToCategory, self.name)
 	end
 end
 
 
-local function SlashCmdHandler(addonName, commandLong, argument)
-	local slash = _G['SLASH_'..commandLong]
-	local msg = slash..' '..argument
-	AddonLoader:LoadAddOn(addonName)
-	_G.ChatFrame_OpenChat(msg)
-	--[[
+
+
+--[[
+-- Credit: https://wow.gamepedia.com/RunSlashCmd
+function RunSlashCmd(cmd)
+  local slash, rest = cmd:match("^(%S+)%s*(.-)$")
+  for name, func in pairs(SlashCmdList) do
+     local i, slashCmd = 1
+     repeat
+        slashCmd, i = _G["SLASH_"..name..i], i + 1
+        if slashCmd == slash then
+           return true, func(rest)
+        end
+     until not slashCmd
+  end
+  -- Okay, so it's not a slash command. It may also be an emote.
+  local i = 1
+  while _G["EMOTE" .. i .. "_TOKEN"] do
+     local j, cn = 2, _G["EMOTE" .. i .. "_CMD1"]
+     while cn do
+        if cn == slash then
+           return true, DoEmote(_G["EMOTE" .. i .. "_TOKEN"], rest);
+        end
+        j, cn = j+1, _G["EMOTE" .. i .. "_CMD" .. j]
+     end
+     i = i + 1
+  end
+end 
+--]]
+
+--[[
+local function SlashCmdRunner1(cond)
 	local editbox = _G.ChatFrameEditBox
 		or  _G.ChatEdit_GetActiveWindow()  -- Support for 3.3.5 and newer
 	assert(editbox, "Failed to open chat message box to run the loaded addon's command.")
-	editbox:SetText(msg)  -- ChatFrame_OpenChat(msg) did this already
-	--]]
+	editbox:SetText(msg)
 	_G.ChatEdit_SendText(editbox, 1)
+end
+--]]
+
+local function SlashCmdRunner2(cond)
+	_G.ChatFrame_OpenChat(cond.replaySlashCommand)
+	_G.ChatEdit_SendText(editbox, 1)
+end
+
+local function SlashCmdRunner3(cond)
+	-- From FrameXML/ChatFrame.lua / ChatFrame_ImportAllListsToHash():
+	ChatFrame_ImportListToHash(SlashCmdList, hash_SlashCmdList)
+	-- Is hash_SlashCmdList[] sensitive to tainting?  Cause ChatEdit_SendText() will taint it too.
+	local slashFunc = _G.hash_SlashCmdList[cond.slashCommand]
+	if  not slashFunc  then
+		print("Addon "..cond.addonName.." did not register the command: "..cond.slashCommand)
+		return
+	end
+	local ran, result = safecall(slashFunc, cond.slashArgument, cond.editBox)
+end
+
+local function SlashCmdRunner(cond)
+  local slashFunc
+	-- SlashCmdList should contain only the newly registered commands. It is hashed and wiped at each chat command execution.
+	for name, handler in pairs(SlashCmdList) do
+		for i = 1,100 do
+			slash = _G["SLASH_"..name..i]
+			if slash == cond.slashCommand then
+				slashFunc = handler ; break
+			end
+		end
+  end
+	if  not slashFunc  then
+		print("Addon "..cond.addonName.." did not register the command: "..cond.slashCommand)
+		return
+	end
+	local ran, result = safecall(slashFunc, cond.slashArgument, cond.editBox)
+end
+
+local function SlashCmdHandler(cond, slash, ...)
+	--local slash = _G['SLASH_'..commandLong]
+	cond.slashCommand = slash
+	cond.slashArgument, cond.editBox = ...
+	cond.afterLoadFunc = SlashCmdRunner
+	-- Load addon asynchronously
+	cond.delayPriority = 'instant'
+	AddonLoader.QueueLoadAddOn(cond.addonName, cond)
 end
 
 
 
 
 
-AddonLoader.conditions = {
-	["X-LoadOn-Bank"] = {
-		events = {"BANKFRAME_OPENED"},
-	},
-	["X-LoadOn-Mailbox"] = {
-		events = {"MAIL_SHOW"},
-	},
-	["X-LoadOn-Merchant"] = {
-		events = {"MERCHANT_SHOW"},
-	},
-	["X-LoadOn-AuctionHouse"] = {
-		events = {"AUCTION_HOUSE_SHOW"},
-	},
-	["X-LoadOn-Crafting"] = {
-		events = {"TRADE_SKILL_SHOW", "CRAFT_SHOW"},
-	},
 
-	["X-LoadOn-Arena"] = {
-		events = {"ZONE_CHANGED_NEW_AREA", "PLAYER_ENTERING_WORLD"},
-		handler = function() return select(2, IsInInstance()) == "arena" end,
-	},
-	["X-LoadOn-Battleground"] = {
-		events = {"ZONE_CHANGED_NEW_AREA", "PLAYER_ENTERING_WORLD"},
-		handler = function() return select(2, IsInInstance()) == "pvp" end,
-	},
-	["X-LoadOn-Instance"] = {
-		events = {"ZONE_CHANGED_NEW_AREA", "PLAYER_ENTERING_WORLD"},
-		handler = function()
-			local instanceType = select(2, IsInInstance())
-			return instanceType == "party" or instanceType == "raid"
+
+ConditionManager.OptionTemplates = {
+	{
+		-- X-Load-Condition
+		-- General precondition for loading an addon. Applies to all event, script, securehook triggers.
+		-- Does not effect Slash and Launcher triggers: those are explicit user commands more important than automated conditions.
+		condName = "Condition",
+		parseMain = function(cond)
+			-- TODO:
+			ConditionManager.AddonOptions[cond.addonName].Condition = ConditionManager:ParseLoadOnFunc(cond)
 		end,
 	},
-	["X-LoadOn-Combat"] = {
-		events = {"PLAYER_REGEN_DISABLED", "PLAYER_ENTERING_WORLD"},
+	
+	{
+		condName = "Delay",
+		parseMain = function(cond)
+			--delayPriority = cond.fieldValue
+			--local addonFields = ConditionManager.MergedConditions[cond.addonName]
+			-- 'Synchronous'  'Instant'  'UserInterface'  'Quick'  'Queued'  'Broker'  'LowPrio'  "N sec"  "N min"
+			ConditionManager.AddonOptions[cond.addonName].Delay = field.mainValue
+		end,
+	},
+	
+	{
+		condName = "Early",
+		--delayPriority = 'synchronous',
+		-- OnUpdate is not fireing while addons are loaded therefore only synchronous loading will happen. This is what the custom handler code does anyway.
+		--addonNames = { ADDON_NAME },    -- Load after AddonLoader SavedVariables
+		options = {
+			BeforeSavedVariables = function(cond)  LoadAddOn(cond.addonName)  end,
+			AfterAddonLoader = function(cond)  cond.eventList = {"ADDON_LOADED"}  end,
+		},
+		handler = function(cond, event, addonName)
+			-- AfterAddonLoader triggers when AddonLoader's SavedVariables has been loaded, therefore overrides are available, but not parsed yet.
+			return  event ~= 'ADDON_LOADED'  or  addonName == ADDON_NAME
+		end,
+	},
+}
+
+
+
+
+
+--[[ TODO: document
+-- parseMain(cond)
+-- Optional. Parse the textual value to cond.properties, as the handler expects.
+-- loadChildren = ConditionManager.LoadChildren,
+-- Split fieldValue into eventName(s), and load the childConds named X-Load-<eventName>-If, if present.
+-- LoadCondition() will call for all eventNames registerChildHook(childCond or cond, eventName) 
+-- registerChildHook(condition, eventName)
+-- It registers the event handler hook for the condition. The way to register the hook is specific to each condition template.
+-- handler(condition, event, ...)
+-- Called when the event occurs, returns truthy value if the addon should be loaded.
+-- The lack of handler() signals to load the addon whenever the event occurs.
+--]]
+
+ConditionManager.ConditionTemplates = {
+	{
+		condName = "Bank",
+		eventList = {"BANKFRAME_OPENED"},
+		--frameList = {'BankFrame'},
+	},{
+		condName = "Mailbox",
+		eventList = {"MAIL_SHOW"},
+		--frameList = {'MailFrame'},
+	},{
+		condName = "Merchant",
+		eventList = {"MERCHANT_SHOW"},
+		--frameList = {'MerchantFrame'},
+	},{
+		condName = "AuctionHouse",
+		eventList = {"AUCTION_HOUSE_SHOW"},
+		--frameList = {'AuctionFrame'},
+	},{
+		condName = "Crafting",
+		eventList = {"TRADE_SKILL_SHOW", "CRAFT_SHOW"},
+		--frameList = {'TradeSkillFrame'},
+	},
+
+	{
+		condName = "Arena",
+		eventList = {"ZONE_CHANGED_NEW_AREA", "PLAYER_ENTERING_WORLD"},
+		handler = function()  return  'arena' == select(2, IsInInstance())  end,
+	},{
+		condName = "Battleground",
+		eventList = {"ZONE_CHANGED_NEW_AREA", "PLAYER_ENTERING_WORLD"},
+		handler = function()  return  'pvp' == select(2, IsInInstance())  end,
+	},{
+		condName = "Instance",
+		eventList = {"ZONE_CHANGED_NEW_AREA", "PLAYER_ENTERING_WORLD"},
 		handler = function()
-			if event == "PLAYER_REGEN_DISABLED" then return true end
-			if event == "PLAYER_ENTERING_WORLD" then return InCombatLockdown() end
+			local _, instanceType = IsInInstance()
+			return  instanceType == 'party'  or  instanceType == 'raid'
 		end,
 	},
 
-	["X-LoadOn-Resting"] = {
-		events = {"PLAYER_UPDATE_RESTING", "PLAYER_ENTERING_WORLD"},
-		handler = function() return IsResting() end,
+	{
+		condName = "Combat",
+		eventList = {"PLAYER_REGEN_DISABLED", "PLAYER_ENTERING_WORLD"},
+		handler = InCombatLockdown,
+		-- Slowing down by loading an addon when entering combat is generally not a good idea, therefore
+		-- this will load "sometime" after entering combat when fps is above half of the top fps.
+		-- To load on the very next frame set  X-LoadOn-Combat-Delay: instant
+		delayPriority = 'goodfps',
+		delayFrames = 60,    -- Minimum delay:  1 sec with 60fps, 2 sec with 30fps
+		--[[
+		handler = function(eventName)
+			if eventName == "PLAYER_REGEN_DISABLED" then return true end
+			if eventName == "PLAYER_ENTERING_WORLD" then return InCombatLockdown() end
+		end,
+		--]]
+	},{
+		condName = "LeaveCombat",
+		eventList = {"PLAYER_REGEN_ENABLED"},
 	},
-	["X-LoadOn-NotResting"] = {
-		events = {"PLAYER_UPDATE_RESTING", "PLAYER_ENTERING_WORLD"},
+
+	{
+		condName = "Resting",
+		eventList = {"PLAYER_UPDATE_RESTING", "PLAYER_ENTERING_WORLD"},
+		handler = IsResting,
+	},{
+		condName = "NotResting",
+		eventList = {"PLAYER_UPDATE_RESTING", "PLAYER_ENTERING_WORLD"},
 		handler = function() return not IsResting() end,
 	},
 
-	["X-LoadOn-PvPFlagged"] = {
-		events = {"UNIT_FACTION", "PLAYER_ENTERING_WORLD"},
+
+	{
+		condName = "PvPFlagged",
+		eventList = {"UNIT_FACTION", "PLAYER_ENTERING_WORLD"},
 		handler = function() return UnitIsPVP("player") end,
-	},
-	["X-LoadOn-Group"] = {
-		events = {"GROUP_ROSTER_UPDATE", "PLAYER_ENTERING_WORLD"},
+	},{
+		condName = "Group",
+		eventList = {"GROUP_ROSTER_UPDATE", "PLAYER_ENTERING_WORLD"},
 		handler = function() return GetNumGroupMembers() > 0 or GetNumSubgroupMembers() > 0 end,
-	},
-	["X-LoadOn-Raid"] = {
-		events = {"GROUP_ROSTER_UPDATE", "PLAYER_ENTERING_WORLD"},
+	},{
+		condName = "Raid",
+		eventList = {"GROUP_ROSTER_UPDATE", "PLAYER_ENTERING_WORLD"},
 		handler = function() return GetNumGroupMembers() > 0 and IsInRaid() end,
-	},
-	["X-LoadOn-Guild"] = {
-		events = {"PLAYER_LOGIN", "GUILD_ROSTER_UPDATE", "GUILD_XP_UPDATE"},
-		handler = function() return IsInGuild() end,
+	},{
+		condName = "Guild",
+		eventList = {"PLAYER_LOGIN", "GUILD_ROSTER_UPDATE", "GUILD_XP_UPDATE"},
+		handler = IsInGuild,
 	},
 
-	["X-LoadOn-Realm"] = {
-		events = {"PLAYER_LOGIN"},
-		parser = dontParse,
-		handler = function(cond, event, ...)  return GetRealmName() == cond.condValue  end,
-	}, 
-	["X-LoadOn-Zone"] = {
-		events = {"ZONE_CHANGED_NEW_AREA", "PLAYER_ENTERING_WORLD", "ZONE_CHANGED", "ZONE_CHANGED_INDOORS", "MINIMAP_ZONE_CHANGED"},
-		parser = dontParse,
+
+	{
+		condName = "Realm",
+		eventList = {"PLAYER_LOGIN"},
+		parseMain = dontParse,
+		handler = function(cond, event, ...)  return GetRealmName() == cond.mainValue  end,
+	},{
+		condName = "Zone",
+		eventList = {"ZONE_CHANGED_NEW_AREA", "PLAYER_ENTERING_WORLD", "ZONE_CHANGED", "ZONE_CHANGED_INDOORS", "MINIMAP_ZONE_CHANGED"},
+		parseMain = dontParse,
 		handler = function(cond, event, ...)
 			local BZ = LibStub and LibStub("LibBabble-Zone-3.0", true) -- silent check for BZ
-			local subzone = string.trim(GetSubZoneText()) -- yeah really...
+			local subzone = string.trim(GetSubZoneText()) -- yeah really..
 			local realzone = GetRealZoneText()
-			for zone in cond.condValue:gmatch('(%w[^,]+%w)') do
+			for zone in cond.mainValue:gmatch('(%w[^,]+%w)') do
 				if (BZ and BZ[zone] and (realzone == BZ[zone] or subzone == BZ[zone])) or 
 					realzone == zone or subzone == zone then
 					return true
 				end
 			end
 		end,
-	},
-	["X-LoadOn-Level"] = {
-		events = {"PLAYER_LEVEL_UP", "PLAYER_ENTERING_WORLD"},
-		parser = dontParse,
+	},{
+		condName = "Level",
+		eventList = {"PLAYER_LEVEL_UP", "PLAYER_ENTERING_WORLD"},
+		parseMain = dontParse,
 		handler = function(cond, event, ...)
 			local level = UnitLevel("player")
-			for chunk in cond.condValue:gmatch('([%d%p^,]+)') do
+			for chunk in cond.mainValue:gmatch('([%d%p^,]+)') do
 				if tonumber(chunk) then -- '68'
 					if level == tonumber(chunk) then return true end
 				elseif chunk:match('%+') then -- '40+'
@@ -276,13 +404,13 @@ AddonLoader.conditions = {
 				end
 			end
 		end,
-	},
-	["X-LoadOn-Class"] = {
-		events = {"PLAYER_LOGIN"},
-		parser = dontParse,
+	},{
+		condName = "Class",
+		eventList = {"PLAYER_LOGIN"},
+		parseMain = dontParse,
 		handler = function(cond, event, ...)
 			local _, classKey = UnitClass('player')
-			for class in cond.condValue:gmatch("[^ ,]+") do
+			for class in cond.mainValue:gmatch("[^ ,]+") do
 				if  class:upper() == classKey  then
 					return true
 				end
@@ -290,173 +418,220 @@ AddonLoader.conditions = {
 		end,
 	},
 
-	["X-LoadOn-Always"] = {
-		events = {"PLAYER_LOGIN"},
-		parser = function (cond)
-			cond.delayed =  (cond.condValue or ""):sub(1,7):lower() == "delayed"
-			local extraParam = cond.delayed  and  cond.condValue:sub(8):trim()  or  cond.condValue
-			return extraParam
-		end,
-		handler = function(cond, event, ...)
-			if  not cond.delayed  then  return true  end
-			AddonLoader:RegisterDelayedLoad(cond.addonName, cond)
+
+	{
+		-- For Keybinding manager addons
+		condName = "BindingsLoaded",
+		eventList = {"VARIABLES_LOADED"},
+	},{
+		-- For AdvancedInterfaceOptions?
+		condName = "CVarsLoaded",
+		eventList = {"VARIABLES_LOADED"},
+	},{
+		-- Spell info loaded
+		condName = "SpellsLoaded",
+		eventList = {"SPELLS_CHANGED"},
+	},
+
+	-- For the generic delayed load sometime after login. Will wait until the fps is above a certain level (eg. 1/4 max fps), but at most 10 sec, or so.
+	-- A lua field can be provided like with all fields in the form (eg. to load on Saturday):  X-LoadOn-Login-If:  date('*t').wday == 7
+	{
+		condName = "Login",
+		eventList = {"PLAYER_LOGIN"},
+		parseMain = function(cond)
+			-- TODO: 'Synchronous'  'Instant'  'UserInterface'  'Quick'  'Queued'  'Broker'  'LowPrio'  "N sec"  "N min"
+			cond.loadTiming = cond.mainValue
+			-- Handled by AddonLoader.QueueLoadAddOn(addonName, loadCondition)
 		end,
 	},
 
-	["X-LoadOn-Slash"] = {
-		parser = function (cond)
-			--local name_upper = cond.addonName:upper():gsub('[^%w]','')
-			local slashes = AddonLoader.slashes[cond.addonName] or {}
-			AddonLoader.slashes[cond.addonName] = slashes
+	-- Deprecated. Use X-LoadOn-Login without "delayed" (delayed is the default).
+	-- If your addon relies on synchronous loading in the event handler,
+	-- as opposed to async (delayed) loading a few frames later then set  X-LoadOn-Login-Delay: synchronous
+	{
+		condName = "Always",
+		eventList = {"PLAYER_LOGIN"},
+		loadChildren = function(cond)
+			if  ConditionManager:GetCondition(cond.addonName, "X-LoadOn-Login")  then
+				-- X-LoadOn-Login overwrites X-LoadOn-Always.
+				-- The field in the metadata is kept for backward compatibility with older AddonLoader.
+				ConditionManager:RemoveCondition(cond.addonName, "X-LoadOn-Always")
+				return false
+			end
+			
+			local delayed =  (cond.mainValue or ""):sub(1,7):lower() == "delayed"
+			if  not delayed  then  cond.delayPriority = 'quick'  end
+		end,
+	},
+
+
+	{
+		condName = "Addon",
+		eventList = {"ADDON_LOADED"},
+		loadChildren = ConditionManager.LoadChildren,
+		handler = function(cond, event, ...)
+			local loadedAddon = ...
+			-- If the loaded addon is in addonList then return a truthy value (the index in the list)
+			local addonList = cond.childList
+			if  tindexof(addonList, loadedAddon)  then
+				return  cond.childConds[loadedAddon]  or  cond
+			end
+		end,
+	},{
+		condName = "Events",
+		loadChildren = ConditionManager.LoadChildren,
+		registerChildHook = function(cond, eventName)
+			ConditionManager.EventHooks:AddConditionHook(nil, eventName, cond)
+		end,
+	},
+
+	{
+		condName = "FrameShown",
+		loadChildren = ConditionManager.LoadChildren,
+		registerChildHook = function(cond, frameName)
+			ConditionManager.FrameHooks:AddConditionHook(frameName, 'OnShow', cond)
+		end,
+	},{
+		condName = "Click",
+		loadChildren = ConditionManager.LoadChildren,
+		registerChildHook = function(cond, frameName)
+			ConditionManager.FrameHooks:AddConditionHook(frameName, 'OnClick', cond)
+		end,
+	},
+
+	{
+		condName = "Scripts",
+		loadChildren = ConditionManager.LoadChildren,
+		registerChildHook = function(cond, frameScriptName)
+			local frameName, scriptName = strsplitObjectKey(frameScriptName)
+			ConditionManager.FrameHooks:AddConditionHook(frameName, scriptName, cond)
+		end,
+	},{
+		condName = "Hooks",
+		loadChildren = ConditionManager.LoadChildren,
+		registerChildHook = function(cond, objectFuncName)
+			local objectName, hookedFuncName = strsplitObjectKey(objectFuncName)
+			ConditionManager.SecureHooks:AddConditionHook(objectName, hookedFuncName, cond)
+		end,
+	},
+
+
+	{
+		condName = "Slash",
+		loadChildren = ConditionManager.LoadChildren,
+		registerChildHook = function(cond, slash)
+			local addonName = cond.addonName
+			--local name_upper = addonName:upper():gsub('[^%w]','')
+			local Slashes = ConditionManager.Slashes[addonName]
+			-- AutoCreateInnerTables metatable creates it first-time
 			local SlashCmdList = _G.SlashCmdList
 			
-			for slash in cond.condValue:gmatch('([^, ]+)') do
-				local command = slash
-				if slash:sub(1,1) ~= '/' then
-					slash = '/'..slash
-				else
-					command = slash:sub(1,2)
-				end
-				
-				local commandLong = cond.addonName:upper().."_LOADER_"..command:upper()
-				_G['SLASH_'..commandLong..'1'] = slash
-				slashes[commandLong] = slash
-				SlashCmdList[commandLong] = function(...)  SlashCmdHandler(cond.addonName, commandLong, ...)  end
+			local command
+			if slash:sub(1,1) ~= '/' then
+				command, slash = slash, '/'..slash
+			else
+				command, slash = slash:sub(1,2), slash
 			end
 			
-			-- We specifically DO NOT return true here, this handler just sets up the other conditions. And will remain dorment for the remainder
-			return nil
+			local commandLong = addonName.."_Loader_"..command
+			--commandLong = commandLong:upper()
+			_G['SLASH_'..commandLong..'1'] = slash
+			Slashes[commandLong] = slash
+			SlashCmdList[commandLong] = function(...)  SlashCmdHandler(cond, slash, ...)  end
 		end,
-	},
-
-	["X-LoadOn-LDB-Launcher"] = {
-		parser = function (cond)
-			local dataobj = ParseEvalTable(cond.condValue)
+	},{
+		condName = "LDB-Launcher",
+		parseMain = function(cond)
+			local icon, rest = strsplit(private.SPLIT_CHARS, cond.mainValue, 2)
+			rest = rest  and  rest:trim()
+			-- the second part can be a string  or  an object definining any property
+			local dataobj, name = parseLuaObject(rest), nil
 			if  not dataobj  then
-				dataobj = {}
-				dataobj.icon, dataobj.name = string.split(" ", condValue)
+				name, rest = strsplit(private.SPLIT_CHARS, rest, 2)
+				rest = rest  and  rest:trim()
+				dataobj = parseLuaObject(rest)  or  {}
 			end
-
+			dataobj.icon = icon
 			dataobj.type = dataobj.type  or  'launcher'
 			dataobj.tocname = dataobj.tocname  or  cond.addonName
-			dataobj.OnClick = dataobj.OnClick  or  function (...)
-				AddonLoader.LoadAddOn(cond.addonName)
-				if OnClick ~= dataobj.OnClick then dataobj.OnClick(...) end
-			end
+			cond.dataobj = dataobj
+		end,
+		
+		--handler = function(cond)
+		registerHook = function(cond)
+			local dataobj = cond.mainValue
+			if  not dataobj  then  return  end
+			
 			dataobj.OnTooltipShow = dataobj.OnTooltipShow  or  function(tt)
-				tt:AddLine(dataobj.name)
+				tt:AddLine(cond.dataobjName)
 				tt:AddLine(AddonLoader.L.clicktoload, 0.2, 1, 0.2, 1)
 			end
+			function dataobj.OnClick(...)
+				-- Delete the mock DataObject.
+				DeleteDataObject(dataobj)
+				-- Save parameters to call addon's OnClick
+				cond.dataobjOnClickParams = { ... }
+				AddonLoader.QueueLoadAddOn(cond.addonName, cond)
+			end
 			
-			dataobj = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject(dataobj.name, dataobj)
-			-- We specifically DO NOT return true here, this handler just sets up the other conditions. And will remain dorment for the remainder
-			return nil
+			cond.dataobjName =  name  or  dataobj.name  or  cond.addonName
+			cond.dataobjOnClick = dataobj.OnClick
+			cond.afterLoadFunc = function(cond)
+				local dataobj = LibStub:GetLibrary("LibDataBroker-1.1"):GetDataObjectByName(cond.dataobjName)
+				if  not dataobj  then  return  end
+				if  dataobj.OnClick == cond.dataobjOnClick  then  return  end
+				dataobj.OnClick( unpack(cond.dataobjOnClickParams or {}) )
+			end
+		
+			LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject(cond.dataobjName, dataobj)
 		end,
 	},
 
-	["X-LoadOn-InterfaceOptions"] = {
-		-- frameList = { InterfaceOptionsPanel }
-		-- Runs on startup
+
+	{
+		condName = "InterfaceOptions",
+		-- Adds a category for the addon to InterfaceOptionsPanel when it is opened.
+		-- Opening the category will load the addon which can replace the category with a populated options panel.
+		--frameList = { InterfaceOptionsPanel },
+		registerHook = function(cond)
+			ConditionManager.FrameHooks:AddConditionHook('InterfaceOptionsPanel', 'OnShow', cond)
+		end,
+		
+		-- Runs when InterfaceOptionsPanel is first opened
 		handler = function(cond, event, ...)
+			-- Added category already?
+			if  cond.optionsFrame  then  return nil  end
+			-- Create frame for InterfaceOptionsPanel category
 			local frame = CreateFrame('Frame', nil, UIParent)
-			frame.name = cond.condValue
+			cond.optionsFrame = frame
+			frame.name = cond.mainValue
 			frame.addonName = cond.addonName
+			frame.loadCondition = cond
 			frame:Hide()
 			frame:SetScript('OnShow', InterfaceOptions_OnShow)
 			InterfaceOptions_AddCategory(frame)
 			-- we do not return true here, the InterfaceOptions_OnShow function will actually load the addon
-		end,
-	},
-
-	["X-LoadOn-FrameShown"] = {
-		parser = function (cond)
-			for  frameName  in cond.condValue:gmatch("[^ ,]+") do
-				local frame = _G[frameName]
-				if  not frame  then
-					geterrorhandler()( formatError("_G."..frameName.." does not exist", cond.addonName, "X-LoadOn-FrameShown", cond.condValue) )
-				elseif  type(frame) ~= 'table'  then
-					geterrorhandler()( formatError("_G."..frameName.." is not an object", cond.addonName, "X-LoadOn-FrameShown", cond.condValue) )
-				elseif  not frame.HookScript  then
-					geterrorhandler()( formatError("_G."..frameName.." is not a frame", cond.addonName, "X-LoadOn-FrameShown", cond.condValue) )
-				else
-					local childCond = "X-LoadOn-"..frameName
-					local beforeLoadFunc = AddonLoader:GetConditionFunc(cond.addonName, childCond)
-					RegisterFrameHook(cond.addonName, frameName, 'OnShow', childCond, beforeLoadFunc)
-				end
-			end
 			return nil
 		end,
 	},
 
-	["X-LoadOn-Events"] = {
-		onload = function (cond)
-			AddonLoader:ReadChildConditions(cond.addonName, cond.condName, cond.condValue)
-		end,
-		parser = function (cond)
-			for  eventName  in cond.condValue:gmatch("[^ ,]+") do
-				local childCond = "X-LoadOn-"..eventName
-				local beforeLoadFunc = AddonLoader:GetConditionFunc(addonName, childCond)
-				RegisterEventHook(cond.addonName, eventName, childCond, beforeLoadFunc)
-			end
-			-- We specifically DO NOT return true here, this handler just sets up the other conditions. And will remain dorment for the remainder
-			return nil
-		end,
-	},
-
-	["X-LoadOn-Hooks"] = {
-		onload = function (cond)
-			AddonLoader:ReadChildConditions(cond.addonName, cond.condName, cond.condValue)
-		end,
-		parser = function (cond)
-			for  hookedFuncName  in cond.condValue:gmatch("[^ ,]+") do
-				if  not _G[hookedFuncName]  then
-					geterrorhandler()( formatError("_G."..hookedFuncName.." does not exist", addonName, cond.condName, cond.condValue) )
-				elseif type(_G[hookedFuncName]) ~= "function" then
-					geterrorhandler()( formatError("_G."..hookedFuncName.." is not a function", addonName, cond.condName, cond.condValue) )
-				else
-					local childCond = "X-LoadOn-"..hookedFuncName
-					local beforeLoadFunc = AddonLoader:GetConditionFunc(cond.addonName, childCond)
-					RegisterSecureHook(cond.addonName, nil, hookedFuncName, childCond, beforeLoadFunc)
-				end
-			end
-			-- We specifically DO NOT return true here, this handler just sets up the other conditions. And will remain dorment for the remainder
-			return nil
-		end,
-	},
-
-	["X-LoadOn-Execute"] = {
-		onload = function (cond)
-			-- Load the extra metadata fields
-			local conditiontext = AddonLoader.conditiontexts[cond.addonName]
+	{
+		-- Runs on StartHandlers, the parsed beforeLoadFunc is implicitly executed.
+		condName = "Execute",
+		loadChildren = function(cond)
+			-- Concat 5 metadata fields for longer possible code
+			local addonName = cond.addonName
+			local childFields
 			for i = 2, 5 do
-				local continuedValue = GetAddOnMetadata(cond.addonName, cond.condName..i)
-				if  not continuedValue  then  break  end
-				conditiontext = conditiontext .. condName..i..": "..continuedValue.."\n"
+				local childField = ConditionManager:GetMergedField(addonName, cond.fieldName..i)
+				if  not childField  then  break  end
+				--childField.parent = cond
+				childFields = childFields or {}
+				childFields[#childFields+1] = childField
+				cond.mainValue = cond.mainValue..'\n'..childField.fieldValue
 			end
-			AddonLoader.conditiontexts[addonName] = conditiontext
+			cond.childFields = childFields
+			cond.beforeLoadFunc =  ConditionManager:ParseLoadOnFunc(cond)
 		end,
-		
-		parser = function (cond)
-			-- Custom parser: concat 5 metadata fields for longer possible code
-			local condBody = cond.condValue
-			for i = 2, 5 do
-				local continuedValue = AddonLoader:GetConditionValue(cond.addonName, cond.condName..i)
-				if  not continuedValue  then  break  end
-				condBody = condBody..'\n'..continuedValue
-			end
-			cond.condBody = condBody
-			local ran, result = pcall(loadstring, cond.condBody)
-			-- result holds the compiled function or the error message, depending on status
-			if  not ran  then  geterrorhandler()( formatError(result, cond.addonName, cond.condName, condBody) )  end
-			cond.beforeLoadFunc =  ran  and  result
-			--return  ran  and  result
-		end,
-		
-		-- Runs on startup because eventList == nil
-		--[[ No need for handler, beforeLoadFunc is implicitly ran.
-		handler = function(cond, event, ...)
-			return  cond.beforeLoadFunc  and  safecall(cond.metadataFunc, ...)
-		end,
-		--]]
 	},
 }
