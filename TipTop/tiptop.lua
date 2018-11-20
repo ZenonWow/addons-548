@@ -15,6 +15,7 @@ local server = GetRealmName()
 local _, db, BGPosition, color, font, classif, talentsGUID, factionIcon, factionTable
 local tooltips = {	GameTooltip,
 					ItemRefTooltip,
+					BattlePetTooltip,
 					ShoppingTooltip1,
 					ShoppingTooltip2,
 					ShoppingTooltip3,
@@ -255,7 +256,7 @@ local function Appendices()	--appends info to the name/guild of the unit - ALSO 
 	local gen= db.gender and UnitSex("mouseover")
 	if gen then
 	  
-	  local genTxt= gen==3 and "(Female)"  or  gen==2 and "(Male)"  or  "(Gender " .. gen .. ")"
+	  local genTxt= gen==3 and "(Female)"  or  gen==2 and "(Male)"  or  gen==1  and  ""  or  "(Gender " .. gen .. ")"
 
 	  local achievementId= 2422  -- Shake Your Bunny-Maker  (Noblegarden Event - in April)
 	  local unitRace= UnitRace("mouseover")
@@ -270,10 +271,31 @@ local function Appendices()	--appends info to the name/guild of the unit - ALSO 
 	    end
 	  end
 	  
-	  if lookingFor then  -- found it? make it red
-	    genTxt= '|cffff0000' .. genTxt .. '|r'
-	    local r= db.bgColor.r + 8
+	  if lookingFor then  -- found it?
+	    genTxt= '|cffff0000' .. genTxt .. ' -> SHAKE IT|r'
+	    --genTxt= genTxt .. '|cffff0000 -> SHAKE IT|r'
 	    TipTop:SetBackdropColor(8, db.bgColor.g, db.bgColor.b, db.alpha)
+	  end
+	  
+	  
+	  --local achievementId= 283  -- The Masquerade  (Hallow's End Event - in October)
+	  local achievementId= 291  -- Check Your Head  (Hallow's End Event - in October)
+	  --local unitRace= UnitRace("mouseover")
+	  local lookingFor= false
+	  if  db.lookFor  then
+	    for i = 1,GetAchievementNumCriteria(achievementId) do
+	      lookForRace,_,complete = GetAchievementCriteriaInfo(achievementId, i)
+	      if lookForRace == unitRace then
+	        lookingFor= not complete
+	        break
+	      end
+	    end
+	  end
+	  
+	  if lookingFor then  -- found it? make it red
+	    genTxt= genTxt .. '|cffff0000 -> JACK-O-IT|r'
+	    local r= db.bgColor.r + 8
+	    --TipTop:SetBackdropColor(8, db.bgColor.g, db.bgColor.b, db.alpha)
 	  end
 	  
 	  tt:AppendText(" " .. genTxt)
@@ -335,25 +357,32 @@ local function BorderClassColor()	--colors tip border
 end
 
 local function ItemQualityBorder(tip)	--colors tip border by item quality
-	if db.itemColor then
-		local _,item = tip:GetItem()	--tip is whatever tooltip called the OnTooltipSetItem script
-		if item then
-			local _,_,quality = GetItemInfo(item)
-			if quality then
-				local r, g, b = qualityColor[quality].r, qualityColor[quality].g, qualityColor[quality].b
-				if r and g and b then
-					if tip == tt then
-						TipTop:SetBackdropBorderColor(r - .2, g - .2, b - .2, db.borderColor.a)
-					else
-						tip:SetBackdropBorderColor(r - .2, g - .2, b - .2, db.borderColor.a)
-					end
-				end
-			end
-		end
-	else
+	if  not db.itemColor  then
 		if tip == ItemRefTooltip then
-			tip:SetBackdropBorderColor(db.borderColor.r, db.borderColor.g, db.borderColor.b, db.borderColor.a)
+			local qc = db.borderColor
+			tip:SetBackdropBorderColor(qc.r, qc.g, qc.b, qc.a)
 		end
+		return
+	end
+	
+	local _,item = tip:GetItem()	--tip is whatever tooltip called the OnTooltipSetItem script
+	if  not item  then  return  end
+	local _,_,quality = GetItemInfo(item)
+	if  not quality  then  return  end
+	
+	local qc = qualityColor[quality]
+	if qc.r and qc.g and qc.b then
+		if tip == tt then  tip = TipTop  end
+		tip:SetBackdropBorderColor(qc.r - .2, qc.g - .2, qc.b - .2, db.borderColor.a)
+	end
+end
+
+local function PetQualityBorder(tip, quality)	--colors tip border by item quality
+	if  not db.itemColor  then  return  end
+	if  not quality  then  return  end
+	local qc = qualityColor[quality]
+	if qc.r and qc.g and qc.b then
+		tip:SetBackdropBorderColor(qc.r - .2, qc.g - .2, qc.b - .2, db.borderColor.a)
 	end
 end
 
@@ -562,7 +591,8 @@ local function PlayerLogin()
 				end
 			end)
 	local moneyfontset
-	for i=1,#tooltips do
+	-- TipTop\tiptop-2.13.3.lua:588: BattlePetTooltip doesn't have a "OnTooltipSetItem" script
+	for i=1,#tooltips do  if  BattlePetTooltip ~= tooltips[i]  then
 		tooltips[i]:HookScript("OnTooltipSetItem", function(tip)
 				ItemQualityBorder(tip)
 				--the vendor price strings don't exist until the first time they're needed
@@ -571,9 +601,14 @@ local function PlayerLogin()
 					moneyfontset = true
 				end
 			end)
-	end
+	end end
 	ttSBar:HookScript("OnValueChanged", CalcHealth)
 	ttSBar:HookScript("OnUpdate", TargetTextUpdate)
+	
+	hooksecurefunc('BattlePetToolTip_Show', function (speciesID, level, breedQuality, maxHealth, power, speed, customName)
+		PetQualityBorder(BattlePetTooltip, breedQuality)
+	end)
+	
 	
 	PlayerLogin = nil	--let this function be garbage collected
 end
