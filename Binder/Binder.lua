@@ -40,9 +40,11 @@ local function out_both(text)
 end
 
 
+function GetProfileName(profile)  return  profile.Name  or  profile[1] and profile[1].Name  end
+
 
 function Binder_OnLoad(self)
-	out_frame("Binder is Loaded. Use /binder for help");
+	--out_frame("Binder is Loaded. Use /binder for help");
 	self:RegisterEvent( "ADDON_LOADED" );
 
 	SLASH_BINDER1 = "/binder";
@@ -93,7 +95,7 @@ function Binder_OnEvent(self, event, addonName)
 		
 		Binder_Profiles_Idx= {}
 		for  i,profile  in  ipairs(BinderProfilesDB)  do
-			Binder_Profiles_Idx[profile.Name]= profile
+			Binder_Profiles_Idx[GetProfileName(profile)]= profile
 		end
 		
 		--Binder_MinimapButton_OnLoad();
@@ -173,15 +175,16 @@ function BinderScrollBar_Update()
 		local BinderEntry= _G["BinderEntry"..line]
 		if ( lineplusoffset <= #BinderProfilesDB ) then
 			local profile= BinderProfilesDB[lineplusoffset]
-			BinderEntry:SetText(profile.Name);
+			local Name = GetProfileName(profile)
+			BinderEntry:SetText(Name)
 			--if  lineplusoffset == Currently_Selected_Profile_Num
-			if  profile.Name == SelectedProfile_Name
+			if  Name == SelectedProfile_Name
 			then  BinderEntry:LockHighlight()
 			else  BinderEntry:UnlockHighlight()
 			end
-			BinderEntry:Show();
+			BinderEntry:Show()
 		else
-			BinderEntry:Hide();
+			BinderEntry:Hide()
 		end
 	end
 end
@@ -223,7 +226,8 @@ end
 
 local function SetBindingsForCommand(command, ...)
 	-- accept keys as  multiple arguments
-	local newKeys= { ...}
+	local newKeys= {...}
+	--[[
 	-- or  a list
 	if  #newKeys == 1  and  type(newKeys[1]) == 'table'  then  newKeys= newKeys[1]
 	-- or a list starting with command
@@ -231,6 +235,7 @@ local function SetBindingsForCommand(command, ...)
 		newKeys= command
 		command= table.remove(newKeys, 1)
 	end
+	--]]
 	
 	local  oldKeys= { GetBindingKey(command) }
 	if  not tableEqualsShallow(oldKeys, newKeys)  then
@@ -241,14 +246,17 @@ local function SetBindingsForCommand(command, ...)
 	end
 end
 
-local function LoadKeyBindingsSerialized(categList)
-	local SavedSeparator= categList[1].Separator
-	for  _,categ  in  ipairs(categList)  do
-		for  _,bindingStr  in  ipairs(categ)  do
-			if  type(bindingStr) == 'string'  then
-				SetBindingsForCommand( strSplit(bindingStr, SavedSeparator) )
-			end
+local function LoadKeyBindingsSerialized(list, SavedSeparator)
+	for  _,bindingStr  in  ipairs(list)  do
+		if  type(bindingStr) == 'string'  and  bindingStr:match("^%a")  then
+			SetBindingsForCommand( strSplit(bindingStr, SavedSeparator) )
 		end
+	end
+end
+
+local function LoadKeyBindingsTwoLevel(categList, SavedSeparator)
+	for  _,categ  in  ipairs(categList)  do
+		LoadKeyBindingsSerialized(categ, SavedSeparator)
 	end
 end
 
@@ -277,7 +285,8 @@ local SerializeBindingStr= SerializeBindingStrLua
 
 -- GetBinding(i) builtin return format before Warlords: binding= { command, key1, key2, ... keyN }
 -- GetBinding(i) builtin since Warlords returns an extra 2nd value:  binding= { command, category, key1, key2, ... keyN }
-local GetBinding_Category_Prefix= 'BINDING_HEADER_'		-- confusingly binding categories were headers in Mists of Pandaria and before
+local GetBinding_Category_Prefix= 'BINDING_HEADER_'		-- confusingly binding categories were called headers b
+local GetBinding_Header_Prefix= 'HEADER_'
 
 
 function 	LoadKeyBindingsOriginal(binds)
@@ -308,35 +317,48 @@ end
 
 local KeySeparator= " || "
 
+local function AddToCategory(list, binding)
+	-- category was removed: binding= { command, keys... }
+	list[#list+1]= table.concat(binding, KeySeparator)
+end
+
 local function 	SaveKeyBindingsSerialized()
 	-- Check if GetBinding(1) returns category as 2nd value
 	local GetBinding_1_2 = select(2, GetBinding(1))
-	local GetBinding_Returns_Category = GetBinding_1_2  and  strBeginsWith( GetBinding_1_2 , GetBinding_Category_Prefix )
+	local GetBinding_Returns_Category = GetBinding_1_2  and  strBeginsWith( GetBinding_1_2, GetBinding_Category_Prefix )
 	--local GetBinding_Returns_Category = ( 60000 <= select(4, GetBuildInfo()) )		-- returns category since Warlords?
 	
-	local categHash, categList= {}, { { Separator= KeySeparator } }
+	local lastCategory = ''
+	local list = { { Separator= KeySeparator } }
+	
+	-- Add hidden bindings
+	AddToCategory( list, { 'CAMERAORSELECTORMOVE', GetBindingKey('CAMERAORSELECTORMOVE') } )
+	AddToCategory( list, { 'TURNORACTION', GetBindingKey('TURNORACTION') } )
+
 	local num= GetNumBindings()
 	for  i= 1,num  do
 		local binding= { GetBinding(i) }
 		-- GetBinding(i) builtin since Warlords returns an extra 2nd value:  binding= { command, category, key1, key2, ... keyN }
 		local category= GetBinding_Returns_Category  and  table.remove(binding, 2)  or  ''
-		--local keys= { GetBindingKey(cmd) }
-		
-		local categ= categHash[category]
-		if  not categ  then
-			local shortName= strRemovePrefix(category, GetBinding_Category_Prefix)  or  category
-			categ= { { Category= shortName } }
-			categHash[category]= categ
-			categList[#categList+1]= categ
+		if  lastCategory ~= category  then
+			--local catName= strRemovePrefix(category, GetBinding_Category_Prefix)  or  category
+			AddToCategory( list, { '-- '.. category } )
+			lastCategory = category
 		end
 		
-		-- category was removed: binding= { command, keys... }
-		categ[#categ+1]= table.concat(binding, KeySeparator)
-		--categ[#categ+1]= SerializeBindingStr(command, keys)
+		if  #binding == 1  and  strBeginsWith( binding[1], GetBinding_Header_Prefix )  then
+			-- Header lines in keybinding ui
+			AddToCategory( list, { '-- '.. binding[1] } )
+		else
+			--local action= table.remove(binding, 1)  or  ''
+			--local keys= { GetBindingKey(cmd) }
+			-- category was removed: binding= { command, keys... }
+			AddToCategory( list, binding )
+			--list[#list+1]= SerializeBindingStr(command, keys)
+		end
 	end
-	return categList
+	return list
 end
-
 
 
 
@@ -345,9 +367,10 @@ function SelectProfile(profileName)
 	SelectedProfile_Name= profileName
 	local profile= Binder_Profiles_Idx[SelectedProfile_Name]
 	if  profile  then
-		Binder_Name_InputBox:SetText(profile.Name)
-		Binder_Description_InputBox:SetText(profile.Description)
-		Binder_Description_Frame_Text2:SetText(profile.Description)
+		local meta = profile[1]  and  profile[1].Name  and  profile[1]  or  profile
+		Binder_Name_InputBox:SetText(meta.Name)
+		Binder_Description_InputBox:SetText(meta.Description)
+		Binder_Description_Frame_Text2:SetText(meta.Description)
 	else
 		Binder_Description_Frame_Text2:SetText("")
 	end
@@ -390,7 +413,7 @@ function LoadProfile(profileName)
 		LoadBindings(2)		-- restore previously saved
 		local msg= "Binder error: ".. tostring(err)
 		out_both(msg)
-		throw(err)
+		error(err)
 		return
 	end
 	
@@ -402,9 +425,13 @@ function LoadProfileProtected()
 	local profile= Binder_Profiles_Idx[profileName]
 	out_both("Loading binding profile '".. profileName .."', changes:")
 	
-	if  profile.Bindings  and  profile.Bindings[1]  and  profile.Bindings[1].Separator  then
+	local bindings = profile[2]
+	if  bindings  and  bindings[1]  and  bindings[1].Separator  then
+		-- using serialized format: bindings listed in declaration order, Bindings[bindingIndex]= "name || binding1 || binding2[ || binding3...]"
+		LoadKeyBindingsSerialized(bindings, bindings[1].Separator)
+	elseif  profile.Bindings  and  profile.Bindings[1]  and  profile.Bindings[1].Separator  then
 		-- using serialized format: bindings listed in categories in order, Bindings[categoryIndex][bindingIndex]= "name || binding1 || binding2[ || binding3...]"
-		LoadKeyBindingsSerialized(profile.Bindings)
+		LoadKeyBindingsTwoLevel(profile.Bindings, profile.Bindings[1].Separator)
 	elseif  profile.The_Binds  then
 		-- using original format: The_Binds[category][name]= { binding1, binding2, ... }
 		LoadKeyBindingsOriginal(profile.The_Binds)
@@ -451,14 +478,21 @@ function SaveProfile()
 		-- new profile: add to end of BinderProfilesDB
 		profile= {}
 		BinderProfilesDB[#BinderProfilesDB+1]= profile
-	elseif  profileName ~= profile.Name  then
-		Binder_Profiles_Idx[profile.Name]= nil
+	else
+		Binder_Profiles_Idx[GetProfileName(profile)]= nil
+		-- delete data with old format
+		profile.Name = nil
+		profile.Description = nil
+		profile.Bindings = nil
 	end
 	Binder_Profiles_Idx[profileName]= profile
 	
-	profile.Name= profileName
-	profile.Description= Binder_Description_InputBox:GetText()
-	profile.Bindings= SaveKeyBindingsSerialized()
+	profile[1] = {
+		Name = profileName,
+		Date = date('%Y-%m-%d', time()),
+		Description = Binder_Description_InputBox:GetText(),
+	}
+	profile[2] = SaveKeyBindingsSerialized()
 	
 	SelectProfile(profileName)
 	

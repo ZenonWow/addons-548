@@ -66,7 +66,9 @@
 			<OnMouseUp> self:StopMovingOrSizing(); </OnMouseUp>
 			<OnDragStop> self:StopMovingOrSizing(); </OnDragStop>
 			<OnLoad>
-				tinsert(UISpecialFrames,self:GetName());
+				--tinsert(UISpecialFrames,self:GetName());
+				local prev_CloseSpecialWindows = _G.CloseSpecialWindows
+				function _G.CloseSpecialWindows()  return  Binder_Frame:IsShown()  and  Binder_Frame:Hide()  or  prev_CloseSpecialWindows()  end
 			</OnLoad>
 		</Scripts>
 		<!--The close button in the top right-->
@@ -109,7 +111,7 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
-				tinsert(UISpecialFrames,self:GetName());
+				--tinsert(UISpecialFrames,self:GetName());
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -138,7 +140,7 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
-				tinsert(UISpecialFrames,self:GetName());
+				--tinsert(UISpecialFrames,self:GetName());
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -178,7 +180,7 @@
 		</Backdrop>
 		<Scripts>
 			<OnLoad>
-				tinsert(UISpecialFrames,self:GetName());
+				--tinsert(UISpecialFrames,self:GetName());
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -195,7 +197,7 @@
 		</Anchors>
 		<Scripts>
 			<OnLoad>
-				tinsert(UISpecialFrames,self:GetName());
+				--tinsert(UISpecialFrames,self:GetName());
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -334,7 +336,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				tinsert(UISpecialFrames,self:GetName());
+				--tinsert(UISpecialFrames,self:GetName());
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -394,7 +396,7 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
-				tinsert(UISpecialFrames,self:GetName());
+				--tinsert(UISpecialFrames,self:GetName());
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -474,7 +476,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				tinsert(UISpecialFrames,self:GetName());
+				--tinsert(UISpecialFrames,self:GetName());
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -501,7 +503,7 @@
 		</Backdrop>
 		<Scripts>
 			<OnLoad>
-				tinsert(UISpecialFrames,self:GetName());
+				--tinsert(UISpecialFrames,self:GetName());
 			</OnLoad>
 		</Scripts>
 		<Frames>
@@ -598,7 +600,7 @@
 		</Backdrop>
 		<Scripts>
 			<OnLoad>
-				tinsert(UISpecialFrames,self:GetName());
+				--tinsert(UISpecialFrames,self:GetName());
 			</OnLoad>
 		</Scripts>
 		<Frames>
@@ -705,7 +707,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				tinsert(UISpecialFrames,self:GetName());
+				--tinsert(UISpecialFrames,self:GetName());
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -749,7 +751,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				tinsert(UISpecialFrames,self:GetName());
+				--tinsert(UISpecialFrames,self:GetName());
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -793,7 +795,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				tinsert(UISpecialFrames,self:GetName());
+				--tinsert(UISpecialFrames,self:GetName());
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -1050,7 +1052,7 @@
 		</Layers-->
 		<Scripts>
 			<OnLoad>
-				tinsert(UISpecialFrames,self:GetName());
+				--tinsert(UISpecialFrames,self:GetName());
 			</OnLoad>
 		</Scripts>
 	</Frame>
