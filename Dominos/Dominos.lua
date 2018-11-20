@@ -8,32 +8,74 @@ local L = LibStub('AceLocale-3.0'):GetLocale('Dominos')
 local CURRENT_VERSION = GetAddOnMetadata('Dominos', 'Version')
 
 
+--[[ Default profile logic from AceDB custom modification ]]--
+
+local realmKey = GetRealmName()
+local charKey = UnitName("player") .. " - " .. realmKey
+local classLocalized, classKey = UnitClass("player")
+
+-- classKeyEnglish will be the same as classLocalized with English locale (EN_US, EN_GB)
+local classKeyEnglish =  classKey == 'DEATHKNIGHT'  and  "Death Knight"  or  classKey == 'DEMONHUNTER'  and  "Demon Hunter"
+	or  classKey:sub(1,1):upper() .. classKey:sub(2):lower()  -- Sorry, "Demonhunter", "Deathknight"
+
+-- "Default" string localized:  _G.DEFAULT  defined in FrameXML/GlobalStrings.lua
+local defaultLocalized = _G.DEFAULT or "Default"
+local defaultKey = "Default"
+
+local function GetProfileName(sv, useDefaultProfile, parentDB)
+	if  useDefaultProfile == true  then  useDefaultProfile = defaultLocalized  end      -- Map "true" to "Default" profile
+	if  useDefaultProfile == 'CLASS'  or  useDefaultProfile == classKey  then  useDefaultProfile = classLocalized  end
+	if  not sv  then  return useDefaultProfile or charKey, useDefaultProfile  end
+	
+	-- Make a container for profile keys
+	--if not sv.profileKeys then sv.profileKeys = {} end
+	local profileKeys =  sv.profileKeys  or  {}
+	local profiles =  sv.profiles  or  {}
+
+	-- Determine defaultProfile:  saved in profileKeys  or  localized class / default
+	local defaultProfile =
+		profileKeys[classKeyEnglish]                              -- class profile saved before
+		or  profileKeys[defaultKey]                               -- default profile saved
+		or  profiles[classLocalized]  and  classLocalized         -- class profile in current language
+		or  profiles[defaultLocalized]  and  defaultLocalized     -- default profile in current language
+		or  profiles[classKeyEnglish]  and  classKeyEnglish       -- class profile in English
+		or  profiles[defaultKey]  and  defaultKey                 -- default profile in English
+		--or  useDefaultProfile == true  and  defaultLocalized      -- Map "true" to "Default" profile
+		or  useDefaultProfile                                     -- Addon provided default profile name
+	
+	-- Addon explicitly requested to not use default?
+	if  useDefaultProfile == false  then  defaultProfile = false  end
+
+	-- Determine profile to use (note: charKey needs no localization, it's "charName - realmName", both specific, non-localized strings
+	local profileName =  parentDB  and  parentDB.keys.profile   -- If this is a namespace then use parent DB's profileName
+		or  profileKeys[charKey]                                  -- If profileName is explicitly set (user selected the profile previously), use it
+		or  profiles[charKey]  and  charKey                       -- A profile exists exactly for this character, use it
+		or  defaultProfile                                        -- Use default profile if found one or requested
+		or  charKey                                               -- Use character-specific profile otherwise
+	
+	-- save the selected profile for later
+	--sv.profileKeys[charKey] = profileName
+	return profileName, defaultProfile
+end
+
+-- Use AceDB-3.0 lib's version if supported and release memory of this copy
+GetProfileName = LibStub('AceDB-3.0').GetProfileName  or  GetProfileName
+
+
 --[[ Startup ]]--
 
 function Dominos:OnInitialize()
-	local savedVarName= 'DominosDB'
-	local savedDB= _G[savedVarName]		-- savedDB = DominosDB
-	local profiles= savedDB  and  savedDB.profiles
-	local defaultProfile= savedDB  and  savedDB.profileKeys  and  savedDB.profileKeys.default
-	
 	--[[
-	Use one profile called 'Default' for all characters originally
+	-- Use one profile called "Default" for all characters originally. Recognise and use class-specific profiles if created.
 	Name of default profile can be changed with setting:
-	/run  DominosDB.profileKeys.default = 'Default'
+	/run  DominosDB.profileKeys.Default = "Default"
 	To have character-specific profiles when creating/initializing a new character
-	/run  DominosDB.profileKeys.default = false
+	/run  DominosDB.profileKeys.Default = false
 	--]]
-	
-	if  profiles  and  not defaultProfile  then
-		local unitClass= UnitClass('player')
-		--if profile for class exists, use that as default
-		if  profiles[unitClass]  then  defaultProfile= unitClass  end
-	end
-	
-	if  defaultProfile == nil  then  defaultProfile= true  end		-- true -> 'Default'
+	local profileName, defaultProfile = GetProfileName(DominosDB, true)
 	
 	--register database events
-	self.db = LibStub('AceDB-3.0'):New(savedVarName, self:GetDefaults(), defaultProfile)
+	self.db = LibStub('AceDB-3.0'):New('DominosDB', self:GetDefaults(), defaultProfile)
 	self.db.RegisterCallback(self, 'OnNewProfile')
 	self.db.RegisterCallback(self, 'OnProfileChanged')
 	self.db.RegisterCallback(self, 'OnProfileCopied')
