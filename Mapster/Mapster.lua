@@ -167,7 +167,10 @@ function Mapster:OnEnable()
 		self:SetFrameStrata("TOOLTIP")
 	end)
 
-	tinsert(UISpecialFrames, "WorldMapFrame")
+	--tinsert(UISpecialFrames, "WorldMapFrame")
+	for  i = 1, #UISpecialFrames  do  if  UISpecialFrames[i] == WorldMapFrame  then  table.remove(UISpecialFrames, i) ; break  end end
+	local prev_CloseSpecialWindows = _G.CloseSpecialWindows
+	function _G.CloseSpecialWindows()  return  WorldMapFrame:IsShown()  and  WorldMapFrame:Hide()  or  prev_CloseSpecialWindows()  end
 
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")

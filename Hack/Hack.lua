@@ -189,7 +189,7 @@ function Hack.OnLoad(self)
          end
       end
 
-   printf('Loaded. /hack to toggle')
+   --printf('Loaded. /hack to toggle')
 end
 
 function Hack.VARIABLES_LOADED(self)
@@ -495,7 +495,9 @@ function Hack.OnEditorHide()
 end
 
 function Hack.OnEditorLoad(self)
-   table.insert(UISpecialFrames,'HackEditFrame')
+   --table.insert(UISpecialFrames,'HackEditFrame')
+   local prev_CloseSpecialWindows = _G.CloseSpecialWindows
+   function _G.CloseSpecialWindows()  return  HackEditFrame:IsShown()  and  HackEditFrame:Hide()  or  prev_CloseSpecialWindows()  end
    self:SetMinResize(Hack.MinWidth,Hack.MinHeight)
 end
 
