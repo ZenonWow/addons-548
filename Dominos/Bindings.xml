@@ -1,0 +1,70 @@
+<Bindings>
+
+	<Binding name="CLICK DominosActionButton1:LeftButton" header="Dominos"></Binding>
+	<Binding name="CLICK DominosActionButton2:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton3:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton4:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton5:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton6:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton7:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton8:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton9:LeftButton"></Binding>
+	
+	<Binding name="CLICK DominosActionButton10:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton11:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton12:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton13:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton14:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton15:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton16:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton17:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton18:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton19:LeftButton"></Binding>
+	
+	<Binding name="CLICK DominosActionButton20:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton21:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton22:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton23:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton24:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton25:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton26:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton27:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton28:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton29:LeftButton"></Binding>
+	
+	<Binding name="CLICK DominosActionButton30:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton31:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton32:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton33:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton34:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton35:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton36:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton37:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton38:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton39:LeftButton"></Binding>
+	
+	<Binding name="CLICK DominosActionButton40:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton41:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton42:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton43:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton44:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton45:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton46:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton47:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton48:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton49:LeftButton"></Binding>
+	
+	<Binding name="CLICK DominosActionButton50:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton51:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton52:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton53:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton54:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton55:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton56:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton57:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton58:LeftButton"></Binding>
+	<Binding name="CLICK DominosActionButton59:LeftButton"></Binding>
+	
+	<Binding name="CLICK DominosActionButton60:LeftButton"></Binding>
+
+</Bindings>

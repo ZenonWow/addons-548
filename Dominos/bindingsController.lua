@@ -178,7 +178,7 @@ function BindingsController:SetupAttributeMethods()
 end
 
 function BindingsController:HookBindingMethods()
-	local updateBindings = function() self:UpdateBindings() end
+	local updateBindings = function(...)  print('SetBinding*(', ..., ')') ;  BindingsController:RequestUpdateBindings()  end
 
 	hooksecurefunc('SetBinding', updateBindings)
 	hooksecurefunc('SetBindingClick', updateBindings)
@@ -200,19 +200,27 @@ function BindingsController:OnEvent(event, ...)
 	self[event](self, event, ...)
 end
 
-function BindingsController:UPDATE_BINDINGS(event)
-	self:UnregisterEvent(event)
+function BindingsController:UPDATE_BINDINGS(...)
+	print('BindingsController:UPDATE_BINDINGS(', ..., ')')
+	-- Why is this registered at all if removed on first event?
+	--self:UnregisterEvent(event)
+end
+
+function BindingsController:PLAYER_REGEN_ENABLED()
+	if self.__NeedsBindingUpdate then
+		self:RequestUpdateBindings()
+	end
 end
 
 function BindingsController:PLAYER_LOGIN()
 	self:UpdateCastOnKeyPress()
-	self:UpdateBindings()
+	self:RequestUpdateBindings()
 end
 
 function BindingsController:CVAR_UPDATE(event, variableName)
 	if variableName == 'ACTION_BUTTON_USE_KEY_DOWN' then
 		self:UpdateCastOnKeyPress()
-		self:UpdateBindings()
+		self:RequestUpdateBindings()
 	end			
 end
 
@@ -309,8 +317,49 @@ function BindingsController:HasSurrogate(button)
 	return self.surrogates[button]
 end
 
---[[ note, i'm probably going to want to throttle this ]]--
+function BindingsController:RequestUpdateBindings()
+	--[[
+	if not self.__UpdateBindings then
+		self.__UpdateBindings = function()
+			self.__WaitingToUpdateBindings = false
+			self:UpdateBindings()
+		end
+	end
+	--]]
+
+	if not self.__WaitingToUpdateBindings then
+		self:SetScript('OnUpdate', BindingsController.OnUpdate)
+		--Timer_After(0.2, self.__UpdateBindings)
+	end
+	
+	-- (Re)start timer
+	self.__WaitingToUpdateBindings = GetTime()
+end
+
+local UPDATE_BINDINGS_DELAY = 0.2    -- seconds
+
+function BindingsController:OnUpdate(elapsed)
+	if  self.__WaitingToUpdateBindings  and  UPDATE_BINDINGS_DELAY <= GetTime() - self.__WaitingToUpdateBindings  then
+		self.__WaitingToUpdateBindings = nil
+		self:SetScript('OnUpdate', nil)
+		self:UpdateBindings()
+	end
+end
+
 function BindingsController:UpdateBindings()
+	if InCombatLockdown() then
+		if  not self.__NeedsBindingUpdate  then
+			self.__NeedsBindingUpdate = true
+			self:RegisterEvent('PLAYER_REGEN_ENABLED')
+		end
+		return
+	end
+
+	if  self.__NeedsBindingUpdate  then
+		self.__NeedsBindingUpdate = nil
+		self:UnregisterEvent('PLAYER_REGEN_ENABLED')
+	end
+
 	for button in pairs(self.frames) do
 		button:UpdateHotkey()
 
