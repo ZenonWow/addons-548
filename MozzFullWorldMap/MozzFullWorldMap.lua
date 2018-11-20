@@ -8,6 +8,9 @@ SEE ReadMe.txt for latest Patch Notes for (Fan's Update) versions
 
 --]]--------------------------------------------------------------------------------------------
 
+local ADDON_NAME, private = ...
+
+	
 -- "MozzFullWorldMap"
 BINDING_HEADER_MFWM = MFWM.L["BINDING_HEADER_MFWM"]
 -- "Show Unexplored Areas"
@@ -617,6 +620,7 @@ end
 ------------------------------------------------------------------------------------------------
 
 local function BattlefieldMinimapUpdateOverlays()
+	if  not BattlefieldMinimap  then  return  end
 
 	UpdateOverlays(
 		BattlefieldMinimap, 
@@ -707,7 +711,7 @@ local function OnEvent( self, event, ... )
 		or (arg1 == "nUI6" and IsAddOnLoaded( "MozzFullWorldMap" ))
 		then
 			DisableAddOn( "MozzFullWorldMap" );
-			ReloadUI();
+			--ReloadUI();
 			return;
 		end
 		
@@ -865,6 +869,8 @@ end
 if WorldMapFrame_Update then
 	hooksecurefunc(	"WorldMapFrame_Update", WorldMapUpdateOverlays );
 end
+
+local function MFWM_Hook_BattlefieldMinimap()
 
 if BattlefieldMinimap_Update then 
 	hooksecurefunc(	"BattlefieldMinimap_Update", BattlefieldMinimapUpdateOverlays );

@@ -1343,6 +1343,8 @@ function Config:OnInitialize()
 	end
 
 	SLASH_GatherMate21 = "/gathermate"
+	SLASH_GatherMate22 = "/gm"
+	SLASH_GatherMate23 = "/gm2"
 	SlashCmdList.GatherMate2 = openOptions
 
 	self:RegisterMessage("GatherMate2ConfigChanged")
