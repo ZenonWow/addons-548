@@ -12,4 +12,10 @@
 	<Binding name="EXAMINER_MOUSEOVER">
 		Examiner:InspectMouseover();		
 	</Binding>
+	
+	<ModifiedClick action="SHOW_ITEMLEVEL" default="ALT"/>
+	<ModifiedClick action="DRESSUP_NO_TMOG" default="ALT"/>
+	
 </Bindings>
+
+

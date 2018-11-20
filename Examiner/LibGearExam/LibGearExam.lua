@@ -36,8 +36,13 @@ LGE.Slots = {
 	"MainHandSlot", "SecondaryHandSlot",
 };
 LGE.SlotIDs = {};
+LGE.SlotNames = {};
 for _, slotName in ipairs(LGE.Slots) do
-	LGE.SlotIDs[slotName] = GetInventorySlotInfo(slotName);
+	local invSlotID = GetInventorySlotInfo(slotName)
+	-- Mapping from string to number
+	LGE.SlotIDs[slotName] = invSlotID
+	-- Reverse mapping from number to string
+	LGE.SlotNames[invSlotID] = slotName
 end
 
 -- Stat Names
@@ -172,24 +177,35 @@ LGE.StatRatingBaseTable = {
 	ARMORPENETRATION = 4.69512176513672 / 1.25 / .88,
 };
 
+-- Cache from FrameXML/Constants.lua:
+local INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED = INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED
 --------------------------------------------------------------------------------------------------------
 --           Scan all items & set bonuses on given [unit] - Make sure the tables are reset            --
 --------------------------------------------------------------------------------------------------------
-function LGE:ScanUnitItems(unit,statTable,setTable)
+function LGE:ScanUnitItems(unit,statTable,infoTable)
 	if (not unit) or (not UnitExists(unit)) then
 		return;
 	end
+	-- 3rd parameter used to be setTable. Clients might pass setTable (infoTable.Sets is nill), use it as setTable in this case.
+	local setTable =  infoTable.Sets  or  infoTable
+	infoTable.Tmogs = infoTable.Tmogs  or  {}
+	local tmogTable = infoTable.Tmogs
+	
 	-- Check all item slots
-	for _, slotName in ipairs(self.Slots) do
+	--for _, slotName in ipairs(self.Slots) do
+	for  invSlotID = INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED  do
 		-- Set New Item Tip
 		self.Tip:ClearLines();
-		self.Tip:SetInventoryItem(unit,self.SlotIDs[slotName]);
+		self.Tip:SetInventoryItem(unit,invSlotID);
 		local lastSetName;
 		local lastBonusCount = 1;
 		-- Check Lines
 		for i = 2, self.Tip:NumLines() do
 			local needScan, lineText = self:DoLineNeedScan(_G["LibGearExamTipTextLeft"..i],true);
-			if (needScan) then
+			if  not needScan  then
+				-- Don't need stat scan, maybe it's tmog info
+				self:ScanLineForTmog(lineText,tmogTable,invSlotID)
+			else
 				-- We use "setMax" to check if the Line was a SetNamePattern (WTB continue statement in Lua)
 				local setName, setCount, setMax;
 				-- Set Header (Only run this if we haven't found a set on this item yet)
@@ -235,8 +251,11 @@ function LGE:ScanItemLink(itemLink,statTable)
 		-- Check Lines
 		for i = 2, self.Tip:NumLines() do
 			local needScan, lineText = self:DoLineNeedScan(_G["LibGearExamTipTextLeft"..i],false);
-			if (needScan) then
+			if  needScan  then
 				self:ScanLineForPatterns(lineText,statTable);
+			else
+				-- ItemLinks do not carry tmog information, I presume only Tip:SetInventoryItem can result in a tooltip with tmog info.
+				--self:ScanLineForTmog(lineText,tmogTable)
 			end
 		end
 	end
@@ -306,12 +325,33 @@ function LGE:DoLineNeedScan(tipLine,scanSetBonuses)
 	elseif (scanSetBonuses and text:find(self.SetNamePattern)) then
 		return true, text;
 	end
-	return;
+	return nil, text;
 end
 --------------------------------------------------------------------------------------------------------
 --                                 Checks a Single Line for Patterns                                  --
 --------------------------------------------------------------------------------------------------------
+-- FrameXML/GlobalStrings.lua: TRANSMOGRIFIED = "Transmogrified to:\n%s";
+--local TRANSMOGRIFIED_PREFIX = TRANSMOGRIFIED:format("")
+--local TRANSMOGRIFIED_PREFIX = strsplit("%", TRANSMOGRIFIED, 2)
+local TRANSMOGRIFIED_PATTERN = TRANSMOGRIFIED:format("(.*)")
+
+function LGE:ScanLineForTmog(text,tmogTable,invSlotID)
+	-- Match "Transmogrified to:\n%s"
+	local tmogName = text:match(TRANSMOGRIFIED_PATTERN)
+	if  tmogName  then
+		print( "Found tooltip tmog line: "..tmogName:gsub("|","||") )  -- gsub() to show any hidden coloring or escape
+		local tmogLink = select(2,GetItemInfo(tmogName))  or  tmogName
+		-- Can be accessed by slotID numbers and SlotName too
+		tmogTable[ self.SlotNames[invSlotID] ] = tmogLink
+		tmogTable[invSlotID] = tmogLink
+	elseif  text:find("ransmog")  then
+		print( "Failed to parse tmog line: "..text:gsub("|","||") )
+	end
+end
+
 function LGE:ScanLineForPatterns(text,statTable)
+	-- Check if client requested stats
+	if  not statTable  then  return  end
 	for index, pattern in ipairs(self.Patterns) do
 		local pos, _, value1, value2 = text:find(pattern.p);
 		if (pos) and (value1 or pattern.v) then
@@ -477,9 +517,10 @@ function LGE:GetGemInfo(link,gemTable,unit,slotName)
 	else
 		gemTable = {};
 	end
+	local invSlotID = self.SlotIDs[slotName]
 	-- Get "link" if we are scanning from "unit"
 	if (not link) then
-		link = GetInventoryItemLink(unit,self.SlotIDs[slotName]);
+		link = GetInventoryItemLink(unit,invSlotID);
 	end
 	-- API Scan (Finds gemmed sockets)
 	for i = 1, MAX_NUM_SOCKETS do
@@ -489,7 +530,7 @@ function LGE:GetGemInfo(link,gemTable,unit,slotName)
 	-- Tooltip Scan (Finds empty sockets)
 	self.Tip:ClearLines();
 	if (unit) then
-		self.Tip:SetInventoryItem(unit,self.SlotIDs[slotName]);
+		self.Tip:SetInventoryItem(unit,invSlotID);
 	else
 		self.Tip:SetHyperlink(link);
 	end

@@ -11,7 +11,7 @@ function AzMsg(msg) DEFAULT_CHAT_FRAME:AddMessage(tostring(msg):gsub("|1","|cfff
 local cfg, cache;
 
 -- Data Tables
-local info = { Sets = {}, Items = {} };
+local info = { Sets = {}, Items = {}, Tmogs = {} };
 local unitStats = {};
 local equippedSlots = {};
 local statTipStats1, statTipStats2 = {}, {};
@@ -70,7 +70,9 @@ BINDING_NAME_EXAMINER_MOUSEOVER = INSPECT.." Mouseover";
 -- UIPanelWindow Entry  -- Az: Can this cause TAINT?
 UIPanelWindows[modName] = { area = "left", pushable = 1, whileDead = 1 };
 -- Allows the use of Esc to close the window -- Az: Can this cause TAINT? Many other addons uses this, so probably no?
-UISpecialFrames[#UISpecialFrames + 1] = modName;
+--UISpecialFrames[#UISpecialFrames + 1] = modName;
+local prev_CloseSpecialWindows = _G.CloseSpecialWindows
+function _G.CloseSpecialWindows()  return  ex:IsShown()  and  ex:Hide()  or  prev_CloseSpecialWindows()  end
 
 --------------------------------------------------------------------------------------------------------
 --                                          Examiner Scripts                                          --
@@ -499,6 +501,7 @@ function ex:LoadPlayerFromCache(entryName)
 		info.Items[slotName] = link;
 		LibGearExam:ScanItemLink(link,unitStats);
 	end
+	info.Tmogs = entry.Tmogs  and  CopyTable(entry.Tmogs)  or  {}
 	-- Sets + Set Bonuses [NEW]
 	for setName, setEntry in next, entry.Sets do
 		info.Sets[setName] = { count = setEntry.count, max = setEntry.max };
@@ -561,6 +564,12 @@ function ex:InspectMouseover()
 	if (not UnitExists(unit)) then
 		HideUIPanel(self);
 	else
+		-- TODO: temporary, it is not opening for some reason
+		if (cfg.makeMovable) then
+			self:Show();
+		else
+			ShowUIPanel(self);
+		end
 		self:DoInspect(unit);
 	end
 end
@@ -723,7 +732,7 @@ end
 function ex:ScanGear(unit)
 	wipe(unitStats);
 	wipe(info.Sets);
-	LibGearExam:ScanUnitItems(unit,unitStats,info.Sets);
+	LibGearExam:ScanUnitItems(unit,unitStats,info);
 	for slotName, slotId in next, LibGearExam.SlotIDs do
 		local link = (GetInventoryItemLink(unit,slotId) or ""):match(LibGearExam.ITEMLINK_PATTERN);
 		info.Items[slotName] = LibGearExam:FixItemStringLevel(link,ex.info.level);	-- Fix item string level
@@ -772,6 +781,42 @@ end
 --------------------------------------------------------------------------------------------------------
 --                                          Helper Functions                                          --
 --------------------------------------------------------------------------------------------------------
+
+-- IsModifiedKey(modifiedClickAction) is similar to IsModifiedClick(modifiedClickAction),
+-- checking only for the modifier key state set in Bindings.xml/<ModifiedClick action="modifiedClickAction">, regardless of mouse input.
+-- Whereas IsModifiedClick() returns nil if there is no mousebutton pressed. 
+-- Also fixes the behaviour with multiple modifiers. CTRL-SHIFT-BUTTON1 checks for Control and Shift _both_ to be pressed,
+-- while IsModifiedClick() checks if _any_ of the modifiers is pressed. Opposite of how keybindings work.
+local IsModifierDownFunc = {
+	ALT = IsAltKeyDown,
+	CTRL = IsControlKeyDown,
+	SHIFT = IsShiftKeyDown,
+	[0] = function() return true end,
+}
+
+local IsModifiedKeyCache = {}
+
+function IsModifiedKey(action)
+	local checkerFuncs = IsModifiedKeyCache[action]
+	if  checkerFunc  then  return checkerFunc()  end
+	
+	-- 8 modifier key variations: ACS, AC, AS, CS, A, C, S, none
+	local key1, key2, key3, btn = ('-'):split( GetModifiedClick(action) or '' )
+	-- f1,f2,f3 will check for one modifier key or return true if not needed. f1 is needed minimum.
+	local f1,f2,f3 = IsModifierDownFunc[key1], IsModifierDownFunc[key2] or IsModifierDownFunc[0], IsModifierDownFunc[key3] or IsModifierDownFunc[0]
+	-- checkerFunc checks for all modifiers needed
+	-- If f1 is null then there is no modifier key in the ModifiedClick. IsModifiedClick is called to check for a potential mouseclick.
+	checkerFunc =  not f1  and  IsModifiedClick
+		or  function()  return f1() and f2() and f3()  end
+	
+	IsModifiedKeyCache[action] = checkerFunc
+	return checkerFunc(action)  -- only IsModifiedClick cares about the parameter
+end
+
+-- Export to modules/itemslots.lua
+ex.IsModifierDownFunc = IsModifierDownFunc
+ex.IsModifiedKey = IsModifiedKey
+
 
 -- Format Time (sec)
 function ex:FormatTime(time,short)
@@ -934,20 +979,77 @@ function ex.ItemButton_OnClick(self,button)
 		local _, itemLink = GetItemInfo(self.link);
 		if (button == "RightButton") then
 			AzMsg("---|2 Gem Overview for "..itemLink.." |r---");
+			if  self.tmogLink  then
+				AzMsg( TRANSMOGRIFIED:format(self.tmogLink) )
+			end
 			for i = 1, 3 do
 				local _, gemLink = GetItemGem(itemLink,i);
 				if (gemLink) then
 					AzMsg(format("Gem |1%d|r = %s",i,gemLink));
 				end
 			end
+			return true
 		elseif (button == "LeftButton") then
-			local editBox = ChatEdit_GetActiveWindow();
-			if (IsModifiedClick("DRESSUP")) then
-				DressUpItemLink(itemLink);
-			elseif (IsModifiedClick("CHATLINK")) and (editBox) and (editBox:IsVisible()) then
-				editBox:Insert(itemLink);
+			--local editBox = ChatEdit_GetActiveWindow();
+			if (IsModifiedClick('DRESSUP')) then
+				local link =  not IsModifiedClick('DRESSUP_NO_TMOG')  and  self.tmogLink  or  self.link
+				DressUpItemLink(link);
+				return true
+			end
+			local link = self.link
+			if  self.tmogLink  then
+				-- Double link... ;-) Addons hooking this shall deal with it on their own.
+				-- Check if blizz functions handle this gracefully and drop the second (tmog) link.
+				-- Check if common string.match(...) patterns in addons handle this, or join the 2 links into one big Hulk/Frankenstein.
+				link = link .. ("|2 tmogged to: |r")
+				-- Check if one backspace keypress deletes this whole explanation text in the middle.
+				link = link .. self.tmogLink
+			end
+			if  ChatEdit_InsertLink(link)  then
+				-- All done
+				return true
 			end
 		end
+	end
+end
+
+
+ex.ITEM_ICON_UNKNOWN = "Interface\\Icons\\INV_Misc_QuestionMark";
+
+-- Call when showing button or modifiers changed
+function ex.ItemButton_UpdateTexture(button)
+	local link = button.link
+	if  button.tmogLink  and  IsModifiedClick()  and  not IsModifiedClick('DRESSUP_NO_TMOG')  then
+		-- Shift / Ctrl -> show tmog item    + Alt -> show actual item
+		link = button.tmogLink
+	elseif  button.itemLink  then
+		link = button.itemLink
+	end
+	button.link = link
+	
+	local itemName, itemLink, itemRarity, itemLevel, _, _, _, _, _, itemTexture =  link  and  GetItemInfo(link)
+	print("ItemButton_UpdateTexture(link="..tostring(link).."): ", link and GetItemInfo(link) )
+	if  link  then
+		button.texture:SetTexture(itemTexture  or  ex.ITEM_ICON_UNKNOWN);
+	else
+		button.texture:SetTexture(button.bgTexture);
+	end
+	
+	if  link  and  not itemTexture  then
+		-- Item data not loaded yet. Retry on OnClick or some cache event.
+		button.realLink = link;
+		button.link = nil;
+	end
+	
+	if  itemTexture  then
+		local r,g,b = GetItemQualityColor(itemRarity and itemRarity > 0 and itemRarity or 0);
+		button.border:SetVertexColor(r,g,b);
+		button.border:Show();
+		itemLevel = GetUpgradedItemLevelFromItemLink(button.link);
+		button.level:SetText(itemLevel);
+	else
+		button.border:Hide();
+		button.level:SetText("");
 	end
 end
 
@@ -960,24 +1062,47 @@ end
 
 -- Item Button OnEnter
 function ex.ItemButton_OnEnter(self,motion)
+	-- Check if the item has been loaded if it was not when UpdateItemSlots() ran
+	if  self.realLink  then  self:UpdateTexture()  end
+	
 	-- Inspect Cursor
 	if (IsModifiedClick("DRESSUP")) then
 		ShowInspectCursor();
 	else
 		ResetCursor();
 	end
-	-- Anchor -- Az: add new option here to anchor it to the default anchor?
+	
+	ex.ItemButton_UpdateTip(self)
+end
+	
+function ex.ItemButton_UpdateTip(self)
 	ex.showingTooltip = true;
-	gtt:SetOwner(self,"ANCHOR_NONE");
 	if (cfg.tooltipSmartAnchor) then
+		gtt:SetOwner(self,"ANCHOR_NONE");
 		gtt:SetPoint("TOPLEFT",ex,"TOPRIGHT",-34,-12);
 	else
-		gtt:SetPoint("TOPLEFT",self,"TOPRIGHT");
+		-- Anchor -- Az: add new option here to anchor it to the default anchor?
+		--gtt:SetPoint("TOPLEFT",self,"TOPRIGHT");
+		-- Just do it
+		GameTooltip_SetDefaultAnchor(gtt, self)
 	end
+	
+	local link =  self.itemLink  or  self.link
 	-- Set Tip
-	if (self.link) and (IsShiftKeyDown()) and (IsAltKeyDown()) then
-		local linkToken, itemId, enchantId, gemId1, gemId2, gemId3, gemId4, suffixId, uniqueId, linkLvl, reforgeId = (":"):split(self.link);
-		local itemName, _, itemRarity = GetItemInfo(self.link);
+	if  not link  then
+		if  self.realLink  then
+			-- Az: should not be like this anymore, a single call to GetItemInfo() would make the client cache the item, so just make some kind of postcacheload thingie, or just redo the OnCacheLoaded event?
+			gtt:SetText(_G[self.slotName:upper()]);
+			gtt:AddLine("ItemID: "..self.realLink:match(LibGearExam.ITEMLINK_PATTERN_ID),0,0.44,0.86);
+			gtt:AddLine("This item was not in the local item cache, click this button to reload the cached player, so the item will update.",1,1,1,1);
+			gtt:Show();
+		elseif (self.slotName) then
+			gtt:SetText(_G[self.slotName:upper()]);
+		end
+	--if (self.link) and (IsShiftKeyDown()) and (IsAltKeyDown()) then
+	elseif  IsModifiedKey('SHOW_ITEMLEVEL')  and  IsModifiedKey('CHATLINK')  then
+		local linkToken, itemId, enchantId, gemId1, gemId2, gemId3, gemId4, suffixId, uniqueId, linkLvl, reforgeId =  (":"):split(link);
+		local itemName, _, itemRarity =  GetItemInfo(link);
 		gtt:AddLine(itemName,GetItemQualityColor(itemRarity));
 		gtt:AddDoubleLine("itemId",itemId or 0,1,1,1);
 		gtt:AddDoubleLine("enchantId",enchantId or 0,1,1,1);
@@ -990,7 +1115,7 @@ function ex.ItemButton_OnEnter(self,motion)
 		gtt:AddDoubleLine("linkLvl",linkLvl or 0,1,1,1);
 		gtt:AddDoubleLine("reforgeId",reforgeId or 0,1,1,1);
 		gtt:Show();
-	elseif (self.link) and (IsAltKeyDown()) then
+	elseif  IsModifiedKey('SHOW_ITEMLEVEL')  then
 		local itemName, _, itemRarity = GetItemInfo(self.link);
 		gtt:AddLine(itemName,GetItemQualityColor(itemRarity));
 		LibGearExam:ScanItemLink(self.link,statTipStats1);
@@ -1007,16 +1132,14 @@ function ex.ItemButton_OnEnter(self,motion)
 		wipe(statTipStats2);
 		gtt:Show();
 	elseif (self.id and ex:ValidateUnit() and CheckInteractDistance(ex.unit,1) and gtt:SetInventoryItem(ex.unit,self.id)) then
-	elseif (self.link) then
-		gtt:SetHyperlink(self.link);
-	elseif (self.realLink) then
-		-- Az: should not be like this anymore, a single call to GetItemInfo() would make the client cache the item, so just make some kind of postcacheload thingie, or just redo the OnCacheLoaded event?
-		gtt:SetText(_G[self.slotName:upper()]);
-		gtt:AddLine("ItemID: "..self.realLink:match(LibGearExam.ITEMLINK_PATTERN_ID),0,0.44,0.86);
-		gtt:AddLine("This item was not in the local item cache, click this button to reload the cached player, so the item will update.",1,1,1,1);
-		gtt:Show();
-	elseif (self.slotName) then
-		gtt:SetText(_G[self.slotName:upper()]);
+		-- Nothing
+	else
+		gtt:SetHyperlink(link)
+		--[[ TODO: 
+		if  self.tmogLink  and  self.tmogLink ~= link  then  SetTmogToLink(self.tmogLink)
+		elseif  self.itemLink  and  self.itemLink ~= link  then  SetTmogFromLink(self.tmogLink)
+		end
+		--]]
 	end
 end
 
@@ -1033,6 +1156,8 @@ ex.slashHelp = {
 	" |2scale <value>|r = Sets the scale of the Examiner window (Default is 1)",
 	" |2reset|r = Resets the position to the center, in case it was moved off screen",
 	" |2clearcache|r = Clears the entire Examiner cache",
+	"Shortcut to compare two items:",
+	"|2/exc <itemlink1> <itemlink2>|r = Compares two items by listing the stat differences",
 };
 
 -- Slash Functions -- Commands starting with underscore are meant for debugging
@@ -1144,10 +1269,12 @@ ex.slashFuncs = {
 		AzMsg("Went through |1"..count.."|r items, including duplicates.");
 	end,
 };
+ex.slashFuncs.c = ex.slashFuncs.compare
 
 -- Slash Handler
 _G["SLASH_"..modName.."1"] = "/examiner";
 _G["SLASH_"..modName.."2"] = "/ex";
+_G["SLASH_"..modName.."3"] = "/exa";
 SlashCmdList[modName] = function(cmd)
 	-- Extract Parameters
 	local param1, param2 = cmd:match("^([^%s]+)%s*(.*)$");
@@ -1165,3 +1292,10 @@ SlashCmdList[modName] = function(cmd)
 		end
 	end
 end
+
+-- Slash Handler to compare
+_G["SLASH_"..modName.."1"] = "/exc";
+SlashCmdList[modName] = function(cmd)
+	ex.slashFuncs.compare(param2);
+end
+

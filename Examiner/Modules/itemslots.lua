@@ -8,7 +8,6 @@ mod.slotBtns = {};
 
 -- Variables
 local statTipStats1, statTipStats2 = {}, {};
-local ITEM_ICON_UNKNOWN = "Interface\\Icons\\INV_Misc_QuestionMark";
 
 -- Options
 ex.options[#ex.options + 1] = { var = "alwaysShowItemLevel", default = true, label = "Always Show Item Levels", tip = "With this enabled, the items will always show their item levels, instead of having to hold down the ALT key." };
@@ -73,33 +72,14 @@ end
 -- UpdateSlot: Updates slot from "button.link"
 function mod:UpdateItemSlots()
 	for index, button in ipairs(self.slotBtns) do
-		local link = ex.info.Items[button.slotName];
 		if (cfg.alwaysShowItemLevel) then
 			button.level:Show();
 		end
-		button.realLink = nil;
-		button.link = link;
-		if (not link) then
-			button.texture:SetTexture(button.bgTexture);
-			button.border:Hide();
-			button.level:SetText("");
-		else
-			local _, _, itemRarity, itemLevel, _, _, _, _, _, itemTexture = GetItemInfo(link);
-			if (itemTexture) then
-				button.texture:SetTexture(itemTexture or ITEM_ICON_UNKNOWN);
-				local r,g,b = GetItemQualityColor(itemRarity and itemRarity > 0 and itemRarity or 0);
-				button.border:SetVertexColor(r,g,b);
-				button.border:Show();
-				itemLevel = GetUpgradedItemLevelFromItemLink(link);
-				button.level:SetText(itemLevel);
-			else
-				button.realLink = link;
-				button.link = nil;
-				button.texture:SetTexture(ITEM_ICON_UNKNOWN);
-				button.border:Hide();
-				button.level:SetText("");
-			end
-		end
+		button.itemLink = ex.info.Items[button.slotName]
+		button.tmogLink = ex.info.Tmogs[button.slotName]
+		button.link = button.itemLink
+		button.realLink = nil
+		button:UpdateTexture()
 	end
 end
 
@@ -107,19 +87,23 @@ end
 --                                          Item Slot Scripts                                         --
 --------------------------------------------------------------------------------------------------------
 
+-- Import from core.lua
+local IsModifiedKey = ex.IsModifiedKey
+
 -- OnEvent -- MODIFIER_STATE_CHANGED
 local function OnEvent(self,event,key,state)
-	-- Update Tip
-	if (gtt:IsOwned(self)) then
-		self:GetScript("OnEnter")(self);
-	end
+	if  event ~= 'MODIFIER_STATE_CHANGED'  then  return  end
+	-- Toggle showing icon of the actual item or the tmog appearance
+	-- Must do before UpdateTip() to update button.link
+	self:UpdateTexture()
+	
 	-- Toggle ItemLevel
-	if (not cfg.alwaysShowItemLevel) then
-		if (self.link) and (IsAltKeyDown()) then
-			self.level:Show();
-		else
-			self.level:Hide();
-		end
+	--if (self.link) and (IsAltKeyDown()) then
+	self.level:SetShown( cfg.alwaysShowItemLevel  or  self.link  and  IsModifiedKey('SHOW_ITEMLEVEL') )
+	
+	-- Update Tip
+	if  gtt:IsOwned(self)  and  gtt:IsShown() then
+		self:UpdateTip()
 	end
 end
 
@@ -134,29 +118,12 @@ end
 local function OnClick(self,button)
 	if (CursorHasItem()) then
 		OnDrag(self);
-	elseif (self.link) then
-		if (button == "RightButton") then
-			AzMsg("---|2 Gem Overview for "..select(2,GetItemInfo(self.link)).." |r---");
-			for i = 1, 3 do
-				local _, gemLink = GetItemGem(self.link,i);
-				if (gemLink) then
-					AzMsg(format("Gem |1%d|r = %s",i,gemLink));
-				end
-			end
-		elseif (button == "LeftButton") then
-			local editBox = ChatEdit_GetActiveWindow();
-			if (IsModifiedClick("DRESSUP")) then
-				DressUpItemLink(self.link);
-			elseif (IsModifiedClick("CHATLINK")) and (editBox) and (editBox:IsVisible()) then
-				local _, itemLink = GetItemInfo(self.link);
-				editBox:Insert(itemLink);
-			else
-				OnDrag(self);
-			end
-		end
+	elseif  ex.ItemButton_OnClick(self,button)  then
+		-- All done
 	elseif (self.realLink) then
 		-- Az: this needs to be changed, look at shared onenter func for more info
 		-- Az: should not be like this anymore, a single call to GetItemInfo() would make the client cache the item, so just make some kind of postcacheload thingie, or just redo the OnCacheLoaded event?
+		-- self:UpdateTexture() should be enough in OnEnter
 		local entryName = ex:GetEntryName();
 		ex:ClearInspect();
 		ex:LoadPlayerFromCache(entryName);
@@ -201,6 +168,8 @@ for index, slot in ipairs(LibGearExam.Slots) do
 
 	btn.id, btn.bgTexture = GetInventorySlotInfo(slot);
 	btn.slotName = slot;
+	btn.UpdateTexture = ex.ItemButton_UpdateTexture
+	btn.UpdateTip = ex.ItemButton_UpdateTip
 
 	btn.texture = btn:CreateTexture(nil,"BACKGROUND");
 	btn.texture:SetAllPoints();

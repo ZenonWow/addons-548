@@ -115,6 +115,7 @@ end
 -- Update
 function UpdateShownItems()
 	local items = ex.info.Items;
+	local Tmogs = ex.info.Tmogs;
 	FauxScrollFrame_Update(mod.scroll,#shownSlots,#buttons,BUTTON_HEIGHT);
 	local index = mod.scroll.offset;
 	-- Loop
@@ -131,12 +132,27 @@ function UpdateShownItems()
 --			btn.name:SetText(itemName);
 --			btn.name:SetTextColor(GetItemQualityColor(itemRarity or 0));
 			btn.level:SetText(itemLevel);
-			btn.icon:SetTexture(itemTexture or "Interface\\Icons\\INV_Misc_QuestionMark");
+			btn.icon:SetTexture(itemTexture  or  ex.ITEM_ICON_UNKNOWN);
 			btn:Show();
 
 			btn.iconFrame.link = link;
-			btn.iconFrame.slotName = shownSlots[index];
-			btn.iconFrame.id = LibGearExam.SlotIDs[shownSlots[index]];
+			btn.iconFrame.slotName = slotName;
+			btn.iconFrame.id = LibGearExam.SlotIDs[slotName];
+			
+			-- Icon of transmogrified to item
+			local tmogLink = Tmogs[slotName]
+			btn.tmogLink = tmogLink
+			btn.iconFrame.tmogLink = tmogLink
+			local obj = btn["Gem0"]
+			obj.link = tmogLink
+			if  tmogLink  then
+				local itemTexture = select(10, GetItemInfo(tmogLink))
+				obj.icon:SetTexture(itemTexture  or  ex.ITEM_ICON_UNKNOWN)
+			else
+				obj.icon:SetTexture( select(2, GetInventorySlotInfo(slotName)) )
+			end
+			--obj:SetShown(not not tmogLink)
+			obj:Show()
 
 			-- Gem Scan -- Directly from unit or just from link
 			if (ex:ValidateUnit() and CheckInteractDistance(ex.unit,1)) then
@@ -213,7 +229,7 @@ for i = 1, NUM_BUTTONS do
 	end
 
 	-- Gems
-	for x = 1, MAX_NUM_SOCKETS do
+	for x = 0, MAX_NUM_SOCKETS do
 		local obj = CreateFrame("Button",nil,btn);
 		obj:SetWidth(18);
 		obj:SetHeight(18);
@@ -230,7 +246,7 @@ for i = 1, NUM_BUTTONS do
 		obj.icon:SetTexture("Interface\\Icons\\INV_Scroll_03");
 		obj.icon:SetTexCoord(0.07,0.93,0.07,0.93);
 
-		if (x == 1) then
+		if (x == 0) then
 			obj:SetPoint("RIGHT",-4,0);
 		else
 			obj:SetPoint("RIGHT",btn["Gem"..(x - 1)],"LEFT",-2,0);
