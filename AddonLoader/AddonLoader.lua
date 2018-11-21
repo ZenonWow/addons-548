@@ -29,12 +29,13 @@ _G.AddonLoader = AddonLoader
 
 -- Debug(...) messages
 function private.tostrjoin(separator, ...)  return strjoin(separator, tostringall(...))  end
+local tostrjoin = private.tostrjoin
 function private.Debug(...)  if  AddonLoader.logFrame  then  AddonLoader.logFrame:AddMessage( tostrjoin(", ", ...) )  end end
+local Debug = private.Debug
+
 AddonLoader.logFrame = tekDebug  and  tekDebug:GetFrame("AddonLoader")  or  ChatFrame4
 if  not tekDebug  then  ChatFrame4:Show()  end
 
-local tostrjoin = private.tostrjoin
-local Debug = private.Debug
 
 AddonLoader.loadReason = {}
 AddonLoader.loadError = {}
@@ -347,9 +348,9 @@ end
 
 -- Delayed loading, 10 frames drawn between two addons loaded
 function AddonLoader:OnUpdate(elapsed)
-	self.framesDrawn = self.framesDrawn + 1
+	self.framesDrawn = (self.framesDrawn or -1) + 1
 	if  0 < self.framesDrawn  then
-		self.elapsedSum = self.elapsedSum + elapsed
+		self.elapsedSum = (self.elapsedSum or 0) + elapsed
 	else
 		local now = GetTime()
 		Debug( "AddonLoader:OnUpdate(elapsed="..("%.3f"):format(elapsed).."): GetTime() difference="..(now-self.lastUpdateGetTime)..", slowdown expected" )
@@ -436,7 +437,7 @@ function AddonLoader:OnEvent(...)
 	if  eventName == self.InitOnEvent  or  delayedLoaded  then
 		Debug("AddonLoader:  Load metadata after event "..eventName)
 		-- Schedule LoadConfiguration()
-		self:ScheduleInitFunc(self.InitOnEvent, ConditionManager.LoadConfiguration)
+		self:ScheduleInitFunc(self.InitOnEvent, self.ConditionManager.LoadConfiguration)
 		self.InitOnEvent = nil
 	end
 	
@@ -444,8 +445,8 @@ function AddonLoader:OnEvent(...)
 	if  eventName == self.StartOnEvent  or  delayedLoaded  then
 		Debug("AddonLoader:  Start Login handlers after event "..eventName)
 		-- Schedule RunStartupHandlers(), RunHandlersForCachedEvents()
-		self:ScheduleInitFunc(self.StartOnEvent, ConditionManager.RunStartupHandlers)
-		self:ScheduleInitFunc(self.StartOnEvent, ConditionManager.RunHandlersForCachedEvents)
+		self:ScheduleInitFunc(self.StartOnEvent, self.ConditionManager.RunStartupHandlers)
+		self:ScheduleInitFunc(self.StartOnEvent, self.ConditionManager.RunHandlersForCachedEvents)
 		self.StartOnEvent = nil
 	end
 	

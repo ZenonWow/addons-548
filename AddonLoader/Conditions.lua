@@ -452,10 +452,10 @@ ConditionManager.ConditionTemplates = {
 		condName = "Always",
 		eventList = {"PLAYER_LOGIN"},
 		loadChildren = function(cond)
-			if  ConditionManager:GetCondition(cond.addonName, "X-LoadOn-Login")  then
+			if  ConditionManager:GetMergedField(cond.addonName, "X-LoadOn-Login")  then
 				-- X-LoadOn-Login overwrites X-LoadOn-Always.
 				-- The field in the metadata is kept for backward compatibility with older AddonLoader.
-				ConditionManager:RemoveCondition(cond.addonName, "X-LoadOn-Always")
+				ConditionManager:RemoveField(cond.addonName, "X-LoadOn-Always")
 				return false
 			end
 			
@@ -547,7 +547,7 @@ ConditionManager.ConditionTemplates = {
 			-- the second part can be a string  or  an object definining any property
 			local dataobj, name = parseLuaObject(rest), nil
 			if  not dataobj  then
-				name, rest = strsplit(private.SPLIT_CHARS, rest, 2)
+				name, rest = rest  and  strsplit(private.SPLIT_CHARS, rest, 2)
 				rest = rest  and  rest:trim()
 				dataobj = parseLuaObject(rest)  or  {}
 			end

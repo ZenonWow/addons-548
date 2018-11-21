@@ -328,7 +328,7 @@ end
 
 function ConditionManager:GetMergedField(addonName, fieldName)
 	-- See if the field is overridden or disabled.
-	local fieldValue = self:AddonOverrides[addonName][fieldName]
+	local fieldValue = self.AddonOverrides[addonName][fieldName]
 	if  fieldValue == false  then  return fieldValue  end
 	
 	-- If no override then load metadata.
@@ -340,6 +340,11 @@ function ConditionManager:GetMergedField(addonName, fieldName)
 end
 
 
+function ConditionManager:RemoveField(addonName, fieldName)
+	--if  GetAddOnMetadata(addonName, fieldName)  then
+	self.AddonOverrides[addonName][fieldName] = false
+end
+
 
 
 
@@ -350,7 +355,6 @@ end
 function ConditionManager.LoadChildren(cond)
 	cond.childList = splitValue(cond.mainValue)
 	local childConds = {}
-	local childTmpl = 
 	cond.childConds = childConds
 	for  i, childName  in ipairs(cond.childList) do
 		local childCond = ConditionManager:LoadCondition(cond.addonName, 'X-LoadOn-'..childName)
@@ -359,7 +363,7 @@ function ConditionManager.LoadChildren(cond)
 			childConds[#childConds+1] = childCond
 			childConds[childName] = childCond
 			-- For backward compatibility parse main field's value as -If condition
-			childCond.beforeLoadFunc =  childCond.beforeLoadFunc  or  self.ParseLoadOnFunc(childCond)
+			childCond.beforeLoadFunc =  childCond.beforeLoadFunc  or  ConditionManager.ParseLoadOnFunc(childCond)
 		end
 	end
 end
@@ -375,7 +379,7 @@ function ConditionManager:LoadCondition(addonName, fieldName, condTmpl, cond)
 	local initField = self:GetMergedField(addonName, fieldName.."-Init")
 	
 	if  mainField  or  ifField  or  initField  then
-		cond =  cond  or  condTmpl  and  setmetatable({}, { __index = condTmpl } )  or  {}
+		cond =  cond  or  condTmpl  and  setmetatable({ addonName = addonName, fieldName = fieldName }, { __index = condTmpl } )  or  {}
 		if  mainField  then
 			cond.mainValue = mainField.fieldValue
 			local ran, result =  condTmpl  and  condTmpl.parseMain  and  safecall(condTmpl.parseMain, cond)
