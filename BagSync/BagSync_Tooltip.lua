@@ -626,7 +626,7 @@ local function hookPetTip()
 	local modified = false
 	-- BattlePetTooltipTemplate_SetBattlePet(BattlePetTooltip, BATTLE_PET_TOOLTIP);
 	hooksecurefunc('BattlePetToolTip_Show', function (speciesID, level, breedQuality, maxHealth, power, speed, customName)
-		modified = BagSync.AddItemToTooltip( self, "battlepet:"..speciesID )
+		modified = BagSync.AddItemToTooltip( BattlePetTooltip, "battlepet:"..speciesID )
 	end)
 end
 

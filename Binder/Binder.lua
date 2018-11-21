@@ -209,15 +209,15 @@ function strRemovePrefix(str, prefix)
 	return  prefix == strsub(str, 1, len)  and  strsub(str, len+1)
 end
 
-local function strSplit(str, sepStr)
+local function subStrSplit(str, sepStr)
 	local splits, from= {}, 0
 	while  from  do
 		local sepIdx= strfind(str, sepStr, from)
 		splits[#splits+1]= strsub(str, from, sepIdx and sepIdx-1 or nil)  -- sepIdx == nil will add the part after the last separator
-		from= sepIdx  and  sepIdx + strlen(sepStr)  or  nil
+		from= sepIdx  and  sepIdx + strlen(sepStr)
 	end
 	-- str == ""  will always result in one split: { "" }
-	return splits
+	return unpack(splits)
 end
 
 local function SetBindingsForKeys(keys, command)
@@ -249,7 +249,7 @@ end
 local function LoadKeyBindingsSerialized(list, SavedSeparator)
 	for  _,bindingStr  in  ipairs(list)  do
 		if  type(bindingStr) == 'string'  and  bindingStr:match("^%a")  then
-			SetBindingsForCommand( strSplit(bindingStr, SavedSeparator) )
+			SetBindingsForCommand( subStrSplit(bindingStr, SavedSeparator) )
 		end
 	end
 end
@@ -407,13 +407,12 @@ function LoadProfile(profileName)
 	
 	SaveBindings(2)		-- save to character-specific so it can be loaded (with modifications) in case of an error
 	--SaveBackup()
-	local result, err= pcall(LoadProfileProtected)
+	local result, err= xpcall(LoadProfileProtected, geterrorhandler())
 	
 	if  not result  then
 		LoadBindings(2)		-- restore previously saved
 		local msg= "Binder error: ".. tostring(err)
 		out_both(msg)
-		error(err)
 		return
 	end
 	

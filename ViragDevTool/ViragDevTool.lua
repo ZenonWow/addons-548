@@ -393,8 +393,14 @@ function ViragDevTool:ExecuteCMD(msg, bAddToHistory)
     end
 end
 
-local function packSkipOne(one, ...)
-  return one, { ..., n = select('#', ...) }
+local function packOrSoloSkipFlag(ran, ...)
+	local n = select('#', ...)
+  return  ran,  ran  and  1 < n  and  { n=n, ... }  or  ...
+end
+
+local function packOrSolo(...)
+	local n = select('#', ...)
+  return  1 < n  and  { n=n, ... }  or  ...
 end
 
 local function tequals(t1,t2)
@@ -404,38 +410,33 @@ local function tequals(t1,t2)
   return true
 end
 
---[[
-/run ViragDevTool.CheckPack()
---]]
-function ViragDevTool.CheckPack()
-  assert( tequals( _pack(1,nil,3) , { 1,nil,3,n=3 })
-  assert( tequals( _pack(1,nil) , { 1,nil,n=2 })
-end
-
 function ViragDevTool.RunUnsafeFunc(updateFunc, bodyStr)
-  local ran, results = packSkipOne( xpcall(updateFunc, geterrorhandler()) )
-  if  not ran  then  self:print('"'..bodyStr..'" update error:  '.. results[1])  end
-  
-  if  results.n <= 1  then  return ran, results[1]  end
-  return ran, results
-end
-
-function ViragDevTool:AddWatch(str)
-  local updateFunc = self:FromStrToFunc(str)
-  self.list:AddNodeFunc(updateFunc, tostring(dataName))
-  self:UpdateMainTableUI()
+  --local ran, result = xpcall(updateFunc, geterrorhandler())
+  local ran, result = packOrSoloSkipFlag( xpcall(updateFunc, geterrorhandler()) )
+  if  not ran  then  ViragDevTool:print('"'..tostring(bodyStr)..'" update error:  '.. tostring(result))  end
+  if  ran  then  ViragDevTool:print(Evaluate '"'..tostring(bodyStr)..'" = '.. tostring(result))  end
+  return  ran, result
 end
 
 function ViragDevTool:FromStrToFunc(str)
 	local body = "return "..str
 	local ran, compiled = pcall(loadstring, body)
-	if  not ran  then  self:print('"'..body..'" failed to compile:  ".. compiled)  end
+	if  not ran  then  self:print('"'..body..'" failed to compile:  '.. compiled)  end
+	-- Pack multiple returns into an array with .n = return count
+	-- Solo return is not packed
+	--return  ran  and  function()  return packOrSolo( compiled() )  end
 	return  ran  and  compiled
 end
 
-function ViragDevTool:FromStrToObject(str)
-	local compiled = self:FromStrToFunc(str)
-	local ran, result = self.RunUnsafeFunc(compiled)
+function ViragDevTool:AddWatch(bodyStr)
+  local updateFunc = self:FromStrToFunc(bodyStr)
+  self.list:AddNodeFunc(updateFunc, tostring(bodyStr))
+  self:UpdateMainTableUI()
+end
+
+function ViragDevTool:FromStrToObject(bodyStr)
+	local compiled = self:FromStrToFunc(bodyStr)
+	local ran, result = self.RunUnsafeFunc(compiled, bodyStr)
 	return  ran  and  result
 end
 
@@ -737,7 +738,7 @@ end
 
 function ViragDevTool:UIUpdateMainTableButton(node, info, id)
     if  info.updateFunc  then
-      local ran, result = self.RunUnsafeFunc(updateFunc)
+      local ran, result = self.RunUnsafeFunc(info.updateFunc, info.name)
       if  ran  then  info.value = result  end
     end
     

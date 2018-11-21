@@ -1,3 +1,13 @@
+--[[
+TODO test:
+ViragDevTool function exec
+InterfaceOptionsFrame_OpenToCategory
+
+/run InterfaceOptionsFrame_OpenToCategory("Ellipsis")
+
+--]]
+
+
 local LuaTests = {}
 _G.LuaTests = LuaTests
 
@@ -15,14 +25,14 @@ _G.LuaTests = LuaTests
 /dump  1, 2 or 2.5, (3,3.5), nil, 5, nil
 --]]
 local fields = {
-"X-NoComma"
-"X-JustComma" --
-"X-CommaUndSpace" -- 
-"X-CommaUnd4Space" --    
-"X-CommaUndTab" --	
-"X-CommaUnd2Tab" --		
-"X-Trimm" --    		    <-4s2t4s    		    4s2t4s->    		    
-"X-Dupli" -- 1 \n 2 \n 3
+"X-NoComma",
+"X-JustComma", --
+"X-CommaUndSpace", -- 
+"X-CommaUnd4Space", --    
+"X-CommaUndTab", --	
+"X-CommaUnd2Tab", --		
+"X-Trimm", --    		    <-4s2t4s    		    4s2t4s->    		    
+"X-Dupli", -- 1 \n 2 \n 3
 }
 
 
@@ -49,7 +59,7 @@ function LuaTests.FieldTest()
 end
 
 function LuaTests.SetScript()
-	local fOnShow(self, ...)  print("fOnShow():", ...)  end
+	local function fOnShow(self, ...)  print("fOnShow():", ...)  end
 	local f=CreateFrame('Frame')
 	print("f:IsShown() = "..tostring(f:IsShown()))
 	print("f.OnShow = "..tostring(f:GetScript('OnShow')))
@@ -71,7 +81,7 @@ end
 
 
 function LuaTests.HookScript()
-	local fOnShowHook(self, ...)  print("fOnShowHook():", ...)  end
+	local function fOnShowHook(self, ...)  print("fOnShowHook():", ...)  end
 	local f=CreateFrame('Frame')
 	print("f:IsShown() = "..tostring(f:IsShown()))
 	print("f.OnShow = "..tostring(f:GetScript('OnShow')))

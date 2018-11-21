@@ -64,14 +64,21 @@ CLASS profileKeys clean
 /run f= BlackMarketFrame ; for i=1,f:GetNumPoints() do print(strjoin(',', tostringall(f:GetPoint(i)) )) end
 /run BlackMarketFrame:SetPoint('TOPLEFT',10,-20)
 /run MailFrame:SetPoint('TOPLEFT',10,-20)
+/run TradeFrame:SetPoint('TOPLEFT',10,-20)
 /run MerchantFrame:SetPoint('TOPLEFT',10,-20)
 /run MailFrame:ClearAllPoints() ; MailFrame:SetHeight(400) ; MailFrame:SetWidth(300) ; MailFrame:SetPoint('TOPLEFT',10,-20)
 /run ToggleFrame(MailFrame)
 /dump MailFrame:IsShown()
 /run DisableAddOn('Dominos')
 /run EnableAddOn('Dominos')
+/run LoadAddOn('TradeSkillMaster_Mailing')
 /run LoadAddOn('GnomishVendorShrinker')
 /run LoadAddOn('ViragDevTool')
+/run LoadAddOn('BankStack')
+/run LoadAddOn('MogIt')
+/run LoadAddOn('Postal')  LoadAddOn('InboxMailBag')
+
+/run Examiner:ClearAllPoints() Examiner:SetPoint('TOPLEFT', 20, -20)
 --]]
 
 UIPanelWindows.InterfaceOptionsFrame = nil
@@ -87,7 +94,7 @@ UIPanelWindows.FriendsFrame          = nil
 UIPanelWindows.WorldMapFrame         = nil
 UIPanelWindows.ChatConfigFrame       = nil
 UIPanelWindows.GameMenuFrame         = nil
--- UISpecialFrames[#UISpecialFrames+1] = "CharacterFrame"
+UISpecialFrames[#UISpecialFrames+1] = "CharacterFrame"
 UISpecialFrames[#UISpecialFrames+1] = "SpellBookFrame"
 -- UISpecialFrames[#UISpecialFrames+1] = "TaxiFrame"
 UISpecialFrames[#UISpecialFrames+1] = "TradeFrame"
@@ -109,7 +116,6 @@ MailFrame:SetPoint('TOPLEFT',10,-20)
 --DressUpFrame:SetPoint('TOPRIGHT',-10,-20)
 FriendsFrame:SetPoint('TOPRIGHT',-10,-20)
 
-Examiner:ClearAllPoints() Examiner:SetPoint('TOPLEFT', 20, -20)
 
 LossOfControlFrame:SetPoint('CENTER', 0, 100)
 

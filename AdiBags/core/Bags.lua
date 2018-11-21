@@ -141,6 +141,8 @@ function addon:NewBag(name, order, bagIds, isBank, ...)
 	bag.order = order
 	tinsert(bags, bag)
 	--tsort(bags, CompareBags)
+	-- Export to global namespace
+	_G['Adi'..name] = bag
 	return bag
 end
 
@@ -286,7 +288,7 @@ do
 	end
 
 	function bank:BANKFRAME_OPENED()
-		--self.atBank = true
+		self.atBank = true
 		if  not self:IsOpen()  then
 			self.autoOpened = true
 			self:Open()
@@ -295,7 +297,7 @@ do
 	end
 	
 	function bank:BANKFRAME_CLOSED()
-		--self.atBank = false
+		self.atBank = false
 		if  self.autoOpened  then
 			_G.CloseAllBags(self)
 			self:Close()

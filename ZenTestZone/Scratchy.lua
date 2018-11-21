@@ -4,7 +4,7 @@
 local prev_InterfaceOptionsFrame_OpenToCategory = InterfaceOptionsFrame_OpenToCategory
 function InterfaceOptionsFrame_OpenToCategory(catFrame)
 	local nameStr = type(catFrame) == 'string'  and  catFrame  or  catFrame.name  or  tostring(catFrame)
-	local thunk = function() InterfaceOptionsFrame_OpenToCategory(catFrame) end
+	local thunk = function() prev_InterfaceOptionsFrame_OpenToCategory(catFrame) end
 	local errorhandler = geterrorhandler()
 	
 	for i = 1,5 do  -- max 5 tries

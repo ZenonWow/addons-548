@@ -7,6 +7,12 @@
 --]]
 
 
+-- Bindings locales
+BINDING_HEADER_Dominos               = "Dominos Extra Action Buttons"
+for i = 1,60 do  _G["BINDING_NAME_CLICK DominosActionButton"..i..":LeftButton"]  = "Dominos Action Button "..i  end
+
+
+
 --[[ globals ]]--
 
 local _G = _G
@@ -178,7 +184,10 @@ function BindingsController:SetupAttributeMethods()
 end
 
 function BindingsController:HookBindingMethods()
-	local updateBindings = function(...)  print('SetBinding*(', ..., ')') ;  BindingsController:RequestUpdateBindings()  end
+	local updateBindings = function(...)
+		--print('SetBinding*(', ..., ')')
+		BindingsController:RequestUpdateBindings()
+	end
 
 	hooksecurefunc('SetBinding', updateBindings)
 	hooksecurefunc('SetBindingClick', updateBindings)
@@ -191,7 +200,7 @@ end
 function BindingsController:RegisterEvents()
 	self:SetScript('OnEvent', self.OnEvent)
 
-	self:RegisterEvent('UPDATE_BINDINGS')
+	--self:RegisterEvent('UPDATE_BINDINGS')
 	self:RegisterEvent('PLAYER_LOGIN')
 	self:RegisterEvent('CVAR_UPDATE')
 end

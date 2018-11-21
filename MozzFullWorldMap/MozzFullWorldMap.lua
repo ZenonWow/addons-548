@@ -701,6 +701,9 @@ local function OnEvent( self, event, ... )
 	-- if we've just loaded the addon, then we need to check if our map data
 	-- needs fixing and rebuild the player table if required. 
 	
+	elseif event == "ADDON_LOADED"  and  arg1 == "Blizzard_BattlefieldMinimap"  then
+		MFWM_Hook_BattlefieldMinimap()
+	
 	elseif event == "ADDON_LOADED" 
 	and (arg1 == "MozzFullWorldMap" or arg1 == "nUI6")
 	then
@@ -870,19 +873,29 @@ if WorldMapFrame_Update then
 	hooksecurefunc(	"WorldMapFrame_Update", WorldMapUpdateOverlays );
 end
 
+local MFWM_Hook_BattlefieldMinimap_done
 local function MFWM_Hook_BattlefieldMinimap()
 
-if BattlefieldMinimap_Update then 
-	hooksecurefunc(	"BattlefieldMinimap_Update", BattlefieldMinimapUpdateOverlays );
+	if  MFWM_Hook_BattlefieldMinimap_done  then  return  end
+
+	if BattlefieldMinimap_Update then 
+		MFWM_Hook_BattlefieldMinimap_done = true
+		hooksecurefunc(	"BattlefieldMinimap_Update", BattlefieldMinimapUpdateOverlays );
+	end
+
+	if BattlefieldMinimap_UpdateOpacity then 
+		MFWM_Hook_BattlefieldMinimap_done = true
+		hooksecurefunc(	"BattlefieldMinimap_UpdateOpacity", BattlefieldMinimapUpdateOverlays );
+	end
+
+	if BattlefieldMinimap_SetOpacity then 
+		MFWM_Hook_BattlefieldMinimap_done = true
+		hooksecurefunc(	"BattlefieldMinimap_SetOpacity", BattlefieldMinimapUpdateOverlays );
+	end
+
 end
 
-if BattlefieldMinimap_UpdateOpacity then 
-	hooksecurefunc(	"BattlefieldMinimap_UpdateOpacity", BattlefieldMinimapUpdateOverlays );
-end
-
-if BattlefieldMinimap_SetOpacity then 
-	hooksecurefunc(	"BattlefieldMinimap_SetOpacity", BattlefieldMinimapUpdateOverlays );
-end
+MFWM_Hook_BattlefieldMinimap()
 
 ------------------------------------------------------------------------------------------------
 

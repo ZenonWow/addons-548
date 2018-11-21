@@ -570,6 +570,8 @@ end
 
 function BagSync:ScanEntireBank()
 	print("BagSync:ScanEntireBank()")
+	-- Delayed scan was scheduled when bank was opened, maybe it has been closed in the meantime.
+	if  not atBank  then  return  end
 	
 	--reset our tooltip data since we scanned new items (we want current data not old)
 	BagSync:resetTooltip()
