@@ -581,9 +581,10 @@ function GVS.Purchase(id, quantity)
 	-- fix bug of buying only 5 when vendorStackSize == 5
 	if  vendorStackSize == 5  then  maxPurchase = vendorStackSize  end
 
-	if numAvailable > 0 and numAvailable < quantity then quantity = numAvailable end
+	quantity =  quantity  or  1
+	if  numAvailable > 0  and  numAvailable < quantity  then  quantity = numAvailable  end
 	local purchased = 0
-	while purchased < quantity do
+	while  purchased < quantity  do
 		local buyamount = math.min(maxPurchase, quantity - purchased)
 		purchased = purchased + buyamount
 		BuyMerchantItem(id, buyamount)
@@ -739,19 +740,26 @@ end    -- Create editbox
 local function RowBuyItem(self, fullstack)
 	local id = self:GetID()
 	local link = GetMerchantItemLink(id)
-	if not link then return end
+	if  not link  then  return  end
 
 	local _, _, _, vendorStackSize = GetMerchantItemInfo(id)
 	local _, _, _, _, _, _, _, itemStackSize = GetItemInfo(link)
-	GVS.Purchase(id, fullstack and itemStackSize or vendorStackSize or 1)
+	local quantity = fullstack and itemStackSize  or  vendorStackSize or 1
+
+	if  self.altcurrency  then
+		self.link, self.texture = GetMerchantItemLink(id), self.icon:GetTexture()
+		MerchantFrame_ConfirmExtendedItemCost(self, quantity)
+	else
+		GVS.Purchase(id, quantity)
+	end
 end
 
 local function RowOnClick(self, button)
-	-- Finished editing search text, regain "WASD controls (or QWES :-)"
+	-- Finished editing search text, regain "WASD" controls (or QWES :-)
 	GVS.editbox:ClearFocus()
 	
 	--if IsAltKeyDown() and not self.altcurrency then self:BuyItem(true)
-	if IsModifiedClick('FULLSTACK') and not self.altcurrency then
+	if  IsModifiedClick('FULLSTACK')  then
 		RowBuyItem(self, true)
 		
 	elseif IsModifiedClick() then
@@ -762,12 +770,6 @@ local function RowOnClick(self, button)
 		GVSTab.onClickInGVS = true
 		HandleModifiedItemClick( GetMerchantItemLink(self:GetID()) )
 		GVSTab.onClickInGVS = false
-		
-	elseif self.altcurrency then
-		local id = self:GetID()
-		local link = GetMerchantItemLink(id)
-		self.link, self.texture = GetMerchantItemLink(id), self.icon:GetTexture()
-		MerchantFrame_ConfirmExtendedItemCost(self)
 		
 	else
 		RowBuyItem(self)
@@ -809,8 +811,8 @@ local function PopoutOnClick(self, button)
 	-- OpenStackSplitFrame(250, self, "LEFT", "RIGHT")
 end
 
-local function PopoutSplitStack(self, qty)
-	GVS.Purchase(self:GetParent():GetID(), qty)
+local function PopoutSplitStack(self, quantity)
+	GVS.Purchase(self:GetParent():GetID(), quantity)
 end
 
 
