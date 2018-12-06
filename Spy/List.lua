@@ -418,7 +418,7 @@ function Spy:AnnouncePlayer(player, channel)
 	local announce = Spy.db.profile.Announce  
 	if channel or announce == "Self" or announce == "LocalDefense" or (announce == "Guild" and GetGuildInfo("player") ~= nil and not Spy.InInstance) or (announce == "Party" and GetNumGroupMembers() > 0) or (announce == "Raid" and UnitInRaid("player")) then --++
 		-- Show player link in chat
-		local playerLink = "|Hplayer:"..player"..|h"..player.."|h"
+		local playerLink = "|Hplayer:"..player.."|h"..player.."|h"
 		if announce == "Self" and not channel then
 			if isKOS then
 				msg = msg..L["SpySignatureColored"]..L["KillOnSightDetectedColored"]..playerLink.." "

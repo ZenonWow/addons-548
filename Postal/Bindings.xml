@@ -8,3 +8,9 @@
 	<ModifiedClick action="ATTACHSIMILAR" default="ALT"/>
 	<ModifiedClick action="AUTOSEND" default="CTRL-BUTTON2"/>
 </Bindings>
+<!--
+/dump GetModifiedClick('ATTACHSIMILAR')
+/dump SetModifiedClick('ATTACHSIMILAR','ALT')
+/run SetModifiedClick('ATTACHSIMILAR','ALT')
+/run SetModifiedClick('ATTACHSIMILAR','ALT-BUTTON1')
+-->

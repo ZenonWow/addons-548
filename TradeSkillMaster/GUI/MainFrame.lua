@@ -97,6 +97,7 @@ function TSM:CreateMainFrame()
 	mainFrame:SetIconText(version)
 	mainFrame:SetIconLabels(L["Options"], L["Modules"])
 	mainFrame:SetLayout("Fill")
+	mainFrame:Hide()
 	
 	for _, icon in ipairs(private.icons) do
 		icon.texture = icon.icon

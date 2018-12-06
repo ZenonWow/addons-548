@@ -5,6 +5,7 @@ local LBI = LibStub("LibBabble-Inventory-3.0"):GetUnstrictLookupTable();
 
 
 mog.view = CreateFrame("Frame","MogItPreview",UIParent);
+mog.view:Hide();
 mog.view:SetAllPoints();
 mog.view:SetScript("OnShow",function(self)
 	if #mog.previews == 0 then

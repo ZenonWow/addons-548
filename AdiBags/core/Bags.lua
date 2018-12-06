@@ -344,3 +344,71 @@ function addon:HookBagFrameCreation(target, callback)
 		target:RegisterMessage("AdiBags_BagFrameCreated", hook)
 	end
 end
+
+
+
+--[[  Bag IDs:
+https://wow.gamepedia.com/BagId
+--
+BACKPACK_CONTAINER	0	The backpack - your intial 16 slots container that you can't change or delete.	ContainerFrame.lua
+BACKPACK_CONTAINER + 1
+to NUM_BAG_SLOTS	1 to 4	The bags on the character (numbered right to left).	ContainerFrame.lua
+BANK_CONTAINER	-1	Bank container. Your intial 28 slots container in the bank that you can't change or delete.	BankFrame.lua
+NUM_BAG_SLOTS + 1
+to NUM_BAG_SLOTS + NUM_BANKBAGSLOTS	5 to 11	Bank bags.	BankFrame.lua
+REAGENTBANK_CONTAINER	-3	Reagent Bank. A reagent-only bank introduced in WoD.	BankFrame.lua
+KEYRING_CONTAINER	-2	Keyring. Removed and obsolete since 4.2.0, but remains in code and constants.
+Trying to use it seems to return equipped items instead.	ContainerFrame.lua
+-4	A 7 slots "container" that holds your bank bags themselves.	BankFrame.lua
+
+
+http://wowprogramming.com/docs/api_types.html#containerID
+--
+Type: containerID
+Identifies one of the player's bags or other containers. Possible values:
+
+REAGENTBANK_CONTAINER: Reagent bank (-3)
+KEYRING_CONTAINER: Keyring and currency bag (-2)
+BANK_CONTAINER Main storage area in the bank (-1)
+BACKPACK_CONTAINER: Backpack (0)
+1 through NUM_BAG_SLOTS: Bag slots (as presented in the default UI, numbered right to left)
+NUM_BAG_SLOTS + 1 through NUM_BAG_SLOTS + NUM_BANKBAGSLOTS: Bank bag slots (as presented in the default UI, numbered left to right)
+--]]
+
+
+--[[
+/run invID=1 ; itemID=GetInventoryItemID('player',invID) ; print(invID ..'. item='.. itemID, GetItemInfo(itemID), 'link='.. GetInventoryItemLink('player',invID) )
+GetInventoryItemID - Returns the item ID of an equipped item
+GetInventoryItemLink - Returns an item link for an item in the unit's inventory
+
+ 0-19 -> gear
+20-23 -> bags 1-4
+24-39 -> 16 backpack contents
+40-67 -> 28 base bank contents
+68-74 -> bankbags 5-11
+-> bags: 1-4 -> 20-23  bankbags: 5-11 -> 68-74
+
+INVSLOT_AMMO       = 0;
+INVSLOT_HEAD       = 1; INVSLOT_FIRST_EQUIPPED = INVSLOT_HEAD;
+INVSLOT_NECK       = 2;
+INVSLOT_SHOULDER   = 3;
+INVSLOT_BODY       = 4;
+INVSLOT_CHEST      = 5;
+INVSLOT_WAIST      = 6;
+INVSLOT_LEGS       = 7;
+INVSLOT_FEET       = 8;
+INVSLOT_WRIST      = 9;
+INVSLOT_HAND       = 10;
+INVSLOT_FINGER1        = 11;
+INVSLOT_FINGER2        = 12;
+INVSLOT_TRINKET1   = 13;
+INVSLOT_TRINKET2   = 14;
+INVSLOT_BACK       = 15;
+INVSLOT_MAINHAND   = 16;
+INVSLOT_OFFHAND        = 17;
+INVSLOT_RANGED     = 18;
+INVSLOT_TABARD     = 19;
+INVSLOT_LAST_EQUIPPED = INVSLOT_TABARD;
+--]]
+
+
