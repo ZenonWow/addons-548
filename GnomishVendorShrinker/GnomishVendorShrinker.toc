@@ -1,13 +1,13 @@
 ## Interface: 50001
+## Title: GnomishVendorShrinker
+## Version: 5.0.1.15
+## Notes: Compact scrolling vendor frame
+## Author: Tekkub Stoutwrithe
+
 ## X-Curse-Packaged-Version: 5.0.1.15-Release
 ## X-Curse-Project-Name: GnomishVendorShrinker
 ## X-Curse-Project-ID: gnomishvendorshrinker
 ## X-Curse-Repository-ID: wow/gnomishvendorshrinker/mainline
-
-## Title: GnomishVendorShrinker
-## Notes: Compact scrolling vendor frame
-## Author: Tekkub Stoutwrithe
-## Version: 5.0.1.15
 ## X-Website: http://www.tekkub.net/
 ## X-Email: tekkub-wow@googlegroups.com
 ## X-Category: Misc
@@ -23,3 +23,4 @@ LibItemSearch-1.0.lua
 
 KnownScanner.lua
 GnomishVendorShrinker.lua
+MerchantFrameMod.lua
