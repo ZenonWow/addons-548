@@ -106,7 +106,7 @@ end
 
 function addon:CloseSpecialWindows()
 	print('CloseSpecialWindows()')
-	-- Close all AdiBags  or  dispatch event to original handler
+	-- Close one AdiBag  or  dispatch event to original handler
 	--return  self:CloseAll()  or  self.hooks.CloseSpecialWindows()
 	--[[
 	return  self.bags.bank:Close()

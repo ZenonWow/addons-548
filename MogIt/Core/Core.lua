@@ -9,6 +9,7 @@ LibStub("Libra"):EmbedWidgets(mog);
 local character = DataStore_Containers and DataStore:GetCharacter();
 
 mog.frame = CreateFrame("Frame","MogItFrame",UIParent,"ButtonFrameTemplate");
+mog.frame:Hide()
 mog.list = {};
 
 function mog:Error(msg)

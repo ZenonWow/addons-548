@@ -414,7 +414,7 @@ function ViragDevTool.RunUnsafeFunc(updateFunc, bodyStr)
   --local ran, result = xpcall(updateFunc, geterrorhandler())
   local ran, result = packOrSoloSkipFlag( xpcall(updateFunc, geterrorhandler()) )
   if  not ran  then  ViragDevTool:print('"'..tostring(bodyStr)..'" update error:  '.. tostring(result))  end
-  if  ran  then  ViragDevTool:print(Evaluate '"'..tostring(bodyStr)..'" = '.. tostring(result))  end
+  if  ran  then  ViragDevTool:print('Evaluate "'..tostring(bodyStr)..'" = '.. tostring(result))  end
   return  ran, result
 end
 
