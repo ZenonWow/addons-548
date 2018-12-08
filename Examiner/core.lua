@@ -1,8 +1,8 @@
 local gtt = GameTooltip;
 
 -- Create Examiner Frame
-local modName = ...;
-local ex = CreateFrame("Frame",modName,UIParent);
+local ADDON_NAME, private = ...
+local ex = CreateFrame("Frame",ADDON_NAME,UIParent);
 
 -- Global Chat Message Function
 function AzMsg(msg) DEFAULT_CHAT_FRAME:AddMessage(tostring(msg):gsub("|1","|cffffff80"):gsub("|2","|cffffffff"),0.5,0.75,1.0); end
@@ -60,19 +60,17 @@ ex.options = {
 };
 
 -- Binding Name
-BINDING_HEADER_EXAMINER = modName;
-BINDING_NAME_EXAMINER_OPEN = "Open "..modName;
+BINDING_HEADER_EXAMINER = ADDON_NAME;
+BINDING_NAME_EXAMINER_OPEN = "Open "..ADDON_NAME;
 BINDING_NAME_EXAMINER_TARGET = INSPECT.." "..TARGET;
 BINDING_NAME_EXAMINER_MOUSEOVER = INSPECT.." Mouseover";
 
 -- Allow Inspect from Any Range -- This was apparently causing TAINT, so it has now been disabled.
 --UnitPopupButtons.INSPECT.dist = 0;
 -- UIPanelWindow Entry  -- Az: Can this cause TAINT?
-UIPanelWindows[modName] = { area = "left", pushable = 1, whileDead = 1 };
+UIPanelWindows[ADDON_NAME] = { area = "left", pushable = 1, whileDead = 1 };
 -- Allows the use of Esc to close the window -- Az: Can this cause TAINT? Many other addons uses this, so probably no?
---UISpecialFrames[#UISpecialFrames + 1] = modName;
-local prev_CloseSpecialWindows = _G.CloseSpecialWindows
-function _G.CloseSpecialWindows()  return  ex:IsShown()  and  ex:Hide()  or  prev_CloseSpecialWindows()  end
+UISpecialFrames[#UISpecialFrames + 1] = ADDON_NAME;
 
 --------------------------------------------------------------------------------------------------------
 --                                          Examiner Scripts                                          --
@@ -116,7 +114,9 @@ end
 --------------------------------------------------------------------------------------------------------
 
 -- Variables Loaded
-function ex:VARIABLES_LOADED(event)
+function ex:ADDON_LOADED(event, addonName)
+	if  addonName ~= ADDON_NAME  then  return  end
+	
 	-- Config
 	if (not Examiner_Config) then
 		Examiner_Config = {};
@@ -317,7 +317,7 @@ ex:SetScript("OnMouseDown",function(self,button) if (self:IsMovable()) then self
 ex:SetScript("OnMouseUp",function(self,button) if (self:IsMovable()) then self:StopMovingOrSizing(); cfg.left = self:GetLeft(); cfg.bottom = self:GetBottom() end end);
 
 -- Events
-ex:RegisterEvent("VARIABLES_LOADED");
+ex:RegisterEvent('ADDON_LOADED');
 
 -- Close Button
 ex.close = CreateFrame("Button",nil,ex,"UIPanelCloseButton"):SetPoint("TOPRIGHT",-30,-8);
@@ -1014,6 +1014,11 @@ function ex.ItemButton_OnClick(self,button)
 end
 
 
+local function GetItemInfoNilSafe(link)
+	if  not link  then  return  end
+	return  GetItemInfo(link)
+end
+
 ex.ITEM_ICON_UNKNOWN = "Interface\\Icons\\INV_Misc_QuestionMark";
 
 -- Call when showing button or modifiers changed
@@ -1027,9 +1032,11 @@ function ex.ItemButton_UpdateTexture(button)
 	end
 	button.link = link
 	
-	local itemName, itemLink, itemRarity, itemLevel, _, _, _, _, _, itemTexture =  link  and  GetItemInfo(link)
-	print("ItemButton_UpdateTexture(link="..tostring(link).."): ", link and GetItemInfo(link) )
+	local itemName, itemLink, itemRarity, itemLevel, _, _, _, _, _, itemTexture
+	--local itemName, itemLink, itemRarity, itemLevel, _, _, _, _, _, itemTexture = GetItemInfoNilSafe(link)
 	if  link  then
+		itemName, itemLink, itemRarity, itemLevel, _, _, _, _, _, itemTexture = GetItemInfo(link)
+		print("ItemButton_UpdateTexture(link="..tostring(link).."): ", itemLink, itemTexture )
 		button.texture:SetTexture(itemTexture  or  ex.ITEM_ICON_UNKNOWN);
 	else
 		button.texture:SetTexture(button.bgTexture);
@@ -1167,8 +1174,8 @@ ex.slashFuncs = {
 		ex:DoInspect(cmd == "" and "target" or cmd);
 	end,
 	-- Scan a Single Item
-	si = function(cmd)
-		if (cmd ~= "") then
+	item = function(cmd)
+		if  cmd  and  cmd ~= ""  then
 			local itemStats = {};
 			LibGearExam:ScanItemLink(cmd,itemStats);
 			AzMsg("--- |2Scan Overview for "..cmd.."|r ---");
@@ -1183,7 +1190,7 @@ ex.slashFuncs = {
 	end,
 	-- Compares two Items
 	compare = function(cmd)
-		if (cmd ~= "") then
+		if  cmd  and  cmd ~= ""  then
 			local item1, item2 = cmd:match("(|c.+|r)%s+(|c.+|r)");
 			if (item1 and item2) then
 				local itemStats1, itemStats2 = {}, {};
@@ -1239,6 +1246,15 @@ ex.slashFuncs = {
 	clearcache = function(cmd)
 		wipe(cache);
 	end,
+	-- Print memory usage and help message
+	help = function(cmd)
+		UpdateAddOnMemoryUsage();
+		AzMsg(format("----- |2%s|r |1%s|r ----- |1%.2f |2kb|r -----",ADDON_NAME,GetAddOnMetadata(ADDON_NAME,"Version"),GetAddOnMemoryUsage(ADDON_NAME)));
+		AzMsg("The following |2parameters|r are valid for this addon:");
+		for index, help in ipairs(ex.slashHelp) do
+			AzMsg(help);
+		end
+	end,
 	-- Scans all cached entries
 	_scanall = function(cmd)
 		local count = 0;
@@ -1270,32 +1286,48 @@ ex.slashFuncs = {
 	end,
 };
 ex.slashFuncs.c = ex.slashFuncs.compare
+ex.slashFuncs.i = ex.slashFuncs.item
+ex.slashFuncs.si = ex.slashFuncs.item
 
 -- Slash Handler
-_G["SLASH_"..modName.."1"] = "/examiner";
-_G["SLASH_"..modName.."2"] = "/ex";
-_G["SLASH_"..modName.."3"] = "/exa";
-SlashCmdList[modName] = function(cmd)
+_G["SLASH_"..ADDON_NAME.."1"] = "/ex";
+_G["SLASH_"..ADDON_NAME.."2"] = "/exa";
+_G["SLASH_"..ADDON_NAME.."3"] = "/examiner";
+SlashCmdList[ADDON_NAME] = function(cmd)
 	-- Extract Parameters
 	local param1, param2 = cmd:match("^([^%s]+)%s*(.*)$");
 	param1 = (param1 and param1:lower() or cmd:lower());
 	-- Check Param Function
-	if (ex.slashFuncs[param1]) then
-		ex.slashFuncs[param1](param2);
+	local subFunc = ex.slashFuncs[param1]
+	if  subFunc  then
+		subFunc(param2)
+	else
+		ex.slashFuncs.inspect(cmd)
+	end
+	--[[
 	-- Invalid or No Command
 	else
 		UpdateAddOnMemoryUsage();
-		AzMsg(format("----- |2%s|r |1%s|r ----- |1%.2f |2kb|r -----",modName,GetAddOnMetadata(modName,"Version"),GetAddOnMemoryUsage(modName)));
+		AzMsg(format("----- |2%s|r |1%s|r ----- |1%.2f |2kb|r -----",ADDON_NAME,GetAddOnMetadata(ADDON_NAME,"Version"),GetAddOnMemoryUsage(ADDON_NAME)));
 		AzMsg("The following |2parameters|r are valid for this addon:");
 		for index, help in ipairs(ex.slashHelp) do
 			AzMsg(help);
 		end
 	end
+	--]]
 end
 
--- Slash Handler to compare
-_G["SLASH_"..modName.."1"] = "/exc";
-SlashCmdList[modName] = function(cmd)
-	ex.slashFuncs.compare(param2);
+-- Slash Handler to compare two items
+local slash = ADDON_NAME.."_compare"
+_G["SLASH_"..slash.."1"] = "/exc"
+SlashCmdList[slash] = function(cmd)
+	ex.slashFuncs.compare(cmd)
+end
+
+-- Slash Handler to scan a single item
+local slash = ADDON_NAME.."_item"
+_G["SLASH_"..slash.."1"] = "/exi"
+SlashCmdList[slash] = function(cmd)
+	ex.slashFuncs.item(cmd)
 end
 
