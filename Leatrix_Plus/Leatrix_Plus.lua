@@ -7271,9 +7271,7 @@
 		-- Create the options panel frame
 		local PageF = CreateFrame("Frame", "LeaPlusGlobalPanel", UIParent);
 		
-		--table.insert(UISpecialFrames, "LeaPlusGlobalPanel")
-		local prev_CloseSpecialWindows = _G.CloseSpecialWindows
-		function _G.CloseSpecialWindows()  return  PageF:IsShown()  and  PageF:Hide()  or  prev_CloseSpecialWindows()  end
+		table.insert(UISpecialFrames, "LeaPlusGlobalPanel")
 
 		LeaPlusLC["PageF"] = PageF
 		PageF:SetSize(570,370)

@@ -2196,11 +2196,9 @@ function ArkInventory.OnInitialize( )
 	for loc_id in pairs( ArkInventory.Global.Location ) do
 		if ArkInventory.Global.Me.location[loc_id].special then
 			local frame = ArkInventory.Frame_Main_Get( loc_id )
---			if frame then
-				--table.insert( UISpecialFrames, frame:GetName( ) )
-				local prev_CloseSpecialWindows = _G.CloseSpecialWindows
-				function _G.CloseSpecialWindows()  return  frame:IsShown()  and  frame:Hide()  or  prev_CloseSpecialWindows()  end
---			end
+			if frame then
+				table.insert( UISpecialFrames, frame:GetName( ) )
+			end
 		end
 	end
 	

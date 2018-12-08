@@ -248,9 +248,7 @@ end
 function WowLua:Initialize(frame)
 	WowLua:OnSizeChanged(frame)
 	
-	--table.insert(UISpecialFrames, "WowLuaFrame")
-	local prev_CloseSpecialWindows = _G.CloseSpecialWindows
-	function _G.CloseSpecialWindows()  return  WowLuaFrame:IsShown()  and  WowLuaFrame:Hide()  or  prev_CloseSpecialWindows()  end
+	table.insert(UISpecialFrames, "WowLuaFrame")
 	
 	--PlaySound("igMainMenuOpen");
 	self:UpdateButtons()

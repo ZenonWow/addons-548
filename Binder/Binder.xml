@@ -66,9 +66,7 @@
 			<OnMouseUp> self:StopMovingOrSizing(); </OnMouseUp>
 			<OnDragStop> self:StopMovingOrSizing(); </OnDragStop>
 			<OnLoad>
-				--tinsert(UISpecialFrames,self:GetName());
-				local prev_CloseSpecialWindows = _G.CloseSpecialWindows
-				function _G.CloseSpecialWindows()  return  Binder_Frame:IsShown()  and  Binder_Frame:Hide()  or  prev_CloseSpecialWindows()  end
+				tinsert(UISpecialFrames,self:GetName());
 			</OnLoad>
 		</Scripts>
 		<!--The close button in the top right-->
@@ -109,11 +107,6 @@
 				</Texture> 
 			</Layer>
 		</Layers>
-		<Scripts>
-			<OnLoad>
-				--tinsert(UISpecialFrames,self:GetName());
-			</OnLoad>
-		</Scripts>
 	</Frame>
 	
 	--Divider Frame 2
@@ -138,11 +131,6 @@
 				</Texture> 
 			</Layer>
 		</Layers>
-		<Scripts>
-			<OnLoad>
-				--tinsert(UISpecialFrames,self:GetName());
-			</OnLoad>
-		</Scripts>
 	</Frame>
 	
 	
@@ -178,11 +166,6 @@
 				<AbsInset left="5" right="5" top="5" bottom="5"/>
 			</BackgroundInsets>
 		</Backdrop>
-		<Scripts>
-			<OnLoad>
-				--tinsert(UISpecialFrames,self:GetName());
-			</OnLoad>
-		</Scripts>
 	</Frame>
 	 
 	
@@ -195,11 +178,6 @@
 		<Anchors>
 			<Anchor point="TOPLEFT" relativeTo="Binder_Frame"/>
 		</Anchors>
-		<Scripts>
-			<OnLoad>
-				--tinsert(UISpecialFrames,self:GetName());
-			</OnLoad>
-		</Scripts>
 	</Frame>
 
 	 
@@ -334,11 +312,6 @@
 			</Button>
 			
 		</Frames>
-		<Scripts>
-			<OnLoad>
-				--tinsert(UISpecialFrames,self:GetName());
-			</OnLoad>
-		</Scripts>
 	</Frame>
 	 
 		--Description Frame
@@ -394,11 +367,6 @@
 	      </FontString>
 			</Layer>
 		</Layers>
-		<Scripts>
-			<OnLoad>
-				--tinsert(UISpecialFrames,self:GetName());
-			</OnLoad>
-		</Scripts>
 	</Frame>
 	 
 	<Frame name="Binder_LoadButtons_Frame" parent="Binder_Load_Frame">
@@ -474,11 +442,6 @@
 			</Button>
 
 		</Frames>
-		<Scripts>
-			<OnLoad>
-				--tinsert(UISpecialFrames,self:GetName());
-			</OnLoad>
-		</Scripts>
 	</Frame>
 
 
@@ -501,11 +464,6 @@
 				<AbsInset left="10" right="10" top="10" bottom="10"/>
 			</BackgroundInsets>
 		</Backdrop>
-		<Scripts>
-			<OnLoad>
-				--tinsert(UISpecialFrames,self:GetName());
-			</OnLoad>
-		</Scripts>
 		<Frames>
 			<Button name="UpdateConfirm_Yes" inherits="UIPanelButtonTemplate" text="Update">
 				<Size>
@@ -598,11 +556,6 @@
 				<AbsInset left="10" right="10" top="10" bottom="10"/>
 			</BackgroundInsets>
 		</Backdrop>
-		<Scripts>
-			<OnLoad>
-				--tinsert(UISpecialFrames,self:GetName());
-			</OnLoad>
-		</Scripts>
 		<Frames>
 			<Button name="Delete_Confirm_Yes" inherits="UIPanelButtonTemplate" text="Yes">
 				<Size>
@@ -705,11 +658,6 @@
 				</Scripts>				
 			</Button>
 		</Frames>
-		<Scripts>
-			<OnLoad>
-				--tinsert(UISpecialFrames,self:GetName());
-			</OnLoad>
-		</Scripts>
 	</Frame>
 
 	<Frame name="Binder_Name_Input_Frame" parent="Binder_Save_Frame">
@@ -749,11 +697,6 @@
 				</Anchors>           
 			</EditBox>
 		</Frames>
-		<Scripts>
-			<OnLoad>
-				--tinsert(UISpecialFrames,self:GetName());
-			</OnLoad>
-		</Scripts>
 	</Frame>
 
 	<Frame name="Binder_Description_Input_Frame" parent="Binder_Save_Frame" visible="true">
@@ -793,11 +736,6 @@
 				</Anchors>           
 			</EditBox>
 		</Frames>
-		<Scripts>
-			<OnLoad>
-				--tinsert(UISpecialFrames,self:GetName());
-			</OnLoad>
-		</Scripts>
 	</Frame>
 
 
@@ -1050,11 +988,6 @@
 				</FontString>
 			</Layer>
 		</Layers-->
-		<Scripts>
-			<OnLoad>
-				--tinsert(UISpecialFrames,self:GetName());
-			</OnLoad>
-		</Scripts>
 	</Frame>
 	 
 	
