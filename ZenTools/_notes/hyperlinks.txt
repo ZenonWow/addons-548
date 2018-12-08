@@ -154,6 +154,78 @@ ChatFrame1:AddMessage("Here's what it really looks like: \"" .. printable .. "\"
 
 
 
+https://wow.gamepedia.com/TradeSkillLink
+--
+tradeSkillLinks are returned by GetTradeSkillListLink().
+
+Anatomy of a tradeSkillLink
+NEWEST Encoding (5.4):
+
+|cffffd000|Htrade:010000000000D4C3:2550:333|h[Cooking]|h|r
+NEW Encoding (5.3):
+
+|cffffd000|Htrade:010000000000D4C3:2550:580:600:2/7/////7/9////9//7//////////////37/////D:982:0:0:A:981:0:0:A:980:0:0:AA:979:600:600:/:978:600:600:/:977:600:600:/:976:600:600:/:975:600:600:/|h[Cooking]|h|r
+OLD Encoding (5.2 and earlier):
+
+|cffffd000|Htrade:2550:580:600:010000000000D4C3:2/7/////7/9////9//7//////////////37/////D|h[Cooking]|h|r
+"|cffffd000" - Colorizes the link (see itemLink)
+"|H" - Hyperlink introduction
+"trade:" - Indicates a tradeskill Hyperlink
+"2550" - Tradeskill Spell ID
+"580" - Current skill level
+"600" - Maximum skill level without further training
+"333" - Unknown
+"010000000000D4C3" - Character GUID
+"2/7/////7/9////9//7//////////////37/////D" - Recipe list (see below): REMOVED in 5.4
+"975:600:600:/"x8 - Descriptor for each trade specialization (currently only for Cooking and omitted for other trade spells). Fields are specid:specrank:specrankmax:specrecipedata: REMOVED in 5.4
+"|h" - Hyperlink data concluded, text follows
+"[Cooking]" - Display text
+"|h" - Hyperlink conclusion
+"|r" - Returns color to normal
+Tradeskill IDs
+The tradeskill ID is the same as the global spell ID for the tradeskill ability. This is the same number returned from API GetSpellLink, and can be passed to API GetSpellInfo. It seems that the ID therefore changes with the rank of the trade skill. For example, an Apprentice Alchemist will link with trade:2259 but a Grand Master will link trade:51304.
+
+Recipe list
+The recipe list portion of the tradeSkillLink is a bitset representing which recipes are available.
+
+Example
+
+If the recipe list portion of a tradeSkillLink is:
+
+ZAAAAAAAgAAAAAAAgAAAAA
+Then the recipe list bitset is:
+
+100110000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000001[... zeroes]
+This set indicates that four (4) specific recipes are available (note that there are 5 bits; there is no information on why there is an extra bit at this time). Also note that the bitset is unique for each tradeskill; a recipe denoted by bit N in one tradeskill is not the same as a recipe denoted by bit N in another tradeskill.
+
+The bitset is encoded into standard Base64, using the characters A-Z, a-z, 0-9, +, and /. Being Base64, there are 6 bits per digit (similar to how hexadecimal has 4 bits per digit); this allows one to easily determine if a specific bit is set by looking only at a single digit in the string.
+
+TODO: Document bitfield ordering, perhaps by looking at Maldivia's TradeLinks addon
+
+Bitsets to Spell IDs
+To convert a bitset to a list of known skill spell IDs, look in SkillLineAbility.dbc. Get the lines for your given SkillLineID (column 2), then sort numerically by minSkillLineRank (column 8) ascending, then by SkillLineAbilityID (column 1) ascending. Your spell IDs are in order in column 3, and a set bit in your bitstring corresponds to knowing the spell ID in that position. Column positions are accurate as of this writing (Patch 3.3.3) but may change in future patches.
+
+Bit Maps
+These provide bitmaps for 3.1 with all the in-game professions. (please verify these are based on standard Base64)
+
+Cooking
+2/7///7///9////7//////////g+/B
+First Aid
+8bffAA
+Link Checking
+The server does a GUID check on the tradeSkillLink. As such, these links won't work cross-servers, but they do work cross-faction.
+The server doesn't check between the tradeskill rank, current/max skill, and the recipe list.
+If a tradeSkillLink does not pass these checks, it'll fail silently.
+Notes
+tradeSkillLink encoding changed significantly in Patch 5.3. The first four fields were re-arranged, and specialization data was added for Cooking.
+It is easy to view a tradeSkillLink in its raw form by opening a tradeskill window and running the command
+/script DEFAULT_CHAT_FRAME:AddMessage(gsub(GetTradeSkillListLink(), "\124", "\124\124"))
+Maldivia's TradeLinks addon can create custom tradelinks.
+Gnomish Yellow Pages provides examples with full bitmaps, and stores data based on bitmap.
+C# TradeSkillList Recipe List Decode forum post showing example code in C# to decode recipe list.
+WowTradeShare is a website where players can post and search tradelinks collected by the TradeShare addon.
+
+
 
 http://wowprogramming.com/docs/api_types.html#hyperlink
 --
@@ -171,7 +243,6 @@ player (example: |Hplayer:Aerdrig:1:WHISPER:AERDRIG|h[Aerdrig]|h) - Represents a
 playerGM (example: |HplayerGM:Eyonix|h[Eyonix]|h) - A variation on the player type used exclusively for Game Master chat.
 
 glyph (example: |cff66bbff|Hglyph:23:460|h[Glyph of Fortitude]|h|r) - Represents a glyph inscribed in a character's spellbook. Clicking a glyph link in the default UI shows a tooltip with its description. The linkdata for a glyph link follows the format socket:glyphID:
-
 socket (optional) - The socket in which the glyph is placed; values 21 through 26 correspond to [[docs/api_types#glyphIndex|glyphIndex]] values 1 through 6.
 glyphID - A unique identifier for the glyph effect; not used elsewhere in the API.
 spell (example: |cff71d5ff|Hspell:46584|h[Raise Dead]|h|r) - Represents a spell. Clicking a spell link in the default UI shows a tooltip with its description. The linkdata for a spell link consists solely of the spellID number uniquely identifying the spell, usable with APIs such as GetSpellInfo().
@@ -179,15 +250,14 @@ spell (example: |cff71d5ff|Hspell:46584|h[Raise Dead]|h|r) - Represents a spell.
 enchant (example: |cffffd000|Henchant:59387|h[Certificate of Ownership]|h|r) - Represents a trade skill recipe (originally used only for Enchanting, but now applies to all trade skills). Clicking a spell link in the default UI shows a tooltip with its description (and that of the item it creates, if applicable). The linkdata for a spell link consists solely of the spellID number uniquely identifying the trade skill recipe, usable with APIs such as GetSpellInfo().
 
 quest (example: |cffffff00|Hquest:982:17|h[Deep Ocean, Vast Sea]|h|r) - Represents a quest from a character's quest log. Clicking a quest link in the default UI shows a tooltip with a brief description of the quest and its objectives. When the client displays a quest link sent by another character, it automatically alters the enclosing colorString to reflect the difficulty of the quest relative to the player's level. The linkdata for a quest link follows the format questID:level:
-
 questID - A unique identifier for the quest; found on database sites (e.g. [[wowhead:quest=982|quest ID 982]]) but not used elsewhere in the API.
 level (optional) - Recommended character level for attempting the quest. (A level of -1 means the quest is appropriate for any level; used for holiday quests.)
-talent (example: |cff4e96f7|Htalent:1396:4|h[Unleashed Fury]|h|r) - Represents a talent. Clicking a talent link in the default UI shows a tooltip with its description. The linkdata for a talent link follows the format talentID:points:
 
+talent (example: |cff4e96f7|Htalent:1396:4|h[Unleashed Fury]|h|r) - Represents a talent. Clicking a talent link in the default UI shows a tooltip with its description. The linkdata for a talent link follows the format talentID:points:
 talentID - A unique identifier for the talent; not used elsewhere in the API.
 rank (optional) - Number of points spent in the talent, minus one: if this value is omitted or -1, the tooltip shows the talent as it appears in the Talents UI when zero points have been spent ; if this value is 0 , the tooltip shows the talent as it appears when one point has been spent on it. Values greater than the number of available ranks for a talent are interpreted as -1.
-achievement (example: |cffffff00|Hachievement:2336:060000000279E425:1:10:14:8:4294967295:4294967295:4294967295:4294967295|h[Insane in the Membrane]|h|r) - Represents an achievement earned or in progress by a player. Clicking an achievement link in the default UI shows a tooltip with a summary of the achievement and (if applicable) its criteria. The linkdata for an achievement link follows the format achievementID:playerGUID:completed:month:day:year:bits1:bits2:bits3:bits4. If only the first element acheivementID is specified, the client resolving the link will show the player's progress or completion of the achievement; otherwise, all elements are required:
 
+achievement (example: |cffffff00|Hachievement:2336:060000000279E425:1:10:14:8:4294967295:4294967295:4294967295:4294967295|h[Insane in the Membrane]|h|r) - Represents an achievement earned or in progress by a player. Clicking an achievement link in the default UI shows a tooltip with a summary of the achievement and (if applicable) its criteria. The linkdata for an achievement link follows the format achievementID:playerGUID:completed:month:day:year:bits1:bits2:bits3:bits4. If only the first element acheivementID is specified, the client resolving the link will show the player's progress or completion of the achievement; otherwise, all elements are required:
 achievementID - A unique identifier for the achievements; usable with various Achievement API functions.
 playerGUID (optional) - GUID of a player character whose progress or completion of the achievement is linked (return value of [[docs/api/UnitGUID|`UnitGUID']] without the "0x" prefix).
 completed (optional) - 1 if the character has completed the achievement; otherwise 0.
@@ -195,15 +265,16 @@ month (optional) - Index of the month (1 = January) in which the character compl
 day (optional) - Day of the month on which the character completed the achievement, or 0 if the achievement is incomplete.
 year (optional) - Year (two-digit year) in which the character completed the achievement, or -1 if the achievement is incomplete.
 bits1, bits2, bits3, bits4 (optional) - Encoded data fields interpreted by the client to show completion of achievement criteria.
-trade (example: |cffffd000|Htrade:45361:339:375:60000000279E425:Q/nPf6nprU3/n/fA8/Bw/PA+/B+/Aw/HA+/Bw/HA+5nfg////////P////HAAAQAA+DAAAAAAA|h[Inscription]|h|r) - Represents the entire list of recipes for a character's trade skill or profession. The linkdata for an achievement link follows the format spellID:skill:maxSkill:playerGUID:data. If only the first element acheivementID is specified, the client resolving the link will show the player's progress or completion of the achievement; otherwise, all elements are required:
 
+trade (example: |cffffd000|Htrade:45361:339:375:60000000279E425:Q/nPf6nprU3/n/fA8/Bw/PA+/B+/Aw/HA+/Bw/HA+5nfg////////P////HAAAQAA+DAAAAAAA|h[Inscription]|h|r) - Represents the entire list of recipes for a character's trade skill or profession. The linkdata for an achievement link follows the format spellID:skill:maxSkill:playerGUID:data. If only the first element acheivementID is specified, the client resolving the link will show the player's progress or completion of the achievement; otherwise, all elements are required:
 spellID - The [[docs/api_types#spellID|spellID]] number uniquely identifying the trade skill and its rank (e.g. Apprentice Tailoring vs. Journeyman Tailoring), usable with APIs such as [[docs/api/GetSpellInfo|GetSpellInfo()]].
 skill - The character's current skill in the profession.
 maxSkill - The maximum skill for the character's current rank in the profession (e.g. 375 for Master rank).
 playerGUID - GUID of the character whose profession is linked (return value of [[docs/api/UnitGUID|`UnitGUID']] without the "0x" prefix).
 data (optional) - Encoded data field interpreted by the client to show the character's list of known trade skill recipes.
-item (examples: |cffa335ee|Hitem:45457:3828:3395:3395:0:0:0:0:80:0:0:0|h[Staff of Endless Winter]|h|r, |cffa335ee|Hitem:113602:0:0:0:0:0:0:0:100:0:5:1:566|h[Throat-Ripper Gauntlets]|h|r) - Represents an item. Clicking an item link in the default UI shows a tooltip with information about the item. Control-clicking an equippable item opens the DressUpFrame to preview how the item would look on the player character if equipped. The linkdata for an item link changed in 6.0.2 and now has the format itemID:enchant:gem1:gem2:gem3:gem4:suffixID:uniqueID:level:upgradeId:instanceDifficultyID:numBonusIds:bonusId1:bonusid2:...:
+@see also https://wow.gamepedia.com/TradeSkillLink
 
+item (examples: |cffa335ee|Hitem:45457:3828:3395:3395:0:0:0:0:80:0:0:0|h[Staff of Endless Winter]|h|r, |cffa335ee|Hitem:113602:0:0:0:0:0:0:0:100:0:5:1:566|h[Throat-Ripper Gauntlets]|h|r) - Represents an item. Clicking an item link in the default UI shows a tooltip with information about the item. Control-clicking an equippable item opens the DressUpFrame to preview how the item would look on the player character if equipped. The linkdata for an item link changed in 6.0.2 and now has the format itemID:enchant:gem1:gem2:gem3:gem4:suffixID:uniqueID:level:upgradeId:instanceDifficultyID:numBonusIds:bonusId1:bonusid2:...:
 itemID - The item's itemID.
 enchant (optional) - Unique identifier of the enchantment applied to the item; not used elsewhere in the API.
 gem1, gem2, gem3, gem4 (optional) - Unique identifiers of the enchantments provided by gems socketed in the item (not the itemIDs of the gems themselves); not used elsewhere in the API.
@@ -214,13 +285,13 @@ upgradeId - A number that identifies whether an item can be upgraded, and if so,
 instanceDifficultyID - the item's instanceDifficultyID (dungeon / raid difficulty at which the item can be obtained).
 numBonusIds - the number of additional bonus ID's associated with the item. Can be 0 for the base item or any number of additional attributes that modify the base item.
 bonusId1, bonusId2 ... - numBonusIds extra bonus modifiers for the item.
-levelup (examples: |cffFF4E00|Hlevelup:61:LEVEL_UP_TYPE_CHARACTER|h[Level 61]|h|r) - represents the level up information for a player unit. The linkdatafor a levelup link follows the format  level:type
 
+levelup (examples: |cffFF4E00|Hlevelup:61:LEVEL_UP_TYPE_CHARACTER|h[Level 61]|h|r) - represents the level up information for a player unit. The linkdatafor a levelup link follows the format  level:type
 level - The numeric level the unit has reached
 type - This is one of LEVEL_UP_TYPE_CHARACTER, LEVEL_UP_TYPE_PET and LEVEL_UP_TYPE_GUILD and specifies who gained the level
 Note: A level up of type LEVEL_UP_TYPE_PET on a non-pet class will display the level up information of the last level up link clicked (or a blank information if none has been clicked since UI load) on non-pet classes.
-instancelock (example: |cffff8000|Hinstancelock:01000000003E8E2E7:531:0:15|h[Ahn'Qiraj Temple]|h|r) - represents a player's instance lockout The linkdata for an instancelock link follows the format guid:instanceID:difficulty:bossesDefeated
 
+instancelock (example: |cffff8000|Hinstancelock:01000000003E8E2E7:531:0:15|h[Ahn'Qiraj Temple]|h|r) - represents a player's instance lockout The linkdata for an instancelock link follows the format guid:instanceID:difficulty:bossesDefeated
 guid - The GUID of the player the lockout belongs to
 instanceID - The ID of the instance
 difficulty - Numeric value indicating the difficulty of the lockout
@@ -228,8 +299,8 @@ difficulty - Numeric value indicating the difficulty of the lockout
 1 - Heroic 5-man
 2 - Heroic raid
 bossesDefeated - Bitmask containing which of the encounters have been defeated
-journal (example: |cff66bbff|Hjournal:1:192:8|h[Beth'tilac]|h|r) - represents a link to an encounter or instance in the Dungeon Journal The linkdata for an journal link follows the format  contentType:contentID:difficulty
 
+journal (example: |cff66bbff|Hjournal:1:192:8|h[Beth'tilac]|h|r) - represents a link to an encounter or instance in the Dungeon Journal The linkdata for an journal link follows the format  contentType:contentID:difficulty
 contentType - 2 if the link points to an entry on a boss page, 1 if the link points to the page for an encounter, 0 if the link points to the page for an instance
 contentID - the unique ID of the encounter or instance - can be passed to EJ_GetSectionInfo(contentID), EJ_GetEncounterInfo(contentID) and EJ_GetInstanceInfo(contentID) , respectively.
 difficulty - indicates the selected difficulty setting for the Dungeon Journal to display. See EJ_SetDifficultyByMask for values.
