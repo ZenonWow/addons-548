@@ -107,9 +107,7 @@ function InventoryFrame:New(titleText, settings, isBank, key)
 	f:UpdateClampInsets()
 
 	lastID = lastID + 1
-	--tinsert(UISpecialFrames, f:GetName())
-	local prev_CloseSpecialWindows = _G.CloseSpecialWindows
-	function _G.CloseSpecialWindows()  return  f:IsShown()  and  f:Hide()  or  prev_CloseSpecialWindows()  end
+	tinsert(UISpecialFrames, f:GetName())
 	Addon.frames[key] = f
 
 	return f
