@@ -13,8 +13,8 @@
 
 ### TradeSkillMaster is the hub loading the dependent addons as needed
 ## Dependency: TradeSkillMaster
-## LoadManagers: AddonLoader, TradeSkillMaster
-## LoadOnDemand: 1
+##- LoadManagers: AddonLoader, TradeSkillMaster
+##- LoadOnDemand: 1
 
 ### Slash command also loads TradeSkillMaster if necessary
 ## X-LoadOn-Slash: /tsmm

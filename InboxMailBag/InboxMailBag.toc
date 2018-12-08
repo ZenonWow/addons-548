@@ -10,7 +10,7 @@
 ## X-Curse-Project-ID: inbox-mailbag
 ## X-Curse-Repository-ID: wow/inbox-mailbag/mainline
 
-## LoadManagers: AddonLoader
+##- LoadManagers: AddonLoader
 ## X-LoadOn-Mailbox: true
 
 #@no-lib-strip@

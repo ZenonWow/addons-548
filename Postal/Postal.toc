@@ -18,7 +18,7 @@
 ## X-Curse-Project-ID: postal
 ## X-Curse-Repository-ID: wow/postal/mainline
 
-## LoadManagers: AddonLoader
+##- LoadManagers: AddonLoader
 ## X-LoadOn-Mailbox: true
 ## X-Email: xinhuan AT gmail DOT com
 

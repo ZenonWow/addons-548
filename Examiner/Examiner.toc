@@ -6,14 +6,15 @@
 
 ## SavedVariables: Examiner_Config, Examiner_Cache
 
-## LoadOnDemand: 1
+##- LoadOnDemand: 1
 ## LoadWith:  Blizzard_InspectUI
 
-## LoadManagers: AddonLoader
+##- LoadManagers: AddonLoader
 ##- X-LoadOn-Login:  LowPrio
 ##- X-LoadOn-Always: delayed
 ## X-LoadOn-Addon:  Blizzard_InspectUI
-## X-LoadOn-Slash:  /ins /inspect /ex /exa /examiner
+## X-LoadOn-Binding:  EXAMINER_OPEN, EXAMINER_TARGET, EXAMINER_MOUSEOVER
+## X-LoadOn-Slash:  /ins /inspect /ex /exa /examiner /exc /exi
 
 
 LibGearExam\LibGearExam.xml
