@@ -6,7 +6,8 @@
 -- Addon private namespace
 local ADDON_NAME, ns = ...
 -- Addon global namespace
-local BagSync = BagSync
+local _G = _G
+local BagSync = _G.BagSync
 -- Localization
 local L = BAGSYNC_L
 local Debug =  ns.Debug
@@ -26,6 +27,16 @@ local RealmBlacklistDB -- BagSyncBLACKLIST_DB[playerRealm]
 local PlayerDB         -- RealmCharDB[playerName]
 local PlayerCraftDB    -- RealmCraftDB[playerName]
 --]]
+
+
+-------------------------------------------------
+-- Basic player info is available when loading --
+-------------------------------------------------
+local playerName = _G.UnitName('player')
+local playerRealm = _G.GetRealmName()
+local playerClass = select(2, _G.UnitClass('player'))
+local playerFaction = _G.UnitFactionGroup('player')
+
 
 -- from https://wow.gamepedia.com/Class_colors
 local colorRGB = {

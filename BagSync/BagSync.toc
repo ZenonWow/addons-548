@@ -27,5 +27,6 @@ BagSync_Profiles.lua
 BagSync_Config.lua
 BagSync_Moneytip.lua
 BagSync_Scan.lua
+BagSync_Events.lua
 BagSync_Tooltip.lua
 BagSync_UI.lua
