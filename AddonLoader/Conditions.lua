@@ -12,6 +12,8 @@
 ## X-LoadOn-Login-Delay:  1 min
 ## X-LoadOn-Addon:
 ## X-LoadOn-Slash:
+## X-LoadOn-Binding:  -- TODO
+## X-LoadOn-Tab:  -- TODO: AuctionHouse addons
 ## X-LoadOn-LDB-Launcher:
 ## X-Load-Delay:
 ## X-Load-Condition:

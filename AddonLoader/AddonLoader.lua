@@ -540,9 +540,9 @@ end
 
 
 function AddonLoader:IsVariablesLoaded()  return self.cachedEvents.VARIABLES_LOADED       end
-function AddonLoader:IsSpellsLoaded()     return self.cachedEvents.SPELLS_CHANGED         end
 function AddonLoader:IsLoggedIn()         return self.cachedEvents.PLAYER_LOGIN           end
 function AddonLoader:IsPlayerInWorld()    return self.cachedEvents.PLAYER_ENTERING_WORLD  end
+function AddonLoader:IsSpellsLoaded()     return self.cachedEvents.SPELLS_CHANGED         end
 AddonLoader.cachedEvents = {}
 
 function AddonLoader:ReplayCachedEvents(recipient)
@@ -559,6 +559,7 @@ function AddonLoader:ReplayCachedEvents(recipient)
 	end
 	
 	-- Mock the most important events if we missed them
+	if  IsLoggedIn()  and  not cachedEvents.VARIABLES_LOADED  then  recipient:FireEvent('VARIABLES_LOADED')  end
 	if  IsLoggedIn()  and  not cachedEvents.PLAYER_LOGIN  then  recipient:FireEvent('PLAYER_LOGIN')  end
 	if  IsPlayerInWorld()  and  not cachedEvents.PLAYER_ENTERING_WORLD  then  recipient:FireEvent('PLAYER_ENTERING_WORLD')  end
 end
