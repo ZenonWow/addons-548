@@ -1,0 +1,25 @@
+﻿## Interface: 50400
+## Title: XLoot Master
+## Version: z15-release
+## Notes: Configurable Master Looter interface
+## Author: Xuerian, Dridzt
+## X-Category: Inventory
+## X-Curse-Packaged-Version: z15-release
+## X-Curse-Project-Name: XLoot
+## X-Curse-Project-ID: xloot
+## X-Curse-Repository-ID: wow/xloot/mainline
+
+## Dependencies: XLoot
+
+##- LoadManagers: AddonLoader
+## X-LoadOn-Group-If:                      IsMasterLooter()
+
+## X-LoadOn-Events: OPEN_MASTER_LOOT_LIST, START_LOOT_ROLL
+## X-LoadOn-UPDATE_MASTER_LOOT_LIST-If:    IsMasterLooter()
+## X-LoadOn-PARTY_LOOT_METHOD_CHANGED-If:  IsMasterLooter()
+## X-LoadOn-START_LOOT_ROLL-If:            IsMasterLooter()
+## X-LoadOn-LOOT_OPENED-If:                IsMasterLooter() and IsInGroup()
+##- X-LoadOn-Events-Delay:  Synchronous
+
+
+load.xml

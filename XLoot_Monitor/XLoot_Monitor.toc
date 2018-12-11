@@ -1,0 +1,19 @@
+﻿## Interface: 50400
+## Title: XLoot Monitor
+## Version: z15-release
+## Notes: A graphical presentation of items looted by yourself and your group
+## Author: Xuerian
+## X-Category: Inventory
+## X-Curse-Packaged-Version: z15-release
+## X-Curse-Project-Name: XLoot
+## X-Curse-Project-ID: xloot
+## X-Curse-Repository-ID: wow/xloot/mainline
+
+## Dependencies: XLoot
+
+##- LoadManagers: AddonLoader
+## X-LoadOn-Group
+## X-LoadOn-Events: LOOT_OPENED
+
+
+load.xml

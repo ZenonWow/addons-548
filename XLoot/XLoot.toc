@@ -1,0 +1,34 @@
+﻿## Interface: 50400
+## Title: XLoot
+## Version: z15-release
+## Notes: Core module for Loot and Looting-related UI improvements
+## Author: Xuerian
+
+## X-Category: Inventory
+## X-eMail xuerian @ gmail DOT com
+## X-Name: XLoot
+## X-Curse-Packaged-Version: z15-release
+## X-Curse-Project-Name: XLoot
+## X-Curse-Project-ID: xloot
+## X-Curse-Repository-ID: wow/xloot/mainline
+
+## SavedVariables: XLootADB
+## OptionalDeps: Ace3, LibStub, ButtonFacade, Masque, Pawn
+
+##- LoadManagers: AddonLoader
+### Event-triggered dependencies will load the core addon
+##- X-LoadOn-Always: delayed
+
+
+#@no-lib-strip@
+Libs\Embeds.xml
+#@end-no-lib-strip@
+
+localization.lua
+XLoot.lua
+skins.lua
+SKIN_TWEAKS.lua
+stacks.lua
+helpers.lua
+
+

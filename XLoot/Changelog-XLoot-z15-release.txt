@@ -1,0 +1,13 @@
+tag z15-release
+b76485bef15189079a92e913f0345dbaa38f6d58
+Xuerian <sky.shell@gmail.com>
+2014-09-20 05:25:24 -0400
+
+Make bonus and alert frame adjustments optional
+
+
+--------------------
+
+Xuerian:
+	- Make hooking bonus and alert frames optional (To improve compatibility with other addons..)
+	- Split out option types into BetterOptionsTypes, change BetterOptions calls to simple functions instead of object methods, tweaks

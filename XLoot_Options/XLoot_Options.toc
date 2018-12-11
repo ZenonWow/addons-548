@@ -1,0 +1,16 @@
+﻿## Interface: 50400
+## Title: XLoot Options
+## Version: z15-release
+## Notes: Configuration interface for XLoot
+## Author: Xuerian
+## X-Category: Inventory
+## X-Curse-Packaged-Version: z15-release
+## X-Curse-Project-Name: XLoot
+## X-Curse-Project-ID: xloot
+## X-Curse-Repository-ID: wow/xloot/mainline
+
+## Dependencies: XLoot
+## LoadOnDemand: 1
+
+
+load.xml

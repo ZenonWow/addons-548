@@ -1,0 +1,19 @@
+﻿## Interface: 50400
+## Title: XLoot Group
+## Version: z15-release
+## Notes: Customizable and skinnable loot roll, alert, and reroll frames
+## Author: Xuerian
+## X-Category: Inventory
+## X-Curse-Packaged-Version: z15-release
+## X-Curse-Project-Name: XLoot
+## X-Curse-Project-ID: xloot
+## X-Curse-Repository-ID: wow/xloot/mainline
+
+## Dependencies: XLoot
+
+##- LoadManagers: AddonLoader
+## X-LoadOn-Events: START_LOOT_ROLL
+## X-LoadOn-Events-Delay: Synchronous
+
+
+load.xml
