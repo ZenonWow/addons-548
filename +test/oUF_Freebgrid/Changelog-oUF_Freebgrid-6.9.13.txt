@@ -1,0 +1,17 @@
+tag 6.9.13
+cbcc3bbb61462126e5725d19daa7d05cb4ba099b
+freebaser <freebaser@freebaser.net>
+2013-09-17 01:31:53 +0000
+
+version 6.9.13
+
+
+--------------------
+
+freebaser:
+	- fix typo
+	- 5.4 update
+	- fix formatting
+pga:
+	- Changed MapID for Siege of Orgrimmar
+	- added "Siege of Orgrimmar" Priority Changes for "Throne of Thunder" bosses, added Ra-Den

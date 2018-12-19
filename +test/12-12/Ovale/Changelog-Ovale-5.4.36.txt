@@ -1,0 +1,26 @@
+tag 5.4.36
+44951ad127871b131b4c6cdd5d4a5812f9b7ca6d
+Johnny C. Lam <jlam88@gmail.com>
+2014-10-08 16:04:23 -0400
+
+Tagging as 5.4.36 release.
+
+
+--------------------
+
+Johnny C. Lam:
+	- Warrior: Improve the AoE tanking rotation.
+	Suggest Cleave, Thunder Clap, and the level 60 talents.
+	- Warrior: Move "offgcd" icon to the far left position.
+	The default icon layout is now:
+	
+	    [offgcd] [shortcd] [main] [aoe] [cd]
+	
+	where the AoE icon can be toggled.  This change makes the shortcd-to-cd
+	icon block like all other classes and specializations, and simply appends
+	the offgcd icon to the leftmost position where it can "flash" as a
+	reminder to use the offgcd ability.
+	
+	Also, make the offgcd icon small to de-emphasize it relative to the
+	rotation icons.
+	- Warrior: Move Demoralizing Shout to the short CD icon.

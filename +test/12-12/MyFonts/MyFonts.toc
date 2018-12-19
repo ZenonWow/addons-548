@@ -1,0 +1,11 @@
+## Interface: 60000
+## Title: MyFonts
+## Notes: A small addon for adding my preferred fonts in LibSharedMedia
+## Author: Axilea, Nemesis(it)
+## Version: 1.0-2014101501
+
+libs\LibStub.lua
+libs\CallbackHandler-1.0.lua
+libs\LibSharedMedia-3.0.lua
+
+core.lua

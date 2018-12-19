@@ -1,0 +1,33 @@
+## Interface: 50300
+## Version: 3.1 Development Alpha
+## Title: Watcher
+## Author: Gellin, nothingsknower, Hallowman100, Mpstark
+## Notes: Watcher is an addon designed to collect information on attacks and cooldowns in such a way to inform a player intelligently of the attacks they should perform on the target.
+## SavedVariablesPerCharacter: WatcherDB
+## OptionalDeps: CallbackHandler-1.0, AceAddon-3.0, AceEvent-3.0, AceDB-3.0, AceLocale-3.0, AceConsole-3.0, AceGUI-3.0, AceConfig-3.0, LibSharedMedia-3.0, LibDispellable-1.0
+## X-Curse-Packaged-Version: r20130730014943
+## X-Curse-Project-Name: Watcher
+## X-Curse-Project-ID: shotwatch
+## X-Curse-Repository-ID: wow/shotwatch/mainline
+
+embeds.xml
+Locales\Locales.xml
+
+Core.lua
+Options.lua
+Display.lua
+Filters.lua
+Migratons.lua
+
+Defaults\Defaults.lua
+Defaults\Hunter.lua
+Defaults\Paladin.lua
+Defaults\Druid.lua
+Defaults\Rogue.lua
+Defaults\Warrior.lua
+Defaults\Shaman.lua
+Defaults\Priest.lua
+Defaults\Warlock.lua
+Defaults\Mage.lua
+Defaults\Monk.lua
+Defaults\Deathknight.lua

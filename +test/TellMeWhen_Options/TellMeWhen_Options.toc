@@ -1,0 +1,21 @@
+﻿## Interface: 50400
+## Title: TellMeWhen Options
+## Author: Cybeloras of Aerie Peak/Detheroc/Mal'Ganis
+
+## X-Curse-Packaged-Version: 7.0.2
+## X-Curse-Project-Name: TellMeWhen
+## X-Curse-Project-ID: tellmewhen
+## X-Curse-Repository-ID: wow/tellmewhen/mainline
+## X-Category: Combat
+
+## Notes: Options and configuration for TellMeWhen
+
+## RequiredDeps: TellMeWhen
+## LoadOnDemand: 1
+## SavedVariables: TMWOptDB
+
+# All files for TellMeWhen_Options are now stored in the main addon.
+# However, they still are not loaded until TellMeWhen_Options, so there is no difference in performance or anything.
+# This makes the structure for modules and components that need their own config files much neater and nicer.
+
+..\TellMeWhen\Options\includes.xml

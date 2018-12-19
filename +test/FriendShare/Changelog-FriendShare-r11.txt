@@ -1,0 +1,13 @@
+------------------------------------------------------------------------
+r11 | vimrasha | 2014-06-06 17:35:21 +0000 (Fri, 06 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/FriendShare.toc
+
+Updated TOC for latest WoW UI version
+------------------------------------------------------------------------
+r10 | vimrasha | 2011-04-27 15:36:28 +0000 (Wed, 27 Apr 2011) | 1 line
+Changed paths:
+   M /trunk/FriendShare.toc
+
+Updated TOC version for WoW 4.1
+------------------------------------------------------------------------

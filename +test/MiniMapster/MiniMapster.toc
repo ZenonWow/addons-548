@@ -1,0 +1,27 @@
+## Interface: 50400
+## X-Curse-Packaged-Version: r58
+## X-Curse-Project-Name: MiniMapster
+## X-Curse-Project-ID: minimapster
+## X-Curse-Repository-ID: wow/minimapster/mainline
+
+## Title: MiniMapster
+## Notes: Mapster's Minimap brother
+
+## Author: Ammo
+## X-Credits: Ckknight for chinchilla, Tekkub for ye ole Squeenix and Nandini for the textures.
+## X-Category: Map
+
+## OptionalDeps: Ace3
+
+## SavedVariables: MiniMapsterDB
+
+## LoadManagers: AddonLoader
+## X-LoadOn-Always: true
+
+## OptionalDeps: Ace3
+
+#@no-lib-strip@
+libs.xml
+#@end-no-lib-strip@
+
+MiniMapster.lua

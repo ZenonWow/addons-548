@@ -1,0 +1,23 @@
+﻿## Interface: 50400
+## Version: 2.0.4
+## Author: BigRedBrent
+## Title: SpellFlashCore
+
+## Notes: This addon contains the button flashing functionality for SpellFlash.
+## URL: http://www.curse.com/addons/wow/spellflashcore
+
+## X-Curse-Packaged-Version: 2.0.4
+## X-Curse-Project-Name: SpellFlashCore
+## X-Curse-Project-ID: spellflashcore
+## X-Curse-Repository-ID: wow/spellflashcore/mainline
+
+## SavedVariables: SpellFlashCoreAddonConfig
+## OptionalDeps: BigLibTimer
+
+##-- LoadManagers: AddonLoader
+## LoadOnDemand: 1
+
+
+libs\BigLibTimer\LibStub\LibStub.lua
+libs\BigLibTimer\BigLibTimer.lua
+Load.xml

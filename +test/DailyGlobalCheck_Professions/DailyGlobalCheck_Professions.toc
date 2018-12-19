@@ -1,0 +1,14 @@
+## Interface: 60000
+## Title: DGC - Professions
+## Author: Jadya EU-Well of Eternity
+## Notes: A |cff00FF00Daily Global Check|r plugin that tracks profession and alt-related dailies
+## eMail: n_rhygar@yahoo.it
+## Dependencies: DailyGlobalCheck
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## SavedVariables: DGC_ProfSaves
+## X-Curse-Packaged-Version: r3
+## X-Curse-Project-Name: Daily Global Check_Professions
+## X-Curse-Project-ID: daily-global-check_professions
+## X-Curse-Repository-ID: wow/daily-global-check_professions/mainline
+DailyGlobalCheck_Professions.lua

@@ -1,0 +1,14 @@
+## Interface: 60200
+## Title: DGC - Hallow's End
+## Author: Mindie  EU-Well of Eternity
+## Notes: A |cff00FF00Daily Global Check|r plugin that tracks Hallow's End candy buckets and dailies
+## eMail: n_rhygar@yahoo.it
+## Dependencies: DailyGlobalCheck
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## SavedVariables: DGCHallowsLocalizedStrings
+## X-Curse-Packaged-Version: v1.0.5
+## X-Curse-Project-Name: Daily Global Check_Hallow's End
+## X-Curse-Project-ID: daily-global-check_hallows-end
+## X-Curse-Repository-ID: wow/daily-global-check_hallows-end/mainline
+DailyGlobalCheck_HallowsEnd.lua

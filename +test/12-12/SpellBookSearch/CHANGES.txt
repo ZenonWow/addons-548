@@ -1,0 +1,13 @@
+lightweight tag b4c9e5713aaa182ac3b3a4c2e340f8732740bda2 0.2-beta
+Author:	kerbaal <kerbaal@yahoo.com>
+Date:	Wed Mar 8 02:05:53 2017 +0100
+
+commit b4c9e5713aaa182ac3b3a4c2e340f8732740bda2
+Author: kerbaal <kerbaal@yahoo.com>
+Date:   Wed Mar 8 02:02:22 2017 +0100
+
+    Also search in sub spellname.
+    
+    A subspell name is a qualifier such as "Talent" or "Passive" and appears
+    below the spell name in the spell book.
+

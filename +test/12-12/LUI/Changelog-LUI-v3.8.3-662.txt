@@ -1,0 +1,53 @@
+------------------------------------------------------------------------
+r662 | chaoslux | 2014-07-13 20:04:14 +0000 (Sun, 13 Jul 2014) | 1 line
+Changed paths:
+   A /tags/v3.8.3-662 (from /trunk:661)
+
+Tagging as v3.8.3-662
+------------------------------------------------------------------------
+r661 | chaoslux | 2014-07-13 20:00:55 +0000 (Sun, 13 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/LUI.toc
+
+- Bumping TOC to show version 3.8.3
+------------------------------------------------------------------------
+r660 | kitkeh | 2014-07-13 02:13:47 +0000 (Sun, 13 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/modules/mirrorbar.lua
+
+- Mirror Bar: Small patch for my derps. Also ensure that Blizzard_ArchaeologyUI is loaded before changing Show and Hide.
+------------------------------------------------------------------------
+r659 | kitkeh | 2014-07-13 00:05:44 +0000 (Sun, 13 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/modules/mirrorbar.lua
+
+- Mirror Bars: integrate the Archaeology Digsite Progress bar to the Mirror Bars (NOTE: definitely alpha code, please test as much as you can). This option is disabled by default.
+------------------------------------------------------------------------
+r658 | kitkeh | 2014-06-18 06:59:55 +0000 (Wed, 18 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/modules/threatbar.lua
+
+- Threat Bar: hopefully fix LUA errors when the bar/text color is set to Gradient
+------------------------------------------------------------------------
+r657 | chaoslux | 2014-06-16 00:34:11 +0000 (Mon, 16 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/unitframes/layout/layout.lua
+
+- Added Monk's Renewing Mist to the oUF RaidFrames, courtesy of Elyne.
+------------------------------------------------------------------------
+r656 | kitkeh | 2014-06-13 22:28:07 +0000 (Fri, 13 Jun 2014) | 2 lines
+Changed paths:
+   M /trunk/LUI.xml
+   A /trunk/modules/artwork.lua
+   M /trunk/unitframes/core/elements/aura.lua
+   M /trunk/unitframes/layout/layout.lua
+
+- Unitframes: hopefully finally once and for all fix the Auras bug (if you enable debuffs after you log into WoW it generates errors with every aura check).
+- Art Work: New module. Disable parts of the LUI art. This module is a work in progress and isn't fully featured just yet. Use at your own risk!
+------------------------------------------------------------------------
+r655 | kitkeh | 2014-05-18 09:24:14 +0000 (Sun, 18 May 2014) | 1 line
+Changed paths:
+   M /trunk/unitframes/core/elements/aura.lua
+
+- Unitframes: resolve errors when buffs/debuffs get applied.
+------------------------------------------------------------------------

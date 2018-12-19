@@ -1,0 +1,116 @@
+## Title: ActionSwap 2
+## Notes: An action / glyph / keybinding set swapper
+## Version: 1.1.4
+## Author: Darthyl of Bronzebeard-US
+## Interface: 50200
+## OptionalDeps: Ace3, LibDebug, LibAdvancedIconSelector-1.0
+## SavedVariablesPerCharacter: ActionSwap2CharacterData
+# (do not add LibKeyBound-1.0 above; it is loaded on-demand)
+## X-Curse-Packaged-Version: 1.1.4
+## X-Curse-Project-Name: ActionSwap 2
+## X-Curse-Project-ID: actionswap2
+## X-Curse-Repository-ID: wow/actionswap2/mainline
+
+## X-Category: Action Bars
+## X-Website: http://wow.curse.com/downloads/wow-addons/details/actionswap2.aspx
+## X-Donate: http://wow.curse.com/downloads/wow-addons/details/actionswap2.aspx
+## X-Feedback: http://wow.curse.com/downloads/wow-addons/details/actionswap2.aspx
+## X-Date: March 12, 2013
+## X-Email: darthyl@hotmail.com
+## X-Localizations: enUS
+## X-License: All Rights Reserved
+## X-Embeds: Ace3, LibAdvancedIconSelector-1.0, LibKeyBound-1.0
+## X-Credits: Darthyl of Bronzebeard-US
+## X-Revision: 13
+
+### Embedded libraries
+#@no-lib-strip@
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+Libs\AceAddon-3.0\AceAddon-3.0.xml
+Libs\AceConsole-3.0\AceConsole-3.0.xml
+Libs\AceEvent-3.0\AceEvent-3.0.xml
+Libs\AceLocale-3.0\AceLocale-3.0.xml
+Libs\AceTimer-3.0\AceTimer-3.0.xml
+Libs\LibKeyBound-1.0\lib.xml
+Libs\LibAdvancedIconSelector-1.0\LibAdvancedIconSelector-1.0.xml
+#@end-no-lib-strip@
+
+### Localization
+Locales\enUS.lua
+
+### Main files
+PackageDefs.lua
+ActionSwap2.lua
+StaticPopups.lua
+Tutorials.lua
+
+### Add-on code
+Controller\ActionButtonManager.lua
+Controller\ActionSetListController.lua
+Controller\BackupFrameController.lua
+Controller\BackupListController.lua
+Controller\ButtonSetFrameController.lua
+Controller\ButtonSetListController.lua
+Controller\ChatCommands.lua
+Controller\GlobalKeysetsFrameController.lua
+Controller\GlobalKeysetListController.lua
+Controller\GlyphActivationFrameController.lua
+Controller\GlyphSetsFrameController.lua
+Controller\GlyphSetListController.lua
+Controller\EventHandlers.lua
+Controller\ListControllerBase.lua
+Controller\MainWindowController.lua
+Controller\SetListControllerBase.lua
+Controller\TalentActivationFrameController.lua
+Controller\TalentSetsFrameController.lua
+Controller\TalentSetListController.lua
+Controller\UIOperations.lua
+Messaging.lua
+Model\Action.lua
+Model\ActionSet.lua
+Model\BackupList.lua
+Model\Binding.lua
+Model\ButtonSet.lua
+Model\ButtonSetList.lua
+Model\DataContext.lua
+Model\GlobalKeyset.lua
+Model\GlobalKeysetList.lua
+Model\GlyphSet.lua
+Model\GlyphSetList.lua
+Model\Model.lua
+Model\QuickCloneTable.lua
+Model\QuickCloneTableCache.lua
+Model\RealGameModel.lua
+Model\SetListBase.lua
+Model\TalentSet.lua
+Model\TalentSetList.lua
+Model\Utilities.lua
+View\ActionBarPreviewFrame.lua
+View\BackupFrame.lua
+View\BackupListButton.lua
+View\ButtonSetFrame.lua
+View\DialogUI.lua
+View\GlobalKeysetsFrame.lua
+View\GlyphActivationFrame.lua
+View\GlyphDisplay.lua
+View\GlyphOverlayFrame.lua
+View\GlyphPreviewFrame.lua
+View\GlyphSetsFrame.lua
+View\IncludeButtonButton.lua
+View\IncludeButtonsFrame.lua
+View\ListButtonBase.lua
+View\ListView.lua
+View\MainWindow.lua
+View\SecondaryFrame.lua
+View\SetEditorDialog.lua
+View\SetListButton.lua
+View\TalentActivationFrame.lua
+View\TalentDisplay.lua
+View\TalentOverlayFrame.lua
+View\TalentPreviewFrame.lua
+View\TalentSetsFrame.lua
+View\TutorialFrame.lua
+View\Widgets.lua
+
+

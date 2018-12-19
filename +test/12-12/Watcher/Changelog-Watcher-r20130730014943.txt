@@ -1,0 +1,68 @@
+Michael Starkweather:
+	- Changed duration string to display 1m instead of 60
+	- Embedded AceTimer
+	- Major work done on move into an event based system.
+	- Changed move up and move down to up and down to support larger fonts
+	- Added edit button that pops out spell settings from priority menu. Changed move up and move down to reselect the spell/filter set that you are moving.
+	- Changed cooldown filter slightly to allow for the cooldown of unusable spells past the previous 3 second mark.
+	- Fixed not being able to add 0 to the time segments after removing it.
+	- Fixed icon size being odd without Masque. Fixed tooltip for health. Adjusted aura refresh threshold max to 60sec. Should support monk stagger now.
+	- Added option to check player health instead of enemy health
+	- Will not show if there are no setup priorities.
+	- Now orders specs correctly so that the one that pops up is the spec that you are in.
+	- Added two new options -- MaxStackedIcons and StackHeight. Moved Timeline settings into own display settings tab. Fixed not being able to edit Timeline time segments Can now edit the maximum number of icons
+	- Switching talents should now properly change the priority list.
+	- Fixed show on enemy target. Again.
+	- Fix for invulnerable enemy targets not showing using Show Only If Target Exists
+	- Fixed turning off keybind labels. Removed MONOCHROME font effect since it crashes the game regularly. Added "Casting a spell that has a cooldown removes it from the list."
+	- Fixed totems. Hopefully for the last time.
+	- Mistype on 295 of Filters.lua. Ooops
+	- Fixed totems.
+	- Hopefully fixed totem time detection.
+	- Added totem filter.
+	Changed "None" to "Usable"
+	- Actually fixed moving.
+	- Fixed moving frame.
+	- Renamed a bunch of things.
+	- Fixing for packaging
+	- Spellcheck.
+	- Attempt number 2 on trying to get packager to like it.
+	- Fix AceLocale and AceGUI
+	- Fix for AceGUI and AceLocale not embedding
+	- First attempt at doing a packaging test.
+	- Removed buffTypes since using LibDispelable
+	- Added CheckSecondaryResource filter.
+	Fixed flipped >= and <= in Classification filter.
+	- Added LibDispel and wrote CheckTargetAura filter
+	- Added target casting interruptible filter
+	- Added license to files
+	- Target classification filter now working
+	- Fixed CheckSpellTalent
+	- Changed some minor things for consistency.
+	Updated CHANGELOG.txt to be.. better.
+	- Added CHANGELOG.txt
+	- Added LICENCE.txt
+	- Added .pkgmeta file to embed latest versions of libraries.
+	- First attempt at showing only one icon.
+	- Fixed usability patch to make so cooldowns and aura tracking doesn't go away when not enough resources.
+	- Changed tooltip for power filter.
+	Keybind display now working.
+	- Fixed priority lists retaining deleted values of spells/filter sets
+	- Fixed inverted aura detection.
+	- Priority list options appear on first load.
+	Changed "Default" name to "None" and made so that cannot change the filters attached to it.
+	
+	Priority list GUI doesn't show the filter set "None" in the sidebar.
+	- Usability is ignored if ability is on cooldown.
+	- More work on getting frame tied into new backend.
+	Max refresh rate on frame is now 60fps.
+	- Removal (and commenting out) of all old code and starting to integrate newDB into the frame and overall usage.
+	Priority list is evaluated at enable time currently. This is working.
+	
+	Beginning of spell filter evaluation.
+	
+	New frame draw method. Hopefully it works -- untested as of now
+	- Changed priority frame GUI to display position in list.
+	- Working GUI for editing priority lists with default values. These priority lists are set up automatically to be all of the available specs of your class.
+	- Can now add spells based on name presuming that the character has the spell.
+	- Initial commit.

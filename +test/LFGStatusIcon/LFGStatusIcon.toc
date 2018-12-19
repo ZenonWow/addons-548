@@ -1,0 +1,16 @@
+## Interface: 50400
+## Title: LFGStatusIcon
+## Notes: Adds queue status indicators to LFG minimap icon
+## Author: TotalPackage
+## X-Category: Interface Enhancements
+## Version: 5.4.001
+
+## LoadManagers: AddonLoader
+## X-LoadOn-Events: LFG_QUEUE_STATUS_UPDATE
+##- X-LoadOn-FrameShown: GroupFinderFrame
+##- X-LoadOn-FrameShown: PVEFrame
+##- X-LoadOn-Always: delayed
+
+## OptionalDeps: Capping
+
+core.lua

@@ -1,0 +1,64 @@
+CHANGELOG (3.0)
+
+ADDED FEATURES
+
+- Complete rewrite of entire addon including new saved variables.
+    - That means that if you used Watcher before, your saved variables WILL BE RESET!
+    - New version is more dynamic, more friendly to different locales, and more awesome.
+- Support for more class specifics!
+    - Shaman Totems
+    - Death Knight Runes
+    - Druid Mushrooms
+    - More Warlock secondary resources!
+- Casting a spell that has a cooldown removes it from the list.
+- Show on target only shows if the target is able to be attacked (same as macro [harm]).
+- Visibility settings for party, raid, and pvp are now non-exclusive and added an additional one for solo.
+- Beautification and usability pass on options menu.
+    - Many changes to names and tooltips.
+    - Spells and Priority Lists tab are now fully dynamic option windows with the new database.
+    - Priority Lists are now by spec.
+        - Keep tuned for more dynamic priority lists in a future version!
+    - TODO: LIST CHANGES TO FILTER SETS
+- Labels are on a spell by spell basis and are now called 'Keybind Labels'.
+- The addon will now include the latest and greatest embedded libraries when packaged.
+
+
+
+REMOVED FEATURES
+
+- GCD and swing timers removed.
+    - Removed corresponding axis settings.
+    - GCD and swing timers will be coming back in a later version!
+- Status bars on the main timeline display removed.
+    - This, again, may make a comeback later in development. But only if requested.
+- Keybindings on priorities removed. These didn't really make any sense.
+- Unworking show only on raid boss removed.
+    - Replaced by new system that does all unit classifications.
+
+
+PERFORMANCE
+
+- Memory usage sigificantly reduced. It is now about 35% of what it used to be.
+- Only checks things that are selected.
+- Capping frame draw at 60fps.
+
+
+CHANGES
+
+- Removed version printout at WoW startup.
+- Legacy LibButtonFacade support removed and Masque (successor to LibButtonFacade) support added.
+- Changed slash command to support the immensely popular addon WeakAuras (/wa).
+    -New short slash command is "/watch".
+- Command line option tweaks.
+    - Triggering command line options without any parameters now opens up the menu.
+    - Only general options like enable, disable, move, reset are available from the command line.
+- Spell icons will only display in the timeline once per spell.
+- Usability will only matter if the spell is available to cast (not on cooldown).
+
+
+BUG FIXES
+
+- Removed references to resources (libraries, optional dependencies) that were not used.
+- Toggling "Move Frames" now will correctly hide and show based on settings.
+- Events are now correctly registered when addon is enabled and unregistered when disabled.
+- No longer polluting global namespace with some common words including options.

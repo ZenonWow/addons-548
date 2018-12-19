@@ -1,0 +1,13 @@
+tag v6.0.0.141025
+c3dac161f627c6b2602bfb97e29c58724789591e
+Vlad <vladix@gmail.com>
+2014-10-25 12:15:34 +0200
+
+Shipping the next batch of phasing and Aldor/Scryers updates. This should make things even more clear.
+
+
+--------------------
+
+Vlad:
+	- Added Blasted Lands phase indication for Horde.
+	- Added Aldor/Scryers support. The icons appear appropriately and will also have a helpful icon in Shattrath regarding how to pick a side, thus gaining access to more candy!

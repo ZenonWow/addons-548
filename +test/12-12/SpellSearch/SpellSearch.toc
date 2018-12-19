@@ -1,0 +1,16 @@
+## Interface: 50402
+## Title: SpellSearch
+## Author: Tessalina of Uldaman
+## Notes: Search for spells/abilities by name in your SpellBook.
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## Version: 1.1
+
+lib\FitzUtils\Util.lua
+lib\Defs.lua
+lib\PrefixTable.lua
+
+localization\Text.lua
+
+SpellSearchUI.lua
+SpellSearch.lua

@@ -1,0 +1,22 @@
+------------------------------------------------------------------------
+r3 | saregon | 2015-01-21 17:37:27 +0000 (Wed, 21 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/DailyGlobalCheck_Professions.lua
+
+-
+------------------------------------------------------------------------
+r2 | saregon | 2015-01-18 22:27:29 +0000 (Sun, 18 Jan 2015) | 1 line
+Changed paths:
+   A /trunk/DailyGlobalCheck_Professions.lua
+   A /trunk/DailyGlobalCheck_Professions.toc
+
+base
+------------------------------------------------------------------------
+r1 | svn | 2015-01-18 21:50:03 +0000 (Sun, 18 Jan 2015) | 1 line
+Changed paths:
+   A /branches
+   A /tags
+   A /trunk
+
+daily-global-check_professions/mainline: Initial Import
+------------------------------------------------------------------------

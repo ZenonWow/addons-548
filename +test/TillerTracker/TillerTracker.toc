@@ -1,0 +1,35 @@
+## Interface: 50200
+## Title: Tiller Tracker
+## Version: 1.13.1
+## Notes: Helps with the daily Tiller food quests ("A Dish for...") by keeping track of what quests have been completed that day, how many dishes need to be cooked, and what materials are required.
+## Author: Amanoa
+## SavedVariables: TillerTrackerDB
+## OptionalDeps: Ace3, AceEvent-3.0, LibQTip-1.0, LibStub, AceTimer-3.0, AceConsole-3.0
+## X-Curse-Packaged-Version: v1.13.1
+## X-Curse-Project-Name: Tiller Tracker
+## X-Curse-Project-ID: tiller-tracker
+## X-Curse-Repository-ID: wow/tiller-tracker/mainline
+
+#@no-lib-strip@ 
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+Libs\AceAddon-3.0\AceAddon-3.0.xml
+Libs\AceConsole-3.0\AceConsole-3.0.xml
+Libs\AceEvent-3.0\AceEvent-3.0.xml
+Libs\AceLocale-3.0\AceLocale-3.0.xml
+Libs\AceTimer-3.0\AceTimer-3.0.xml
+Libs\AceDB-3.0\AceDB-3.0.xml
+Libs\AceGUI-3.0\AceGUI-3.0.xml
+Libs\AceConfig-3.0\AceConfig-3.0.xml
+Libs\LibQTip-1.0\lib.xml
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
+#@end-no-lib-strip@
+
+Locale\enUS.lua
+Locale\frFR.lua
+Locale\deDE.lua
+
+Data.lua
+Sort.lua
+TillerTracker.lua

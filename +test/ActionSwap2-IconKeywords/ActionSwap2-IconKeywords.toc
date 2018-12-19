@@ -1,0 +1,35 @@
+## Interface: 50200
+## Title: ActionSwap 2 |cff68ccf0[Icon Keywords]|r
+## Version: 1.0.7
+## Notes: Keyword data for ActionSwap 2's icon selector
+## Author: Darthyl of Bronzebeard-US
+## X-Curse-Packaged-Version: 1.1.4
+## X-Curse-Project-Name: ActionSwap 2
+## X-Curse-Project-ID: actionswap2
+## X-Curse-Repository-ID: wow/actionswap2/mainline
+
+## X-Part-Of: ActionSwap2
+## X-Category: Miscellaneous
+## X-Website: http://www.curse.com/addons/wow/advancediconselector
+## X-Donate: http://www.curse.com/addons/wow/advancediconselector
+## X-Feedback: http://www.curse.com/addons/wow/advancediconselector
+## X-Date: March 12, 2013
+## X-Email: darthyl@hotmail.com
+## X-Localizations: enUS
+## X-License: MIT
+## X-Credits: Darthyl of Bronzebeard-US
+## X-Revision: 12
+
+## Dependencies: ActionSwap2
+## OptionalDeps: Ace3
+## LoadOnDemand: 1
+
+
+### Embedded libraries
+#@no-lib-strip@
+Libs\LibStub\LibStub.lua
+#@end-no-lib-strip@
+
+
+### Main file
+AdvancedIconSelector-KeywordData.lua

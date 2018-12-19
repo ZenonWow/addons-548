@@ -1,0 +1,28 @@
+v1.1.4 (March 12, 2013)
+- Updated for WoW version 5.2
+
+v1.1.3 (October 9, 2012)
+- Fixed a crash occurring when battle pets are placed on the action bar
+
+v1.1.2 (September 28, 2012)
+- Fixed Warlock Demonology spec and other spell-morphing issues
+- Fixed taint issues preventing removal of talents and glyphs
+- Fewer erreneous dialogs should be displayed
+
+v1.1.1 (September 14, 2012)
+- Fixed an error that would occur only upon first login
+- Fixed some talent preview layout bugs
+
+v1.1.0 (September 14, 2012)
+- Added talent sets!  You can now use ActionSwap 2 to keep sets (and backups) of Pandaria talents, glyphs, AND action buttons!
+- Updated the look of the main window
+- Fixed a bug where warrior keybinding changes sometimes weren't detected
+- Fixed a bug where druid button overlays wouldn't update when changing shapeshift form
+- Miscellaneous bugfixes
+
+v1.0.1 (August 30, 2012)
+- Added support for Mists of Pandaria
+- Glyph sets have been reset (due to significant glyph changes in WoW)
+
+v1.0.0 (February 14, 2012)
+- First public release of ActionSwap 2

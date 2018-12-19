@@ -1,0 +1,27 @@
+------------------------------------------------------------------------
+r441 | beautiuz | 2013-09-11 15:01:10 +0000 (Wed, 11 Sep 2013) | 1 line
+Changed paths:
+   A /tags/1.3.6-Release (from /trunk:440)
+
+Tagging as 1.3.6-Release
+------------------------------------------------------------------------
+r440 | beautiuz | 2013-09-11 14:56:50 +0000 (Wed, 11 Sep 2013) | 2 lines
+Changed paths:
+   M /trunk/AuraFramesConfig/AuraFramesConfig.toc
+   M /trunk/AuraFramesConfig/ContentGeneral.lua
+
+Bumped toc version
+Fixed layout in the general config page.
+------------------------------------------------------------------------
+r439 | beautiuz | 2013-09-11 14:56:10 +0000 (Wed, 11 Sep 2013) | 1 line
+Changed paths:
+   M /trunk/AuraFrames/AuraFrames.toc
+
+Bumped toc version
+------------------------------------------------------------------------
+r438 | beautiuz | 2013-06-04 19:25:54 +0000 (Tue, 04 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/AuraFrames/AnimationSystem.lua
+
+- Fixed a small bug in the animation system with reseting animation data
+------------------------------------------------------------------------

@@ -1,0 +1,14 @@
+## Interface: 40200
+## Author: d07.RiV (Iroared)
+## Title: ShowItemLevel
+## Notes: Shows item level in inspect frame
+## Version: 1.00
+## SavedVariables: ShowItemLevelDB
+## Dependencies: 
+## X-Curse-Packaged-Version: v1.01
+## X-Curse-Project-Name: ShowItemLevel
+## X-Curse-Project-ID: showitemlevel
+## X-Curse-Repository-ID: wow/showitemlevel/mainline
+
+ShowItemLevel.lua
+

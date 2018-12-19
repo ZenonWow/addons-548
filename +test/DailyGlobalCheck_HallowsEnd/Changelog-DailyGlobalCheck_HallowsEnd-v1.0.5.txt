@@ -1,0 +1,62 @@
+------------------------------------------------------------------------
+r16 | saregon | 2015-10-18 17:27:39 +0000 (Sun, 18 Oct 2015) | 1 line
+Changed paths:
+   A /tags/v1.0.5 (from /trunk:13)
+
+release tag
+------------------------------------------------------------------------
+r13 | saregon | 2015-10-18 17:09:14 +0000 (Sun, 18 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/DailyGlobalCheck_HallowsEnd.lua
+   M /trunk/DailyGlobalCheck_HallowsEnd.toc
+
+-
+------------------------------------------------------------------------
+r11 | saregon | 2015-10-18 14:03:30 +0000 (Sun, 18 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/DailyGlobalCheck_HallowsEnd.lua
+   M /trunk/DailyGlobalCheck_HallowsEnd.toc
+
+-
+------------------------------------------------------------------------
+r9 | saregon | 2015-10-15 15:20:19 +0000 (Thu, 15 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/DailyGlobalCheck_HallowsEnd.lua
+
+-
+------------------------------------------------------------------------
+r7 | saregon | 2015-10-15 14:57:22 +0000 (Thu, 15 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/DailyGlobalCheck_HallowsEnd.lua
+   M /trunk/DailyGlobalCheck_HallowsEnd.toc
+
+hotfix
+------------------------------------------------------------------------
+r5 | saregon | 2015-10-14 09:49:52 +0000 (Wed, 14 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/DailyGlobalCheck_HallowsEnd.lua
+
+-
+------------------------------------------------------------------------
+r3 | saregon | 2015-10-13 20:38:32 +0000 (Tue, 13 Oct 2015) | 1 line
+Changed paths:
+   M /trunk/DailyGlobalCheck_HallowsEnd.lua
+   M /trunk/DailyGlobalCheck_HallowsEnd.toc
+
+-
+------------------------------------------------------------------------
+r2 | saregon | 2015-10-13 20:32:02 +0000 (Tue, 13 Oct 2015) | 1 line
+Changed paths:
+   A /trunk/DailyGlobalCheck_HallowsEnd.lua
+   A /trunk/DailyGlobalCheck_HallowsEnd.toc
+
+base
+------------------------------------------------------------------------
+r1 | svn | 2015-10-13 17:16:49 +0000 (Tue, 13 Oct 2015) | 1 line
+Changed paths:
+   A /branches
+   A /tags
+   A /trunk
+
+daily-global-check_hallows-end/mainline: Initial Import
+------------------------------------------------------------------------

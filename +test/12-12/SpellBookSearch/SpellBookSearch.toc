@@ -1,0 +1,8 @@
+## Interface: 70100
+## Title: SpellBookSearch
+## Notes: Add a search field to the spell book.
+## Author: Kerbaal
+## SavedVariables:
+## SavedVariablesPerCharacter:
+
+SpellBookSearch.lua

@@ -1,0 +1,32 @@
+------------------------------------------------------------------------
+r62 | amanoa | 2013-03-22 13:16:02 +0000 (Fri, 22 Mar 2013) | 1 line
+Changed paths:
+   A /tags/v1.13.1 (from /trunk:61)
+
+Tagging as v1.13.1
+------------------------------------------------------------------------
+r61 | amanoa | 2013-03-22 13:10:21 +0000 (Fri, 22 Mar 2013) | 1 line
+Changed paths:
+   M /trunk/TillerTracker.lua
+   M /trunk/TillerTracker.toc
+
+Fix error when leveling
+------------------------------------------------------------------------
+r59 | amanoa | 2013-03-20 22:05:53 +0000 (Wed, 20 Mar 2013) | 1 line
+Changed paths:
+   M /trunk/Locale/enUS.lua
+   M /trunk/TillerTracker.lua
+   M /trunk/TillerTracker.toc
+
+Add support for gathering for multiple days
+------------------------------------------------------------------------
+r57 | amanoa | 2013-03-20 14:15:58 +0000 (Wed, 20 Mar 2013) | 3 lines
+Changed paths:
+   M /trunk/Locale/enUS.lua
+   M /trunk/TillerTracker.lua
+   M /trunk/TillerTracker.toc
+
+Disable if player is not 90
+Disable if all reputation is done
+Update interface level
+------------------------------------------------------------------------

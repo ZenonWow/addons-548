@@ -1,0 +1,7 @@
+## Interface: 40300
+## Title: mapSearch
+## Notes: lightweight map searcher
+## Author: Fernir
+## Version: 1
+
+mapSearch.lua

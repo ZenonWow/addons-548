@@ -1,0 +1,125 @@
+Adirelle:
+	- Fixed cs.sh and lualint.sh.
+	- Fixed tests.
+arcadepro:
+	- Some basic Warrior Rules.
+	Enraged Regen rule is useful. The rest, not so much.
+	- Common Rule fixes
+	Warrior changes/Drums of Rage debuff added.
+	- Small border art fixes.
+	- English language clarity fix
+Adirelle:
+	- D'oh !
+	Fixes GH-37.
+	- Sanitized action analysis.
+	Indicated unsupported actions with an orange overlay.
+	Spit an error on unknown action types.
+	- Properly update the configuration overlay when the button changes (pagination, macro, ...).
+	- Import racials and tradeskills from LibPlayerSpells.
+	See GH-37.
+	- Retrieve the database version of LibItemBuffs using the proper API.
+	- Updated .docmeta to reflect recent changes.
+	- Update README.md
+	- Converted textile files to Markdown.
+	- Update Getting Started.md
+	- Update Getting Started.md
+	Minor layout and syntax fixes.
+	- First version of a "Getting started", thanks to dafzor.
+	- Updated embedded wowmock.
+	- Added unit testing for items.
+	See GH-37.
+	- Fixed whitespaces.
+	- Added a checkstyle test.
+	- Added basic testing.
+	- Tell the Wowace packager to ignore the "tests" folders of libraries.
+	- Fixes GH-56.
+	- The Base64 encoder, the serializer and their tests moved to a better place.
+	- The serializer and deserializer handles (circular) references.
+	- More serializer test cases, and fixes.
+	- Added tests for the serializer/deserializer.
+	- Added a base64_encoder/decoder with some tests.
+	- Fixed GH-55.
+	- Added a "SafeGetGlobal" helper, that does not choke on nil values.
+	- Error about access to unexistent globals un rules.
+	- Warlock: fixed Pyroclasm.
+	- Warlock: moved Havoc suggestion in another rule.
+	Fixes GH-47.
+	- Allow "print()" in user rules for debugging purpose.
+	- Added a class restriction to user rules.
+	- README update.
+	- DK: fixed Soul Reaper target.
+	- Slightly improved the "user rules" panel, again.
+	- Improved the "user rules" panel.
+	- Enhanced the debug panel.
+	- Reorganised sources into smaller files.
+	- Changed file layout.
+	- User-defined rules.
+	- Fixes GH-53.
+	- Update Rules.textile
+	- Update RulesRef.md
+	- Fixed aura iterators.
+	- Experimental aura cache and accessors.
+	This should avoid "seq-scanning" the auras several times to find specific player auras.
+	UnitAura is not accessible in rules but there are specific accessors, e.g. GetPlayerBuff(unit, id), IterateDebuffs(unit), ...
+	- Tidied up allowed globals in rule snippets.
+	- Renamed highlight textures to be more descriptive.
+	Fixes GH-45.
+	- Fixed a typo in Config.lua.
+	- Added an option to select the highlight texture.
+	- Fixed RuleDSL.lua globals.
+	- Moved the environment builder in its own file.
+	- Moved more functions into Utils.lua.
+	- Removed dead code.
+	- Added font options in a theme panel.
+	Also moved the color options in this new panel.
+	Fixes GH-50.
+	- Display the source of item rules.
+	- Display the internal "key" of unknown spell/item.
+	- Rewritten item support so item rules can be shown and disabled.
+arcadepro:
+	- Borders
+	10 border images.
+Adirelle:
+	- Fixes GH-51.
+	- Removed a spammy debug line.
+	- Fixed a table leak related to items.
+daf:
+	- Fixed logic error in buff count tracker
+Adirelle:
+	- Reworked how the hint option affects display during spell cooldown and out of combat.
+	May affect GH-47.
+	- Messing with InterfaceOptionsFrame_OpenToCategory again.
+	Hopefully fixes GH-41.
+	- Common rules: ignore pets when checking raid buffs.
+	Fixes GH-46.
+	- Whitespace fixes in Druid.lua.
+	- Load all rules in debug mode, to check them all.
+	- Copyright bump.
+	- Hardened the running environment of rule snippets.
+	- I love you too, Textile markup.
+	- Fixed README markup.
+	- Workaround Blizzard option panel bug.
+	Fixes GH-41.
+	- Updated the README file.
+	- Locales updated.
+arcadepro:
+	- English Corrections.
+	Some minor spelling and language tweaks so the descriptions are easier
+	to understand.
+	- Fixed Feral Clear casting. Issue #30.
+	This time not touching the file using the web interface.  :smirk:
+Adirelle:
+	- Fixed GH-37.
+	- Docs updated.
+	- Whenever possible, append a reference to the source in the description of the rule.
+	LPS-<class>-<patch>-<revision>: LibPlayerSpells-1.0.
+	DR-<minor>: DRData-1.0.
+	LSB-<minor>: LibSpellbook-1.0.
+	LD-<minor>: LibDispellable-1.0.
+	- Updated the localization.
+	- Config: added an option to select how to display the suggestions.
+	Closes GH-38.
+	- Common: improved the description of the raid buff rule.
+	Fixes GH-34.
+	- Common: ignore dead group members in the count of missing raid buffs.
+	- Improved the content of the tooltips in configuration mode.

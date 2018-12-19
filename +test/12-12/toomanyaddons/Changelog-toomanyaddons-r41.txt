@@ -1,0 +1,20 @@
+------------------------------------------------------------------------
+r41 | daxdax | 2013-11-14 06:54:37 +0000 (Thu, 14 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/TooManyAddons.lua
+
+realm name acccess changed
+------------------------------------------------------------------------
+r40 | daxdax | 2013-11-14 06:49:09 +0000 (Thu, 14 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/TooManyAddons.lua
+
+realm name acccess changed
+------------------------------------------------------------------------
+r39 | daxdax | 2012-09-24 01:41:09 +0000 (Mon, 24 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/TooManyAddons.lua
+   M /trunk/TooManyAddonsInterface.lua
+
+fixed for 5.04, cannot reproduce the raid bug
+------------------------------------------------------------------------

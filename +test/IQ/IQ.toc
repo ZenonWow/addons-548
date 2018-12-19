@@ -1,0 +1,14 @@
+## Interface: 40000
+## Author: kunda
+## Title: IQ (ItemLevel Quotient)
+## Notes: Shows ItemLevel Quotient in the Character and Inspect Frame.
+## Version: 40000-1
+## X-Curse-Packaged-Version: r38
+## X-Curse-Project-Name: IQ ItemLevel Quotient
+## X-Curse-Project-ID: iq
+## X-Curse-Repository-ID: wow/iq/mainline
+
+IQ-localization-enUS.lua
+IQ-localization-deDE.lua
+
+IQ.lua
