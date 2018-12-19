@@ -3,6 +3,8 @@
 -- Author: Mikord
 -------------------------------------------------------------------------------
 
+local ADDON_NAME, private = ...
+
 -- Create module and set its name.
 local module = {}
 local moduleName = "Profiles"
@@ -147,7 +149,7 @@ local currentProfile
 local pathTable = {}
 
 -- Flag to hold whether or not this is the first load.
-local isFirstLoad
+--local isFirstLoad
 
 
 -------------------------------------------------------------------------------
@@ -1839,25 +1841,49 @@ end
 -- ****************************************************************************
 -- Disable Blizzard's combat text.
 -- ****************************************************************************
-local function DisableBlizzardCombatText()
+function MikSBT:DisableBlizzardCombatText()
+ self.blizzardCombatTextCvars =  self.blizzardCombatTextCvars  or  {
+  enableCombatText = GetCVar("enableCombatText"),
+  CombatDamage = GetCVar("CombatDamage"),
+  CombatHealing = GetCVar("CombatHealing"),
+ }
  -- Turn off Blizzard's default combat text.
+ _G.SHOW_COMBAT_TEXT = "0"
+ SetCVar("enableCombatText", 0)
  SetCVar("CombatDamage", 0)
  SetCVar("CombatHealing", 0)
- SetCVar("enableCombatText", 0)
- SHOW_COMBAT_TEXT = "0"
- if (CombatText_UpdateDisplayedMessages) then CombatText_UpdateDisplayedMessages() end
+end
+
+-- ****************************************************************************
+-- Restore Blizzard's combat text.
+-- ****************************************************************************
+function MikSBT:RestoreBlizzardCombatText()
+ local cvars = self.blizzardCombatTextCvars
+ if  not cvars  then  return false  end
+
+ -- Restore Blizzard_CombatText cvars.
+ _G.SHOW_COMBAT_TEXT = cvars.enableCombatText
+ SetCVar("enableCombatText", cvars.enableCombatText)
+ SetCVar("CombatDamage", cvars.CombatDamage)
+ SetCVar("CombatHealing", cvars.CombatHealing)
+ self.blizzardCombatTextCvars = nil
+ return true
+end
+
+function MikSBT:SetEnableBlizzardCombatText(isEnabled)
+	if  isEnabled  then  return  self:RestoreBlizzardCombatText()
+	else  return  self:DisableBlizzardCombatText()
+	end
 end
 
 
 
 -- ****************************************************************************
--- Set the user disabled option
+-- Enable or disable the addon
 -- ****************************************************************************
-local function SetOptionUserDisabled(isDisabled)
- savedVariables.userDisabled = isDisabled or nil
-
+function MikSBT:SetEnabled(isEnabled)
  -- Check if the mod is being set to disabled.
- if (isDisabled) then
+ if (not isEnabled) then
   -- Disable the cooldowns, triggers, event parser, and main modules.
   MikSBT.Cooldowns.Disable()
   MikSBT.Triggers.Disable()
@@ -1871,14 +1897,30 @@ local function SetOptionUserDisabled(isDisabled)
   MikSBT.Triggers.Enable()
   MikSBT.Cooldowns.Enable()
  end
+
 end
+
+
+-- ****************************************************************************
+-- Set the user disabled option
+-- ****************************************************************************
+local function SetOptionUserDisabled(isDisabled)
+ savedVariables.userDisabled = isDisabled or nil
+ MikSBT:SetEnabled(not isDisabled)
+ MikSBT:SetEnableBlizzardCombatText(isDisabled)
+
+ -- Load Blizzard_CombatText addon if enabled
+ if ("1" == _G.SHOW_COMBAT_TEXT  and  not IsAddOnLoaded("Blizzard_CombatText")) then  UIParentLoadAddOn("Blizzard_CombatText")  end
+ if (CombatText_UpdateDisplayedMessages) then CombatText_UpdateDisplayedMessages() end
+end
+
 
 
 -- ****************************************************************************
 -- Returns whether or not the mod is disabled.
 -- ****************************************************************************
 local function IsModDisabled()
- return savedVariables and savedVariables.userDisabled
+ return savedVariables and (savedVariables.userDisabled or false)
 end
 
 
@@ -2042,12 +2084,10 @@ local function InitSavedVariables()
   -- Create the profiles table and default profile.
   savedVariablesPerChar.currentProfileName = DEFAULT_PROFILE_NAME
   savedVariables.profiles = {}
-  savedVariables.profiles[DEFAULT_PROFILE_NAME] = {}
-
-  savedVariables.profiles[DEFAULT_PROFILE_NAME].creationVersion = MikSBT.VERSION .. "." .. MikSBT.SVN_REVISION
+  savedVariables.profiles[DEFAULT_PROFILE_NAME] = { creationVersion = MikSBT.VERSION .. "." .. MikSBT.SVN_REVISION }
   
   -- Set the first time loaded flag.
-  isFirstLoad = true
+  --isFirstLoad = true
   
  -- There are saved variables.
  else
@@ -2186,11 +2226,11 @@ end
 -- ****************************************************************************
 -- Called when the registered events occur.
 -- ****************************************************************************
-local function OnEvent(this, event, arg1)
+local function OnEvent(this, event, addonName)
  -- When an addon is loaded.
  if (event == "ADDON_LOADED") then
   -- Ignore the event if it isn't this addon.
-  if (arg1 ~= "MikScrollingBattleText") then return end
+  if (addonName ~= ADDON_NAME) then return end
 
   -- Don't get notification for other addons being loaded.
   this:UnregisterEvent("ADDON_LOADED")
@@ -2208,13 +2248,20 @@ local function OnEvent(this, event, arg1)
   -- Let the media module know the variables are initialized.
   MikSBT.Media.OnVariablesInitialized()
 
+  -- Start the mod if not disabled.
+  if (not IsModDisabled())  then  MikSBT:SetEnabled()  end
+
+  -- Disable Blizzard_CombatText even if delay-loaded (after VARIABLES_LOADED event).
+  if  IsLoggedIn()  then  return OnEvent(this, "VARIABLES_LOADED")  end
+
  -- Variables for all addons loaded.
  elseif (event == "VARIABLES_LOADED") then
-  -- Disable or enable the mod depending on the saved setting.
-  SetOptionUserDisabled(IsModDisabled())
+  -- Disable Blizzard_CombatText cvars before it is loaded on PLAYER_ENTERING_WORLD event by:
+	-- InterfaceOptionsCombatTextPanelFCTDropDown_OnEvent() in FrameXML/InterfaceOptionsPanels.lua
+  if (not IsModDisabled()) then  MikSBT:DisableBlizzardCombatText()  end
   
   -- Disable Blizzard's combat text if it's the first load.
-  if (isFirstLoad) then DisableBlizzardCombatText() end
+  --if (isFirstLoad) then DisableBlizzardCombatText() end
 
   -- Support CUSTOM_CLASS_COLORS.
   if (CUSTOM_CLASS_COLORS) then
@@ -2222,6 +2269,11 @@ local function OnEvent(this, event, arg1)
    if (CUSTOM_CLASS_COLORS.RegisterCallback) then CUSTOM_CLASS_COLORS:RegisterCallback(UpdateCustomClassColors) end
   end
   collectgarbage("collect")
+
+ -- Logout or ReloadUI.
+ elseif (event == "PLAYER_LOGOUT") then
+  -- Restore Blizzard_CombatText cvars. If MikSBT is not loaded next time, Blizzard_CombatText will work as before.
+  MikSBT:RestoreBlizzardCombatText()
  end
 end
 
@@ -2238,6 +2290,8 @@ eventFrame:SetScript("OnEvent", OnEvent)
 -- Register events for when the mod is loaded and variables are loaded.
 eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("VARIABLES_LOADED")
+eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+eventFrame:RegisterEvent("PLAYER_LOGOUT")
 
 
 
