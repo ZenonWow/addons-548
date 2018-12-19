@@ -1,0 +1,19 @@
+## Interface: 50400
+## Title: Details DamageRank (plugin)
+## Notes: Plugin for Details
+## SavedVariablesPerCharacter: _detalhes_databaseDmgRank
+## RequiredDeps: Details
+## OptionalDeps:  Ace3, LibSharedMedia-3.0, LibBossIDs-1.0, LibGraph-2.0, !ClassColors
+## X-Curse-Packaged-Version: r236
+## X-Curse-Project-Name: Details!
+## X-Curse-Project-ID: details
+## X-Curse-Repository-ID: wow/details/mainline
+
+#@no-lib-strip@
+embeds.xml
+#@end-no-lib-strip@
+
+enUS.lua
+ptBR.lua
+
+Details_DmgRank.lua

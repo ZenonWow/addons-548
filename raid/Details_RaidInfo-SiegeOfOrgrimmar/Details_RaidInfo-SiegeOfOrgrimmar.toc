@@ -1,0 +1,13 @@
+## Interface: 50400
+## Title: Details: Siege of Orgrimmar
+## Notes: Plugin for Details
+## RequiredDeps: Details
+## X-Curse-Packaged-Version: r236
+## X-Curse-Project-Name: Details!
+## X-Curse-Project-ID: details
+## X-Curse-Repository-ID: wow/details/mainline
+
+enUS.lua
+ptBR.lua
+
+SiegeOfOrgrimmar.lua
