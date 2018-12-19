@@ -1,0 +1,31 @@
+http://vranx.com/font.htm
+--
+Changing Fonts
+You can use a mod to change in game fonts. Or you can replace the original game fonts with the fonts you want to use. Create the following folder:
+<WoW directory>\Fonts\
+Create copies of the font file of your choice, place them in the above folder, and rename them to the following names:
+FRIZQT__.ttf (the main UI font - NPC names, player names, spell names, item names, buffs, quest log text, combat text, button text)
+ARIALN.ttf (chat font, info text, small text)
+skurri.ttf (default unit frame combat text)
+MORPHEUS.ttf (mail text, quest log header text)
+FRIENDS.ttf (friends list text)
+
+Popular Fonts
+Andika Basic, Alte Haas Grotesk, Comfortaa, Expressway Free, PT Sans Narrow, SD Fresh Regular, SF New Republic, Tork 
+dafont has many good fonts to choose from.
+
+
+https://www.mmo-champion.com/threads/603893-Ask-it!-UI-Mods-Edition?p=43001753&viewfull=1#post43001753
+--
+2016-10-28, 01:57 AM #14673
+Quote Originally Posted by Greevir  View Post
+You don't need an addon to fully replace default Blizz fonts. Under the World of Warcraft folder (the same place you find your Interface, Screenshot, and WTF folders) just make a folder named Fonts. Then find any truetype font and place it in there (fonts end with the extension .ttf). you will need 5 of them. Copy/paste that file till you have 5 of them. Rename them skurri.ttf, ARIALN.ttf, FRIENDS.ttf, FRIZQT__.ttf, and MORPHEUS.ttf. There you go! You have replaced all default blizzard fonts with whatever you chose. NOTE: Any addon that also uses the default fonts will also show the new font.
+These are all the latin-based fonts used by the game. The ones ending with CYR (cyrillic characters, i.e. Russian) can be ignored by the majority of NA users and shouldn't be replaced unless the font you are using has a full set of cyrillic characters.
+
+(FRIZQT has two underscores, its CYR counterpart has three, and NIM has five)
+
+
+I don't know where you got FRIENDS.ttf, but a font with that name does not exist in the game files. There is a defined font family in the UI code called "FriendsFont" but it uses FRIZQT__.TTF.
+
+Here's all the non-latin game fonts (in order: Korean, Traditional Chinese, Simplified Chinese).
+
