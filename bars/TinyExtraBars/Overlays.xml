@@ -1,0 +1,49 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+	..\FrameXML\UI.xsd">
+	
+	<Frame name="TinyExtraBarsOverlay" enablemouse="true" hidden="true" virtual="true">
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="UIParent" relativePoint="TOPLEFT">
+				<Offset>
+					<AbsDimension x="0" y="0" />
+				</Offset>
+			</Anchor>
+			<Anchor point="BOTTOMRIGHT" relativeTo="UIParent" relativePoint="BOTTOMRIGHT">
+				<Offset>
+					<AbsDimension x="0" y="0" />
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background" edgeFile="" tile="true">
+			<TileSize>
+				<AbsValue val="16" />
+			</TileSize>
+			<EdgeSize>
+				<AbsValue val="16" />
+			</EdgeSize>
+		</Backdrop>
+	</Frame>
+	
+	<Frame name="TinyExtraBarsCreateBarOverlayTemplate" parent="UIParent" inherits="SecureHandlerStateTemplate, TinyExtraBarsOverlay" frameStrata="FULLSCREEN_DIALOG" virtual="true">
+		<Scripts>
+			<OnLoad>
+				RegisterStateDriver(self, "visibility", "[combat] hide")
+				self:SetBackdropColor(0.02, 0.03, 0.8, 0.4)
+			</OnLoad>
+			<OnMouseUp>
+				if (button == "LeftButton") then
+					local left, top = GetCursorPosition()
+					local scale = UIParent:GetEffectiveScale()
+					TEB_Container_New(nil, left / scale, top / scale, 1, 6)
+				end
+				TinyExtraBarsToggleCreateBar(true)
+			</OnMouseUp>
+			<OnEnter>
+				SetCursor("REPAIRNPC_CURSOR")
+			</OnEnter>
+			<OnHide>
+				TinyExtraBarsToggleCreateBar(true)
+			</OnHide>
+		</Scripts>
+	</Frame>
+</Ui>

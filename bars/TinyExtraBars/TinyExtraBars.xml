@@ -1,0 +1,717 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+	..\FrameXML\UI.xsd">
+
+	<Button name="TinyExtraBarsTabButtonTemplate" inherits="CharacterFrameTabButtonTemplate" hidden="true" virtual="true">
+		<Scripts>
+			<OnClick>
+				TinyExtraBarsTabButton_OnClick(self)
+			</OnClick>
+		</Scripts>
+	</Button>
+		   
+	<Frame name="TinyExtraBarsButtonFrameTemplate" inherits="SecureHandlerStateTemplate" hidden="true" enableMouse="false" frameStrata="LOW" virtual="true">
+		<Scripts>
+			<OnShow>
+				self:OnShow()
+			</OnShow>
+			<OnHide>
+				self:OnHide()
+			</OnHide>
+			<OnEnter>
+				self:ResetCustomAlpha()
+			</OnEnter>
+			<OnLeave>
+				self:SetCustomAlpha()
+			</OnLeave>
+		</Scripts>
+	</Frame>
+
+	<Frame name="TinyExtraBarsContainerFrameTemplate" inherits="SecureHandlerStateTemplate" hidden="true" enableMouse="true" movable="true" frameStrata="LOW" clampedToScreen="true" virtual="true">
+		<ResizeBounds>
+			<minResize>
+				<AbsDimension x="40" y="40"/>
+			</minResize>
+			<maxResize>
+				<AbsDimension x="400" y="400"/>
+			</maxResize>
+		</ResizeBounds>
+		<Backdrop bgFile="Interface/DialogFrame/UI-DialogBox-Background" edgeFile="Interface/DialogFrame/UI-DialogBox-Border" tile="true" parentKey="backdrop">
+			<EdgeSize>
+				<AbsValue val="16"/>
+			</EdgeSize>
+			<TileSize>
+				<AbsValue val="16"/>
+			</TileSize>
+			<BackgroundInsets>
+				<AbsInset left="5" right="5" top="5" bottom="5"/>
+			</BackgroundInsets>
+		</Backdrop>
+		<Frames>
+			<Button name="$parentResizeGripButton" parentKey="resizegrip">
+				<Size>
+					<AbsDimension x="32" y="32"/>
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" x="4" y="-4"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture file="Interface\AddOns\TinyExtraBars\textures\ResizeGripRight" alpha="0.7" parentKey="texture"/>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEnter>
+						self.texture:SetAlpha(1.0)
+						GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+						GameTooltip:SetText("Resize")
+					</OnEnter>
+					<OnLeave>
+						self.texture:SetAlpha(0.7)
+						GameTooltip_Hide()
+					</OnLeave>
+					<OnMouseDown>
+						TinyExtraBarsFrame_OnResizeGripMouseDown(self, button)
+					</OnMouseDown>
+					<OnMouseUp>
+						TinyExtraBarsFrame_OnResizeGripMouseUp(self, button)
+					</OnMouseUp>
+				</Scripts>
+			</Button>
+			<Button name="$parentConfigureContainer" parentKey="configureContainer">
+				<Size>
+					<AbsDimension x="16" y="16"/>
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" x="-50" y="6"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture file="Interface\WorldMap\GEAR_64" alpha="0.7" parentKey="texture">
+							<TexCoords left="0" right="0.5" top="0" bottom="0.5"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEnter>
+						self.texture:SetAlpha(1.0)
+						GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+						GameTooltip:SetText("Configure Container")
+					</OnEnter>
+					<OnLeave>
+						self.texture:SetAlpha(0.7)
+						GameTooltip_Hide()
+					</OnLeave>
+					<OnMouseDown>
+						self.texture:SetPoint("TOPLEFT", 1, -1)
+					</OnMouseDown>
+					<OnMouseUp>
+						self.texture:SetPoint("TOPLEFT", 0, 0)
+					</OnMouseUp>
+					<OnClick>
+						self:GetParent():OnContainerSubmenu()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentConfigureTab" parentKey="configureTab">
+				<Size>
+					<AbsDimension x="16" y="16"/>
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" x="-25" y="6"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture file="Interface\WorldMap\GEAR_64" alpha="0.7" parentKey="texture">
+							<TexCoords left="0" right="0.5" top="0" bottom="0.5"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEnter>
+						self.texture:SetAlpha(1.0)
+						GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+						GameTooltip:SetText("Configure Tab")
+					</OnEnter>
+					<OnLeave>
+						self.texture:SetAlpha(0.7)
+						GameTooltip_Hide()
+					</OnLeave>
+					<OnMouseDown>
+						self.texture:SetPoint("TOPLEFT", 1, -1)
+					</OnMouseDown>
+					<OnMouseUp>
+						self.texture:SetPoint("TOPLEFT", 0, 0)
+					</OnMouseUp>
+					<OnClick>
+						self:GetParent():OnTabSubmenu()
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnShow>
+				self:OnShow()
+			</OnShow>
+			<OnHide>
+				self:OnHide()
+			</OnHide>
+			<OnMouseDown>
+				self:OnMouseDown(button)
+			</OnMouseDown>
+			<OnMouseUp>
+				self:OnMouseUp(button)
+			</OnMouseUp>
+		</Scripts>
+	</Frame>
+
+	<CheckButton name="TinyExtraBarsCheckButtonSettingsTemplate" inherits="OptionsBaseCheckButtonTemplate" virtual="true">
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentText" inherits="GameFontHighlight">
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="1"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</CheckButton>
+	
+	<Frame name="TinyExtraBarsToolsFrameTemplate" inherits="SecureHandlerStateTemplate" hidden="true" enableMouse="true" movable="true" frameStrata="LOW" clampedToScreen="true" virtual="true">
+		<Size>
+			<AbsDimension x="200" y="340"/>
+		</Size>
+		<Anchors>
+			<Anchor point="CENTER"/>
+		</Anchors>
+		<Backdrop bgFile="Interface/DialogFrame/UI-DialogBox-Background" edgeFile="Interface/DialogFrame/UI-DialogBox-Border" tile="true">
+			<EdgeSize>
+				<AbsValue val="16"/>
+			</EdgeSize>
+			<TileSize>
+				<AbsValue val="16"/>
+			</TileSize>
+			<BackgroundInsets>
+				<AbsInset left="5" right="5" top="5" bottom="5"/>
+			</BackgroundInsets>
+		</Backdrop>
+		<Layers>
+			<Layer>
+				<Texture parentKey="TitleBorder" file="Interface/DialogFrame/UI-DialogBox-Header">
+					<Size>
+						<AbsDimension x="150" y="32" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOP" y="10" />
+					</Anchors>
+					<TexCoords left="0.2" right="0.8" top="0" bottom="0.6" />
+				</Texture>
+				<FontString parentKey="TitleString" font="Fonts/FRIZQT__.TTF" text="TinyExtraBars">
+					<Size>
+						<AbsDimension x="140" y="0" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOP" y="1" />
+					</Anchors>
+					<FontHeight>
+						<AbsValue val="12" />
+					</FontHeight>
+					<Color r="1" g="0.8196079" b="0" />
+					<Shadow>
+						<Color r="0" g="0" b="0" />
+						<Offset>
+							<AbsDimension x="1" y="-1" />
+						</Offset>
+					</Shadow>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button parentKey="Toggle">
+				<Size>
+					<AbsDimension x="32" y="32"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPRIGHT" x="5" y="5"/>
+				</Anchors>
+				<NormalTexture file="Interface/Buttons/UI-Panel-MinimizeButton-Up"/>
+				<PushedTexture file="Interface/Buttons/UI-Panel-MinimizeButton-Down"/>
+				<HighlightTexture file="Interface/Buttons/UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
+				<Scripts>
+					<OnClick>
+						self:GetParent():Hide()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentButtonCreateBar" inherits="UIPanelButtonTemplate" text="Create Bar">
+				<Size>
+					<AbsDimension x="150" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOP" y="-40"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						TinyExtraBarsToggleCreateBar(false)
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentCheckButtonKeybind" inherits="UIPanelButtonTemplate" text="Keybind mode">
+				<Size>
+					<AbsDimension x="150" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOP" y="-70"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						TEB_LibKeyBound:Toggle()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentCheckButtonStance" inherits="UIPanelButtonTemplate" text="Print current stance">
+				<Size>
+					<AbsDimension x="150" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOP" y="-100"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						print("stance", GetShapeshiftForm(true), "aura/presence", GetShapeshiftForm(false))
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Slider name="$parentButtonSize" parentKey="sliderButtonSize" inherits="OptionsSliderTemplate">
+				<Size x="150" y="17"/>
+				<Anchors>
+					<Anchor point="TOP" y="-135"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						_G[self:GetName().."Text"]:SetFontObject("GameFontNormalSmall")
+						_G[self:GetName().."Low"]:SetText(16)
+						_G[self:GetName().."High"]:SetText(72)
+						self:SetValueStep(4)
+						self:SetMinMaxValues(16, 72)
+						self.tooltipText = "ButtonSize"
+					</OnLoad>
+					<OnValueChanged>
+						TinyExtraBarsToolsFrame_SetButtonSize(self, self:GetValue())
+						<!-- _G[self:GetName().."Text"]:SetText(self:GetValue()) -->
+					</OnValueChanged>
+				</Scripts>	
+			</Slider>
+			<Slider name="$parentButtonSpace" parentKey="sliderButtonSpace" inherits="OptionsSliderTemplate">
+				<Size x="150" y="17"/>
+				<Anchors>
+					<Anchor point="TOP" y="-170"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						_G[self:GetName().."Text"]:SetFontObject("GameFontNormalSmall")
+						_G[self:GetName().."Low"]:SetText(4)
+						_G[self:GetName().."High"]:SetText(16)
+						self:SetValueStep(2)
+						self:SetMinMaxValues(4, 16)
+						self.tooltipText = "ButtonSpace"
+					</OnLoad>
+					<OnValueChanged>
+						TinyExtraBarsToolsFrame_SetButtonSpace(self, self:GetValue())
+						<!-- _G[self:GetName().."Text"]:SetText(self:GetValue()) -->
+					</OnValueChanged>
+				</Scripts>	
+			</Slider>
+			<CheckButton name="$parentCBLastEffect" parentKey="checkBoxLastEffect" inherits="TinyExtraBarsCheckButtonSettingsTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="25" y="-190"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						_G[self:GetName().."Text"]:SetText("LastEffect mode")
+					</OnLoad>
+					<OnClick>
+						if self:GetChecked() then
+							PlaySound("igMainMenuOptionCheckBoxOn")
+						else
+							PlaySound("igMainMenuOptionCheckBoxOff")
+						end
+						TinyExtraBarsToolsFrame_SetLastEffect(self:GetChecked())
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentCBLastEffectAverage" parentKey="checkBoxLastEffectAverage" inherits="TinyExtraBarsCheckButtonSettingsTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="25" y="-210"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						_G[self:GetName().."Text"]:SetText("LastEffect Average")
+					</OnLoad>
+					<OnClick>
+						if self:GetChecked() then
+							PlaySound("igMainMenuOptionCheckBoxOn")
+						else
+							PlaySound("igMainMenuOptionCheckBoxOff")
+						end
+						TinyExtraBarsToolsFrame_SetLastEffectAverage(self:GetChecked())
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentCBHideBorders" parentKey="checkBoxHideBorders" inherits="TinyExtraBarsCheckButtonSettingsTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="25" y="-230"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						_G[self:GetName().."Text"]:SetText("Hide borders")
+					</OnLoad>
+					<OnClick>
+						if self:GetChecked() then
+							PlaySound("igMainMenuOptionCheckBoxOn")
+						else
+							PlaySound("igMainMenuOptionCheckBoxOff")
+						end
+						TinyExtraBarsToolsFrame_SetHideBorders(self:GetChecked())
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentCBFullRangeArtwork" parentKey="checkBoxFullRangeArtwork" inherits="TinyExtraBarsCheckButtonSettingsTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="25" y="-250"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						_G[self:GetName().."Text"]:SetText("Button Range Coloring")
+					</OnLoad>
+					<OnClick>
+						if self:GetChecked() then
+							PlaySound("igMainMenuOptionCheckBoxOn")
+						else
+							PlaySound("igMainMenuOptionCheckBoxOff")
+						end
+						TinyExtraBarsToolsFrame_SetFullRangeArtwork(self:GetChecked())
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentCBUseShift" parentKey="checkBoxUseShift" inherits="TinyExtraBarsCheckButtonSettingsTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="25" y="-270"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						_G[self:GetName().."Text"]:SetText("Use Shift")
+					</OnLoad>
+					<OnClick>
+						if self:GetChecked() then
+							PlaySound("igMainMenuOptionCheckBoxOn")
+						else
+							PlaySound("igMainMenuOptionCheckBoxOff")
+						end
+						TinyExtraBarsToolsFrame_SetUseShift(self:GetChecked())
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+			<Button name="$parentButtonPresets" inherits="UIPanelButtonTemplate" text="Presets">
+				<Size>
+					<AbsDimension x="150" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOP" y="-300"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						TinyExtraBarsPresetsToogle()
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnShow>
+				TinyExtraBarsToolsFrame_OnShow()
+			</OnShow>
+			<OnHide>
+				TinyExtraBarsToolsFrame_OnHide()
+			</OnHide>
+			<OnMouseDown>
+				TinyExtraBarsToolsFrame_OnMouseDown(self, button)
+			</OnMouseDown>
+			<OnMouseUp>
+				TinyExtraBarsToolsFrame_OnMouseUp(self)
+			</OnMouseUp>
+		</Scripts>
+	</Frame>
+	
+	<Button name="TinyExtraBarsMinimapButtonTemplate" enableMouse="true" movable="true" frameStrata="MEDIUM" clampedToScreen="true" virtual="true">
+		<Size>
+			<AbsDimension x="18" y="18"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentIcon" parentKey="icon" file="Interface\AddOns\TinyExtraBars\textures\CreateBar"/>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture name="$parentArtwork" file="Interface/Minimap/MiniMap-TrackingBorder">
+					<Size>
+						<AbsDimension x="54" y="54"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-8" y="6"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="HIGHLIGHT">
+				<Texture name="$parentHighlight" file="Interface/Minimap/UI-Minimap-ZoomButton-Highlight" alphaMode="ADD">
+					<Size>
+						<AbsDimension x="34" y="34"/>
+					</Size>
+					<Anchors>
+						<Anchor point="CENTER" x="-1" y="-1"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
+		<Scripts>
+			<OnLoad>
+				TinyExtraBarsMinimapButton_OnLoad(self)
+			</OnLoad>
+			<OnEnter>
+				GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+				GameTooltip:SetText("TinyExtraBars|r |n|cFF55FF55Left Mouse |cFFFFFFFFTinyExtraBars|n|cFF55FF55Right Mouse |cFFFFFFFFMove Button", nil, nil, nil, nil, 1)
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide()
+			</OnLeave>
+			<OnMouseDown>
+				if (IsMouseButtonDown("RightButton")) then 
+					self:StartMoving()
+				end
+			</OnMouseDown>
+			<OnMouseUp>
+				self:StopMovingOrSizing()
+				TinyExtraBarsMinimapButton_OnMouseUp(self, button)
+			</OnMouseUp>
+			<OnClick>
+				TinyExtraBarsMinimapButton_OnClick(self, button)
+			</OnClick>
+		</Scripts>
+	</Button>
+	
+	<CheckButton name="TinyExtraBarsButtonTemplate" inherits="SecureHandlerStateTemplate, SecureHandlerShowHideTemplate, SecureActionButtonTemplate, ActionButtonTemplate" virtual="true">
+		<Layers>
+			<Layer level="ARTWORK" textureSubLevel = "3" alphaMode="ADD">
+				<Texture name="$parentArtworkRange" parentKey="ArtworkRange" file="Interface/Tooltips/UI-Tooltip-Background">
+					<Size>
+						<AbsDimension x="36" y="36"/>
+					</Size>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+					<Color r="0.5" g="0" b="0" a="0.0"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="$parentConfigure" parentKey="configure">
+				<Size>
+					<AbsDimension x="16" y="16"/>
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture file="Interface\WorldMap\GEAR_64" alpha="0.7" parentKey="texture">
+							<TexCoords left="0" right="0.5" top="0" bottom="0.5"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEnter>
+						self.texture:SetAlpha(1.0)
+						GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+						GameTooltip:SetText("Macrotext")
+					</OnEnter>
+					<OnLeave>
+						self.texture:SetAlpha(0.7)
+						GameTooltip_Hide()
+					</OnLeave>
+					<OnMouseDown>
+						self.texture:SetPoint("TOPLEFT", 1, -1)
+					</OnMouseDown>
+					<OnMouseUp>
+						self.texture:SetPoint("TOPLEFT", 0, 0)
+					</OnMouseUp>
+					<OnClick>
+						self:GetParent():OnCustomize()
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<PreClick>
+				self:PreClick(button)
+			</PreClick>
+			<PostClick>
+				self:PostClick(button)
+			</PostClick>
+			<OnReceiveDrag>
+				self:OnReceiveDrag()
+			</OnReceiveDrag>
+			<OnDragStart>
+				self:OnDragStart()
+			</OnDragStart>
+			<OnEnter>
+				self:OnEnter()
+				self:GetParent():ResetCustomAlpha()
+			</OnEnter>
+			<OnLeave>
+				self:OnLeave()
+				self:GetParent():SetCustomAlpha()
+			</OnLeave>
+		</Scripts>
+	</CheckButton>
+	
+	<Frame name="TinyExtraBarsPresetsFrameTemplate" inherits="SecureHandlerStateTemplate" hidden="true" enableMouse="true" movable="true" frameStrata="DIALOG" clampedToScreen="true" virtual="true">
+		<Size>
+			<AbsDimension x="200" y="240"/>
+		</Size>
+		<Anchors>
+			<Anchor point="CENTER"/>
+		</Anchors>
+		<Backdrop bgFile="Interface/DialogFrame/UI-DialogBox-Background" edgeFile="Interface/DialogFrame/UI-DialogBox-Border" tile="true">
+			<EdgeSize>
+				<AbsValue val="16"/>
+			</EdgeSize>
+			<TileSize>
+				<AbsValue val="16"/>
+			</TileSize>
+			<BackgroundInsets>
+				<AbsInset left="5" right="5" top="5" bottom="5"/>
+			</BackgroundInsets>
+		</Backdrop>
+		<Layers>
+			<Layer>
+				<Texture parentKey="TitleBorder" file="Interface/DialogFrame/UI-DialogBox-Header">
+					<Size>
+						<AbsDimension x="150" y="32" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOP" y="10" />
+					</Anchors>
+					<TexCoords left="0.2" right="0.8" top="0" bottom="0.6" />
+				</Texture>
+				<FontString parentKey="TitleString" font="Fonts/FRIZQT__.TTF" text="Presets">
+					<Size>
+						<AbsDimension x="140" y="0" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOP" y="1" />
+					</Anchors>
+					<FontHeight>
+						<AbsValue val="12" />
+					</FontHeight>
+					<Color r="1" g="0.8196079" b="0" />
+					<Shadow>
+						<Color r="0" g="0" b="0" />
+						<Offset>
+							<AbsDimension x="1" y="-1" />
+						</Offset>
+					</Shadow>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button parentKey="Toggle">
+				<Size>
+					<AbsDimension x="32" y="32"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPRIGHT" x="5" y="5"/>
+				</Anchors>
+				<NormalTexture file="Interface/Buttons/UI-Panel-MinimizeButton-Up"/>
+				<PushedTexture file="Interface/Buttons/UI-Panel-MinimizeButton-Down"/>
+				<HighlightTexture file="Interface/Buttons/UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
+				<Scripts>
+					<OnClick>
+						self:GetParent():Hide()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentButtonSaveAsPreset" parentKey="SaveAsPreset" inherits="UIPanelButtonTemplate" text="Save as preset">
+				<Size>
+					<AbsDimension x="150" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOP" y="-40"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						TinyExtraBarsPresetSaveAs()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<ScrollFrame name="$parentScrollFrame" parentKey="ScrollFrame" inherits="FauxScrollFrameTemplate">
+				<Size>
+					<AbsDimension x="130" y="100"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="25" y="-70"/>
+				</Anchors>
+				<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+					<EdgeSize>
+						<AbsValue val="16"/>
+					</EdgeSize>
+					<TileSize>
+						<AbsValue val="16"/>
+					</TileSize>
+					<BackgroundInsets>
+						<AbsInset left="4" right="4" top="4" bottom="4"/>
+					</BackgroundInsets>
+				</Backdrop>
+				<Scripts>
+					<OnVerticalScroll>
+						TinyExtraBarsScrollBar_VerticalScroll(self, offset)
+					</OnVerticalScroll>
+					<OnShow>
+						TinyExtraBarsScrollBar_Update(self)
+					</OnShow>
+				</Scripts>
+			</ScrollFrame>
+			<Button name="$parentButtonApply" parentKey="Apply" inherits="UIPanelButtonTemplate" text="Apply">
+				<Size>
+					<AbsDimension x="150" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOP" y="-170"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						TinyExtraBarsPresetApply()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentButtonDelete" parentKey="Delete" inherits="UIPanelButtonTemplate" text="Delete">
+				<Size>
+					<AbsDimension x="150" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOP" y="-200"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						TinyExtraBarsPresetDelete()
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnMouseDown>
+				self:StartMoving()
+			</OnMouseDown>
+			<OnMouseUp>
+				self:StopMovingOrSizing()
+			</OnMouseUp>
+		</Scripts>
+	</Frame>
+</Ui>

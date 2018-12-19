@@ -1,0 +1,31 @@
+## Interface: 50400
+## Title: TinyExtraBars
+## Author: another
+## Version: 1.16
+## Notes: Tiny extra action bars
+## SavedVariables: TinyExtraBars_Global
+## SavedVariablesPerCharacter: TinyExtraBars_PerChar
+## OptionalDeps: ButtonFacade
+
+libs\libstub\LibStub.lua
+libs\EasyStorage\EasyStorage.lua
+libs\CallBackHandler-1.0\CallbackHandler-1.0.lua
+libs\LibKeyBound-1.0\lib.xml
+libs\PanelTemplates\UIPanelTemplates.lua
+libs\DropDownMenu\UIDropDownMenuTemplates.xml
+libs\DropDownMenu\UIDropDownMenu.lua
+libs\DropDownMenu\EasyMenu.lua
+libs\Glow\Glow.xml
+libs\Glow\Glow.lua
+libs\MacroText\IconSelection.xml
+libs\MacroText\MacroText_Customize.xml
+
+Spells.lua
+Common.lua
+TinyExtraBars.xml
+Overlays.xml
+Container.lua
+ButtonFrame.lua
+SpellEffect.lua
+Button.lua
+TinyExtraBars.lua
