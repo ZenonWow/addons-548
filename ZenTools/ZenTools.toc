@@ -13,9 +13,15 @@ Media.lua
 # PlaySoundOverride.lua
 
 LibContainerFrameCleanup.lua
+LibCloseOneWindow.lua
+
 BlackMarketTracker.lua
+BlackMarketTracker.xml
 PrintUnitAuras.lua
 TargetWatcherMop.lua
+WhoMonitor.lua
+DebugTools.lua
+
 MacroClicks.lua
 MouseWheelHandlers.lua
 

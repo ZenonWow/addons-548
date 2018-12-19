@@ -1,7 +1,7 @@
 --[[ Dump code here and enter in chat   /rl  ]]--
 
 --[[ TODO:
-- TipTop skin battlepet: and MogIt tooltips
+- TipTop skin MogIt tooltips
 - LiteMount About config gyökérbe került
 - AddonLoader config ures
 - Elephant memory optim	
@@ -74,9 +74,12 @@ CLASS profileKeys clean
 /dump SetModifiedClick('ATTACHSIMILAR','ALT')
 /run LoadAddOn('TradeSkillMaster_Mailing')
 /run LoadAddOn('TradeSkillMaster_Auctioning')
+/run LoadAddOn('TradeSkillMaster_Shopping')
 /run LoadAddOn('GnomishVendorShrinker')
+/run LoadAddOn('Examiner')
 /run LoadAddOn('ViragDevTool')
 /run LoadAddOn('BankStack')
+/run LoadAddOn('LuaBrowser')
 /run LoadAddOn('MogIt')
 /run LoadAddOn('Postal')  LoadAddOn('InboxMailBag')
 
@@ -128,84 +131,24 @@ if  BFBindingMode  then  BFBindingMode:Hide()  end
 --tDeleteItem(UISpecialFrames, BFBindingMode)
 
 
---[[ Original:
--- should always be called from secure code using securecall()
-function CloseSpecialWindows()
-	local found;
-	for index, value in pairs(UISpecialFrames) do
-		local frame = _G[value];
-		if ( frame and frame:IsShown() ) then
-			frame:Hide();
-			found = 1;
-		end
-	end
-	return found;
-end
---]]
--- should always be called from secure code using securecall()
-local prev_CloseSpecialWindows = CloseSpecialWindows
-function CloseSpecialWindows(...)
-	-- Press Shift-Esc to close those nasty windows.  Ctrl-Esc and Alt-Esc will do also... bet you need to disable those in windose (try AutoHotKey).
-	--if  not IsModifierKeyDown()  then  return  end    -- modify TOGGLEGAMEMENU keybinding instead to remain consistent with addons also hooking CloseSpecialWindows
-	
-	for index, frameName in pairs(UISpecialFrames) do
-		local frame = _G[frameName];
-		-- frame:GetLeft() is a simple on-screen check. Returns nil if the frame was not positioned. If it was, then its most probably on-screen.
-		if ( frame and frame:IsVisible() and frame:GetLeft() ) then
-			print("CloseSpecialWindows(): "..index..". "..frameName)
-			frame:Hide()
-			-- Close ONE special window
-			return frame
-		end
-	end
-	print("prev_CloseSpecialWindows()")
-	return prev_CloseSpecialWindows(...)
-end
 
 
 
---[[
-	FriendsFrame:UnregisterEvent("WHO_LIST_UPDATE")
-	FriendsFrame:RegisterEvent("WHO_LIST_UPDATE")
-	FriendsFrame:UnregisterEvent("IGNORELIST_UPDATE")
-	FriendsFrame:RegisterEvent("IGNORELIST_UPDATE")
-	FriendsFrame:UnregisterEvent("FRIENDLIST_UPDATE")
-	FriendsFrame:RegisterEvent("FRIENDLIST_UPDATE")
-	FriendsFrame:UnregisterEvent("FRIENDLIST_SHOW")
-	FriendsFrame:RegisterEvent("FRIENDLIST_SHOW")
---]]
 
-local WhoMonitor = {
-	lastEnteredWho = "",
-	lastWhoUpdate = 0,
-}
-_G.WhoMonitor = WhoMonitor
 
-function WhoFrameEditBox_OnEnterPressed(self)
-	WhoMonitor.lastEnteredWho = self:GetText()
-	SendWho(self:GetText());
-end
-
-function WhoMonitor.OnUpdate(whoFrame)
-	if  WhoMonitor.lastEnteredWho == ""  then  return  end
-	local now = time()
-	if  WhoFrame:IsVisible()  and  2 <= now - WhoMonitor.lastWhoUpdate then
-		print("WhoMonitor.OnUpdate(): "..WhoMonitor.lastEnteredWho)
-		WhoMonitor.lastWhoUpdate = now
-		SendWho(WhoMonitor.lastEnteredWho)
+function GetActionButtonNameMy(id)
+	-- 6->2 5->3 4->4 3->5 2->6
+	if id <= 12 then  return 'ActionButton' .. id
+	elseif id <= 24 then  return 'MultiBarBottomLeftButton' .. (id-12)
+	elseif id <= 36 then  return 'MultiBarBottomRightButton' .. (id-24)
+	elseif id <= 48 then  return 'MultiBarLeftButton' .. (id-36)
+	elseif id <= 60 then  return 'MultiBarRightButton' .. (id-48)
+	--elseif id <= 72 then  return 'DominosActionButton' .. (id-60)
+	else  return 'DominosActionButton' .. (id-60)
 	end
 end
 
-WhoFrameEditBox:SetScript('OnEnterPressed', WhoFrameEditBox_OnEnterPressed)
-WhoFrame:SetScript('OnUpdate', WhoMonitor.OnUpdate)
-
-
-
-
-
-
-
-function GetActionButtonName(id)
+function GetActionButtonNameOrig(id)
 	if id <= 12 then  return 'ActionButton' .. id
 	elseif id <= 24 then  return 'DominosActionButton' .. (id-12)
 	elseif id <= 36 then  return 'MultiBarRightButton' .. (id-24)
@@ -215,6 +158,8 @@ function GetActionButtonName(id)
 	else  return 'DominosActionButton' .. (id-60)
 	end
 end
+
+local GetActionButtonName = GetActionButtonNameOrig
 
 --[[
 http://wowwiki.wikia.com/wiki/SecureHandlers
