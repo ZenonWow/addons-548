@@ -2,6 +2,8 @@
 -- Hack. Notebook addon. Eric Tetz <erictetz@gmail.com> 2008 
 --------------------------------------------------------------------------------
 
+local ADDON_NAME, private = ...
+
 HackDB = { -- default settings saved variables
    font = 2,
    fontsize = 11,
@@ -170,7 +172,7 @@ function Hack.OnLoad(self)
       setmetatable( HackExamples, { __mode='kv' } ) -- let examplebook be collected
    end
 
-   self:RegisterEvent('VARIABLES_LOADED')
+   self:RegisterEvent('ADDON_LOADED')
    self:RegisterEvent('CHAT_MSG_ADDON')
 
    -- Addon message prefixes
@@ -192,7 +194,8 @@ function Hack.OnLoad(self)
    --printf('Loaded. /hack to toggle')
 end
 
-function Hack.VARIABLES_LOADED(self)
+function Hack.ADDON_LOADED(self, event, addonName)
+   if  addonName ~= ADDON_NAME  then  return  end
    db = HackDB
    items = db.books[db.book].data
    Hack.UpdateFont()

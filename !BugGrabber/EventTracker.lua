@@ -4,9 +4,12 @@
 
 local  EventTracker = CreateFrame('Frame', 'EventTracker', UIParent)
 EventTracker:RegisterEvent('ADDON_LOADED')
+EventTracker:RegisterEvent('SAVED_VARIABLES_TOO_LARGE')
+EventTracker:RegisterEvent('VARIABLES_LOADED')
 EventTracker:RegisterEvent('PLAYER_LOGIN')
 EventTracker:RegisterEvent('PLAYER_ENTERING_WORLD')
-EventTracker:RegisterEvent('VARIABLES_LOADED')
+EventTracker:RegisterEvent('PLAYER_LEAVING_WORLD')
+EventTracker:RegisterEvent('SPELLS_CHANGED')
 EventTracker:RegisterEvent('PLAYER_ALIVE')
 --EventTracker:RegisterEvent('PLAYER_LOGOUT')
 

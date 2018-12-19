@@ -60,4 +60,4 @@ end
 
 SlashCmdList["VIEWPORTER"] = self.onChatCommand;
 self:SetScript("OnEvent", self.onLoad )
-self:RegisterEvent("VARIABLES_LOADED")
+self:RegisterEvent("ADDON_LOADED")

@@ -154,7 +154,7 @@ Atr_core.TimeSinceLastUpdate = 0;
 if  _G.Auctionator  then
 	print("_G.Auctionator already defined, GetName()=".. tostring(_G.Auctionator.GetName  and  _G.Auctionator:GetName()  or  '<no such method>') )
 end
--- Export event handler frame so delayed load can send dummy Auctionator:PLAYER_ENTERING_WORLD() event.
+-- Export core object
 _G.Auctionator = Atr_core
 
 
@@ -184,7 +184,7 @@ Atr_core:InitGlobals()
 
 function Atr_core:RegisterEvents()
 	self:RegisterEvent('ADDON_LOADED')
-	self:RegisterEvent('VARIABLES_LOADED')
+	--self:RegisterEvent('VARIABLES_LOADED')    -- CVARS loaded...  don't need 'em
 	self:RegisterEvent('PLAYER_ENTERING_WORLD')
 	
 	self:RegisterEvent('CHAT_MSG_ADDON')
@@ -911,9 +911,9 @@ function Atr_core:ADDON_LOADED(event, addonName)
 
 	-- Loaded this addon?
 	if  addonName == ADDON_NAME  then
-		Debug("Atr_core:ADDON_LOADED("..tostring(addonName)..")")
+		Debug("Atr_core:"..tostring(event).."("..tostring(addonName)..")")
 
-		-- need this for AH_QuickSearch since that mod forces Blizzard_AuctionUI to load at a startup
+		-- need this for AH_QuickSearch since that mod forces Blizzard_AuctionUI to load at startup
 		--if  IsAddOnLoaded("Blizzard_AuctionUI")  then  self:HookAuctionFrame()  end
 		if  AuctionFrame  then  self:HookAuctionFrame()  end
 
@@ -922,7 +922,7 @@ function Atr_core:ADDON_LOADED(event, addonName)
 		if  TradeSkillFrame  then  self:InitTradeSkillFrame()  end
 
 		-- With delayed loading the event PLAYER_ENTERING_WORLD might not be received so make up for it
-		if  IsLoggedIn()  and  self.PLAYER_ENTERING_WORLD  then  self:PLAYER_ENTERING_WORLD(event)  end
+		if  IsPlayerInWorld()  and  self.PLAYER_ENTERING_WORLD  then  self:PLAYER_ENTERING_WORLD(event)  end
 
 	else
 		Atr_Check_For_Conflicts(addonName)
@@ -938,14 +938,8 @@ end
 
 
 
-function Atr_core:VARIABLES_LOADED(event)
-  -- CVARS loaded...  don't need'em
-end
-
-
-
 function Atr_core:PLAYER_ENTERING_WORLD(event)
-	Debug("Atr_core:PLAYER_ENTERING_WORLD("..tostring(event)..")")
+	Debug("Atr_core:"..tostring(event).."()")
 
 	Atr_Install_Error_Handler()
 	--Atr_InitOptionsPanels();

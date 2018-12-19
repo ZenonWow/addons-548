@@ -176,19 +176,18 @@ function  ZenShortcuts.DeleteItemOrEjectPassengers()
 		print('Exit Vehicle')
 		securecall('VehicleExit')
 	else
-		local _, name1, _, _, _ = UnitVehicleSeatInfo('player', 1)
-		local _, name2, _, _, _ = UnitVehicleSeatInfo('player', 2)
-		local name, num
-
-		--if  name1  and  name2  then  name1= name1 .. ',' .. name2
-		if  name1  then  name,num = name1,1
-		elseif  name2  then  name,num = name2,2
+		local seatIdx
+		for  i = 1, UnitVehicleSeatCount('player')  do
+			if  CanEjectPassengerFromSeat(i)  then
+				seatIdx = i
+				break
+			end
 		end
 
-		if  name  then
-			print('Eject passenger '.. num ..': ' .. name)
-			EjectPassengerFromSeat(num)
-			--EjectPassengerFromSeat(2)
+		if  seatIdx  then
+			local _, name, _, _, _ = UnitVehicleSeatInfo('player', seatIdx)
+			print('Eject passenger '.. seatIdx ..': ' .. name)
+			EjectPassengerFromSeat(seatIdx)
 		else
 			print('Nothing to delete/abandon/exit/eject.')
 		end

@@ -1,3 +1,4 @@
+local ADDON_NAME, private = ...
 -- just remove global reference so it is easy to read with my ide
 local pairs, tostring, type, print, string, getmetatable, table, pcall, unpack, tonumber =
 pairs, tostring, type, print, string, getmetatable, table, pcall, unpack, tonumber
@@ -9,7 +10,6 @@ ViragDevTool = {
     --static constant useed for metatable name
     METATABLE_NAME = "$metatable",
     METATABLE_NAME2 = "$metatable.__index",
-    ADDON_NAME = "ViragDevTool",
 
     -- you can use /vdt find somestr parentname(can be in format _G.Frame.Button)
     -- for examle "/vdt find Virag" will find every variable in _G that has *Virag* pattern
@@ -97,12 +97,11 @@ ViragDevTool = {
         LOGFN = function(msg2, msg3)
             ViragDevTool:StartLogFunctionCalls(msg2, msg3)
         end,
-        CENTER = function(msg2, msg3)
+        RESET = function(msg2, msg3)
             ViragDevToolFrame:ClearAllPoints()
             ViragDevToolFrame:SetPoint("CENTER", UIParent)
             ViragDevToolFrame:SetSize(635, 200)
         end,
-				--VDT_RESET_WND = ViragDevTool.CMD.CENTER,
     },
 
     -- Default settings
@@ -153,7 +152,7 @@ ViragDevTool = {
             string = { 0.67, 0.83, 0.45, 1 },
             number = { 1, 0.96, 0.41, 1 },
             default = { 1, 1, 1, 1 },
-						restore = "|r",
+            restore = "|r",
         },
 
         -- events to monitor
@@ -178,7 +177,8 @@ ViragDevTool = {
 }
 -- just remove global reference so it is easy to read with my ide
 local ViragDevTool = ViragDevTool
-ViragDevTool.CMD.VDT_RESET_WND = ViragDevTool.CMD.CENTER
+-- /vdt reset used to be:
+ViragDevTool.CMD.VDT_RESET_WND = ViragDevTool.CMD.RESET
 
 -----------------------------------------------------------------------------------------------
 -- ViragDevTool.colors additional setup
@@ -575,7 +575,7 @@ end
 function ViragDevTool:SetVisible(view, isVisible)
     if not view then return end
     --self:print('SetVisible:  ' .. tostring(view) .. '  ' .. tostring(isVisible) )
-		view:SetShown(isVisible or false)
+    view:SetShown(isVisible or false)
 --[[
     if isVisible then
         view:Show()
@@ -1185,7 +1185,7 @@ function ViragDevTool:OnLoad(mainFrame)
     self.wndRef:RegisterEvent("ADDON_LOADED")
     --self.wndRef:RegisterEvent("PLAYER_ENTERING_WORLD")
     self.wndRef:SetScript("OnEvent", function(this, event, addonName, ...)
-        if event == "ADDON_LOADED" and addonName == self.ADDON_NAME then
+        if event == "ADDON_LOADED" and addonName == ADDON_NAME then
             self:OnAddonSettingsLoaded()
         end
         if event == "PLAYER_ENTERING_WORLD" then
@@ -1204,8 +1204,8 @@ function ViragDevTool:OnLoad(mainFrame)
     end
 
     -- register slash cmd
-    SLASH_VIRAGDEVTOOLS1 = '/vdt';
-    function SlashCmdList.VIRAGDEVTOOLS(msg, editbox)
+    SLASH_VIRAGDEVTOOL1 = '/vdt';
+    function SlashCmdList.VIRAGDEVTOOL(msg, editbox)
         if msg == "" or msg == nil then
             self:ToggleUI()
         else
