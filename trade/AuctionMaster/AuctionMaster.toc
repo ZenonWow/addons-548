@@ -1,0 +1,27 @@
+## Interface: 50400
+## Title: AuctionMaster
+## Version: 5.7.2
+## Notes: Auction house selling and statistic tool.
+## Author: Udorn
+## X-Category: Auction
+## X-Feedback: http://www.curse.com/addons/wow/vendor
+
+## DefaultState: enabled
+## RequiredDeps:
+## Dependencies:
+## SavedVariables: VendorDb, AuctionMasterMiscDb
+
+## LoadOnDemand: 1
+## LoadWith: Blizzard_AuctionUI
+
+## LoadManagers: AddonLoader
+## X-LoadOn:  AuctionHouse
+## X-LoadOn-AuctionHouse: true
+
+
+libs\Import.xml
+src\xml\Import.xml
+src\locale\Import.xml
+src\main\Import.xml
+src\api\Import.xml
+src\test\Import.xml
