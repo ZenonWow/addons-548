@@ -1,0 +1,22 @@
+## Interface: 50400
+## Title: Advanced Event Trace
+## Author: mynameisforeal
+
+## SavedVariables: AdvETraceDB
+## RequiredDeps: Blizzard_DebugTools
+
+## LoadOnDemand: 1
+## LoadWith: Blizzard_DebugTools
+
+##- LoadManagers: AddonLoader
+##- X-LoadOn-FrameShown: EventTraceFrame
+## X-LoadOn-Slash: /etrace /eventtrace
+
+
+libs\load_libs.xml
+constants.lua
+core.lua
+general.lua
+interface.lua
+filters.lua
+hooks.lua

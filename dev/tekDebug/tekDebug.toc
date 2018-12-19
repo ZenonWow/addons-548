@@ -1,0 +1,15 @@
+## Interface: 50400
+##- Interface: 30000
+
+## Title: tekDebug
+## Notes: Debug output frame thing
+## Author: Tekkub Stoutwrithe
+## Version: 3.0.1.3
+## X-Website: http://www.tekkub.net/
+## X-Email: tekkub-wow@googlegroups.com
+## X-Category: Development Tools
+
+LibStub.lua
+SlimPanel.lua
+
+tekDebug.lua
