@@ -179,12 +179,14 @@ function AddonLoader:LoadAndInitialize(addonName, loadCondition)
 		self.loadError[addonName]  = "No error, but not loaded"
 	end
 	
-	-- Replay the standard events of addon loading
-	local eventsOk, eventsErr =  capture  and  capture:SendAddOnLoadEvents()
-	if  not eventsOk  then
-		self:Print(addonName.."  addon initialization error: "..eventsErr)
-		self:Toast(addonName.."  addon failed to initialize properly", textColors.error)
-		-- Report the error, but return the loading succeeded.
+	if  capture  then
+		-- Replay the standard events of addon loading
+		local eventsOk, eventsErr =  capture:SendAddOnLoadEvents()
+		if  not eventsOk  then
+			self:Print(addonName.."  addon initialization error: "..eventsErr)
+			self:Toast(addonName.."  addon failed to initialize properly", textColors.error)
+			-- Report the error, but return the loading succeeded.
+		end
 	end
 	
 	-- After load callback function loaded from metadata
@@ -431,10 +433,11 @@ function AddonLoader:OnEvent(...)
 	end
 	
 	-- If the delayed loader has been delay-loaded, then this is the only event guaranteed to fire, so schedule initialization.
-	local delayedLoaded =  eventName == 'ADDON_LOADED'  and  IsLoggedIn()
+	local delayLoaded =  eventName == 'ADDON_LOADED'  and  IsLoggedIn()
+	self.delayLoaded = delayLoaded
 	
 	-- Loading conditions from metadata and SavedVariables
-	if  eventName == self.InitOnEvent  or  delayedLoaded  then
+	if  eventName == self.InitOnEvent  or  delayLoaded  then
 		Debug("AddonLoader:  Load metadata after event "..eventName)
 		-- Schedule LoadConfiguration()
 		self:ScheduleInitFunc(self.InitOnEvent, self.ConditionManager.LoadConfiguration)
@@ -442,7 +445,7 @@ function AddonLoader:OnEvent(...)
 	end
 	
 	-- Running Startup and Login handlers
-	if  eventName == self.StartOnEvent  or  delayedLoaded  then
+	if  eventName == self.StartOnEvent  or  delayLoaded  then
 		Debug("AddonLoader:  Start Login handlers after event "..eventName)
 		-- Schedule RunStartupHandlers(), RunHandlersForCachedEvents()
 		self:ScheduleInitFunc(self.StartOnEvent, self.ConditionManager.RunStartupHandlers)
@@ -562,6 +565,9 @@ function AddonLoader:ReplayCachedEvents(recipient)
 	if  IsLoggedIn()  and  not cachedEvents.VARIABLES_LOADED  then  recipient:FireEvent('VARIABLES_LOADED')  end
 	if  IsLoggedIn()  and  not cachedEvents.PLAYER_LOGIN  then  recipient:FireEvent('PLAYER_LOGIN')  end
 	if  IsPlayerInWorld()  and  not cachedEvents.PLAYER_ENTERING_WORLD  then  recipient:FireEvent('PLAYER_ENTERING_WORLD')  end
+	-- Can't know if SPELLS_CHANGED was fired if  AddonLoader.delayLoaded:  this might be after PLAYER_ENTERING_WORLD but before SPELLS_CHANGED
+	-- Coolline addon expects this event, others like Quartz initialize spells even without it.
+	-- Possible to mock it if necessary.
 end
 
 
@@ -594,20 +600,20 @@ AddonLoader.addonLoadEvents = {
 	-- Use it only if you are into saving and loading keybindings: since 3.0.2 (WotLK) it signals that keybindings and cvars have been loaded.
 	-- For usual purposes you can do SetOverrideBinding() on your frame even before these are loaded.
 	--]]
-	'SPELLS_CHANGED',
-	-- Spells of player has been loaded...
 	'PLAYER_LOGIN',
-	--[[ PLAYER_LOGIN is that favored event to initialize and start OnUpdate processing, causing a lagspike.
+	--[[ PLAYER_LOGIN is the favored event to initialize and start OnUpdate processing, causing a lagspike.
 	-- The purpose is to delay initilization further, in the best case to implement proper lazy initialization, only loading addons when you start using them.
 	--]]
 	'PLAYER_ENTERING_WORLD',
+	'SPELLS_CHANGED',
+	-- Spells of player has been loaded...
 }
 
 
 -- Registering addon load events and handlers
 AddonLoader:SetScript('OnEvent', AddonLoader.OnEvent)
-AddonLoader:Show()
 AddonLoader:SetScript('OnUpdate', AddonLoader.OnUpdate)
+AddonLoader:Show()
 for  idx, eventName  in ipairs(AddonLoader.addonLoadEvents) do
 	AddonLoader.addonLoadEvents[eventName] = idx
 	AddonLoader:RegisterEvent(eventName)
@@ -627,6 +633,7 @@ Generally will not fire. This event indicates an error state where the SavedVari
 The upshot here is that your addon could be in a state where the saved variables did not load. This event's purpose is to indicate that you are in this error state.
 If you are in this state your addon's SavedVariables will NOT be saved back to disk at the next logout. This was done with the reasoning that it will prevent valid data from accidentally being wiped by defaults.
 It is possible for an addon's account wide SavedVariables to load, but for the character specific SavedVariables to fail, or vice versa. There is no way to detect the difference between no variables loaded and some.
+VARIABLES_LOADED has not been a reliable part of the addon loading process since Patch 3.0.2. It is now fired only in response to CVars, Keybindings and other associated "Blizzard" variables being loaded, and may therefore be delayed until after PLAYER_ENTERING_WORLD. The event may still be useful to override positioning data stored in layout-cache.txt.
 SPELLS_CHANGED
 This event fires shortly before the PLAYER_LOGIN event and signals that information on the user's spells has been loaded and is available to the UI.
 PLAYER_LOGIN
@@ -639,7 +646,6 @@ This event fires immediately after PLAYER_LOGIN
 Most information about the game world should now be available to the UI. If this is an interface reload rather than a fresh log in, talent information should also be available.
 All sizing and positioning of frames is supposed to be completed before this event fires.
 This event also fires whenever the player enters/leaves an instance and generally whenever the player sees a loading screen
-Since Patch 3.0.2, VARIABLES_LOADED has not been a reliable part of the addon loading process. It is now fired only in response to CVars, Keybindings and other associated "Blizzard" variables being loaded, and may therefore be delayed until after PLAYER_ENTERING_WORLD. The event may still be useful to override positioning data stored in layout-cache.txt.
 
 Somewhere around Patch 5.4.0, PLAYER_ALIVE stopped being fired on login. It now only fires when a player is resurrected (before releasing spirit) or when a player releases spirit. Previously, PLAYER_ALIVE was used to by addons to signal that quest and talent information were available because it was the last event to fire (fired after PLAYER_ENTERING_WORLD), but this is no longer accurate.
 

@@ -88,7 +88,8 @@ local function parseLuaObject(str)
 	
 	local body = "return "..str
 	local ran, result = safecall(loadstring, body)
-	local ran, object =  ran  and  type(result) == 'function'  and  safecall(result)
+	if  not ran  or  type(result) ~= 'function'  then  return  end
+	local ran, object =  safecall(result)
 	return  ran  and  object
 end
 
@@ -549,7 +550,7 @@ ConditionManager.ConditionTemplates = {
 			-- the second part can be a string  or  an object definining any property
 			local dataobj, name = parseLuaObject(rest), nil
 			if  not dataobj  then
-				name, rest = rest  and  strsplit(private.SPLIT_CHARS, rest, 2)
+				if  rest  then  name, rest = strsplit(private.SPLIT_CHARS, rest, 2)  end
 				rest = rest  and  rest:trim()
 				dataobj = parseLuaObject(rest)  or  {}
 			end

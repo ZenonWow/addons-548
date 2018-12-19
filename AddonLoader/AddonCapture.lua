@@ -98,9 +98,9 @@ function AddonCapture:SendAddOnLoadEvents()
 	AddonLoader:ReplayCachedEvents(self)
 	--[[
 	self:FireEvent('VARIABLES_LOADED')
-	self:FireEvent('SPELLS_CHANGED')
 	self:FireEvent('PLAYER_LOGIN')
 	self:FireEvent('PLAYER_ENTERING_WORLD')
+	self:FireEvent('SPELLS_CHANGED')
 	--]]
 	return self
 end

@@ -601,11 +601,12 @@ function ConditionManager:EvaluateCondition(addonName, condition, ...)
 	if  condition.error  then  return false  end
 	self.evaluatedCondition = condition
 	-- If a handler fails with error then it is ignored to load the addon early instead of never. This includes the case when  condition.handler == nil
-	local ran, result = condition.handler  and  safecall(condition.handler, condition, ...)
+	local ran, result = nil, nil
+	if  condition.handler  then  ran, result = safecall(condition.handler, condition, ...)  end
 	-- It is possible the beforeLoadFunc will load the addon and return nil.
-	ran, result = (not ran or result)  and  safecall(condition.beforeLoadFunc, condition, ...)
+	if  not ran or result  then  ran, result = safecall(condition.beforeLoadFunc, condition, ...)  end
 	-- The beforeLoadFunc must return some Trueish value to load the addon.
-	-- NIL is used as false. (1nil type.. 1nilla..)
+	-- nil is used as false. (1nil type.. 1nilla..)
 	-- The beforeLoadFunc might have loaded the addon, check consistency with ADDON_LOADED event.
 	AddonLoader:CheckAddOnLoaded(addonName)
 	
