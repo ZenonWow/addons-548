@@ -478,16 +478,16 @@ function BMT.ScrollFrame_Update()
 				-- |cffa335ee|Hitem:87144:0:0:0:0:0:0:0:90:0:445|h[Regail's Band of the Endless]|h|r
 				local itemID = link:match('|Hitem:(%d*):%d*:%d*:%d*:%d*:%d*:%d*:%d*:%d*:%d*:%d*')
 				local _,_,_,itemLevel,reqLevel,armorType,armorClass,_,armorSlot,iconPath,maybe_useSpellId = GetItemInfo(link)
-				itemType = itemType  and  itemType..'\n'  or  ''
+				--itemType = itemType  and  itemType..'\n'  or  ''
 				itemID = itemID  or  '?'
-				button.Type:SetText(itemType..'item='.. colors.itemID .. itemID ..'|r');
+				button.Type:SetText('item='.. colors.itemID .. itemID ..'|r\n'..itemType);
 				
 				sellerName = sellerName or ''
 				-- Show marketID, itemID in seller column
 				--button.Seller:SetText(sellerName ..' #'.. colors.marketID .. marketID ..'|r \n item='.. colors.itemID .. itemID .. '|r')
 				--button.Seller:SetText(sellerName ..' \n item='.. colors.itemID .. itemID .. '|r')
 				marketID = marketID  or  '?'
-				button.Seller:SetText(sellerName ..' #'.. colors.marketID .. marketID .. '|r')
+				button.Seller:SetText('#'.. colors.marketID .. marketID ..'|r '.. sellerName)
 				--button.Seller.tooltip = 'item='.. itemID ..' \n marketID='.. marketID
 				
 				level = level  or  '?'
@@ -553,7 +553,12 @@ function BMT.BlackMarketFrame_Resize(self)
 	--BlackMarketFrame.Inset:SetPoint('BOTTOMRIGHT',nil)
 	--BlackMarketFrame.Inset:SetPoint('BOTTOMLEFT',nil)
 	--BlackMarketScrollFrame:SetSize(345,450)
-	HybridScrollFrame_CreateButtons(BlackMarketScrollFrame, "BlackMarketItemTemplate", 5, -5)
+	--[[
+	BlackMarketItemTemplate:SetHeight(44)
+	BlackMarketItemTemplate.TimeLeft:SetSize(150,42)
+	BlackMarketItemTemplate.TimeLeft:SetWidth(150)
+	--]]
+	HybridScrollFrame_CreateButtons(BlackMarketScrollFrame, "BlackMarketItemTemplate2", 0, 0)
 end
 
 
