@@ -1,0 +1,201 @@
+------------------------------------------------------------------------
+r1126 | funkydude | 2014-10-12 17:58:06 +0000 (Sun, 12 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/UpperBlackrockSpire/Gorashan.lua
+   M /trunk/WoD/UpperBlackrockSpire/Kyrak.lua
+   M /trunk/WoD/UpperBlackrockSpire/Ragewing.lua
+   M /trunk/WoD/UpperBlackrockSpire/Tharbek.lua
+   M /trunk/WoD/UpperBlackrockSpire/Zaela.lua
+
+UBRS: Remaining fixes
+------------------------------------------------------------------------
+r1125 | funkydude | 2014-10-12 16:16:56 +0000 (Sun, 12 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/UpperBlackrockSpire/Gorashan.lua
+   M /trunk/WoD/UpperBlackrockSpire/Kyrak.lua
+   M /trunk/WoD/UpperBlackrockSpire/Ragewing.lua
+   M /trunk/WoD/UpperBlackrockSpire/Tharbek.lua
+   M /trunk/WoD/UpperBlackrockSpire/Zaela.lua
+
+UBRS: Finish this off.
+------------------------------------------------------------------------
+r1124 | funkydude | 2014-10-12 12:08:17 +0000 (Sun, 12 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/GrimrailDepot/Rocketspark.lua
+   A /trunk/WoD/TheEverbloom
+   M /trunk/WoD/UpperBlackrockSpire/Gorashan.lua
+
+Rocketspark: fix deaths and tweak sounds.
+------------------------------------------------------------------------
+r1123 | funkydude | 2014-10-09 21:37:21 +0000 (Thu, 09 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/MoP/MogushanPalace/TrialOfTheKing.lua
+   M /trunk/MoP/ShadoPanMonastery/TaranZhu.lua
+
+more tweaks.
+------------------------------------------------------------------------
+r1122 | funkydude | 2014-10-09 16:12:09 +0000 (Thu, 09 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/LittleWigs.toc
+   M /trunk/MoP/MogushanPalace/Gekkan.lua
+   M /trunk/MoP/MogushanPalace/TrialOfTheKing.lua
+   M /trunk/MoP/TempleOfTheJadeSerpent/LiuFlameheart.lua
+   M /trunk/MoP/TempleOfTheJadeSerpent/WiseMari.lua
+   M /trunk/WoD/ShadowmoonBurialGrounds/Nhallish.lua
+
+Tweaks
+------------------------------------------------------------------------
+r1121 | funkydude | 2014-09-26 22:39:01 +0000 (Fri, 26 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/LittleWigs.toc
+   A /trunk/WoD/UpperBlackrockSpire
+   A /trunk/WoD/UpperBlackrockSpire/Gorashan.lua
+   A /trunk/WoD/UpperBlackrockSpire/Kyrak.lua
+   A /trunk/WoD/UpperBlackrockSpire/Ragewing.lua
+   A /trunk/WoD/UpperBlackrockSpire/Tharbek.lua
+   A /trunk/WoD/UpperBlackrockSpire/Zaela.lua
+   A /trunk/WoD/UpperBlackrockSpire/modules.xml
+   M /trunk/modules.xml
+
+UBRS plumbing.
+------------------------------------------------------------------------
+r1120 | funkydude | 2014-09-20 22:21:37 +0000 (Sat, 20 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Auchindoun/Terongor.lua
+
+Auchindoun/Terongor: Win event.
+------------------------------------------------------------------------
+r1119 | funkydude | 2014-09-20 16:42:01 +0000 (Sat, 20 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/modules.xml
+
+Fix loading.
+------------------------------------------------------------------------
+r1118 | funkydude | 2014-09-16 14:48:52 +0000 (Tue, 16 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/WoD/Auchindoun/Azzakel.lua
+   M /trunk/WoD/Auchindoun/Kaathar.lua
+   M /trunk/modules.xml
+
+Auchindoun: tweaks
+------------------------------------------------------------------------
+r1117 | funkydude | 2014-09-16 13:28:21 +0000 (Tue, 16 Sep 2014) | 2 lines
+Changed paths:
+   M /trunk/WoD/IronDocks/Enforcers.lua
+   M /trunk/WoD/ShadowmoonBurialGrounds/Sadana.lua
+
+IronDocks/Enforcers: fix call to self
+ShadowmoonBurialGrounds/Sadana: Fix boss id
+------------------------------------------------------------------------
+r1116 | funkydude | 2014-09-16 12:41:37 +0000 (Tue, 16 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/LittleWigs.toc
+   A /trunk/WoD/Skyreach
+   A /trunk/WoD/Skyreach/Araknath.lua
+   A /trunk/WoD/Skyreach/Ranjit.lua
+   A /trunk/WoD/Skyreach/Rukhran.lua
+   A /trunk/WoD/Skyreach/Viryx.lua
+   A /trunk/WoD/Skyreach/modules.xml
+   M /trunk/modules.xml
+
+Skyreach plumbing
+------------------------------------------------------------------------
+r1115 | funkydude | 2014-09-16 12:11:41 +0000 (Tue, 16 Sep 2014) | 1 line
+Changed paths:
+   D /trunk/BlackTempleSolo
+   D /trunk/GateOfTheSettingSun
+   A /trunk/MoP/BlackTempleSolo (from /trunk/BlackTempleSolo:1114)
+   A /trunk/MoP/GateOfTheSettingSun (from /trunk/GateOfTheSettingSun:1114)
+   A /trunk/MoP/MogushanPalace (from /trunk/MogushanPalace:1114)
+   A /trunk/MoP/ScarletHalls (from /trunk/ScarletHalls:1114)
+   A /trunk/MoP/ScarletMonastery (from /trunk/ScarletMonastery:1114)
+   A /trunk/MoP/Scholomance (from /trunk/Scholomance:1114)
+   A /trunk/MoP/ShadoPanMonastery (from /trunk/ShadoPanMonastery:1114)
+   A /trunk/MoP/SiegeOfNiuzaoTemple (from /trunk/SiegeOfNiuzaoTemple:1114)
+   A /trunk/MoP/StormstoutBrewery (from /trunk/StormstoutBrewery:1114)
+   A /trunk/MoP/TempleOfTheJadeSerpent (from /trunk/TempleOfTheJadeSerpent:1114)
+   D /trunk/MogushanPalace
+   D /trunk/ScarletHalls
+   D /trunk/ScarletMonastery
+   D /trunk/Scholomance
+   D /trunk/ShadoPanMonastery
+   D /trunk/SiegeOfNiuzaoTemple
+   D /trunk/StormstoutBrewery
+   D /trunk/TempleOfTheJadeSerpent
+
+Move MoP instances to MoP folder.
+------------------------------------------------------------------------
+r1114 | funkydude | 2014-09-16 12:10:30 +0000 (Tue, 16 Sep 2014) | 1 line
+Changed paths:
+   D /trunk/Auchindoun
+   D /trunk/BloodmaulSlagMines
+   D /trunk/GrimrailDepot
+   D /trunk/IronDocks
+   D /trunk/ShadowmoonBurialGrounds
+   A /trunk/WoD/Auchindoun (from /trunk/Auchindoun:1113)
+   A /trunk/WoD/BloodmaulSlagMines (from /trunk/BloodmaulSlagMines:1113)
+   A /trunk/WoD/GrimrailDepot (from /trunk/GrimrailDepot:1113)
+   A /trunk/WoD/IronDocks (from /trunk/IronDocks:1113)
+   A /trunk/WoD/ShadowmoonBurialGrounds (from /trunk/ShadowmoonBurialGrounds:1113)
+
+Move WoD instances to WoD folder.
+------------------------------------------------------------------------
+r1113 | funkydude | 2014-09-16 12:08:30 +0000 (Tue, 16 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/LittleWigs.toc
+   A /trunk/MoP
+   A /trunk/WoD
+   M /trunk/modules.xml
+
+Plumbing for categorization of instances.
+------------------------------------------------------------------------
+r1112 | funkydude | 2014-09-15 19:16:08 +0000 (Mon, 15 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/IronDocks/Enforcers.lua
+   M /trunk/IronDocks/Nokgar.lua
+   M /trunk/IronDocks/Oshir.lua
+   M /trunk/IronDocks/Skulloc.lua
+
+IronDocks: add some timers.
+------------------------------------------------------------------------
+r1111 | funkydude | 2014-09-13 19:57:44 +0000 (Sat, 13 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/IronDocks/Enforcers.lua
+   M /trunk/IronDocks/Nokgar.lua
+   M /trunk/IronDocks/Oshir.lua
+   M /trunk/IronDocks/Skulloc.lua
+
+IronDocks: Add boss ids.
+------------------------------------------------------------------------
+r1110 | funkydude | 2014-09-13 18:35:38 +0000 (Sat, 13 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/Auchindoun/Kaathar.lua
+   M /trunk/IronDocks/Enforcers.lua
+   M /trunk/IronDocks/Nokgar.lua
+   M /trunk/IronDocks/Oshir.lua
+   M /trunk/IronDocks/Skulloc.lua
+
+Auchindoun/Kaathar: now has a boss unit.
+------------------------------------------------------------------------
+r1109 | funkydude | 2014-09-13 00:30:04 +0000 (Sat, 13 Sep 2014) | 1 line
+Changed paths:
+   A /trunk/IronDocks
+   A /trunk/IronDocks/Enforcers.lua
+   A /trunk/IronDocks/Nokgar.lua
+   A /trunk/IronDocks/Oshir.lua
+   A /trunk/IronDocks/Skulloc.lua
+   A /trunk/IronDocks/modules.xml
+   M /trunk/LittleWigs.toc
+   M /trunk/modules.xml
+
+Iron Docks plumbing.
+------------------------------------------------------------------------
+r1108 | funkydude | 2014-09-13 00:13:29 +0000 (Sat, 13 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/ShadowmoonBurialGrounds/Bonemaw.lua
+   M /trunk/ShadowmoonBurialGrounds/Nerzhul.lua
+   M /trunk/ShadowmoonBurialGrounds/Nhallish.lua
+   M /trunk/ShadowmoonBurialGrounds/Sadana.lua
+
+ShadowmoonBurialGrounds: Finish this off.
+------------------------------------------------------------------------

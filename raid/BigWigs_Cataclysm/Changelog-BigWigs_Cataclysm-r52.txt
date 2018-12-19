@@ -1,0 +1,52 @@
+------------------------------------------------------------------------
+r52 | nebula169 | 2014-09-26 18:54:49 +0000 (Fri, 26 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/Throne/Alakir.lua
+
+Alakir: update spell id
+------------------------------------------------------------------------
+r51 | ananhaid | 2014-09-16 03:12:40 +0000 (Tue, 16 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/BigWigs_Cataclysm.toc
+
+- zhCN update.
+------------------------------------------------------------------------
+r50 | funkydude | 2014-09-11 21:29:22 +0000 (Thu, 11 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/Firelands/Ragnaros.lua
+
+Firelands/Ragnaros: Replace Burning Wound debuff duration bar with ability cooldown bar.
+------------------------------------------------------------------------
+r49 | funkydude | 2014-09-03 20:46:03 +0000 (Wed, 03 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/Firelands/Staghelm.lua
+
+Firelands/Staghelm: Fix Reckless Leap target scanning in a party.
+------------------------------------------------------------------------
+r48 | funkydude | 2014-09-03 20:15:06 +0000 (Wed, 03 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/Firelands/Locales/deDE.lua
+   M /trunk/Firelands/Locales/esES.lua
+   M /trunk/Firelands/Locales/frFR.lua
+   M /trunk/Firelands/Locales/itIT.lua
+   M /trunk/Firelands/Locales/koKR.lua
+   M /trunk/Firelands/Locales/ptBR.lua
+   M /trunk/Firelands/Locales/ruRU.lua
+   M /trunk/Firelands/Locales/zhCN.lua
+   M /trunk/Firelands/Locales/zhTW.lua
+   M /trunk/Firelands/Ragnaros.lua
+
+Firelands/Ragnaros: Fix burning wound message
+------------------------------------------------------------------------
+r47 | funkydude | 2014-09-03 19:25:21 +0000 (Wed, 03 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/Firelands/Baleroc.lua
+
+Firelands/Baleroc: Fix focus stack alerts for Torment showing up when they are on you.
+------------------------------------------------------------------------
+r45 | funkydude | 2013-09-29 22:43:14 +0000 (Sun, 29 Sep 2013) | 1 line
+Changed paths:
+   M /trunk/Blackwing/Maloriak.lua
+
+Maloriak: fix phase change message
+------------------------------------------------------------------------
