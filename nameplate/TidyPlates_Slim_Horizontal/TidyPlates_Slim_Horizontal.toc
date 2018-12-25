@@ -1,0 +1,8 @@
+## Interface: 50400
+## Title: Tidy Plates: Slim Horizontal
+## Notes: 
+## Author: Dotfix
+## Version: 1
+## Dependencies: TidyPlates, TidyPlatesHub
+
+Slim_Horizontal.lua

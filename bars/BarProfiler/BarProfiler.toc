@@ -1,0 +1,6 @@
+## Interface: 50001
+## Title: Bar Profiler
+## Notes: A small addon for saving and loading the spells, macros, companions and items on your action bars
+## Version: 0.3.2a
+## SavedVariables: BarProfilerDb
+BarProfiler.xml

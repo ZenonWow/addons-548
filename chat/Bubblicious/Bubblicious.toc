@@ -1,0 +1,26 @@
+## Interface: 50400
+## X-Curse-Packaged-Version: r21
+## X-Curse-Project-Name: Bubblicious
+## X-Curse-Project-ID: bubblicious
+## X-Curse-Repository-ID: wow/bubblicious/mainline
+
+## Title: Bubblicious
+## Notes: Customize the appearance of the chat bubbles.
+## Version: r21 
+## Author: Sylvanaar
+
+## SavedVariables: BubbliciousDB 
+
+## OptDeps: LibStub, Ace3
+
+#@no-lib-strip@
+libs\LibStub-1.0\LibStub.lua
+libs\AceAddon-3.0\AceAddon-3.0.xml
+libs\AceDB-3.0\AceDB-3.0.xml
+libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+libs\AceGUI-3.0\AceGUI-3.0.xml
+libs\AceConfigRegistry-3.0\AceConfigRegistry-3.0.xml
+libs\AceConfigDialog-3.0\AceConfigDialog-3.0.xml
+#@end-no-lib-strip@
+
+Bubbles.lua

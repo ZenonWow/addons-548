@@ -1,0 +1,144 @@
+2014-06-29  sylvanaar  <sylvanaar@mindspring.com>
+
+[9c4366a8823f] [tip]
+* Bubblicious.toc:
+
+TOC Bump
+
+
+2012-10-21  sylvanaar  <sylvanaar@mindspring.com>
+
+[a50f155b9932]
+* .hgtags:
+
+Added tag 1.4 for changeset 7c342992ba43
+
+
+[7c342992ba43] [1.4]
+* Bubblicious.toc:
+
+TOC 50001
+
+
+2011-06-28  sylvanaar  <sylvanaar@mindspring.com>
+
+[a2def99cb2db]
+* .hgtags:
+
+Added tag 1.3 for changeset fab9e68b45d8
+
+
+[fab9e68b45d8] [1.3]
+* Bubblicious.toc:
+
+TOC 40200
+
+
+2011-04-26  sylvanaar  <sylvanaar>
+
+[a2eca62b682b]
+* .hgtags:
+
+Added tag 1.2 for changeset 84c789392daa
+
+
+[84c789392daa] [1.2]
+* Bubblicious.toc:
+
+TOC 40100
+
+
+2010-10-25  sylvanaar  <sylvanaar>
+
+[3fb60ad4f7f3]
+* .hgtags:
+
+Added tag 1.1 for changeset e63ee45c88ef
+
+
+[e63ee45c88ef] [1.1]
+* Bubblicious.toc:
+
+toc 40000
+
+
+2010-09-17  sylvanaar  <sylvanaar>
+
+[e3f2beb45591]
+* .hgtags:
+
+Added tag 1.0 for changeset a0b78fe3ce6b
+
+
+[a0b78fe3ce6b] [1.0]
+* .hgtags:
+
+Added tag 1.0b1 for changeset c6568f72b015
+
+
+[c6568f72b015] [1.0b1]
+* .hgignore:
+
+update hgignore for libs
+
+
+[4556258a3843]
+* .pkgmeta, Bubblicious.toc:
+
+add reference to AceGUI
+
+
+[4d8dc60eac84]
+* .pkgmeta, Bubblicious.toc:
+
+add callbackhandler lib needed by aceconfig
+
+
+[cdd26b852bd2]
+* Bubbles.lua:
+
+disable dynamic chatbubble compression by default
+
+
+[23793e4b92cc]
+* .pkgmeta:
+
+fix svn path to AceConfig-3.0 libraries
+
+
+[5c068d8d57cf]
+* .pkgmeta, Bubbles.lua, Bubblicious.toc:
+
+add options via aceconfig*
+
+
+[7838512deffb]
+* Bubblicious.toc:
+
+fix libstub error in toc
+
+
+[4fa4515ec25f]
+* .pkgmeta:
+
+output a license file
+
+
+[672c73e425bf]
+* Bubblicious.toc:
+
+add missing saved variable
+
+
+[65d0d3e56d37]
+* Bubbles.lua, Bubblicious.toc:
+
+first alpha version...options are only changable in the lua code in this version
+
+
+[69151a73d1e5]
+* .pkgmeta:
+
+set up pkgmeta
+
+

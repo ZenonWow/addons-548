@@ -1,0 +1,31 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+
+<Script file="actions\SetTheory.lua"/>
+<Script file="actions\Outfitter.lua"/>
+<Script file="actions\TrinketMenu.lua"/>
+<Script file="actions\ZOMGBuffs.lua"/>
+<Script file="actions\PowerAuras.lua"/>
+<Script file="actions\PowerAuras3.lua"/>
+<Script file="actions\CharacterStats.lua"/>
+<Script file="actions\DualSpec.lua"/>
+<Script file="actions\AceProfile.lua"/>
+<Script file="actions\Talented.lua"/>
+<Script file="actions\Dominos.lua"/>
+<Script file="actions\Wait.lua"/>
+<Script file="actions\AceToggle.lua"/>
+<Script file="actions\EquipmentManager.lua"/>
+<Script file="actions\Lua.lua"/>
+<Script file="actions\TellMeWhen.lua"/>
+<Script file="actions\XPerl.lua"/>
+<Script file="actions\DoTimer.lua"/>
+<Script file="actions\ItemRack.lua"/>
+<Script file="actions\ACP.lua"/>
+<Script file="actions\ABS.lua"/>
+<Script file="actions\CancelBuff.lua"/>
+<Script file="actions\KeyChange.lua"/>
+<Script file="actions\Glyphs.lua"/>
+
+<Script file="actions\Role.lua"/>
+</Ui>

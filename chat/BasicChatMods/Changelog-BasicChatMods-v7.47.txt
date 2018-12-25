@@ -1,0 +1,46 @@
+------------------------------------------------------------------------
+r480 | funkydude | 2014-08-18 10:55:07 +0000 (Mon, 18 Aug 2014) | 1 line
+Changed paths:
+   A /tags/v7.47 (from /trunk:479)
+
+Tagging as v7.47
+------------------------------------------------------------------------
+r479 | funkydude | 2014-08-18 10:53:23 +0000 (Mon, 18 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/BasicChatMods.toc
+   M /trunk/chatcopy.lua
+
+chatcopy: re-enable keyboard input
+------------------------------------------------------------------------
+r477 | funkydude | 2014-08-14 12:59:59 +0000 (Thu, 14 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/BasicChatMods.toc
+
+bump version
+------------------------------------------------------------------------
+r476 | funkydude | 2014-08-14 11:36:52 +0000 (Thu, 14 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/BasicCore.lua
+
+Add yet another oq filter, as apparently it also creates a custom channel for transmission. Remove previous debug.
+------------------------------------------------------------------------
+r475 | funkydude | 2014-08-13 21:48:17 +0000 (Wed, 13 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/BasicCore.lua
+
+Add some (most likely) spammy debug to try solve the oqueue issues.
+------------------------------------------------------------------------
+r473 | funkydude | 2014-08-11 20:17:22 +0000 (Mon, 11 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/BasicCore.lua
+   M /trunk/chatcopy.lua
+
+Re-add the oQueue filters. Evidently oQueue is still abusing chat instead of using the BNET addon comm API? Bring on 6.x and raid finder.
+------------------------------------------------------------------------
+r472 | funkydude | 2014-08-10 10:55:59 +0000 (Sun, 10 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/BasicChatMods.toc
+   M /trunk/chatcopy.lua
+
+chatcopy: Disable keyboard input on the popup, scroll to the bottom of the popup automatically after opening.
+------------------------------------------------------------------------

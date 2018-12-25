@@ -1,0 +1,22 @@
+## Interface: 50000
+## Title : SetTheory
+## Author: fakeh
+## Version: v0.6-release-MoPupdate
+## SavedVariables: SetTheoryDB
+## OptionalDeps: Outfitter, ZOMGBuffs, TrinketMenu, PowerAuras, TellMeWhen, XPerl, DoTimer, ItemRack, ACP, ActionBarSaver, Dominos
+## X-Curse-Packaged-Version: v0.6-release-MoPupdate
+## X-Curse-Project-Name: SetTheory
+## X-Curse-Project-ID: settheory
+## X-Curse-Repository-ID: wow/settheory/mainline
+
+embeds.xml
+
+core.lua
+opts.lua
+prompt.lua
+progress.lua
+broker.lua
+menu.lua
+
+actions.xml
+triggers.xml

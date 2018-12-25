@@ -1,0 +1,17 @@
+<Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+	<Script file="Libs\LibStub\LibStub.lua"/>
+	<Include file="Libs\AceAddon-3.0\AceAddon-3.0.xml"/>
+	<Include file="Libs\AceConsole-3.0\AceConsole-3.0.xml"/>
+	<Include file="Libs\AceGUI-3.0\AceGUI-3.0.xml"/>
+	<Include file="Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml"/>
+	<Script file="Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua"/>
+	<Script file="Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua"/>
+	<Script file="BarProfilerInitialSlash.lua"/>
+	<Script file="BarProfilerSaveLoad.lua"/>
+	<Script file="BarProfilerCreateDeleteRename.lua"/>
+	<Script file="Gui\BarProfilerGuiHandler.lua"/>
+	<Script file="Gui\BarProfilerGuiMainTab.lua"/>
+	<Script file="Gui\BarProfilerGuiAdvancedTab.lua"/>
+	<Script file="Gui\BarProfilerGuiSettingTab.lua"/>
+	<Script file="Gui\BarProfilerGuiWarning.lua"/>
+</Ui>

@@ -1,0 +1,16 @@
+------------------------------------------------------------------------
+r155 | fakeh | 2012-09-22 08:32:15 +0000 (Sat, 22 Sep 2012) | 1 line
+Changed paths:
+   A /tags/v0.6-release-MoPupdate (from /trunk:154)
+
+Tagging as v0.6-release-MoPupdate
+------------------------------------------------------------------------
+r154 | fakeh | 2012-09-22 08:29:29 +0000 (Sat, 22 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/SetTheory.toc
+   M /trunk/actions/CharacterStats.lua
+   M /trunk/actions/DualSpec.lua
+   M /trunk/core.lua
+
+5.0.4 update. Don't expect all modules to work.
+------------------------------------------------------------------------

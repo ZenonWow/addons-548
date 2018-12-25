@@ -1,0 +1,56 @@
+## Interface: 50400
+## Author: Funkydude
+## X-Credits: Rabbit & Ammo (SCM)
+## Notes: Basic Chat Mods!
+## Version: 7.47
+## Title: BasicChatMods
+## SavedVariables: bcmDB
+## X-Category: Chat/Communication
+## X-License: All Rights Reserved
+## X-Curse-Packaged-Version: v7.47
+## X-Curse-Project-Name: BasicChatMods
+## X-Curse-Project-ID: basic-chat-mods
+## X-Curse-Repository-ID: wow/basic-chat-mods/mainline
+
+## OptionalDeps: LibChatAnims
+## X-Embeds: LibChatAnims
+
+embeds.xml
+
+Locales\enUS.lua
+Locales\deDE.lua
+Locales\koKR.lua
+Locales\frFR.lua
+Locales\esMX.lua
+Locales\ruRU.lua
+Locales\zhCN.lua
+Locales\esES.lua
+Locales\zhTW.lua
+Locales\itIT.lua
+Locales\ptBR.lua
+
+BasicCore.lua
+BasicConfig.lua
+
+history.lua
+
+AltInvite.lua
+autolog.lua
+bnet.lua
+buttons.lua
+channelnames.lua
+chatcopy.lua
+editbox.lua
+fade.lua
+font.lua
+gmotd.lua
+highlight.lua
+justify.lua
+playernames.lua
+resize.lua
+scrolldown.lua
+sticky.lua
+telltarget.lua
+timestamp.lua
+urlcopy.lua
+

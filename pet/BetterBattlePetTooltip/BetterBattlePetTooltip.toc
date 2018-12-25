@@ -1,0 +1,34 @@
+## Interface: 50400
+## Version: 5.4.8.62
+
+## Title: BetterBattlePetTooltip
+## Notes: Adds your highest collected level and quality to battle pet tooltips.
+## Notes-deDE: Zeigt in den Kampfhaustieren-Tooltips die höchste gefangene Stufe und Qualität.
+## Notes-esES: Mostrar el mayor nivel y calidad de las mascotas de combate capturados en las descripciones.
+## Notes-esMX: Mostrar el mayor nivel y calidad de las mascotas de combate capturados en las descripciones.
+## Notes-frFR: Afficher le plus haut niveau et qualité des mascottes de combat capturées dans les infobulles.
+## Notes-itIT: Mostrare il più alto livello e qualità dei mascotti da combattimento catturati nelle descrizioni.
+## Notes-ptBR: Mostrar o mais alto nível e qualidade dos mascotes de batalha capturados nas dicas.
+## Notes-ruRU: Отображать наивысший уровень и качество боевых питомцев во всплывающих подсказках.
+
+## Author: Phanx
+## X-Email: addons@phanx.net
+## X-Copyright: Copyright (c) 2012-2014 Phanx. All rights reserved.
+## X-License: See the accompanying LICENSE file.
+## X-CompatibleLocales: deDE, enUS, esES, esMX, frFR, itIT, ptBR, koKR, ruRU, zhCN, zhTW
+## X-Localizations: enUS, deDE, esES, esMX, frFR, itIT, ruRU
+## X-Website: http://www.wowinterface.com/downloads/info21978-BetterBattlePetTooltip.html
+## X-Curse-Project-Name: betterbattlepettooltip
+## X-WoWI-ID: 21978
+
+## OptionalDependencies: LibPetJournal-2.0
+## SavedVariables: BBPTDB
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+Libs\LibPetJournal-2.0\LibPetJournal-2.0.lua
+
+Localization.lua
+Data.lua
+Addon.lua
+Options.lua
