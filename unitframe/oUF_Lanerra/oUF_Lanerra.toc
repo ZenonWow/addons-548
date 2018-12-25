@@ -11,8 +11,14 @@
 ## X-Copyright: Copyright © 2014 Lanerra.
 ## X-License: See LICENSE file for license terms.
 ## RequiredDeps: oUF
-## OptionalDeps: oUF_DebuffHighlight, oUF_RuneBar
+## OptionalDeps: oUF_DebuffHighlight, oUF_RuneBar, oUF_MovableFrames
 
+## LoadManagers: AddonLoader
+## X-Load-OnlyOne:  UnitFrame
+
+
+# Embedded oUF
+oUF\oUF.xml
 
 modules\Smooth.lua
 modules\DispellableDebuffs.lua

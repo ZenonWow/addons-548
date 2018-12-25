@@ -20,12 +20,16 @@
 ## X-WoWI-ID: 13993
 
 ## --Dependencies: oUF
-## OptionalDependencies: LibResInfo-1.0, LibSharedMedia-3.0, PhanxConfigWidgets, Clique
+## OptionalDependencies: LibResInfo-1.0, LibSharedMedia-3.0, PhanxConfigWidgets, Clique, oUF_MovableFrames
 ## SavedVariables: oUFPhanxConfig, oUFPhanxUnitConfig
 ## SavedVariablesPerCharacter: oUFPhanxAuraConfig
 
-embeds\oUF\oUF.xml
-oUF.lua
+## LoadManagers: AddonLoader
+## X-Load-OnlyOne:  UnitFrame
+
+
+# Embedded oUF
+oUF\oUF.xml
 
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua

@@ -11,7 +11,11 @@
 ## X-Curse-Project-ID: ouf_adirelle
 ## X-Curse-Repository-ID: wow/ouf_adirelle/mainline
 
+##- LoadManagers: AddonLoader
+## X-Load-OnlyOne:  UnitFrame
+
 ## X-DiminishingReturns-Callback: oUF_Adirelle:RegisterDiminishingReturns()
+
 
 # Libraries
 #@no-lib-strip@
