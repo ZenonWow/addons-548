@@ -1,0 +1,3 @@
+-- Export oUF to global namespace for oUF_MovableFrames addon
+local ADDON_NAME, ns = ...
+if  not _G.oUF  then  _G.oUF = ns.oUF  end

@@ -1,0 +1,18 @@
+## Interface: 50200
+## Title: oUF_Mlight
+## Author: Blue
+## Version: 5.36
+## Notes: oUF layout.
+## Credits:Haste, Freebaser, Monolit, Haleth, Phanx, Tukz, p3lim
+## Dependencies: oUF
+## OptionalDeps: Aurora, oUF_MovableFrames
+## SavedVariablesPerCharacter: oUF_MlightDB
+
+## LoadManagers: AddonLoader
+## X-Load-OnlyOne:  UnitFrame
+
+
+# Embedded oUF
+oUF\oUF.xml
+
+load.xml
