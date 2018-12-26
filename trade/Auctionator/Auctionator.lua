@@ -3452,16 +3452,18 @@ end
 function Atr_ShowLineTooltip (self)
 
 	local itemLink = self.itemLink;
+	--if  itemLink  then  GameTooltip:SetOwner(self, "ANCHOR_RIGHT", -280)  end
+	if  itemLink  then  GameTooltip:SetOwner(Atr_core, "ANCHOR_BOTTOMLEFT", 0)  end
 
 	if (zc.IsBattlePetLink (itemLink)) then
 	
 		local speciesID, level, breedQuality, maxHealth, power, speed, battlePetID, name = zc.ParseBattlePetLink(itemLink)
 
 		BattlePetToolTip_Show(speciesID, level, breedQuality, maxHealth, power, speed, name)
-
+		----[[ BattlePetToolTip_Show takes GameTooltip's anchor
 		BattlePetTooltip:ClearAllPoints();
 		BattlePetTooltip:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 10, 0)
-		
+		--]]
 	else   -- normal case
 	
 		local fname = self:GetName()
@@ -3469,7 +3471,6 @@ function Atr_ShowLineTooltip (self)
 		local textPart = _G[ftname]
 			
 		if (itemLink) then
-			GameTooltip:SetOwner(self, "ANCHOR_RIGHT", -280)
 			GameTooltip:SetHyperlink (itemLink, 1)
 		end
 	end

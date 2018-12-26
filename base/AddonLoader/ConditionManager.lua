@@ -2,7 +2,6 @@ local ADDON_NAME, private = ...
 local AddonLoader = AddonLoader
 local tostrjoin = private.tostrjoin
 local Debug = private.Debug
-local safecall = private.safecall
 local _G, tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown = 
       _G, tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown
 local EMPTY = {}  -- constant empty object to use in place of nil table reference
@@ -20,18 +19,19 @@ AddonLoader.frame = ConditionManager  -- Deprecated: easy reference for use in X
 
 
 -- Metatable to auto-create empty inner tables when first referenced.
-local AutoCreateInnerTables = { __index = function(self, key)  local subTable = {} ; self[key] = subTable ; return subTable  end }
+local AutoCreateInnerTablesMT = { __index = function(self, key)  local subTable = {} ; self[key] = subTable ; return subTable  end }
+-- Want optimized lua syntax: local AutoCreateInnerTablesMT = { __index = function(self, key)  return self[key] = {}  end }
 
-ConditionManager.AddonMetadata = setmetatable({}, AutoCreateInnerTables)
-ConditionManager.AddonOverrides = setmetatable({}, AutoCreateInnerTables)
-ConditionManager.MergedConditions = setmetatable({}, AutoCreateInnerTables)
+ConditionManager.AddonMetadata = setmetatable({}, AutoCreateInnerTablesMT)
+ConditionManager.AddonOverrides = setmetatable({}, AutoCreateInnerTablesMT)
+ConditionManager.MergedConditions = setmetatable({}, AutoCreateInnerTablesMT)
 
 ConditionManager.EventHooks = {}
 ConditionManager.FrameHooks = {}
 ConditionManager.SecureHooks = {}
 
 -- Slashes:  ["AddonName"] = { "ADDON_SLASH"="/slash", "ADDON_DOTHIS"="/dothis", .. }, ["AnotherAddon"] = ..
-ConditionManager.Slashes = setmetatable({}, AutoCreateInnerTables)
+ConditionManager.Slashes = setmetatable({}, AutoCreateInnerTablesMT)
 
 
 
@@ -59,21 +59,22 @@ function private.safecall(unsafeFunc, ...)
 
 	if type(unsafeFunc) ~= "function" then  return  end
 	-- Without parameters call the function directly
-	if  0 == select('#',...)  then
+	local nParams = select('#',...)
+	if  0 == nParams  then
 		return xpcall(unsafeFunc, localErrorHandler)
   end
 
 	-- Pack the parameters to pass to the actual function
-	local params =  { ... }
+	local tParams = { ... }
 
 	local function localErrorHandler(...)
-		local msg = "AddonLoader: safecall failed (params: " .. tostrjoin(", ", unpack(params)) .. "): "
+		local msg = "AddonLoader: safecall failed (params: " .. tostrjoin(", ", unpack(tParams,1,nParams)) .. "): "
 		print(msg .. tostrjoin(" ",...) .. formatSourceField())
 		return errorhandlerBeforeCall(...)
 	end
 
 	-- Unpack the parameters in the thunk
-	local function safecallThunk()  unsafeFunc( unpack(params) )  end
+	local function safecallThunk()  unsafeFunc( unpack(tParams,1,nParams) )  end
 	-- Do the call through the thunk
 	return xpcall(safecallThunk, localErrorHandler)
 end
@@ -206,7 +207,7 @@ do
 		if  eventObj  then  return  eventObj  end
 		
 		-- First time reference, create it
-		eventObj = setmetatable({}, AutoCreateInnerTables)
+		eventObj = setmetatable({}, AutoCreateInnerTablesMT)
 		Hooks[eventKey] = eventObj
 		-- Tries to install the dispatcher only the first time the EventObj is requested. If it fails there's no errormessage spam.
 		Hooks:InstallDispatcher(objectName, eventName, eventKey)

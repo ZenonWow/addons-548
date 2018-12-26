@@ -5,8 +5,8 @@ local GetCVarBool = GetCVarBool
 
 local isBubble = function(frame)
 	if frame:GetName() then return end
-	if not frame:GetRegions() then return end
 	local region = frame:GetRegions()
+	if not region then return end
 	return region:GetTexture() == [[Interface\Tooltips\ChatBubble-Background]]
 end
 

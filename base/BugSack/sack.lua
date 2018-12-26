@@ -173,12 +173,16 @@ end
 
 local function createBugSack()
 	window = CreateFrame("Frame", "BugSackFrame", UIParent)
-	UIPanelWindows.BugSackFrame = { area = "center", pushable = 0, whileDead = 1 }
-	HideUIPanel(window)
+	--UIPanelWindows.BugSackFrame = { area = "center", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
+	--HideUIPanel(window)
+	UIPanelWindows.BugSackFrame = { area = "right", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
+	window:Hide()
 
 	window:SetFrameStrata("FULLSCREEN_DIALOG")
 	window:SetWidth(500)
-	window:SetHeight(500 / 1.618)
+	--window:SetHeight(500 / 1.618)
+	--window:SetWidth(600)
+	window:SetHeight(400)
 	window:SetPoint("CENTER")
 	window:SetMovable(true)
 	window:EnableMouse(true)
@@ -186,10 +190,10 @@ local function createBugSack()
 	window:SetScript("OnDragStart", window.StartMoving)
 	window:SetScript("OnDragStop", window.StopMovingOrSizing)
 	window:SetScript("OnShow", function()
-		PlaySound("igQuestLogOpen")
+		--PlaySound("igQuestLogOpen")
 	end)
 	window:SetScript("OnHide", function()
-		PlaySound("igQuestLogClose")
+		--PlaySound("igQuestLogClose")
 		currentErrorObject = nil
 		currentSackSession = nil
 		currentSackContents = nil
@@ -206,6 +210,7 @@ local function createBugSack()
 	dialogbg:SetPoint("BOTTOMRIGHT", -6, 8)
 	dialogbg:SetTexCoord(0.255, 1, 0.29, 1)
 
+----[[
 	local topleft = window:CreateTexture(nil, "BORDER")
 	topleft:SetTexture("Interface\\PaperDollInfoFrame\\UI-GearManager-Border")
 	topleft:SetWidth(64)
@@ -261,6 +266,7 @@ local function createBugSack()
 	right:SetPoint("TOPRIGHT", topright, "BOTTOMRIGHT")
 	right:SetPoint("BOTTOMRIGHT", bottomright, "TOPRIGHT")
 	right:SetTexCoord(0.1171875, 0.2421875, 0, 1)
+--]]
 
 	local close = CreateFrame("Button", nil, window, "UIPanelCloseButton")
 	close:SetPoint("TOPRIGHT", 2, 1)
@@ -386,11 +392,13 @@ local function createBugSack()
 	textArea:SetAutoFocus(false)
 	textArea:SetMultiLine(true)
 	textArea:SetFontObject(_G[addon.db.fontSize] or GameFontHighlightSmall)
-	textArea:SetMaxLetters(99999)
+	--textArea:SetMaxLetters(99999)
 	textArea:EnableMouse(true)
 	textArea:SetScript("OnEscapePressed", textArea.ClearFocus)
 	-- XXX why the fuck doesn't SetPoint work on the editbox?
-	textArea:SetWidth(450)
+	--textArea:SetWidth(450)
+	--textArea:SetWidth(550)
+	textArea:SetWidth(scroll:GetWidth())
 
 	scroll:SetScrollChild(textArea)
 

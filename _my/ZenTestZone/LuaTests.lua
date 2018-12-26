@@ -45,6 +45,7 @@ local fields = {
 /run LuaTests.FieldTest()
 /run LuaTests.SetScript()
 /run LuaTests.HookScript()
+/run LuaTests.SecureHook()
 --]]
 
 function LuaTests.SlashTest()
@@ -102,6 +103,15 @@ function LuaTests.HookScript()
 end
 
 
+function hookDummy1()
+	print("hookDummy1")
+end
+function hookDummy2()
+	print("hookDummy2")
+end
+
+function LuaTests.SecureHook()
+end
 
 --[[
 [08:13:54] Dump: value=strsplit(" ,", "  1, ,2,,,3   4  ,")

@@ -306,16 +306,23 @@ end
 function BMT:FilterItem(item)
 	local data = item.data
 	
-	if  not self.incompleteQuery  then
-		if  not item.exists  and  not data.completed  then
-			-- Save time of completion
-			item[14] = 0  -- time left column: Completed
-			data.completed = nowSeconds
-			data.timeFrame = 'Unseen at '.. date('%m-%d %H:%M:%S', data.completed)
+	if  self.incompleteQuery  or  not data  then
+		if  item[1] == 'Blood-Soaked Invitation'  then
+			-- Skip invitations
 		else
-			-- Remove flag
-			item.exists = nil
+			table.insert(self.filteredItems, item)
 		end
+		return
+	end
+	
+	if  not item.exists  and  not data.completed  then
+		-- Save time of completion
+		item[14] = 0  -- time left column: Completed
+		data.completed = nowSeconds
+		data.timeFrame = 'Unseen at '.. date('%m-%d %H:%M:%S', data.completed)
+	else
+		-- Remove flag
+		item.exists = nil
 	end
 	
 	if  item[1] == 'Blood-Soaked Invitation'  then
@@ -513,7 +520,7 @@ function BMT.ScrollFrame_Update()
 			if  timeLeft  then
 				button.auctionCompleate = (timeLeft == 0);
 				-- Show end time frame in time left column
-				button.TimeLeft.Text:SetText(colors.timeLeft[timeLeft] .. _G["AUCTION_TIME_LEFT"..timeLeft] ..'|r \n '.. item.data.timeFrame)
+				button.TimeLeft.Text:SetText(colors.timeLeft[timeLeft] .. _G["AUCTION_TIME_LEFT"..timeLeft] .."|r \n ".. (item.data and item.data.timeFrame or "") )
 				button.TimeLeft.tooltip = _G["AUCTION_TIME_LEFT"..timeLeft.."_DETAIL"];
 			end
 			

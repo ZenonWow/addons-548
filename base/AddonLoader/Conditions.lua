@@ -526,7 +526,7 @@ ConditionManager.ConditionTemplates = {
 			local addonName = cond.addonName
 			--local name_upper = addonName:upper():gsub('[^%w]','')
 			local Slashes = ConditionManager.Slashes[addonName]
-			-- AutoCreateInnerTables metatable creates it first-time
+			-- AutoCreateInnerTablesMT metatable creates it first-time
 			local SlashCmdList = _G.SlashCmdList
 			
 			local command

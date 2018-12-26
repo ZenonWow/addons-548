@@ -5595,7 +5595,7 @@
 		----------------------------------------------------------------------
 		-- Final code for Player
 		----------------------------------------------------------------------
-
+--[[
 		-- Preload the auction house
 		if not IsAddOnLoaded("Blizzard_AuctionUI") then
 
@@ -5603,6 +5603,7 @@
 			UIParentLoadAddOn("Blizzard_AuctionUI");
 
 		end
+--]]
 
 		-- Unregister the player section (since it should only be run once)
 		LpEvt:UnregisterEvent("PLAYER_ENTERING_WORLD")

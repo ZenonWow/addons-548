@@ -554,7 +554,11 @@ end
 bwFrame:SetScript("OnEvent", function(frame, event, ...)
 	mod[event](mod, ...)
 end)
+
+-- Handle delayed load
+if  IsLoggedIn()  then  mod:PLAYER_LOGIN()  else  
 bwFrame:RegisterEvent("PLAYER_LOGIN")
+end
 
 -- Role Updating
 function mod:ACTIVE_TALENT_GROUP_CHANGED()

@@ -472,6 +472,11 @@ function addon:OnEnable()
 	self:RegisterEvent("TRADE_SKILL_CLOSE") -- Addon responds to tradeskill windows being closed.
 	self:RegisterEvent("TRADE_SKILL_UPDATE")
 
+	if  _G.TradeSkillFrame  and  _G.TradeSkillFrame:IsShown()  then
+		-- Delayed load after the crafting panel became visible (after the event)
+		self:TRADE_SKILL_SHOW()
+	end
+
 	if addon.db.profile.scantrainers then
 		self:RegisterEvent("TRAINER_SHOW")
 	end
@@ -603,7 +608,7 @@ function addon:TRADE_SKILL_SHOW()
 	end
 	local scan_button = self.scan_button
 
-	if not scan_button then
+	if not scan_button and _G.TradeSkillFrame then
 		scan_button = _G.CreateFrame("Button", nil, _G.TradeSkillFrame, "UIPanelButtonTemplate")
 		scan_button:SetHeight(20)
 		scan_button:RegisterForClicks("LeftButtonUp")

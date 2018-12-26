@@ -12,6 +12,7 @@
 --]]
 
 local ADDON_NAME, private = ...
+local safecall = private.safecall
 local _G, tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown = 
       _G, tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown
 local EMPTY = {}  -- constant empty object to use in place of nil table reference
