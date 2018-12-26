@@ -4,6 +4,12 @@
 ## Notes: Exorsus Raid Tools
 ## SavedVariables: VExRT
 ## Version: 2567
+
+## LoadManagers: AddonLoader
+## X-LoadOn-Slash:  /exrt /rt /ert /raidtools /exorsusraidtools
+## X-LoadOn-Raid: true
+
+
 core.lua
 Templates.xml
 ExLib.lua

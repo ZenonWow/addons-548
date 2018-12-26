@@ -11,6 +11,8 @@
 ## X-Curse-Project-ID: auctionlite
 ## X-Curse-Repository-ID: wow/auctionlite/mainline
 
+## LoadManagers: AddonLoader
+
 embeds.xml
 
 Locale\enUS.lua

@@ -4,4 +4,10 @@
 ## Author: Aezay (Earthen Ring EU)
 ## Notes: Highly Customizable Tooltip Enhancement Addon
 ## SavedVariables: TipTac_Config
+
+## LoadManagers: AddonLoader
+## X-Load-OnlyOne:  ToolTip
+## X-LoadOn-Login:  UserInterface
+## X-LoadOn-Always: delayed
+
 core.lua

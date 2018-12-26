@@ -1,16 +1,21 @@
 ## Interface: 30000
-
 ## Title: GnomishAuctionShrinker
+## Version: Alpha
 ## Notes: Compact AH browser panel
 ## Author: Tekkub Stoutwrithe
-## Version: Alpha
+
 ## X-Website: http://www.tekkub.net/
 ## X-Email: tekkub-wow@googlegroups.com
 ## X-Category: Misc
 ## X-Icon: Interface\Icons\Ability_Paladin_JudgementRed
 
-## LoadOnDemand: 1
-## LoadWith: Blizzard_AuctionUI
+##- LoadOnDemand: 1
+##- LoadWith: Blizzard_AuctionUI
+
+## LoadManagers: AddonLoader
+## X-LoadOn:  AuctionHouse
+## X-LoadOn-AuctionHouse: true
+
 
 externals\events.lua
 externals\item_colors.lua

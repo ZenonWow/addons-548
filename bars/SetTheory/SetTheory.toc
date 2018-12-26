@@ -9,6 +9,10 @@
 ## X-Curse-Project-ID: settheory
 ## X-Curse-Repository-ID: wow/settheory/mainline
 
+## LoadManagers: AddonLoader
+## X-LoadOn-LDB-Launcher:  Interface\GossipFrame\HealerGossipIcon
+
+
 embeds.xml
 
 core.lua

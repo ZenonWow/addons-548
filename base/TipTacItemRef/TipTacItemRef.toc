@@ -4,5 +4,9 @@
 ## Author: Aezay (Earthen Ring EU)
 ## Notes: Improved ItemRefTooltip
 ## OptionalDeps: TipTac
+
+## LoadManagers: AddonLoader
+## LoadWith: TipTac
+
 GetUpgradedItemLevel.lua
 core.lua

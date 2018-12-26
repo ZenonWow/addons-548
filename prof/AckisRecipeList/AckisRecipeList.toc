@@ -58,8 +58,9 @@
 
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Slash: /arl /ack /ackis
-## X-LoadOn:  Crafting
-##- X-LoadOn-Crafting-Init:  AckisRecipeList:TRADE_SKILL_SHOW()
+##-- X-LoadOn:  Crafting
+##-- X-LoadOn-Crafting-Init:  AckisRecipeList:TRADE_SKILL_SHOW()
+##-- X-LoadOn-Crafting-Init:  LibStub("AceAddon-3.0"):GetAddon('AckisRecipeList'):TRADE_SKILL_SHOW()
 
 
 

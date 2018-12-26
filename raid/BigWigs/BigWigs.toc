@@ -27,9 +27,7 @@
 
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Slash: /bw, /bigwigs
-##-- X-LoadOn-Raid: true
-##-- X-LoadOn-Events: TRADE_SKILL_SHOW
-## X-LoadOn-TRADE_SKILL_SHOW: AddonLoader:LoadAddOn("TradeSkillMaster_Crafting"); LibStub("AceAddon-3.0"):GetAddon("TSM_Crafting"):OnEvent("TRADE_SKILL_SHOW")
+## X-LoadOn-Raid: true
 
 embeds.xml
 locales.xml
