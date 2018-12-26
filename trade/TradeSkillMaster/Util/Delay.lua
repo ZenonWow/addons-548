@@ -9,11 +9,22 @@
 -- This file contains various delay APIs
 
 local TSM = select(2, ...)
+LibStub("AceTimer-3.0"):Embed(TSM)
 
+--[[
 local delays = {}
 local events = {}
+--]]
 local private = {} -- registers for tracing at the end
+local timers = {}
+local repeatOnUpdates = {}
+local updateFrame
+local asyncCallbacks = {}
+local eventBuckets = {}
+local fireBuckets = {}
 
+
+--[[
 -- OnUpdate script handler for delay frames
 local function DelayFrameOnUpdate(self, elapsed)
 	if self.inUse == "repeat" then
@@ -40,6 +51,7 @@ local function CreateDelayFrame()
 	delay:SetScript("OnUpdate", DelayFrameOnUpdate)
 	return delay
 end
+--]]
 
 --- Creates a time-based delay. The callback function will be called after the specified duration.
 -- Use TSMAPI:CancelFrame(label) to cancel delays (usually just used for repetitive delays).
@@ -48,6 +60,33 @@ end
 -- @param callback The function to be called after the duration expires.
 -- @param repeatDelay If you want this delay to repeat until canceled, after the initial duration expires, will restart the callback with this duration. Passing nil means no repeating.
 -- @return Returns an error message as the second return value on error.
+function TSMAPI:CreateTimeDelay(...)
+	local label, duration, callback, repeatDelay = ...
+	if  type(label) == 'number'  then  label, duration, callback, repeatDelay = nil, ...  end
+	if not label or type(duration) ~= "number" or type(callback) ~= "function" then return nil, "invalid args", label, duration, callback, repeatDelay end
+	local timerID
+	
+	-- Timer with label already registered?
+	if  timers[label]  then  return  end
+	
+	if  not repeatDelay  then
+		if  duration == 0  then
+			asyncCallbacks[callback] = callback
+		else
+			timerID = TSM:ScheduleTimer(callback, duration)
+		end
+	else
+		if  duration ~= repeatDelay  then
+			-- Core/Mover.lua gives smaller duration than repeatDelay.
+			-- AceTimer does not support this out-of-the-box and an extra callback round would be overshoot, therefore the initial delay is also the repeatDelay.
+		end
+		timerID = TSM:ScheduleRepeatingTimer(callback, repeatDelay)
+	end
+	
+	if  label  then  timers[label] = timerID  end
+end
+
+--[[
 function TSMAPI:CreateTimeDelay(...)
 	local label, duration, callback, repeatDelay
 	if type(select(1, ...)) == "number" then
@@ -81,11 +120,24 @@ function TSMAPI:CreateTimeDelay(...)
 	frame.callback = callback
 	frame:Show()
 end
+--]]
 
 --- The passed callback function will be called once every OnUpdate until canceled via TSMAPI:CancelFrame(label).
 -- @param label An arbitrary label for this delay. If a delay with this label has already been started, the request will be ignored.
 -- @param callback The function to be called every OnUpdate.
 -- @return Returns an error message as the second return value on error.
+function TSMAPI:CreateFunctionRepeat(label, callback)
+	if not label or label == "" or type(callback) ~= "function" then return nil, "invalid args", label, callback end
+	
+	if  repeatOnUpdates[label]  then  return  end
+	
+	repeatOnUpdates[label] = callback
+	
+	--CreateUpdateFrame()
+	if  not updateFrame:IsShown()  then  updateFrame:Show()  end
+end
+
+--[[
 function TSMAPI:CreateFunctionRepeat(label, callback)
 	if not label or label == "" or type(callback) ~= "function" then return nil, "invalid args", label, callback end
 
@@ -109,10 +161,25 @@ function TSMAPI:CreateFunctionRepeat(label, callback)
 	frame.callback = callback
 	frame:Show()
 end
+--]]
 
 --- Cancels a frame created through TSMAPI:CreateTimeDelay() or TSMAPI:CreateFunctionRepeat().
 -- Frames are automatically recycled to avoid memory leaks.
 -- @param label The label of the frame you want to cancel.
+function TSMAPI:CancelFrame(label)
+	local timerID = timers[label]
+	if  timerID  then  return TSM:CancelTimer(timerID)  end
+	
+	local callback = repeatOnUpdates[label]
+	if  callback  then
+		repeatOnUpdates[label] = nil
+		return true
+	else
+		-- No TimeDelay or FunctionRepeat found with this label.
+  end
+end
+
+--[[
 function TSMAPI:CancelFrame(label)
 	if label == "" then return end
 	local delayFrame
@@ -134,25 +201,56 @@ function TSMAPI:CancelFrame(label)
 		delayFrame.timeLeft = nil
 	end
 end
+--]]
 
 
+
+local function FireBucket(bucket, byTimer)
+	if  byTimer  then  bucket.timerID = nil  end
+	bucket.lastCallback = GetTime()
+	bucket.callback()
+end
+
+local function BucketHandler(bucket, event, ...)
+	-- Do nothing if already scheduled
+	if  bucket.timerID  then  return  end
+
+	local sinceLast = GetTime() - bucket.lastCallback
+	if  sinceLast > bucket.bucketTime  then
+		fireBuckets[bucket] = bucket
+		if  not updateFrame:IsShown()  then  updateFrame:Show()  end
+	else
+		bucket.timerID = TSM:ScheduleTimer(FireBucket, bucket.bucketTime - sinceLast, bucket, 'timer')
+	end
+end
+
+
+-- TSMAPI:CreateEventBucket(event, callback, bucketTime) works slightly differently from AceBucket.
+-- After no events for bucketTime period the first event triggers the callback in the next framedraw (next OnUpdate cycle).
+-- In comparison AceBucket delays the first event by bucketTime in every case.
+function TSMAPI:CreateEventBucket(event, callback, bucketTime)
+	local bucket = { event = event, callback = callback, bucketTime = bucketTime or 0, lastCallback = 0 }
+	eventBuckets[event] = eventBuckets[event] or {}
+	tinsert(eventBuckets[event], bucket)
+	TSM:RegisterEvent(event, BucketHandler, bucket)
+	--CreateUpdateFrame()
+end
+
+
+
+--[[
 local function EventFrameOnUpdate(self)
-	for event, data in pairs(self.events) do
-		if data.eventPending and GetTime() > (data.lastCallback + data.bucketTime) then
-			data.eventPending = nil
+	for event, data in pairs(self.eventPending) do
+		if GetTime() > (data.lastCallback + data.bucketTime) then
+			--data.eventPending = nil
 			data.lastCallback = GetTime()
 			data.callback()
 		end
 	end
 end
 
-local function EventFrameOnEvent(self, event)
-	self.events[event].eventPending = true
-end
-
 local function CreateEventFrame()
 	local event = CreateFrame("Frame")
-	event:Show()
 	event:SetScript("OnEvent", EventFrameOnEvent)
 	event:SetScript("OnUpdate", EventFrameOnUpdate)
 	event.events = {}
@@ -175,6 +273,41 @@ function TSMAPI:CreateEventBucket(event, callback, bucketTime)
 	eventFrame:RegisterEvent(event)
 	eventFrame.events[event] = {callback=callback, bucketTime=bucketTime, lastCallback=0}
 end
+--]]
+
+
+local function OnUpdate(self, elapsed)
+	--for  bucket  in fireBuckets do
+	local bucket = next(fireBuckets)
+	if  bucket  then
+		fireBuckets[bucket] = nil
+		-- Remove first, order matters: if bucket.callback() causes an error there will be no infinite loop.
+		FireBucket(bucket)
+		return
+	end
+	
+	for  callback  in pairs(asyncCallbacks) do
+		asyncCallbacks[callback] = nil
+		callback()
+	end
+	
+	for  callback  in pairs(repeatOnUpdates) do
+		callback()
+	end
+	
+	-- No buckets or FunctionRepeat to call: hide frame to stop OnUpdate()
+	if  not next(repeatOnUpdates)  then  self:Hide()  end
+end
+
+local function CreateUpdateFrame()
+	if  updateFrame  then  return  end
+	updateFrame = CreateFrame("Frame")
+	updateFrame:Hide()
+	updateFrame:SetScript('OnUpdate', OnUpdate)
+end
+
+CreateUpdateFrame()
+
 
 
 TSMAPI:CreateTimeDelay(0.1, function()

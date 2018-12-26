@@ -65,8 +65,22 @@ function Inbox:CreateTab(parent)
 			InboxFrame_Update()
 		end,
 		OnEnter = function(_, data, self)
+			if  not data.itemLink  then  return  end
+			local GameTooltip = _G.GameTooltip
+			-- y coord grows upward in blizz universe
+			local anchor =  frame:GetBottom() > GetScreenHeight()/4  and  'ANCHOR_BOTTOMLEFT'  or  'ANCHOR_TOPLEFT'
+			GameTooltip:SetOwner(frame, anchor)
+			-- From FrameXML/MailFrame.lua/InboxFrameItem_OnEnter():
+			local hasCooldown, speciesID, level, breedQuality, maxHealth, power, speed, name = GameTooltip:SetInboxItem(data.index)
+			if(speciesID and speciesID > 0) then
+				BattlePetToolTip_Show(speciesID, level, breedQuality, maxHealth, power, speed, name)
+			else
+				GameTooltip:Show()
+			end
 		end,
 		OnLeave = function()
+			_G.GameTooltip:Hide()
+			_G.BattlePetTooltip:Hide()
 		end,
 	}
 
@@ -275,7 +289,7 @@ function private:GetMailItemText(mailIdx)
 	end
 	
 	local itemInfo = items[1]
-	local itemText = "---"
+	local itemText = nil
 	local itemLink = itemInfo and itemInfo.l
 	if  itemInfo  then
 		itemText = itemInfo.l
@@ -292,28 +306,39 @@ function private:InboxUpdate()
 
 	local numMail, totalMail = GetInboxNumItems()
 	local greenColor, redColor = "|cff00ff00", "|cffff0000"
+	local yellowColor = _G.YELLOW_FONT_COLOR_CODE or "|cffffff00"  -- From FrameXML/Constants.lua
 	local mailInfo = {}
+	local mailItem = {}
 	local collectGold = 0
 	for i = 1, numMail do
-		mailInfo[i] = ""
 		local isInvoice = select(4, GetInboxText(i))
 		local _, _, sender, subject, money, cod, daysLeft, hasItem = GetInboxHeaderInfo(i)
+		--mailInfo[i] = subject
 		if isInvoice then
 			local invoiceType, itemName, playerName, bid, _, _, ahcut, _, _, _, quantity = GetInboxInvoiceInfo(i)
 			if invoiceType == "buyer" then
-				local itemLink = GetInboxItemLink(i, 1) or itemName
-				mailInfo[i] = format(L["Buy: %s (%d) | %s | %s"], itemLink, quantity, TSMAPI:FormatTextMoney(bid, redColor), FormatDaysLeft(daysLeft, i))
-			elseif invoiceType == "seller" then
+				local itemLink = GetInboxItemLink(i, 1)
+				mailItem[i] = itemLink
+				mailInfo[i] = format(L["Buy: %s (%d) | %s | %s"], itemLink or itemName, quantity, TSMAPI:FormatTextMoney(bid, yellowColor), FormatDaysLeft(daysLeft, i))
+			elseif invoiceType == "seller" or invoiceType == "seller_temp_invoice" then
 				collectGold = collectGold + bid - ahcut
-				mailInfo[i] = format(L["Sale: %s (%d) | %s | %s"], itemName, quantity, TSMAPI:FormatTextMoney(bid - ahcut, greenColor), FormatDaysLeft(daysLeft, i))
+				local itemLink = select(2, GetItemInfo(itemName))
+				mailItem[i] = itemLink
+				local typeText =  invoiceType == "seller_temp_invoice"  and  "Pending Sale"  or  "Sale"
+				mailInfo[i] = format(L[typeText..": %s (%d) | %s | %s"], itemLink or itemName, quantity, TSMAPI:FormatTextMoney(bid - ahcut, greenColor), FormatDaysLeft(daysLeft, i))
+			else
+				-- New invoiceType
 			end
 		elseif hasItem then
 			local itemText, itemLink = private:GetMailItemText(i)
+			mailItem[i] = itemLink
+			itemText = itemText or subject
 			--if hasItem == 1 and itemLink and strfind(subject, "^" .. TSMAPI:StrEscape(format(AUCTION_EXPIRED_MAIL_SUBJECT, TSMAPI:GetSafeItemInfo(itemLink)))) then 
 			if hasItem == 1 and strfind(subject, SubjectPatterns.AHExpired) then
 				mailInfo[i] = format(L["Expired: %s | %s"], itemText, FormatDaysLeft(daysLeft, i))
 			elseif cod > 0 then
-				mailInfo[i] = format(L["COD: %s | %s | %s | %s"], itemText, TSMAPI:FormatTextMoney(cod, redColor), sender or "---", FormatDaysLeft(daysLeft, i))
+				local moneyColor =  GetMoney() < cod  and  redColor  or  yellowColor
+				mailInfo[i] = format(L["COD: %s | %s | %s | %s"], itemText, TSMAPI:FormatTextMoney(cod, moneyColor), sender or "---", FormatDaysLeft(daysLeft, i))
 			elseif money > 0 then
 				collectGold = collectGold + money
 				mailInfo[i] = format("%s + %s | %s | %s", itemText, TSMAPI:FormatTextMoney(money, greenColor), sender or "---", FormatDaysLeft(daysLeft, i))
@@ -322,7 +347,9 @@ function private:InboxUpdate()
 			end
 		elseif money > 0 then
 			mailInfo[i] = format("%s | %s | %s | %s", subject, TSMAPI:FormatTextMoney(money, greenColor), sender or "---", FormatDaysLeft(daysLeft, i))
-		else
+		end
+		
+		if  not mailInfo[i]  then
 			mailInfo[i] = format("%s | %s | %s", subject, sender or "---", FormatDaysLeft(daysLeft, i))
 		end
 	end
@@ -330,7 +357,7 @@ function private:InboxUpdate()
 
 	local stData = {}
 	for i, info in ipairs(mailInfo) do
-		tinsert(stData, { cols = { { value = info } }, index = i })
+		tinsert(stData, { cols = { { value = info } }, index = i, itemLink = mailItem[i] })
 	end
 	private.frame.st:SetData(stData)
 
@@ -508,7 +535,8 @@ function private:LootMailItem(index)
 				local itemLink = GetInboxItemLink(index, 1) or itemName
 				TSM:Printf(L["Collected purchase of %s (%d) for %s."], itemLink, quantity, TSMAPI:FormatTextMoney(bid, redColor))
 			elseif invoiceType == "seller" then
-				TSM:Printf(L["Collected sale of %s (%d) for %s."], itemName, quantity, TSMAPI:FormatTextMoney(bid - ahcut, greenColor))
+				local itemLink = select(2, GetItemInfo(itemName)) or itemName
+				TSM:Printf(L["Collected sale of %s (%d) for %s."], itemLink, quantity, TSMAPI:FormatTextMoney(bid - ahcut, greenColor))
 			end
 		elseif hasItem then
 			local itemLink
@@ -524,6 +552,7 @@ function private:LootMailItem(index)
 				end
 			end
 			local itemText, itemLink = private:GetMailItemText(index)
+			itemText = itemText or subject
 			--if hasItem == 1 and itemLink and strfind(subject, "^" .. TSMAPI:StrEscape(format(AUCTION_EXPIRED_MAIL_SUBJECT, TSMAPI:GetSafeItemInfo(itemLink)))) then
 			if hasItem == 1 and strfind(subject, SubjectPatterns.AHExpired) then
 				TSM:Printf(L["Collected expired auction of %s"], itemText)
