@@ -403,19 +403,15 @@ Prat:AddModuleToLoad(function()
   end
 
   function module:IterateChatBubbles(funcToCall)
-    for i = 1, WorldFrame:GetNumChildren() do
-      local v = select(i, WorldFrame:GetChildren())
-      local b = v:GetBackdrop()
+    for i,frame in ipairs(WorldFrame:GetChildren()) do
+      local b = frame:GetBackdrop()
       if b and b.bgFile == "Interface\\Tooltips\\ChatBubble-Background" then
-        for i = 1, v:GetNumRegions() do
-          local frame = v
-          local v = select(i, v:GetRegions())
-          if v:GetObjectType() == "FontString" then
-            local fontstring = v
+        for _,region in ipairs(frame:GetRegions()) do
+          if region:GetObjectType() == "FontString" then
             if type(funcToCall) == "function" then
-              funcToCall(frame, fontstring)
+              funcToCall(frame, region)
             else
-              self[funcToCall](self, frame, fontstring)
+              self[funcToCall](self, frame, region)
             end
           end
         end
