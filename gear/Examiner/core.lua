@@ -11,7 +11,7 @@ function AzMsg(msg) DEFAULT_CHAT_FRAME:AddMessage(tostring(msg):gsub("|1","|cfff
 local cfg, cache;
 
 -- Data Tables
-local info = { Sets = {}, Items = {}, Tmogs = {} };
+local info = { Sets = {}, Items = {}, Tmogs = {}, TmogIDs = {} };
 local unitStats = {};
 local equippedSlots = {};
 local statTipStats1, statTipStats2 = {}, {};
@@ -113,7 +113,7 @@ end
 --                                           Event Handling                                           --
 --------------------------------------------------------------------------------------------------------
 
--- Variables Loaded
+-- SavedVariables Loaded
 function ex:ADDON_LOADED(event, addonName)
 	if  addonName ~= ADDON_NAME  then  return  end
 	
@@ -150,7 +150,8 @@ function ex:ADDON_LOADED(event, addonName)
 	end
 	-- HOOK: InspectUnit
 	if (HOOK_DEFAULT_INSPECT) then
-		InspectUnit = function(...) ex:DoInspect(...); end
+		local defaultInspectUnit = _G.InspectUnit
+		_G.InspectUnit = function(...)  if  IsShiftKeyDown()  then  return defaultInspectUnit(...)  else  return ex:DoInspect(...)  end end
 	end
 	-- Init Modules
 	for index, mod in ipairs(self.modules) do
@@ -174,9 +175,10 @@ end
 
 -- Target Unit Changed
 function ex:PLAYER_TARGET_CHANGED(event)
-	if (cfg.autoInspect) and (UnitExists("target")) then
+	if  self.unit ~= 'target'  then  return  end
+	if  cfg.autoInspect and UnitExists('target')  or  self.guid == UnitGUID('target')  then
 		self:DoInspect("target");
-	elseif (self.unit == "target") then
+	else
 		self.unit = nil;
 		self:SetScript("OnUpdate",nil);
 	end
@@ -191,16 +193,18 @@ end
 
 -- Model or Portrait Change
 function ex:UNIT_MODEL_CHANGED(event,unit)
-	if (unit and self:ValidateUnit() and UnitIsUnit(unit,self.unit)) then
-		self.model:SetUnit(self.unit);
-		SetPortraitTexture(self.portrait,self.unit);
+	--if (unit and self:ValidateUnit() and UnitIsUnit(unit,self.unit)) then
+	if  unit  and  self.guid == UnitGUID(unit)  then
+		self.model:SetUnit(unit)
+		SetPortraitTexture(self.portrait, unit)
 	end
 end
 ex.UNIT_PORTRAIT_UPDATE = ex.UNIT_MODEL_CHANGED;
 
 -- Rescan Gear on Item Change
 function ex:UNIT_INVENTORY_CHANGED(event,unit)
-	if (self:ValidateUnit() and UnitIsUnit(unit,self.unit) and CheckInteractDistance(self.unit,1)) then
+	--if (self:ValidateUnit() and UnitIsUnit(unit,self.unit) and CheckInteractDistance(self.unit,1)) then
+	if  unit  and  self.guid == UnitGUID(unit)  then
 		self:ScanGear(unit);
 		self:SendModuleEvent("OnInspectReady",unit,self.guid);
 	end
@@ -222,6 +226,9 @@ end
 -- Inspect Ready -- This event will never fire when on a public transport mount for some odd reason
 function ex:INSPECT_READY(event,guid)
 	self:UnregisterEvent("INSPECT_READY");
+	-- Ignore concurrent NotifyInspect()->INSPECT_READY possibly sent by other addon (tooltip addons like TipTop) right after ex:DoInspect().
+	-- /inspect is not likely to be run in this short amount of time.
+	if  guid  and  guid ~= self.guid  then  return  end
 	self:InspectReady(guid);
 end
 
@@ -643,9 +650,9 @@ function ex:DoInspect(unit,openFlag)
 	elseif (unit == "mouseover") or (unit == "target") then
 		local count = GetNumGroupMembers();
 		if (count) and (count > 0) then
-			local isRaid = IsInRaid();
+			local groupType = IsInRaid() and "raid" or "party"
 			for i = 1, count do
-				local token = (isRaid and "raid" or "party")..i;
+				local token = groupType..i;
 				if (UnitIsUnit(unit,token)) then
 					unit = token;
 					break;
@@ -736,6 +743,14 @@ function ex:ScanGear(unit)
 	for slotName, slotId in next, LibGearExam.SlotIDs do
 		local link = (GetInventoryItemLink(unit,slotId) or ""):match(LibGearExam.ITEMLINK_PATTERN);
 		info.Items[slotName] = LibGearExam:FixItemStringLevel(link,ex.info.level);	-- Fix item string level
+		
+		local strID = link:match("item:%d+")
+		local visibleID = GetInventoryItemID(unit,slotId)
+		if  visibleID ~= tonumber(strID)  then
+			info.TmogIDs[slotName] = visibleID
+			print("InvSlot ".. slotId .." tmog: ".. select(2,GetItemInfo(visibleID)))
+		end
+		
 		if (link) then
 			ex.itemsLoaded = true;
 		end
@@ -1142,7 +1157,7 @@ function ex.ItemButton_UpdateTip(self)
 		-- Nothing
 	else
 		gtt:SetHyperlink(link)
-		--[[ TODO: 
+		--[[ TODO: print Transmogrified to: into reconstructed tooltip.
 		if  self.tmogLink  and  self.tmogLink ~= link  then  SetTmogToLink(self.tmogLink)
 		elseif  self.itemLink  and  self.itemLink ~= link  then  SetTmogFromLink(self.tmogLink)
 		end

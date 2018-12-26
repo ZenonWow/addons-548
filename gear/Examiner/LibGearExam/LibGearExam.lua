@@ -29,12 +29,94 @@ LGE.SetBonusTokenInactive = "%((%d+)%) "..ITEM_SET_BONUS:gsub("%%s","");
 -- Schools
 LGE.MagicSchools = { "FIRE", "NATURE", "ARCANE", "FROST", "SHADOW", "HOLY" };
 
+--[[ Gear slot constants
+-- Ingame order
+INVSLOT_HEAD = "HeadSlot",  -- 1
+INVSLOT_NECK = "NeckSlot",  -- 2
+INVSLOT_SHOULDER = "ShoulderSlot",  -- 3
+INVSLOT_BACK = "BackSlot",  -- 15
+INVSLOT_CHEST = "ChestSlot",  -- 5
+INVSLOT_BODY = "ShirtSlot",  -- 4
+INVSLOT_TABARD = "TabardSlot",  -- 19
+INVSLOT_WRIST = "WristSlot",  -- 9
+
+INVSLOT_HAND = "HandsSlot",  -- 10
+INVSLOT_WAIST = "WaistSlot",  -- 6
+INVSLOT_LEGS = "LegsSlot",  -- 7
+INVSLOT_FEET = "FeetSlot",  -- 8
+INVSLOT_FINGER1 = "Finger0Slot",  -- 11
+INVSLOT_FINGER2 = "Finger1Slot",  -- 12
+INVSLOT_TRINKET1 = "Trinket0Slot",  -- 13
+INVSLOT_TRINKET2 = "Trinket1Slot",  -- 14
+
+INVSLOT_MAINHAND = "MainHandSlot",  -- 16
+INVSLOT_OFFHAND = "SecondaryHandSlot",  -- 17
+
+-- INVSLOT_RANGED  -- 18
+-- INVSLOT_AMMO  -- 0
+
+
+-- Preferred order
+INVSLOT_HEAD = "HeadSlot",  -- 1
+INVSLOT_SHOULDER = "ShoulderSlot",  -- 3
+INVSLOT_CHEST = "ChestSlot",  -- 5
+
+INVSLOT_WRIST = "WristSlot",  -- 9
+INVSLOT_HAND = "HandsSlot",  -- 10
+
+INVSLOT_WAIST = "WaistSlot",  -- 6
+INVSLOT_LEGS = "LegsSlot",  -- 7
+INVSLOT_FEET = "FeetSlot",  -- 8
+
+
+INVSLOT_BACK = "BackSlot",  -- 15
+INVSLOT_BODY = "ShirtSlot",  -- 4
+INVSLOT_TABARD = "TabardSlot",  -- 19
+
+INVSLOT_NECK = "NeckSlot",  -- 2
+INVSLOT_FINGER1 = "Finger0Slot",  -- 11
+INVSLOT_FINGER2 = "Finger1Slot",  -- 12
+INVSLOT_TRINKET1 = "Trinket0Slot",  -- 13
+INVSLOT_TRINKET2 = "Trinket1Slot",  -- 14
+
+
+INVSLOT_MAINHAND = "MainHandSlot",  -- 16
+INVSLOT_OFFHAND = "SecondaryHandSlot",  -- 17
+
+
+-- Reorder gear item iconsInspectHeadSlot      :SetID( GetInventorySlotInfo( "HeadSlot"     ) )
+InspectNeckSlot      :SetID( GetInventorySlotInfo( "ShoulderSlot" ) )
+InspectShoulderSlot  :SetID( GetInventorySlotInfo( "ChestSlot"    ) )
+InspectBackSlot      :SetID( GetInventorySlotInfo( "WristSlot"    ) )
+InspectChestSlot     :SetID( GetInventorySlotInfo( "HandsSlot"    ) )
+InspectShirtSlot     :SetID( GetInventorySlotInfo( "WaistSlot"    ) )
+InspectTabardSlot    :SetID( GetInventorySlotInfo( "LegsSlot"     ) )
+InspectWristSlot     :SetID( GetInventorySlotInfo( "FeetSlot"     ) )
+InspectHandsSlot     :SetID( GetInventorySlotInfo( "BackSlot"     ) )
+InspectWaistSlot     :SetID( GetInventorySlotInfo( "ShirtSlot"    ) )
+InspectLegsSlot      :SetID( GetInventorySlotInfo( "TabardSlot"   ) )
+InspectFeetSlot      :SetID( GetInventorySlotInfo( "NeckSlot"     ) )
+InspectFinger0Slot   :SetID( GetInventorySlotInfo( "Finger0Slot"  ) )
+InspectFinger1Slot   :SetID( GetInventorySlotInfo( "Finger1Slot"  ) )
+InspectTrinket0Slot  :SetID( GetInventorySlotInfo( "Trinket0Slot" ) )
+InspectTrinket1Slot  :SetID( GetInventorySlotInfo( "Trinket1Slot" ) )--]]
+
+
+
+-- Gear Slots, preferred order
+LGE.Slots = {
+	"HeadSlot", "ShoulderSlot", "ChestSlot",  "WristSlot", "HandsSlot",  "WaistSlot", "LegsSlot", "FeetSlot", 
+	"BackSlot", "ShirtSlot", "TabardSlot",  "NeckSlot", "Finger0Slot", "Finger1Slot", "Trinket0Slot", "Trinket1Slot",
+	"MainHandSlot", "SecondaryHandSlot",
+};
+--[[
 -- Gear Slots
 LGE.Slots = {
 	"HeadSlot", "NeckSlot", "ShoulderSlot", "BackSlot", "ChestSlot", "ShirtSlot", "TabardSlot", "WristSlot",
 	"HandsSlot", "WaistSlot", "LegsSlot", "FeetSlot", "Finger0Slot", "Finger1Slot", "Trinket0Slot", "Trinket1Slot",
 	"MainHandSlot", "SecondaryHandSlot",
 };
+--]]
 LGE.SlotIDs = {};
 LGE.SlotNames = {};
 for _, slotName in ipairs(LGE.Slots) do
