@@ -12,7 +12,7 @@ local raidIcon = ttSBar:CreateTexture(nil, "OVERLAY")
 local LSM = LibStub("LibSharedMedia-3.0")
 local player = UnitName("player")
 local server = GetRealmName()
-local _, db, BGPosition, color, font, classif, talentsGUID, factionIcon, factionTable
+local _, db, BGPosition, color, font, classif, factionIcon, factionTable
 local tooltips = {	GameTooltip,
 					ItemRefTooltip,
 					BattlePetTooltip,
@@ -194,17 +194,17 @@ function TipTop:RaidIcon()
 	raidIcon:Hide()
 end
 
-local function FactionIconUpdate()
-	if UnitPlayerControlled("mouseover") then
-		factionIcon:SetTexture(factionTable[UnitFactionGroup("mouseover")])
+local function FactionIconUpdate(unit)
+	if UnitPlayerControlled(unit) then
+		factionIcon:SetTexture(factionTable[UnitFactionGroup(unit)])
 		factionIcon:Show()
 	else
 		factionIcon:Hide()
 	end
 end
 
-local function RaidIconUpdate()
-	local icon = GetRaidTargetIndex("mouseover")
+local function RaidIconUpdate(unit)
+	local icon = GetRaidTargetIndex(unit)
 	if icon then
 		SetRaidTargetIconTexture(raidIcon, icon)
 		raidIcon:Show()
@@ -213,14 +213,14 @@ local function RaidIconUpdate()
 	end
 end
 
-local function FadedTip()	--grays out tooltip if unit is tapped or dead
+local function FadedTip(unit)	--grays out tooltip if unit is tapped or dead
 	local tapped = false
-	if not UnitPlayerControlled("mouseover") then
-		if UnitIsTapped("mouseover") and not UnitIsTappedByPlayer("mouseover") then
+	if not UnitPlayerControlled(unit) then
+		if UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) then
 			tapped = true
 		end
 	end
-	if UnitIsDead("mouseover") or tapped or not UnitIsConnected("mouseover") then
+	if UnitIsDead(unit) or tapped or not UnitIsConnected(unit) then
 		local borderColor = db.borderColor
 		TipTop:SetBackdropBorderColor(borderColor.r, borderColor.g, borderColor.b, borderColor.a)
 		local bgColor = db.bgColor
@@ -228,8 +228,8 @@ local function FadedTip()	--grays out tooltip if unit is tapped or dead
 	end
 end
 
-local function Appendices()	--appends info to the name/guild of the unit - ALSO sets elite graphic
-	classif = UnitClassification("mouseover")
+local function Appendices(unit)	--appends info to the name/guild of the unit - ALSO sets elite graphic
+	classif = UnitClassification(unit)
 	if db.elite and not elitetexture then
 		elitetexture = TipTop:CreateTexture(nil, "OVERLAY")
 		elitetexture:SetHeight(70)
@@ -253,13 +253,13 @@ local function Appendices()	--appends info to the name/guild of the unit - ALSO 
 	if db.gender == nil then db.gender = true end
 	if db.lookFor == nil then db.lookFor = true end
 	
-	local gen= db.gender and UnitSex("mouseover")
+	local gen= db.gender and UnitSex(unit)
 	if gen then
 	  
 	  local genTxt= gen==3 and "(Female)"  or  gen==2 and "(Male)"  or  gen==1  and  ""  or  "(Gender " .. gen .. ")"
 
 	  local achievementId= 2422  -- Shake Your Bunny-Maker  (Noblegarden Event - in April)
-	  local unitRace= UnitRace("mouseover")
+	  local unitRace= UnitRace(unit)
 	  local lookingFor= false
 	  if db.lookFor and gen == 3 then  -- Female
 	    for i = 1,GetAchievementNumCriteria(achievementId) do
@@ -280,7 +280,7 @@ local function Appendices()	--appends info to the name/guild of the unit - ALSO 
 	  
 	  --local achievementId= 283  -- The Masquerade  (Hallow's End Event - in October)
 	  local achievementId= 291  -- Check Your Head  (Hallow's End Event - in October)
-	  --local unitRace= UnitRace("mouseover")
+	  --local unitRace= UnitRace(unit)
 	  local lookingFor= false
 	  if  db.lookFor  then
 	    for i = 1,GetAchievementNumCriteria(achievementId) do
@@ -302,13 +302,13 @@ local function Appendices()	--appends info to the name/guild of the unit - ALSO 
 	end
 	
 	
-	if UnitIsAFK("mouseover") then
+	if UnitIsAFK(unit) then
 		tt:AppendText(" (AFK)")
-	elseif UnitIsDND("mouseover") then
+	elseif UnitIsDND(unit) then
 		tt:AppendText(" (DND)")
 	end
 	if db.guildRank then
-		local guild, rank = GetGuildInfo("mouseover")
+		local guild, rank = GetGuildInfo(unit)
 		if guild then
 			local text = nil
 			text = GameTooltipTextLeft2:GetText()
@@ -320,11 +320,11 @@ local function Appendices()	--appends info to the name/guild of the unit - ALSO 
 	end
 end
 
-local function BorderClassColor()	--colors tip border
-	local _,class = UnitClass("mouseover")
-	local level = UnitLevel("mouseover")
+local function BorderClassColor(unit)	--colors tip border
+	local _,class = UnitClass(unit)
+	local level = UnitLevel(unit)
 	if db.diffColor and level then	--if coloring by difficulty
-		if db.classColor and class and UnitIsFriend("player", "mouseover") then	--if class enabled, too, use that if unit is friendly
+		if db.classColor and class and UnitIsFriend("player", unit) then	--if class enabled, too, use that if unit is friendly
 			TipTop:SetBackdropBorderColor(color[class].r - .2, color[class].g - .2, color[class].b - .2, db.borderColor.a)
 		else	--all else, color by difficulty
 			if level == -1 then	--account for bosses and elites being harder
@@ -386,12 +386,12 @@ local function PetQualityBorder(tip, quality)	--colors tip border by item qualit
 	end
 end
 
-local function CalcHealth(_,hp)	--sets health text on status bar
+local function CalcHealth(unit, hp)	--sets health text on status bar
 	if db.healthText then
 		local per, hpmult, hpdiv, maxhpmult, maxhpdiv, hpformat, maxhpformat	--upvalues
-		local maxhp = UnitHealthMax("mouseover")
+		local maxhp = UnitHealthMax(unit)
 		if maxhp == 0 then maxhp = 1 end
-		local hp = hp or UnitHealth("mouseover")
+		local hp = hp or UnitHealth(unit)
 		if db.textformat == "100/100" then
 			ttHealth:SetFormattedText("%d / %d", hp, maxhp)
 		elseif db.textformat == "100%" then
@@ -429,8 +429,9 @@ end
 
 local function TargetTextUpdate()	--shows and updates target text
 	if db.showTargetText then
-		local target, tserver = UnitName("mouseovertarget")
-		local _,tclass = UnitClass("mouseovertarget")
+		local unittarget = tt:GetUnit() .. "target"
+		local target, tserver = UnitName(unittarget)
+		local _,tclass = UnitClass(unittarget)
 		if target and target ~= UNKNOWN and tclass then
 			local targetLine
 			for i=1, GameTooltip:NumLines() do	--scan tip to see if Target line is already added
@@ -467,65 +468,171 @@ local function TargetTextUpdate()	--shows and updates target text
 	end
 end
 
-local function TalentQuery()	--send request for talent info
-	if CanInspect("mouseover") and db.showTalentText then
-		if UnitName("mouseover") ~= player and UnitLevel("mouseover") > 9 then
-			local talentline = nil
-			for i=1, tt:NumLines() do
-				local left, leftText
-				left = _G["GameTooltipTextLeft"..i]
-				leftText = left:GetText()
-				if leftText == "Talents:" then
-					talentline = 1
-				end
-			end
-			if not talentline then
-				--we'll leave this in until the default UI gets all the kinks out
-				if InspectFrame and InspectFrame:IsShown() then	--to not step on default UI's toes
-					tt:AddDoubleLine("Talents:", "Inspect Frame is open", nil,nil,nil, 1,0,0)
-				elseif Examiner and Examiner:IsShown() then		--same thing with Examiner
-					tt:AddDoubleLine("Talents:", "Examiner frame is open", nil,nil,nil, 1,0,0)
-				else
-					talentsGUID = UnitGUID("mouseover")
-					NotifyInspect("mouseover")
-					TipTop:RegisterEvent("INSPECT_READY")
-					tt:AddDoubleLine("Specialization:", "...")	--adds the Talents line with a placeholder for info
-				end
-				tt:Show()
-			end
+
+--[[
+local patchedInspectFrame
+
+local function PatchInspectUI(InspectFrame, f2, f3, f4)
+	if  not InspectFrame  then  return  end
+	patchedInspectFrame = InspectFrame
+
+	-- The same condition is copied 4 times, yet it fails to check if the INSPECT_READY event is for the actual inspected player/npc,
+	-- therefore the event has to be registered only for one INSPECT_READY event after InspectFrame_Show()
+	local _ = InspectFrame:UnregisterEvent('INSPECT_READY')
+	_ =  f2  and  f2:UnregisterEvent('INSPECT_READY')
+	_ =  f3  and  f3:UnregisterEvent('INSPECT_READY')
+	_ =  f4  and  f4:UnregisterEvent('INSPECT_READY')
+	
+	hooksecurefunc('InspectFrame_Show', function ()
+		local _ = InspectFrame:RegisterEvent('INSPECT_READY')
+		--[=[
+		_ =  f2  and  f2:RegisterEvent('INSPECT_READY')
+		_ =  f3  and  f3:RegisterEvent('INSPECT_READY')
+		_ =  f4  and  f4:RegisterEvent('INSPECT_READY')
+		--]=]
+	end
+	
+	InspectFrame:HookScript('OnEvent', function (self, event, guid, ...)
+		if  event ~= 'INSPECT_READY'  then  return  end
+		local _ = InspectFrame:UnregisterEvent('INSPECT_READY')
+		_ =  f2  and  f2:GetScript('OnEvent')(f2, event, guid, ...)
+		_ =  f3  and  f3:GetScript('OnEvent')(f3, event, guid, ...)
+		_ =  f4  and  f4:GetScript('OnEvent')(f4, event, guid, ...)
+		--[=[
+		_G.InspectGuildFrame_OnEvent(_G.InspectGuildFrame, event, guid, ...)
+		_G.InspectPaperDollFrame_OnEvent(_G.InspectPaperDollFrame, event, guid, ...)
+		_G.InspectTalentFrame_OnEvent(_G.InspectTalentFrame, event, guid, ...)
+		--]=]
+	end)
+end
+--]]
+
+--[[
+local suspendedInspectFrames = {}
+
+local function ResumeInspectEvent()
+	for  i,frame  in pairs(suspendedInspectFrames) do
+		frame:RegisterEvent('INSPECT_READY')
+	end
+	wipe(suspendedInspectFrames)
+end
+
+local function SuspendInspectEvent(...)
+	local inspectUIloaded
+	for  i = 1,select('#',...)  do
+		local frame = select(i,...)
+		if  frame  and  frame:IsEventRegistered('INSPECT_READY')  then
+			inspectUIloaded = true
+			--tinsert(suspendedInspectFrames, frame)
+			suspendedInspectFrames[frame] = frame
+			frame:UnregisterEvent('INSPECT_READY')
 		end
+	end
+	if  inspectUIloaded  and  not patchedInspectUI  and  _G.InspectFrame_Show  then
+		patchedInspectUI = true
+		hooksecurefunc('InspectFrame_Show', ResumeInspectEvent)
+	end
+end
+--]]
+
+
+local function StopInspect()
+	if  _G.INSPECTED_UNIT == TipTop.unit  then
+		ClearInspectPlayer(TipTop.unit)
+		_G.INSPECTED_UNIT = nil
+	end
+	
+	TipTop.unit = nil
+	TipTop.guid = nil
+	TipTop:UnregisterEvent('INSPECT_READY')
+end
+
+local function CheckInspectFrame(frame)
+	-- Return NotifyInspect() to Examiner / InspectFrame 's unit
+	if  frame  and  frame:IsShown()  and  CanInspect(frame.unit)  then
+		if  TipTop.guid ~= UnitGUID(unit)  then  StopInspect()  end
+		
+		_G.INSPECTED_UNIT = unit
+		NotifyInspect(unit)
+		return true
 	end
 end
 
-local maxtree,left,leftText
+
+local function TalentQuery(unit)	--send request for talent info
+	if  not db.showTalentText  or  not CanInspect(unit)  then
+		if  TipTop.guid  then  StopInspect()  end
+		return
+	end
+	
+	--if  UnitName(unit) ~= player  then  return  end
+	if  UnitLevel(unit) < 10  then  return  end
+	
+	local talentline = nil
+	for i=1, tt:NumLines() do
+		local left = _G["GameTooltipTextLeft"..i]
+		if  left:GetText() == "Specialization:"  then
+			talentline = i
+			break
+		end
+	end
+	if   talentline  then  return  end
+	
+	
+	--[[
+	-- Both Examiner and InspectFrame checks guid and should be safe from concurrent queries.
+	local InspectFrame, Examiner = _G.InspectFrame, _G.Examiner
+	if  not patchedInspectFrame  and  InspectFrame  then  PatchInspectUI(InspectFrame, _G.InspectGuildFrame, _G.InspectPaperDollFrame, _G.InspectTalentFrame)  end
+	--SuspendInspectEvent(InspectFrame, _G.InspectGuildFrame, _G.InspectPaperDollFrame, _G.InspectTalentFrame)
+	
+	if  Examiner  and  Examiner:IsShown()  and  Examiner:IsEventRegistered('INSPECT_READY')  then
+		tt:AddDoubleLine("Specialization:", "Examiner frame is querying", nil,nil,nil, 1,0,0)
+	elseif  InspectFrame  and  InspectFrame:IsShown()  then	--to not step on default UI's toes
+		tt:AddDoubleLine("Specialization:", "Inspect Frame is querying", nil,nil,nil, 1,0,0)
+	else
+	--]]
+	do
+		tt:AddDoubleLine("Specialization:", "...")	--adds the Specialization line with a placeholder for info
+		TipTop.unit = unit
+		TipTop.guid = guid
+		TipTop:RegisterEvent('INSPECT_READY')
+		
+		_G.INSPECTED_UNIT = unit
+		NotifyInspect(unit)
+	end
+	tt:Show()
+end
+
 local function TalentText()
-	if UnitExists("mouseover") then
-		maxtree = GetInspectSpecialization("mouseover")
+	local unit = TipTop.unit
+	local maxtree,left,leftText
+	if UnitExists(unit) then
+		maxtree = GetInspectSpecialization(unit)
 		if maxtree and maxtree > 0 then
 			for i=1, tt:NumLines() do
 				left = _G[GameTooltip:GetName().."TextLeft"..i]
 				leftText = left:GetText()
-				if leftText == "Specialization:" then	--finds the Talents line and updates with info
+				-- Find the Specialization line and update with info
+				if leftText == "Specialization:" then
 					_G[GameTooltip:GetName().."TextRight"..i]:SetText(select(2,GetSpecializationInfoByID(maxtree)))
 				end
 				tt:Show()
 			end
 		end
 	end
-	TipTop:UnregisterEvent("INSPECT_READY")
-	maxtree = nil	--reset this variable
 end
 
 local ttWidth
 local function MouseoverTargetUpdate()	--do this stuff whenever the mouseover unit is changed
-	Appendices()
-	BorderClassColor()
-	CalcHealth()
-	RaidIconUpdate()
-	TalentQuery()
-	FadedTip()
+	local unit = tt:GetUnit()
+	Appendices(unit)
+	BorderClassColor(unit)
+	CalcHealth(unit)
+	RaidIconUpdate(unit)
+	TalentQuery(unit)
+	FadedTip(unit)
 	if db.factionIcon then
-		FactionIconUpdate()
+		FactionIconUpdate(unit)
 	end
 	--sets min size for aesthetics and for extended health text
 	ttWidth = tt:GetWidth()
@@ -580,18 +687,27 @@ local function PlayerLogin()
 		end)
 	
 	TipTop:UnregisterEvent("PLAYER_LOGIN")
-	TipTop:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
+	--TipTop:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
+	GameTooltip:HookScript("OnTooltipSetUnit", MouseoverTargetUpdate)
+	GameTooltip:HookScript("OnTooltipCleared", StopInspect)
+	GameTooltip:HookScript("OnHide", StopInspect)
 	TipTop:SetScript("OnEvent", function(_, event, arg)
-				if event == "UPDATE_MOUSEOVER_UNIT" then
-					MouseoverTargetUpdate()
-				elseif event == "INSPECT_READY" then
-					if talentsGUID == arg then	--only gather information about the unit we requested
-						TalentText()
-					end
-				end
-			end)
+		--[[
+		if event == "UPDATE_MOUSEOVER_UNIT" then
+			MouseoverTargetUpdate()
+		end
+		--]]
+		if  event == 'INSPECT_READY'  then
+			if TipTop.guid == arg then	--only gather information about the unit we requested
+				TalentText()
+				local _ =  CheckInspectFrame(_G.Examiner)  or  CheckInspectFrame(_G.InspectFrame)
+			end
+		end
+	end)
+	
 	local moneyfontset
 	-- TipTop\tiptop-2.13.3.lua:588: BattlePetTooltip doesn't have a "OnTooltipSetItem" script
+	-- if  tooltips[i]:HasScript('OnTooltipSetItem')  then
 	for i=1,#tooltips do  if  BattlePetTooltip ~= tooltips[i]  then
 		tooltips[i]:HookScript("OnTooltipSetItem", function(tip)
 				ItemQualityBorder(tip)
@@ -602,7 +718,7 @@ local function PlayerLogin()
 				end
 			end)
 	end end
-	ttSBar:HookScript("OnValueChanged", CalcHealth)
+	ttSBar:HookScript("OnValueChanged", function(_,hp) CalcHealth(tt:GetUnit(), hp) end)
 	ttSBar:HookScript("OnUpdate", TargetTextUpdate)
 	
 	hooksecurefunc('BattlePetToolTip_Show', function (speciesID, level, breedQuality, maxHealth, power, speed, customName)
@@ -617,3 +733,6 @@ end
 TipTop:RegisterEvent("PLAYER_LOGIN")
 TipTop:SetScript("OnEvent", PlayerLogin)
 TipTop:SetScript("OnShow", TipShow)
+-- Survive delayed load
+if  IsLoggedIn()  then  PlayerLogin()  end
+
