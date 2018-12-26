@@ -1,0 +1,150 @@
+Squeenix: enabled
+Mappy: disabled
+
+tekChat: disabled
+tekplayermenu: disabled
+tekPopbar: disabled
+picoPriority: disabled
+TinyInspect: disabled
+
+Autopsy: enabled
+BindPad: enabled
+mapSearch: enabled
+MyFonts: enabled
+SpellSearch: enabled
+TinyExtraBars: enabled
+
+Ovale: enabled
+Watcher: disabled
+
+ButtonFacade: enabled
+Masque: enabled
+
+
+Aurora: enabled
+LUI: enabled
+
+AltzUI: disabled
+!ClassColors: disabled
+oGlow: disabled
+oUF: disabled
+oUF_Mlight: disabled
+oUF_MovableFrames: disabled
+
+Immersion: disabled
+Storyline: disabled
+
+AddonLoader: enabled
+ACP: enabled
+stAddonmanager: enabled
+AddonUsage: enabled
+iCPU: enabled
+MacroBank: disabled
+
+FriendShare: disabled
+FriendsShare: disabled
+FriendsWithBenefits: enabled
+SyncFriends: disabled
+
+Dominos: enabled
+Bartender4: disabled
+ButtonForge: disabled
+ActionSwap2: disabled
+
+InspectEquip: disabled
+IQ: disabled
+ShowItemLevel: disabled
+!InspectFix: disabled
+Reforgenator: disabled
+Outfitter: disabled
+
+MikScrollingBattleText: enabled
+sct: disabled
+xCT+: disabled
+
+NeedToKnow: disabled
+SpellFlash: disabled
+SpellFlashCore: disabled
+TellMeWhen: disabled
+TellMeWhen_Options: disabled
+Raven: disabled
+Ellipsis: enabled
+AdiButtonAuras: enabled
+AuraFrames: enabled
+Details: disabled
+Skada: enabled
+
+DevPad: enabled
+Hack: disabled
+LuaBrowser: enabled
+TinyPad: enabled
+ViragDevTool: enabled
+WowLua: enabled
+
+TomTom: enabled
+TomTomLite: disabled
+
+AdvancedIconSelector: enabled
+
+GnomishVendorShrinker: enabled
+GnomishAuctionShrinker: disabled
+Auctionator: enabled
+AuctionLite: disabled
+AuctionMaster: disabled
+
+AckisRecipeList: enabled
+Skillet: disabled
+Archy: disabled
+
+PetJournalEnhanced: disabled
+
+BankStack: enabled
+AdiBags: enabled
+BagSync: enabled
+Combuctor: disabled
+BagBrother: disabled
+ArkInventory: disabled
+ArkInventoryRules: disabled
+
+Butsu: disabled
+XLoot: enabled
+
+Bazooka: enabled
+BlizzMove: enabled
+
+AllPlayed: disabled
+Broker_CPU: enabled
+Broker_Garbage: disabled
+EmoteLDB: disabled
+
+Spy: enabled
+Examiner: enabled
+LiteMount: enabled
+
+Explorer: enabled
+FlightMap: disabled
+MozzFullWorldMap: disabled
+HandyNotes_SummerFestival: disabled
+LorewalkersHelper: disabled
+
+LoseControl: disabled
+LoseControlFix: disabled
+NPCScan: disabled
+NPCScan.Overlay: disabled
+
+oUF_Adirelle: enabled
+-oUF_Freebgrid: disabled
+-oUF_Lanerra: disabled
+-oUF_Mlight: disabled
+-oUF_Phanx: disabled
+
+Kui_Nameplates: disabled
+TidyPlates: enabled
+
+TipTop: enabled
+TipTac: disabled
+TipTacItemRef: disabled
+TipTacTalents: disabled
+
+Leatrix_Plus: enabled
+Viewporter: disabled

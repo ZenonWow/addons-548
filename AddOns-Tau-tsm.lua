@@ -23,19 +23,19 @@ ColorPickerPlus =true,
 TinyInspect =true,
 }
 
-linkAddOns.A548('ui-AltzUI') {
+linkAddOns.A548('ui') {
 Aurora =true,
+}
+
 --[[
-["!ClassColors"] =true,
+linkAddOns.A548('ui/AltzUI-5.60/AddOns') {
+--Aurora =true,
 AltzUI =true,
 AltzUIConfig =true,
+["!ClassColors"] =true,
 oGlow =true,
-oUF =true,
-oUF_Mlight =true,
-oUF_MovableFrames =true,
---]]
-stAddonmanager =true,
 }
+--]]
 
 linkAddOns.A548('_test/12-12') {
 AdiButtonAuras =true,
@@ -112,6 +112,7 @@ Ace3 =true,
 
 AddonLoader =true,
 ACP =true,
+stAddonmanager =true,
 
 Binder =true,
 BlizzMove =true,
@@ -147,6 +148,17 @@ ZenTools =true,
 
 
 linkAddOns.A548('bars') {
+BarProfiler =true,
+SetTheory =true,
+
+AutoBar =false,
+ExtraQuestButton =true,
+TinyExtraBars =true,
+ButtonForge =true,
+
+Masque =true,
+Masque_CleanIcons =true,
+
 Bazooka =true,
 Bazooka_Options =true,
 
@@ -159,14 +171,6 @@ Dominos_Encounter =true,
 Dominos_Quest =true,
 Dominos_Roll =true,
 Dominos_XP =true,
-
-AutoBar =false,
-ExtraQuestButton =true,
-TinyExtraBars =true,
-ButtonForge =true,
-
-Masque =true,
-Masque_CleanIcons =true,
 }
 
 
@@ -210,9 +214,14 @@ oUF_Adirelle_Config =true,
 
 oUF_Freebgrid =true,
 oUF_Freebgrid_Config =true,
-oUF_Lanerra =true,
 oUF_Phanx =false,
 oUF_Phanx_Config =false,
+
+oUF =false,
+oUF_MovableFrames =true,
+oUF_Mlight =true,
+oUF_Lanerra =true,
+oUF_Phanx =true,
 }
 
 
@@ -221,10 +230,15 @@ Kui_Media =true,
 Kui_Nameplates =true,
 Kui_Nameplates_Auras =true,
 
+PlateBuffs =false,
+
 TidyPlates =true,
-TidyPlates_Graphite =true,
 TidyPlatesHub =true,
 TidyPlatesWidgets =true,
+TidyPlates_Graphite =true,
+TidyPlates_Slim_Horizontal =false,
+TidyPlates_Slim_Vertical =false,
+TidyPlates_ThreatPlates =false,
 }
 
 
@@ -252,10 +266,14 @@ Spy =true,
 
 
 linkAddOns.A548('chat') {
+Bubblicious =false,
+BasicChatMods =false,
+PhanxChat =false,
 Chatter =false,
+
 ["Prat-3.0"] =true,
-["Prat-3.0_Libraries"] =true,
-["Prat-3.0_HighCPUUsageModules"] =false,
+["Prat-3.0_Libraries"] =false,
+["Prat-3.0_HighCPUUsageModules"] =true,
 Elephant =true,
 }
 
@@ -412,6 +430,7 @@ MogIt =true,
 
 
 linkAddOns.A548('pet') {
+BetterBattlePetTooltip =true,
 PetBattleQualityGlow =false,
 PetJournalEnhanced =false,
 PetTracker =false,
@@ -450,6 +469,8 @@ Skada =true,
 
 
 linkAddOns.A548('raid') {  -- BigWigs
+oRA3 =true,
+
 BigWigs =true,
 BigWigs_Core =true,
 BigWigs_Options =true,
@@ -470,7 +491,6 @@ BigWigs_Draenor =false,
 BigWigs_BlackrockFoundry =false,
 
 LittleWigs =true,
-oRA3 =true,
 }
 
 --[[
