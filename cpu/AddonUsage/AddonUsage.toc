@@ -4,7 +4,7 @@
 ## Notes: Displays addon memory/cpu usage
 ## Author: Gello
 
-## LoadManagers: AddonLoader
+##- LoadManagers: AddonLoader
 ## X-LoadOn:  Login
 ## X-LoadOn-Login: LowPrio
 

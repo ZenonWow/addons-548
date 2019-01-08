@@ -14,5 +14,8 @@
 ## SavedVariables: HandyNotes_LostAndFoundDB
 ## RequiredDeps: HandyNotes
 
+## LoadManagers: AddonLoader
+## X-LoadOn-FrameShown: WorldMapFrame
+
 
 Lost.lua

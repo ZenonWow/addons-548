@@ -12,7 +12,7 @@
 ## SavedVariables: iCPUDB
 ## OptionalDeps: Ace3, iLib, LibCrayon-3.0
 
-## LoadManagers: AddonLoader
+##- LoadManagers: AddonLoader
 ## X-LoadOn:  Login
 ## X-LoadOn-Login: LowPrio
 

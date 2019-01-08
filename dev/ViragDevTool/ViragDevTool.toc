@@ -13,7 +13,7 @@
 ## OptionalDeps: LibStub, CallbackHandler-1.0, LibDataBroker-1.1
 ## X-OptionalUse: TinyPad
 
-##- LoadManagers: AddonLoader
+## LoadManagers: AddonLoader
 ## X-LoadOn-Slash: /vdt
 ## X-LoadOn-LDB-Launcher:  Interface/AddOns/ViragDevTool/icon  { label="/VDT" }
 
