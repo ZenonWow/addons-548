@@ -1,0 +1,25 @@
+## Interface: 50400
+## Author: Vrul
+## Title: DockingStation_Config
+## Notes: Configuration support for DockingStation.
+## LoadOnDemand: 1
+## Dependencies: DockingStation
+## OptionalDeps: AceGUI-3.0-SharedMediaWidgets, LibMenuAssist-1.0
+## DefaultState: Disabled
+## X-Child-Of: DockingStation
+
+Libs\AceConfigRegistry-3.0.lua
+Libs\AceGUI-3.0\AceGUI-3.0.xml
+Libs\AceConfigDialog-3.0.lua
+Libs\AceDBOptions-3.0.lua
+Libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
+Libs\LibMenuAssist-1.0.lua
+
+Widget-StatusbarOverlay.lua
+
+Locales\deDE.lua
+Locales\zhTW.lua
+
+SideBar.lua
+SideBarMenu.lua
+Core.lua

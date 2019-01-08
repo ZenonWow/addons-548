@@ -1,0 +1,11 @@
+## Interface: 50300
+## Title: Extra Bars
+## Notes: Adds an extra moveable bar of buttons to the interface without changing the existing bars
+## Version: 0.7.16
+## Author: Massiner of Nathrezim
+## Dependencies: AlternateButtonTemplate
+## OptionalDeps: ButtonFacade
+## SavedVariablesPerCharacter: ExtraBar_ButtonEntries, ExtraBar_ButtonSettings, ExtraBar_Config
+ExtraBar.lua
+ExtraBar.xml
+ConfigLib.lua

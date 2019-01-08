@@ -1,0 +1,12 @@
+------------------------------------------------------------------------
+r61 | funkydude | 2013-12-09 03:37:55 +0000 (Mon, 09 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/.pkgmeta
+   A /trunk/Libs/LibStub
+   A /trunk/Libs/LibStub/LibStub.lua
+   M /trunk/StatBlockCore.lua
+   M /trunk/StatBlockCore.toc
+   M /trunk/embeds.xml
+
+Remove AceConfigCmd.
+------------------------------------------------------------------------

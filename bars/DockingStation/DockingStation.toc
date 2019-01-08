@@ -1,0 +1,33 @@
+## Interface: 50400
+## Author: Vrul
+## Version: 0.5.4 (Beta)
+## Title: DockingStation
+## Notes: A display platform for LibDataBroker (LDB) based plug-ins.
+## OptionalDeps: Ace3, CallbackHandler-1.0, LibDataBroker-1.1, LibDisplayAssist-1.3, LibJostle-3.0, LibOptionsAssist-1.0, LibSharedMedia-3.0, LibStateDriver-1.3, LibStub
+## SavedVariables: DockingStationSettings
+## X-WoWI-ID: 11831
+
+Libs\LibStub.lua
+Libs\CallbackHandler-1.0.lua
+Libs\AceDB-3.0.lua
+Libs\AceEvent-3.0.lua
+Libs\LibJostle-3.0.lua
+Libs\LibSharedMedia-3.0.lua
+Libs\LibDataBroker-1.1.lua
+Libs\LibDisplayAssist-1.3.lua
+Libs\LibOptionsAssist-1.0.lua
+Libs\LibStateDriver-1.3.lua
+
+Core.lua
+
+Locales\deDE.lua
+Locales\zhTW.lua
+
+Panels.lua
+Plugins.lua
+FontStrings.lua
+Textures.lua
+Settings.lua
+Config.lua
+Tooltips.lua
+Convert.lua
