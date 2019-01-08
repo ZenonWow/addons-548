@@ -1,53 +1,43 @@
 -- AddOns-Tau-light-v548.txt
---  cmd /c mklink AddOns.txt  ..\..\WTF\AddOns.txt
-
 dofile('../mkAddOnsLinks.lua')
+local linkExpaAddOns = linkAddOns.A548
+local linkServerAddOns = linkAddOns.A735Fs
 
 
-linkAddOns.A715 {
-oUF_MovableFrames =false,
-}
-
-linkAddOns.Adev {
-Binder =true,
-CombatMode =true,
-MyAdd =false,
-MyBindings =false,
-ZenShortcuts =true,
-ZenTools =true,
-ViragDevTool =true,
-}
-
-linkAddOns.A548('base') {  -- World Events
-CandyBuckets = false,
-HandyNotes_CamelFigurines =false,
-HandyNotes_HallowsEnd =false,
---HandyNotes_SummerFestival =true,
-kAutoOpen =false,
-}
-
-linkAddOns.A548('base') {
+linkExpaAddOns('base') {
 Ace3 =true,
-["!BugGrabber"] =true,
-BugSack =true,
 
-AdiBags =true,
-AdiBags_Config =true,
-BagSync =true,
-BagBrother =true,
-Combuctor =true,
-Combuctor_Config =true,
-Combuctor_Sets =true,
-Combuctor_BindToAccount =true,
-Combuctor_EquipmentSets =true,
-ArkInventory =true,
-ArkInventoryConfig =true,
-ArkInventoryRules =true,
-ArkInventoryRules_Example =true,
+AddonLoader =false,
+ACP =false,
+stAddonmanager =false,
 
-AutoBar =false,
+Binder =true,
+BlizzMove =true,
+CombatMode =true,
+FasterCamera =true,
+
+Viewporter =false,
+Leatrix_Plus =true,
+
+idTip =true,
+TipTop =true,
+
+}
+
+
+linkExpaAddOns('_my') {
+ZenShortcuts =true,
+ZenTestZone =true,
+ZenTools =true,
+}
+
+
+
+
+linkExpaAddOns('bars') {
 Bazooka =true,
 Bazooka_Options =true,
+
 Dominos =true,
 Dominos_Auras =true,
 Dominos_Bufftimes =true,
@@ -57,101 +47,208 @@ Dominos_Encounter =true,
 Dominos_Quest =true,
 Dominos_Roll =true,
 Dominos_XP =true,
+}
 
-Broker_Everything =true,
-Broker_Garbage =true,
-["Broker_Garbage-Config"] =true,
-["Broker_Garbage-LootManager"] =true,
 
+linkExpaAddOns('bag') {
+BankStack =false,
+
+AdiBags =true,
+AdiBags_Config =true,
+BagSync =true,
+
+BagBrother =false,
+Combuctor =false,
+Combuctor_Config =false,
+Combuctor_Sets =false,
+Combuctor_BindToAccount =false,
+Combuctor_EquipmentSets =false,
+
+ArkInventory =false,
+ArkInventoryConfig =false,
+ArkInventoryRules =false,
+ArkInventoryRules_Example =false,
+
+XLoot =false,
+XLoot_Frame =false,
+XLoot_Group =false,
+XLoot_Master =false,
+XLoot_Monitor =false,
+XLoot_Options =false,
+}
+
+
+
+
+linkExpaAddOns('unitframe') {
 oUF_Adirelle =true,
 oUF_Adirelle_Single =true,
 oUF_Adirelle_Arena =true,
 oUF_Adirelle_Boss =true,
 oUF_Adirelle_Raid =true,
 oUF_Adirelle_Config =true,
+
 oUF_Freebgrid =false,
 oUF_Freebgrid_Config =false,
-oUF_Lanerra =false,
 oUF_Phanx =false,
 oUF_Phanx_Config =false,
+
+oUF =false,
+oUF_MovableFrames =false,
+oUF_Mlight =false,
+oUF_Lanerra =false,
+oUF_Phanx =false,
+}
+
+
+linkExpaAddOns('nameplate') {
 Kui_Media =true,
 Kui_Nameplates =true,
 Kui_Nameplates_Auras =true,
+
+PlateBuffs =false,
+
 TidyPlates =false,
-TidyPlates_Graphite =false,
 TidyPlatesHub =false,
 TidyPlatesWidgets =false,
-Ellipsis =true,
-Ellipsis_Options =true,
-Raven =true,
-Raven_Options =true,
-["xCT+"] =true,
---Doom_CooldownPulse =true,
+TidyPlates_Graphite =false,
+TidyPlates_Slim_Horizontal =false,
+TidyPlates_Slim_Vertical =false,
+TidyPlates_ThreatPlates =false,
+}
 
-LoseControlFix =true,
---GTFO =true,
 
-Skada =true,
+linkExpaAddOns('combat') {
+Quartz =false,
+CoolLine =false,
+Ellipsis =false,
+Ellipsis_Options =false,
+Raven =false,
+Raven_Options =false,
+
+MikScrollingBattleText =true,
+MSBTOptions =true,
+["xCT+"] =false,
+Doom_CooldownPulse =false,
+
+LoseControlFix =false,
+LoseControl =false,
+GTFO =false,
+
 Spy =true,
+}
 
-Postal =true,
-InboxMailBag =false,
+
+
+
+linkExpaAddOns('chat') {
 
 ["Prat-3.0"] =true,
-["Prat-3.0_Libraries"] =true,
+["Prat-3.0_Libraries"] =false,
+["Prat-3.0_HighCPUUsageModules"] =false,
 Elephant =true,
+}
 
-idTip =true,
-TipTop =true,
 
-Mappy =true,
+linkExpaAddOns('mail') {
+Postal =true,
+GnomishInboxShrinker =false,
+InboxMailBag =false,
+}
+
+
+linkExpaAddOns('players') {
+}
+
+
+
+
+linkExpaAddOns('map') {
 Mapster =true,
 TomTom =true,
 
 Explorer =true,
 MozzFullWorldMap =false,
-Routes =false,
+
+
+Routes =true,
 HandyNotes =false,
 HandyNotes_LostAndFound =false,
 
 NPCScan =false,
 ["NPCScan.Overlay"] =false,
-_NPCScan = false,
-["_NPCScan.Overlay"] = false,
-
+RareSpawnOverlay =false,
 SilverDragon =true,
 SilverDragon_Data =true,
+}
 
 
-AddonLoader =true,
-BlizzMove =true,
-Viewporter =true,
-Leatrix_Plus =true,
-MacroBank =false,
-AdvancedIconSelector =false,
-["AdvancedIconSelector-KeywordData"] =false,
 
-TinyPad =true,
---ViragDevTool =true, -- linkAddOns.Adev
 
-FasterCamera =true,
-FriendsShare =true,
+linkExpaAddOns('broker') {
 AllPlayed =false,
-Examiner =true,
---EmoteLDB =true,
+Broker_Everything =true,
+Broker_Garbage =false,
+["Broker_Garbage-Config"] =false,
+["Broker_Garbage-LootManager"] =false,
+EmoteLDB =false,
 LiteMount =true,
+}
 
-Archy =true,
-Skillet =false,
-Accountant =false,
+
+linkExpaAddOns('cpu') {
+AddonUsage =true,
+iCPU =false,
+Broker_CPU =true,
+}
+
+
+linkExpaAddOns('dev') {
+["!BugGrabber"] =true,
+BugSack =true,
+
+AdvancedEventTrace =false,
+ImprovedFrameStack =false,
+
+TinyPad =false,
+ViragDevTool =false,
+
+Hack =false,
+LuaBrowser =false,
+WowLua =false,
+DevPad =false,
+["DevPad.GUI"] =false,
+tekDebug =true,
+}
+
+
+
+
+linkExpaAddOns('trade') {
 GnomishVendorShrinker =true,
 Auctionator =true,
 
-MogIt =true,
-
 }
 
-linkAddOns.A548Tau {
+
+linkExpaAddOns('prof') {
+Archy =false,
+Milling =false,
+Panda =false,
+Skillet =false,
+}
+
+
+
+
+linkExpaAddOns('gear') {
+Examiner =true,
+MogIt =true,
+}
+
+
+
+linkServerAddOns {
 
 Blizzard_AchievementUI =true,
 Blizzard_ArchaeologyUI =true,

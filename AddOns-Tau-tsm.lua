@@ -1,12 +1,19 @@
 -- AddOns-Tau-tsm-v548.txt
---  cmd /c mklink AddOns.txt  .. =true,.. =true,WTF =true,AddOns.txt
+--[[
+In AddOns folder:
+cmd /c mklink ..\..\WTF\AddOns.txt ..\Interface\AddOns\AddOns.txt 
+Or in WTF folder:
+cmd /c mklink AddOns.txt ..\Interface\AddOns\AddOns.txt 
+In account folder:
+cmd /c mklink AddOns.txt ..\..\AddOns.txt 
+--]]
 
 dofile('../mkAddOnsLinks.lua')
+local linkExpaAddOns = linkAddOns.A548
+local linkServerAddOns = linkAddOns.A735Fs
 
 
-
-
-linkAddOns.A548('_read/tek') {
+linkExpaAddOns('_read/tek') {
 Ampere =true,
 addonaddoff =true,
 linkenlog =true,
@@ -18,17 +25,18 @@ tekPopbar =true,
 tekticles =true,
 }
 
-linkAddOns.A548('_read') {
+linkExpaAddOns('_read') {
 ColorPickerPlus =true,
 TinyInspect =true,
 }
 
-linkAddOns.A548('ui') {
+linkExpaAddOns('ui') {
 Aurora =true,
+LUI =true,
 }
 
 --[[
-linkAddOns.A548('ui/AltzUI-5.60/AddOns') {
+linkExpaAddOns('ui/AltzUI-5.60/AddOns') {
 --Aurora =true,
 AltzUI =true,
 AltzUIConfig =true,
@@ -37,7 +45,7 @@ oGlow =true,
 }
 --]]
 
-linkAddOns.A548('_test/12-12') {
+linkExpaAddOns('_test/12-12') {
 AdiButtonAuras =true,
 AdiButtonAuras_Config =true,
 AuraFrames =true,
@@ -45,11 +53,6 @@ AuraFramesConfig =true,
 Autopsy =true,
 BindPad =true,
 Butsu =true,
-
-ButtonFacade =true,
-Masque =true,
-Masque_CleanIcons =true,
-Masque_Darion =true,
 
 mapSearch =true,
 MyFonts =true,
@@ -59,11 +62,10 @@ Ovale =true,
 Watcher =true,
 
 toomanyaddons =true,
-LUI =true,
 }
 
 
-linkAddOns.A548('_test') {
+linkExpaAddOns('_test') {
 MiniMapster =true,
 
 FriendShare =true,
@@ -105,14 +107,12 @@ TellMeWhen_Options =true,
 
 
 
-linkAddOns.A548('base') {
-["!BugGrabber"] =true,
-BugSack =true,
+linkExpaAddOns('base') {
 Ace3 =true,
 
 AddonLoader =true,
 ACP =true,
-stAddonmanager =true,
+stAddonmanager =false,
 
 Binder =true,
 BlizzMove =true,
@@ -138,7 +138,7 @@ AdvancedIconSelector =true,
 }
 
 
-linkAddOns.A548('_my') {
+linkExpaAddOns('_my') {
 ZenShortcuts =true,
 ZenTestZone =true,
 ZenTools =true,
@@ -147,7 +147,7 @@ ZenTools =true,
 
 
 
-linkAddOns.A548('bars') {
+linkExpaAddOns('bars') {
 BarProfiler =true,
 SetTheory =true,
 
@@ -156,8 +156,10 @@ ExtraQuestButton =true,
 TinyExtraBars =true,
 ButtonForge =true,
 
-Masque =true,
-Masque_CleanIcons =true,
+ButtonFacade =false,
+Masque =false,
+Masque_CleanIcons =false,
+Masque_Darion =false,
 
 Bazooka =true,
 Bazooka_Options =true,
@@ -174,7 +176,7 @@ Dominos_XP =true,
 }
 
 
-linkAddOns.A548('bag') {
+linkExpaAddOns('bag') {
 BankStack =true,
 
 AdiBags =true,
@@ -204,7 +206,7 @@ XLoot_Options =true,
 
 
 
-linkAddOns.A548('unitframe') {
+linkExpaAddOns('unitframe') {
 oUF_Adirelle =true,
 oUF_Adirelle_Single =true,
 oUF_Adirelle_Arena =true,
@@ -225,7 +227,7 @@ oUF_Phanx =true,
 }
 
 
-linkAddOns.A548('nameplate') {
+linkExpaAddOns('nameplate') {
 Kui_Media =true,
 Kui_Nameplates =true,
 Kui_Nameplates_Auras =true,
@@ -242,7 +244,7 @@ TidyPlates_ThreatPlates =false,
 }
 
 
-linkAddOns.A548('combat') {
+linkExpaAddOns('combat') {
 Quartz =true,
 CoolLine =true,
 Ellipsis =true,
@@ -265,7 +267,7 @@ Spy =true,
 
 
 
-linkAddOns.A548('chat') {
+linkExpaAddOns('chat') {
 Bubblicious =false,
 BasicChatMods =false,
 PhanxChat =false,
@@ -278,24 +280,24 @@ Elephant =true,
 }
 
 
-linkAddOns.A548('mail') {
+linkExpaAddOns('mail') {
 Postal =true,
 GnomishInboxShrinker =true,
 InboxMailBag =true,
 }
 
 
-linkAddOns.A548('players') {
+linkExpaAddOns('players') {
 }
 
 
 
 
-linkAddOns.A548('map') {
+linkExpaAddOns('map') {
 OmegaMap =false,
 FlightMap =false,
 Mapster =true,
-Mappy =true,
+Mappy =false,
 Squeenix =true,
 TomTom =true,
 TomTomPing =false,
@@ -334,7 +336,7 @@ AtlasMajorCitiesEnhanced =false,
 
 NPCScan =true,
 ["NPCScan.Overlay"] =true,
-RareSpawnOverlay =false,
+RareSpawnOverlay =true,
 SilverDragon =true,
 SilverDragon_Data =true,
 }
@@ -342,7 +344,7 @@ SilverDragon_Data =true,
 
 
 
-linkAddOns.A548('broker') {
+linkExpaAddOns('broker') {
 AllPlayed =false,
 Broker_Everything =true,
 Broker_Garbage =true,
@@ -353,14 +355,17 @@ LiteMount =true,
 }
 
 
-linkAddOns.A548('cpu') {
+linkExpaAddOns('cpu') {
 AddonUsage =true,
 iCPU =true,
 Broker_CPU =true,
 }
 
 
-linkAddOns.A548('dev') {
+linkExpaAddOns('dev') {
+["!BugGrabber"] =true,
+BugSack =true,
+
 AdvancedEventTrace =true,
 ImprovedFrameStack =true,
 
@@ -378,7 +383,7 @@ tekDebug =true,
 
 
 
-linkAddOns.A548('trade') {
+linkExpaAddOns('trade') {
 GnomishVendorShrinker =true,
 GnomishAuctionShrinker =true,
 
@@ -401,7 +406,7 @@ TradeSkillMaster_Warehousing =true,
 }
 
 
-linkAddOns.A548('prof') {
+linkExpaAddOns('prof') {
 AckisRecipeList =true,
 AckisRecipeList_Alchemy =true,
 AckisRecipeList_Cooking =true,
@@ -423,13 +428,13 @@ Skillet =false,
 
 
 
-linkAddOns.A548('gear') {
+linkExpaAddOns('gear') {
 Examiner =true,
 MogIt =true,
 }
 
 
-linkAddOns.A548('pet') {
+linkExpaAddOns('pet') {
 BetterBattlePetTooltip =true,
 PetBattleQualityGlow =false,
 PetJournalEnhanced =false,
@@ -442,7 +447,7 @@ PetTracker_Upgrades =false,
 }
 
 
-linkAddOns.A548('quest') {
+linkExpaAddOns('quest') {
 Immersion =true,
 Storyline =true,
 }
@@ -450,7 +455,7 @@ Storyline =true,
 
 
 
-linkAddOns.A548('raid') {  -- damage meter, Exorsus Raid Tools
+linkExpaAddOns('raid') {  -- damage meter, Exorsus Raid Tools
 Details =true,
 Details_DmgRank =true,
 Details_DpsTuning =true,
@@ -468,7 +473,7 @@ Skada =true,
 }
 
 
-linkAddOns.A548('raid') {  -- BigWigs
+linkExpaAddOns('raid') {  -- BigWigs
 oRA3 =true,
 
 BigWigs =true,
@@ -494,7 +499,7 @@ LittleWigs =true,
 }
 
 --[[
-linkAddOns.A548('raid') {  -- DBM
+linkExpaAddOns('raid') {  -- DBM
 ["DBM-BaradinHold"] =true,
 ["DBM-BastionTwilight"] =true,
 ["DBM-BlackwingDescent"] =true,
@@ -523,7 +528,7 @@ linkAddOns.A548('raid') {  -- DBM
 
 
 
-linkAddOns.A548Tau {
+linkServerAddOns {
 
 Blizzard_AchievementUI =true,
 Blizzard_ArchaeologyUI =true,
