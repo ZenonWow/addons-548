@@ -64,7 +64,8 @@ end
 function BagSync:BAG_UPDATE(event, bagID, slotID)
 	print("BagSync:"..event.."(bagID="..bagID..", slotID="..tostring(slotID)..")")
 	self:ScheduleScanContainer(bagID)
-	-- Changing equipped bags fires only BAG_UPDATE for BACKPACK_CONTAINER
+	-- When items in the builtin bank change PLAYERBANKSLOTS_CHANGED event is sent instead of BAG_UPDATE(BANK_CONTAINER).
+	-- Changing equipped bags fires only BAG_UPDATE(BACKPACK_CONTAINER) event.
 	if  bagID == BACKPACK_CONTAINER  then  self:Schedule( self.ScanBackpackBags )  end
 end
 
@@ -84,6 +85,12 @@ function BagSync:BANKFRAME_OPENED()
 	self:Schedule( self.ScanEntireBank )
 end
 
+-- From FrameXML/Constants.lua:
+local BANK_CONTAINER = _G.BANK_CONTAINER or -1
+local NUM_BAG_SLOTS = _G.NUM_BAG_SLOTS or 4
+local NUM_BANKGENERIC_SLOTS = _G.NUM_BANKGENERIC_SLOTS or 28
+local NUM_BANKBAGSLOTS = _G.NUM_BANKBAGSLOTS or 7
+
 function BagSync:BANKFRAME_CLOSED()
 	ns.atBank = false
 	-- Drop scheduled bank bag scans
@@ -92,6 +99,7 @@ function BagSync:BANKFRAME_CLOSED()
 		self.BagsToScan[bagID] = nil
 	end
 end
+
 
 function BagSync:PLAYERBANKSLOTS_CHANGED(event, slotID)
 	print("BagSync:"..event.."(slotID="..tostring(slotID)..")")
@@ -102,6 +110,7 @@ function BagSync:PLAYERBANKSLOTS_CHANGED(event, slotID)
 		local bagID = NUM_BAG_SLOTS + slotID - NUM_BANKGENERIC_SLOTS
 		self:ScanBankBags(bagID)
 	else
+		-- When items in the builtin bank change PLAYERBANKSLOTS_CHANGED event is sent instead of BAG_UPDATE(BANK_CONTAINER).
 		self:ScheduleScanContainer(BANK_CONTAINER)
 		self:ScanBankBags()
 	end
@@ -163,6 +172,7 @@ function BagSync:GUILDBANKFRAME_OPENED()
 	ns.atGuildBank = true
 	if  not _G.BagSyncOpt.enableGuild  then  return  end
 	
+	ns.guildTabQueryQueue = {}
 	local numTabs = GetNumGuildBankTabs()
 	for  tabID = 1, numTabs  do
 		-- add this tab to the queue to refresh; if we do them all at once the server bugs and sends massive amounts of events
@@ -175,13 +185,14 @@ end
 
 function BagSync:GUILDBANKFRAME_CLOSED()
 	ns.atGuildBank = false
+	ns.guildTabQueryQueue = nil
 end
 
 function BagSync:GUILDBANKBAGSLOTS_CHANGED(event, tabID, slotID)
 	if  not _G.BagSyncOpt.enableGuild  then  return  end
 	print("BagSync:"..event.."(tabID="..tostring(tabID)..", slotID="..tostring(slotID)..")")
 
-	if  ns.atGuildBank  then
+	if  ns.guildTabQueryQueue  then
 		-- check if we need to process the queue
 		local tabID = next(ns.guildTabQueryQueue)
 		if tabID then

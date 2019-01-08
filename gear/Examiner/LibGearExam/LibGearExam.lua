@@ -264,14 +264,15 @@ local INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED = INVSLOT_FIRST_EQUIPPED, IN
 --------------------------------------------------------------------------------------------------------
 --           Scan all items & set bonuses on given [unit] - Make sure the tables are reset            --
 --------------------------------------------------------------------------------------------------------
-function LGE:ScanUnitItems(unit,statTable,infoTable)
+function LGE:ScanUnitItems(unit,statTable,info)
 	if (not unit) or (not UnitExists(unit)) then
 		return;
 	end
-	-- 3rd parameter used to be setTable. Clients might pass setTable (infoTable.Sets is nill), use it as setTable in this case.
-	local setTable =  infoTable.Sets  or  infoTable
-	infoTable.Tmogs = infoTable.Tmogs  or  {}
-	local tmogTable = infoTable.Tmogs
+	-- 3rd parameter used to be setTable. Clients might pass setTable (info.Sets is nil), use it as setTable in this case.
+	local setTable =  info.Sets  or  info
+	local tmogTable = {}
+	-- if 3rd parameter is setTable then don't save Tmogs
+	if  info.Tmogs  or  info.Sets  then  info.Tmogs = tmogTable  end
 	
 	-- Check all item slots
 	--for _, slotName in ipairs(self.Slots) do
@@ -412,7 +413,7 @@ end
 --------------------------------------------------------------------------------------------------------
 --                                 Checks a Single Line for Patterns                                  --
 --------------------------------------------------------------------------------------------------------
--- FrameXML/GlobalStrings.lua: TRANSMOGRIFIED = "Transmogrified to:\n%s";
+local TRANSMOGRIFIED =  _G.TRANSMOGRIFIED  or  "Transmogrified to:\n%s";   -- FrameXML/GlobalStrings.lua
 --local TRANSMOGRIFIED_PREFIX = TRANSMOGRIFIED:format("")
 --local TRANSMOGRIFIED_PREFIX = strsplit("%", TRANSMOGRIFIED, 2)
 local TRANSMOGRIFIED_PATTERN = TRANSMOGRIFIED:format("(.*)")
@@ -421,7 +422,7 @@ function LGE:ScanLineForTmog(text,tmogTable,invSlotID)
 	-- Match "Transmogrified to:\n%s"
 	local tmogName = text:match(TRANSMOGRIFIED_PATTERN)
 	if  tmogName  then
-		print( "Found tooltip tmog line: "..tmogName:gsub("|","||") )  -- gsub() to show any hidden coloring or escape
+		print( "Found tooltip tmog line: "..text:gsub("|","||") )  -- gsub() to show any hidden coloring or escape
 		local tmogLink = select(2,GetItemInfo(tmogName))  or  tmogName
 		-- Can be accessed by slotID numbers and SlotName too
 		tmogTable[ self.SlotNames[invSlotID] ] = tmogLink

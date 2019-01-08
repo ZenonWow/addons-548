@@ -355,9 +355,7 @@ end
 
 -----------------------------------------
 
-function Atr_core:CHAT_MSG_ADDON (...)
-
-	local	prefix, msg, distribution, sender = ...;
+function Atr_core:CHAT_MSG_ADDON (event, prefix, msg, distribution, sender)
 	
 
 	if (prefix == "ATR") then
@@ -1018,7 +1016,7 @@ end
 
 -----------------------------------------
 
-function Atr_core:UNIT_SPELLCAST_SENT (...)
+function Atr_core:UNIT_SPELLCAST_SENT (event, ...)
 
 	if (select (2,...) ~= "Disenchant") then
 		return;
@@ -1033,7 +1031,7 @@ end
 
 -----------------------------------------
 
-function Atr_core:UNIT_SPELLCAST_SUCCEEDED (...)
+function Atr_core:UNIT_SPELLCAST_SUCCEEDED (event, ...)
 
 	if (select (2,...) ~= "Disenchant") then
 		return;
@@ -1057,7 +1055,7 @@ end
 
 -----------------------------------------
 
-function Atr_core:BAG_UPDATE (...)
+function Atr_core:BAG_UPDATE (event, bagID)
 
 	if (time() - gDisenchantTime > 5) then
 		return;
@@ -1645,15 +1643,13 @@ end
 
 -----------------------------------------
 
-function Atr_core:AUCTION_MULTISELL_UPDATE(...)
+function Atr_core:AUCTION_MULTISELL_UPDATE(event, stacksSoFar, stacksTotal)
 	
 	if (not gAtr_SellTriggeredByAuctionator) then
 		zc.md ("skipping.  gAtr_SellTriggeredByAuctionator is false");
 		return;
 	end
 
-	local stacksSoFar, stacksTotal = ...;
-		
 	--zc.md ("stacksSoFar: ", stacksSoFar, "stacksTotal: ", stacksTotal);
 	
 	local delta = stacksSoFar - gMS_stacksPrev;
@@ -1842,9 +1838,7 @@ end
 
 -----------------------------------------
 
-function auctionator_ChatFrame_OnEvent(self, event, ...)
-
-	local msg = select (1, ...);
+function auctionator_ChatFrame_OnEvent(self, event, msg, ...)
 
 	if (event == "CHAT_MSG_SYSTEM") then
 		if (msg == ERR_AUCTION_STARTED) then		-- absorb the Auction Created message
@@ -1855,7 +1849,7 @@ function auctionator_ChatFrame_OnEvent(self, event, ...)
 		end
 	end
 
-	return auctionator_orig_ChatFrame_OnEvent (self, event, ...);
+	return auctionator_orig_ChatFrame_OnEvent (self, event, msg, ...);
 
 end
 
@@ -1939,7 +1933,7 @@ end
 
 local aoa_count = 0
 
-function Atr_core:AUCTION_ITEM_LIST_UPDATE (...)
+function Atr_core:AUCTION_ITEM_LIST_UPDATE (event, ...)
 
 	local numBatchAuctions, totalAuctions = Atr_GetNumAuctionItems("list");
 

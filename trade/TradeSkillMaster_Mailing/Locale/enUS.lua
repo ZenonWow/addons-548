@@ -103,6 +103,7 @@ L["Restart Delay (minutes)"] = true
 L["Restock Target to Max Quantity"] = true
 L["Sales"] = true
 L["Sale: %s (%d) | %s | %s"] = true
+L["Pending Sale: %s (%d) | %s | %s"] = true
 L["Send all %s to %s - %s per Item COD"] = true
 L["Send %sx%d to %s - %s per Item COD"] = true
 L["Send all %s to %s - No COD"] = true

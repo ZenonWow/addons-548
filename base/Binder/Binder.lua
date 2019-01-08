@@ -486,10 +486,13 @@ function SaveProfile()
 	end
 	Binder_Profiles_Idx[profileName]= profile
 	
+	local clientVersion, build, buildDate, interfaceVersion, memUpdateLocked = GetBuildInfo()
 	profile[1] = {
 		Name = profileName,
 		Date = date('%Y-%m-%d', time()),
 		Description = Binder_Description_InputBox:GetText(),
+		ClientVersion = clientVersion,
+		--ClientVersion = clientVersion .. "-" .. interfaceVersion,
 	}
 	profile[2] = SaveKeyBindingsSerialized()
 	

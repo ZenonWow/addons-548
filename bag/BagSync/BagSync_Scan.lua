@@ -1,7 +1,10 @@
 --[[
 /run print( format("BagSync:AfterLoginScan() ran for %.3f seconds", BagSync.AfterLoginScanTime) )
+/run slotID = 1; print( GetInventoryItemID('player', slotID), GetInventoryItemLink('player', slotID) )
+/dump GetItemInfo(1)
 /dump GetInventoryItemID('player', 68)
-/dump GetInventoryItemLink('player', 68)
+/dump GetInventoryItemID('player', 1)
+/dump GetInventoryItemLink('player', 1)
 /run for bagID=1,11 do local invSlotID=ContainerIDToInventoryID(bagID); print(bagID..'. invSlotID='..tostring(invSlotID)..' item='..(GetInventoryItemID('player', invSlotID) or 'nil')..' '..(GetInventoryItemLink('player', invSlotID) or 'nil') ) end
 /run for bagID=1,11 do local l=GetBagLink(bagID); if l then print(bagID..'. '..l..'  '..gsub(l,'|','||')) else print(bagID..'. <no bag>') end end
 --]]
@@ -393,7 +396,7 @@ function BagSync:ScanVoidBank()
 
 	local voidItems = {}
 	for slotID = 1, 80 do
-		itemID, textureName, locked, recentDeposit, isFiltered = GetVoidItemInfo(i)
+		itemID, textureName, locked, recentDeposit, isFiltered = GetVoidItemInfo(slotID)
 		voidItems[slotID] =  itemID  and  tostring(itemID)    -- no counts in void storage
 	end
 	

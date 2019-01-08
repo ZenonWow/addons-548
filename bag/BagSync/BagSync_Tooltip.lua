@@ -400,8 +400,11 @@ end
 
 
 local function AddLinesToTooltip(tooltip, lineList)
-	for  i, line  in ipairs(lineList) do
-		tooltip:AddDoubleLine( unpack(line) )
+	if  tooltip.AddDoubleLine  then
+		for  i, line  in ipairs(lineList) do
+			tooltip:AddDoubleLine( unpack(line) )
+		end
+	else
 	end
 	tooltip:Show()
 	return  0 < #lineList
@@ -637,6 +640,7 @@ local function hookPetTip()
 	local modified = false
 	-- BattlePetTooltipTemplate_SetBattlePet(BattlePetTooltip, BATTLE_PET_TOOLTIP);
 	hooksecurefunc('BattlePetToolTip_Show', function (speciesID, level, breedQuality, maxHealth, power, speed, customName)
+		print("BattlePetToolTip_Show(", speciesID, level, breedQuality, maxHealth, power, speed, customName, ")")
 		modified = BagSync.AddItemToTooltip( BattlePetTooltip, "battlepet:"..speciesID )
 	end)
 end

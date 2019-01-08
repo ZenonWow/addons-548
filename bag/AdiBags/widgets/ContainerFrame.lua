@@ -198,11 +198,9 @@ function containerProto:OnCreate(name, bagIds, isBank)
 	self.forceLayout = true
 
 	-- Register persitent listeners
-	local name = self:GetName()
-	local RegisterMessage = LibStub('AceEvent-3.0').RegisterMessage
-	RegisterMessage(name, 'AdiBags_FiltersChanged', self.FiltersChanged, self)
-	RegisterMessage(name, 'AdiBags_LayoutChanged', self.LayoutChanged, self)
-	RegisterMessage(name, 'AdiBags_ConfigChanged', self.ConfigChanged, self)
+	self:RegisterMessage('AdiBags_FiltersChanged', 'FiltersChanged')
+	self:RegisterMessage('AdiBags_LayoutChanged', 'LayoutChanged')
+	self:RegisterMessage('AdiBags_ConfigChanged', 'ConfigChanged')
 end
 
 function containerProto:ToString() return self.name or self:GetName() end

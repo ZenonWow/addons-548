@@ -428,8 +428,10 @@ local function CalcHealth(unit, hp)	--sets health text on status bar
 end
 
 local function TargetTextUpdate()	--shows and updates target text
-	if db.showTargetText then
-		local unittarget = tt:GetUnit() .. "target"
+	if  not db.showTargetText  then  return  end
+	local unit = tt:GetUnit()
+	if  unit  then
+		local unittarget = unit .. "target"
 		local target, tserver = UnitName(unittarget)
 		local _,tclass = UnitClass(unittarget)
 		if target and target ~= UNKNOWN and tclass then
