@@ -5,7 +5,7 @@
 
 
 
-
+local logFile = "AddOns.log"
 
 Adev = [[d:/Games/WowSync/dev/]]
 A548 = [[d:/Games/WowSync/548/addons/]]
@@ -60,11 +60,11 @@ end
 --[[
 local function mklinkFile(from, to)
 	if  1 == os.execute('IF EXIST "'.. from ..'" exit 1')  then
-		--printCount('exists:  '.. from)
+		printCount('     EXISTS: '.. from)
 		return
 	end
 	
-	printCount('  ++ link: '.. from)
+	printCount('  ++ mklink: '.. from)
 	local cmdline = 'mklink "'.. from .. '" "'.. to ..'"'
 	local res = os.execute(cmdline)
 	if  res ~= 0  then  printCount('    \- FAILED:  '.. cmdline)  end
@@ -75,12 +75,12 @@ end
 
 local function mklinkDir(from, to)
 	if  1 == os.execute('IF EXIST "'.. from ..'" exit 1')  then
-		--printCount('exists:  '.. from)
+		printCount('     EXISTS: '.. from)
 		return
 	end
 	
-	printCount('  ++ link: '.. from)
-	local cmdline = 'mklink /j "'.. from .. '" "'.. to ..'"'
+	printCount('  ++ mklink: '.. from ..'  =>  '.. to)
+	local cmdline = 'mklink /j "'.. from .. '" "'.. to ..'" >> '.. logFile
 	local res = os.execute(cmdline)
 	if  res ~= 0  then  printCount('    \- FAILED:  '.. cmdline)  end
 	printPause()
@@ -88,10 +88,11 @@ end
 
 local function dellinkDir(from, to, nopause)
 	if  1 ~= os.execute('IF EXIST "'.. from ..'" exit 1')  then
+		printCount(' NOT EXISTS: '.. from)
 		return
 	end
 	
-	printCount('  -- delete: '.. from ..'  =>  '.. to)
+	printCount('  -- rmdir:  '.. from ..'  =>  '.. to)
 	local cmdline = 'rmdir "'.. from .. '"'
 	local res = os.execute(cmdline)
 	if  res ~= 0  then  printCount('    \- FAILED:  '.. cmdline)  end
@@ -107,7 +108,7 @@ local function listLinks()
 	-- local tmpfile = io.tmpfile()
 	-- dir /al = attribute:link - list only links / junctions (folder links on windows)
 	local cmdline = 'dir /al > '.. tmpfile
-	printCount('    '.. cmdline)
+	-- print('    '.. cmdline)
 	local res = os.execute(cmdline)
 	if  res ~= 0  then  printCount('    \- FAILED listing links:  '.. cmdline)  end
 
@@ -168,7 +169,43 @@ end
 
 
 
+function linkAddOns.str(rootFolder, list)
+	rootFolder = rootFolder:gsub('/', '\\')
+	for  line  in  list:gmatch('[^\n]+')  do
+		--line = line:trim()
+		local addon, subFolder = strsplit('=:', line, 2)
+		addon, subFolder = addon:trim(), subFolder:trim()
+		
+		if  subFolder == 'false'  or  subFolder == 'disabled'  then
+			-- skip disabled
+		elseif  addon == ''  or  addon:sub(1,2) == '--'  then
+			-- skip empty and comment
+		else
+			if  subFolder == nil  or  subFolder == ''  or  subFolder == 'true'  or  subFolder == 'enabled'  then  subFolder = true  end
+			setlinkDir(addon, rootFolder, subFolder)
+		end
+	end
+end
+
+function linkAddOns.arr(rootFolder, list)
+	rootFolder = rootFolder:gsub('/', '\\')
+	for  addon, subFolder  in  pairs(list)  do
+		setlinkDir(addon, rootFolder, subFolder)
+	end
+end
+
+function linkAddOns.list(rootFolder, list)
+	if  type(list) == 'string'  then  return linkAddOns.str(rootFolder, list)
+	elseif  type(list) == 'table'  then  return linkAddOns.arr(rootFolder, list)
+	else  error("Expecting  list  to be a string or table")
+	end
+end
+
+
+
 function linkAddOns.commitLinks()
+	os.remove(logFile)
+	
 	-- Delete removed addons
 	local prevList, prevMap = listLinks()
 	for  i, addon  in  ipairs(prevList)  do
@@ -189,13 +226,6 @@ function linkAddOns.commitLinks()
 	end
 	
 	pause('Finished')
-end
-
-function linkAddOns.list(rootFolder, list)
-	rootFolder = rootFolder:gsub('/', '\\')
-	for  addon, subFolder  in  pairs(list)  do
-		setlinkDir(addon, rootFolder, subFolder)
-	end
 end
 
 
