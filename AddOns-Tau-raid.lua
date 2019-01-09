@@ -543,5 +543,5 @@ Blizzard_VoidStorageUI =true,
 }
 
 
-pause('Finished')
+linkAddOns.commitLinks()
 
