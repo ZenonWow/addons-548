@@ -13,7 +13,7 @@
 ## X-Curse-Repository-ID: wow/timelessislechests/mainline
 
 #@no-lib-strip@
-embeds.xml
+# embeds.xml
 #@end-no-lib-strip@
 
 HandyNotes_TimelessIsleChests.lua

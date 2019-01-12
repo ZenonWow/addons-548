@@ -11,11 +11,12 @@
 ## X-Curse-Repository-ID: wow/bagsync/mainline
 
 localization\localization.lua
-libs\LibStub.lua
-libs\CallbackHandler-1.0.lua
+# libs\LibStub.lua
+# libs\CallbackHandler-1.0.lua
 libs\tekKonfigScroll.lua
 libs\LibItemSearch-1.0.lua
-libs\LibDataBroker-1.1.lua
+# libs\LibDataBroker-1.1.lua
+# libs\LibDBIcon-1.0.lua
 
 BagSync.lua
 BagSync_Minimap.lua

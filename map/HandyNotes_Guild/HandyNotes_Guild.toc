@@ -14,8 +14,8 @@
 
 #@no-lib-strip@
 libs\LibGuildPositions-1.0\lib.xml
-libs\AceTimer-3.0\AceTimer-3.0.xml
-libs\AceBucket-3.0\AceBucket-3.0.xml
+# libs\AceTimer-3.0\AceTimer-3.0.xml
+# libs\AceBucket-3.0\AceBucket-3.0.xml
 #@end-no-lib-strip@
 
 GuildNotes.lua
