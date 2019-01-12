@@ -5,12 +5,12 @@
 
 VdtLauncher= {
 	type = "launcher",
-	label= 'DevTool',
-	--text= '/VDT',
-	--text= '💐',
-	text= [[🌷]],
+	--label= 'DevTool',
+	--label= '/VDT',
+	label= '🌷VDT',
+	--label= '💐',
+	--label= [[🌷]],
 	-- or any of the following:  ✾❀⚘🍀🌷💐
-	--value= '/VDT',
 	--icon = [[Interface\AddOns\ViragDevTool\icon]],
 	OnClick = function(self, button)
 		if  button == "LeftButton"  then

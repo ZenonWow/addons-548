@@ -84,14 +84,10 @@ end
 function Binder_OnEvent(self, event, addonName)
 	if  event == "ADDON_LOADED"  and  addonName == AddonName  then
 		-- migrate after 6.2.2:  Binder_Settings.Profiles -> BinderProfilesDB
-		if  not BinderProfilesDB  and  Binder_Settings  then
-			BinderProfilesDB= Binder_Settings.Profiles
-			--Binder_Settings.Profiles = nil
-			Binder_Settings = nil
-		end
 		if  not BinderProfilesDB  then
-			BinderProfilesDB= {}
+			BinderProfilesDB=  Binder_Settings  and  Binder_Settings.Profiles
 		end
+		Binder_Settings = nil
 		
 		Binder_Profiles_Idx= {}
 		for  i,profile  in  ipairs(BinderProfilesDB)  do
@@ -100,7 +96,7 @@ function Binder_OnEvent(self, event, addonName)
 		
 		--Binder_MinimapButton_OnLoad();
 		--Minimap_Options_WhenLoaded();
-		Binder_Frame.MiniButton:OnLoad()
+		Binder_Frame.MiniButton:OnAddonLoad()
 	end		
 end
 

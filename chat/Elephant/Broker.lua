@@ -26,7 +26,7 @@ local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 local LDBDataObject
 if LDB then
   LDBDataObject = LDB:NewDataObject("Elephant", {
-    type = "data source",
+    type = "launcher",
     icon = "Interface\\AddOns\\Elephant\\icon.tga",
     OnClick = function(self, button)
       if button == "RightButton" then

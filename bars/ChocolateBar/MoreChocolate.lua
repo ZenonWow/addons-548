@@ -9,11 +9,10 @@ local L = LibStub("AceLocale-3.0"):GetLocale("ChocolateBar")
 local wipe, pairs = wipe, pairs
 --GLOBALS: InterfaceOptionsFrame_OpenToCategory
 
-local moreChocolate = LibStub("LibDataBroker-1.1"):NewDataObject("MoreChocolate", {
+local moreChocolate = LibStub("LibDataBroker-1.1"):NewDataObject("ChocolateBar", {
 	type = "launcher",
 	icon = "Interface\\AddOns\\ChocolateBar\\pics\\ChocolatePiece",
-	label = "MoreChocolate",
-	text  = "MoreChocolate",
+	label = "ChocolateBar",
 	
 	OnClick = function(self, btn)
 		if btn == "LeftButton" then 

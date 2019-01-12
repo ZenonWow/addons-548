@@ -2,7 +2,7 @@
     This handles the creation and configuration of the minimap/DataBroker button
 --]]
 
-local AddonName = ...
+local ADDON_NAME, _A = ...
 local LibDBIcon = LibStub('LibDBIcon-1.0')
 
 local MiniButton = {}
@@ -12,7 +12,7 @@ Binder_Frame.MiniButton = MiniButton
 function MiniButton:Init()
 	local minimapButton = {
 		type = "launcher",
-		icon = "Interface\\MacroFrame\\MacroFrame-Icon",
+		icon = "Interface/MacroFrame/MacroFrame-Icon",
 		label = "Binder",
 		OnClick = function(self, button)
 			if button == 'LeftButton' then
@@ -32,34 +32,34 @@ function MiniButton:Init()
 		OnTooltipShow = function(tooltip)
 			if  not tooltip  or  not tooltip.AddLine  then  return  end
 			tooltip:AddLine("Binder")
-			tooltip:AddLine("Left Click: open Profiles frame")
-			tooltip:AddLine("Shift-Left Click: modify Acionbar keybindings")
-			tooltip:AddLine("Right Click: open Keybindings frame")
+			tooltip:AddLine("Left-Click: open Profiles frame")
+			tooltip:AddLine("Shift+Left-Click: modify Acionbar keybindings")
+			tooltip:AddLine("Right-Click: open Keybindings frame")
 			--tooltip:AddLine("Hold Left Button: Move")
 		end,
 	}
 
-	self.dataObject = LibStub("LibDataBroker-1.1"):NewDataObject(AddonName, minimapButton)
+	self.dataObject = LibStub("LibDataBroker-1.1"):NewDataObject(ADDON_NAME, minimapButton)
 end
 
-function MiniButton:OnLoad()
+function MiniButton:OnAddonLoad()
 	BinderSettingsDB = BinderSettingsDB  or  {}
 	if  not BinderSettingsDB.minimap  then
 		BinderSettingsDB.minimap = BinderMinimapSettings  and  {
 			minimapPos = BinderMinimapSettings.degree,
-			hide = not BinderMinimapSettings.ShowMinimapButton,
+			hide =  not BinderMinimapSettings.ShowMinimapButton  or  nil,
 		}  or  {}
 		BinderMinimapSettings= nil
 	end
 	
-	LibDBIcon:Register(AddonName, self.dataObject, BinderSettingsDB.minimap)
+	LibDBIcon:Register(ADDON_NAME, self.dataObject, BinderSettingsDB.minimap)
 end
 
 function MiniButton:Update(newSettings)
 	if  newSettings  then  for  k,v  in  pairs(newSettings)  do
 		BinderSettingsDB.minimap[k]= v
 	end end
-	LibDBIcon:Refresh(AddonName)
+	LibDBIcon:Refresh(ADDON_NAME)
 end
 
 

@@ -21,9 +21,9 @@ BPFunc.GUI.SettingsTab = {
 	MiniMapCheckHandler = function(Value)
 		BarProfilerDb.Minimap.Hide = Value
 		if BarProfilerDb.Minimap.Hide == true then
-			BarProfilerIcon:Hide("BarProfilerIconLabel")
+			BarProfilerIcon:Hide("BarProfiler")
 		else
-			BarProfilerIcon:Show("BarProfilerIconLabel")
+			BarProfilerIcon:Show("BarProfiler")
 		end
 	end,
 -------------------------------------------------------------------------------------------------------------------------------------------

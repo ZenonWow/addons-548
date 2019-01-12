@@ -55,10 +55,11 @@ StaticPopupDialogs["CONFIRM"] = {
 -- module (BE internal) functions --
 ------------------------------------
 
-ns.modules[name].init = function(obj)
+ns.modules[name].init = function(data)
+	if not data then return end  -- pre LDB init
 	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-	if not obj then return end
-	obj = obj.obj or ns.LDB:GetDataObjectByName(ldbName) 
+	local dataobj = data.obj or ns.LDB:GetDataObjectByName(ldbName)
+	dataobj.type = 'launcher'  -- .label, tooptip and click only.  no .text, .value, .suffix
 end
 
 --[[ ns.modules[name].onevent = function(self,event,msg) end ]]

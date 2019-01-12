@@ -712,9 +712,9 @@ end
 
 local TinyPadLDB= {
 	type = "launcher",
-	label= 'TinyPad',
-	text= 'TP',
-	--value= '/TP',
+	--label= 'TinyPad',
+	label= 'TP',
+	--label= '/TP',
 	--icon = "Interface\\AddOns\\ViragDevTool\\icon",
 	OnClick = function(self, button)
 		if  button == "LeftButton"  then

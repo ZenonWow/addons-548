@@ -131,7 +131,7 @@ ns.modules[name] = {
 	}, 
 	updateinterval = nil, -- 10
 	config_defaults = {
-		customTitle = "", 
+		customTitle = nil, 
 		hideSection2 = false, 
 		hideSection3 = false, 
 		disableOnClick = false, 
@@ -216,17 +216,22 @@ end
 -- module (BE internal) functions --
 ------------------------------------
 
-ns.modules[name].init = function()
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-	local obj = ns.LDB:GetDataObjectByName(ldbName)
-	if Broker_EverythingDB[name].customTitle~="" and type(Broker_EverythingDB[name].customTitle)=="string" then
-		customTitle = Broker_EverythingDB[name].customTitle
-	end
-	if obj~=nil then
-		obj.text = customTitle
+local function updateCustomTitle()
+	local dataobj = ns.LDB:GetDataObjectByName(ldbName)
+	local modDB = Broker_EverythingDB[name]
+	if  modDB.customTitle == ""  then  modDB.customTitle = nil  end
+	customTitle = modDB.customTitle
+	if  dataobj  then
+		dataobj.text = customTitle
+		dataobj.label =  not customTitle  and  L[name]
 	end
 end
 
+ns.modules[name].init = function()
+	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
+	updateCustomTitle()
+end
+	
 ns.modules[name].onevent = function(self, ...)
 	local event, _ = ...
 
@@ -234,11 +239,7 @@ ns.modules[name].onevent = function(self, ...)
 		_, gmticket.hasTicket, gmticket.numTickets, gmticket.ticketStatus, gmticket.caseIndex, gmticket.waitTime, gmticket.waitMsg = ...
 		updateGMTicket()
 	elseif event == "BE_DUMMY_EVENT" then
-		local obj = ns.LDB:GetDataObjectByName(ldbName)
-		customTitle = Broker_EverythingDB[name].customTitle~="" and type(Broker_EverythingDB[name].customTitle)=="string" and Broker_EverythingDB[name].customTitle or L[name]
-		if obj~=nil then
-			obj.text = customTitle
-		end
+		updateCustomTitle()
 	end
 end
 

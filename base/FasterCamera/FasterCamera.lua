@@ -252,7 +252,7 @@ end
 local dataobject = {
 	type = "launcher",
 	icon = "Interface\\Icons\\inv_misc_spyglass_03",
-	text = NAME,
+	label = NAME,
 	OnClick = function(clickedframe, button)
 		ACD[ACD.OpenFrames.FasterCamera and "Close" or "Open"](ACD, "FasterCamera")
 	end,

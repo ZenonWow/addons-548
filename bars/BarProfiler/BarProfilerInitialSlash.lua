@@ -101,16 +101,16 @@ BPFunc.Initial = {
 		BarProfilerSlashCount = 0	--needs moving into Db
 		tinsert(UISpecialFrames,"BPGUIEsc")
 		tinsert(UISpecialFrames,"BarProfilerMessageFrame")
-		BarProfilerDb.Minimap.Info = LibStub("LibDataBroker-1.1"):NewDataObject("BarProfilerIconLabel", {	--only needs doing once?
-			type = "data source",
-			text = "BarProfilerIconLabel",
+		BarProfilerDb.Minimap.Info = LibStub("LibDataBroker-1.1"):NewDataObject("BarProfiler", {	--only needs doing once?
+			type = "launcher",
+			label = "BarProfiler",
 			icon = "Interface\\Icons\\Achievement_guildperk_workingovertime",
 			OnClick = function() BarProfiler:BarProfilerSlash(nil) end,
 			OnTooltipShow = function(tooltip)
 			tooltip:AddLine("Bar Profiler")
 			end,
 		})
-		BarProfilerIcon:Register("BarProfilerIconLabel", BarProfilerDb.Minimap.Info, BarProfilerDb.Minimap)
+		BarProfilerIcon:Register("BarProfiler", BarProfilerDb.Minimap.Info, BarProfilerDb.Minimap)
 
 		BarProfilerDb.GUI.Inhibit = nil
 		BarProfiler:Print ("Loaded")
