@@ -106,8 +106,8 @@ local function CreateIcon(self, icon)
 	if obj.iconCoords then
 		iconTex:SetTexCoord(unpack(obj.iconCoords))
 	end
-	iconTex:SetDesaturated(db.desaturated);
 	self.icon = iconTex
+	IconColorUpdater(self, obj.iconR, 'iconR')
 end
 
 -- updaters code taken with permission from fortress 
@@ -335,9 +335,11 @@ function ChocolatePiece:New(name, obj, settings, database)
 	
 	if text then
 		chocolate.text:SetText(text)
+		--[[ No, you are not allowed to modify the dataobject that belongs to a client addon
 	else
 		obj.text = name
 		chocolate.text:SetText(name)
+		--]]
 	end
 	
 	chocolate.name = name
