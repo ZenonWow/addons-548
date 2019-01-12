@@ -1,0 +1,816 @@
+﻿<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+	
+    <Script file="SimpleNotepad_Defaults.lua"/>
+	<Script file="SimpleNotepad.lua"/>
+    <Script file="SimpleNotepad-drag-drop.lua"/>
+	<Scripts> 
+			<OnLoad>
+			SimpleNotepad_OnLoad(self);
+            SimpleNotepad:RegisterForDrag("LeftButton");
+            SimpleNotepad:RegisterEvent("VARIABLES_LOADED");
+            WorldFrame:HookScript("OnMouseDown", function(self, button) SimpleNotepadEditBoxN_ClearFocus() or SimpleNotepadEditBoxC_ClearFocus() or SimpleNotepadEditBoxP_ClearFocus() or SimpleNotepadEditBoxT_ClearFocus() or SimpleNotepadEditBoxR_ClearFocus() end)
+			
+			    self:HookScript("OnMouseDown", function(self, button)	-- hooked this to prevent interference with other OnMouseDown stuff
+				SimpleNotepadEditBoxN_MouseButton = button
+				SimpleNotepadEditBoxN_MouseButton = RightButton 
+                else
+                SimpleNotepadEditBoxC_MouseButton = button
+				SimpleNotepadEditBoxC_MouseButton = RightButton
+                else
+                SimpleNotepadEditBoxP_MouseButton = button
+				SimpleNotepadEditBoxP_MouseButton = RightButton 
+                else
+                SimpleNotepadEditBoxT_MouseButton = button
+				SimpleNotepadEditBoxT_MouseButton = RightButton 
+                else
+                SimpleNotepadEditBoxR_MouseButton = button
+				SimpleNotepadEditBoxR_MouseButton = RightButton 
+			    end)
+
+            </OnLoad>
+			<OnEvent>
+				SimpleNotepad_OnEvent(event, self,  ...);
+			</OnEvent>
+            <OnEvent>
+            if (event == "VARIABLES_LOADED") then
+            SimpleNotepad_Loaded();
+            end
+            </OnEvent>
+	</Scripts>
+    
+    <!-- TEMPLATES -->
+    
+   <!-- FRAMES -->
+
+	<Frame name="SimpleNotepadFrame" parent="UIParent" movable="true" resizable="true" enableMouse="true" toplevel="true" hidden="true">
+		<Size>
+			<AbsDimension x="550" y="550"/>
+		</Size>
+		<Anchors>
+			<Anchor point="CENTER"/>
+		</Anchors>
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+			<BackgroundInsets>
+				<AbsInset left="4" right="4" top="4" bottom="4" />
+			</BackgroundInsets>
+			<TileSize>
+				<AbsValue val="16" />
+			</TileSize>
+			<EdgeSize>
+				<AbsValue val="16" />
+			</EdgeSize>
+		</Backdrop>
+           <!-- PAGE LABEL --> 
+             <Layers>
+                <Layer>
+			        <FontString name="SimpleNotepadPageName" inherits="GameFontNormal" text="">
+					    <Size>
+						    <AbsDimension x="280" y="24"/>
+					    </Size>
+				        <Anchors>
+					        <Anchor point="TOPLEFT" relativeTo="SimpleNotepadFrame" relativePoint="TOPLEFT" x="25" y="-8"/>
+				        </Anchors>
+			        </FontString>
+                </Layer>
+            </Layers>
+            
+           <!-- EDIT FRAME --> 
+           
+        <Frames>
+			<Frame name="SimpleNotepadEditFrame">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="8" y="-55"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="-8" y="4"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Backdrop bgFile="Interface\ChatFrame\ChatFrameBackground" edgeFile="Interface\Buttons\UI-SliderBar-Border" tile="true">
+					<BackgroundInsets>
+						<AbsInset left="3" right="3" top="6" bottom="6" />
+					</BackgroundInsets>
+					<TileSize>
+						<AbsValue val="16" />
+					</TileSize>
+					<EdgeSize>
+						<AbsValue val="9" />
+					</EdgeSize>
+				</Backdrop>
+                <!-- SCROLL FRAME 1 -->
+        <Frames>
+				<ScrollFrame name="SimpleNotepadEditScrollFrame" inherits="UIPanelScrollFrameTemplate">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="6" y="-12"/>
+							</Offset>
+						</Anchor>
+					    <Anchor point="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="-26" y="8"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+						<Layers>
+							<Layer level="BORDER">
+								<Texture file="Interface\ChatFrame\ChatFrameBackground">
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeTo="SimpleNotepadEditScrollFrame" relativePoint="TOPRIGHT">
+											<Offset>
+												<AbsDimension x="0" y="0"/>
+											</Offset>
+										</Anchor>
+										<Anchor point="BOTTOMRIGHT" relativeTo="SimpleNotepadEditScrollFrame" relativePoint="BOTTOMRIGHT">
+											<Offset>
+												<AbsDimension x="23" y="0"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+									<Gradient>
+										<MinColor r="0.1" g="0.1" b="0.1"/>
+										<MaxColor r="0" g="0" b="0"/>
+									</Gradient>
+								</Texture>
+							</Layer>
+						</Layers>
+						<ScrollChild>
+                            <!-- NOTES -->
+							<EditBox name="SimpleNotepadEditBoxN" resizable="true" multiLine="true" maxLines="500" letters="8192" nonspacewrap="true" spacing="1" autoFocus="false">
+								<Size>
+									<AbsDimension x="500" y="500"/>
+								</Size>
+								<Anchors>
+									<Anchor point="TOPLEFT"/>
+									<Anchor point="BOTTOMRIGHT"/>
+								</Anchors>
+								<Scripts>
+                                    <OnLoad>
+                                        local text = SimpleNotepadEditBoxN:GetText()
+			                            local pos = string.find(text, "|")
+			
+			                            if pos ~= nil then
+				                        _G[SimpleNotepadEditBoxN:GetName() .. "Label"] = strsub(text, 0, pos-1)
+				                        _G[SimpleNotepadEditBoxN:GetName() .. "Tooltip"] = strsub(text, pos+1)
+			                            end
+                                    </OnLoad>
+		                            <OnEnter>
+			                            if _G[SimpleNotepadEditBoxN:GetName() .. "Tooltip"] ~= nil then
+				                        GameTooltip:SetOwner(SimpleNotepadEditBoxN, "ANCHOR_TOPLEFT")
+				                        GameTooltip:SetText(_G[SimpleNotepadEditBoxN:GetName() .. "Tooltip"], 1, 0.8, 0, 1, 1)
+			                        end
+		                            </OnEnter>
+		                            <OnCursorChanged>
+                                    SimpleNotepadEditBoxN_EditBoxCursor(self, y, h)
+                                    </OnCursorChanged>
+		                            <OnLeave>
+                                    GameTooltip:Hide()
+                                    </OnLeave>
+                                    <OnReceiveDrag>
+                                        SimpleNotepadEditBoxN_Drag()
+                                    </OnReceiveDrag>
+									<OnEditFocusGained>
+										SimpleNotepad.has_focus = 1
+									</OnEditFocusGained>
+									<OnTextChanged>
+										SimpleNotepad_OnTextChanged(self)
+									</OnTextChanged>
+									<OnEscapePressed>
+										self:ClearFocus();
+									</OnEscapePressed>
+								</Scripts>
+								<FontString inherits="GameFontHighlight"/>
+							</EditBox>
+						</ScrollChild>
+					</ScrollFrame>
+				</Frames>
+                <!-- SCROLL FRAME 2 -->
+                <Frames>
+				<ScrollFrame name="SimpleNotepadEditScrollFrame" inherits="UIPanelScrollFrameTemplate">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="6" y="-12"/>
+							</Offset>
+						</Anchor>
+					    <Anchor point="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="-26" y="8"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+						<Layers>
+							<Layer level="BORDER">
+								<Texture file="Interface\ChatFrame\ChatFrameBackground">
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeTo="SimpleNotepadEditScrollFrame" relativePoint="TOPRIGHT">
+											<Offset>
+												<AbsDimension x="0" y="0"/>
+											</Offset>
+										</Anchor>
+										<Anchor point="BOTTOMRIGHT" relativeTo="SimpleNotepadEditScrollFrame" relativePoint="BOTTOMRIGHT">
+											<Offset>
+												<AbsDimension x="23" y="0"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+									<Gradient>
+										<MinColor r="0.1" g="0.1" b="0.1"/>
+										<MaxColor r="0" g="0" b="0"/>
+									</Gradient>
+								</Texture>
+							</Layer>
+						</Layers>
+						<ScrollChild>
+                            <!-- CHARACTER -->
+							<EditBox name="SimpleNotepadEditBoxC" resizable="true" multiLine="true" maxLines="500" letters="8192" nonspacewrap="true" spacing="1" autoFocus="false">
+								<Size>
+									<AbsDimension x="500" y="500"/>
+								</Size>
+								<Anchors>
+									<Anchor point="TOPLEFT"/>
+									<Anchor point="BOTTOMRIGHT"/>
+								</Anchors>
+								<Scripts>
+                                    <OnLoad>
+                                        local text = SimpleNotepadEditBoxC:GetText()
+			                            local pos = string.find(text, "|")
+			
+			                            if pos ~= nil then
+				                        _G[SimpleNotepadEditBoxC:GetName() .. "Label"] = strsub(text, 0, pos-1)
+				                        _G[SimpleNotepadEditBoxC:GetName() .. "Tooltip"] = strsub(text, pos+1)
+			                            end
+                                    </OnLoad>
+		                            <OnEnter>
+			                            if _G[SimpleNotepadEditBoxC:GetName() .. "Tooltip"] ~= nil then
+				                        GameTooltip:SetOwner(SimpleNotepadEditBoxC, "ANCHOR_TOPLEFT")
+				                        GameTooltip:SetText(_G[SimpleNotepadEditBoxC:GetName() .. "Tooltip"], 1, 0.8, 0, 1, 1)
+			                        end
+		                            </OnEnter>
+		                            <OnCursorChanged>
+                                    SimpleNotepadEditBoxC_EditBoxCursor(self, y, h)
+                                    </OnCursorChanged>
+		                            <OnLeave>
+                                    GameTooltip:Hide()
+                                    </OnLeave>
+                                    <OnReceiveDrag>
+                                        SimpleNotepadEditBoxC_Drag()
+                                    </OnReceiveDrag>
+									<OnEditFocusGained>
+										SimpleNotepad.has_focus = 1
+									</OnEditFocusGained>
+									<OnTextChanged>
+										SimpleNotepad_OnTextChanged(self)
+									</OnTextChanged>
+									<OnEscapePressed>
+										self:ClearFocus();
+									</OnEscapePressed>
+								</Scripts>
+								<FontString inherits="GameFontHighlight"/>
+							</EditBox>
+						</ScrollChild>
+					</ScrollFrame>
+				</Frames>
+                <!-- SCROLL FRAME 3 -->
+                <Frames>
+				<ScrollFrame name="SimpleNotepadEditScrollFrame" inherits="UIPanelScrollFrameTemplate">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="6" y="-12"/>
+							</Offset>
+						</Anchor>
+					    <Anchor point="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="-26" y="8"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+						<Layers>
+							<Layer level="BORDER">
+								<Texture file="Interface\ChatFrame\ChatFrameBackground">
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeTo="SimpleNotepadEditScrollFrame" relativePoint="TOPRIGHT">
+											<Offset>
+												<AbsDimension x="0" y="0"/>
+											</Offset>
+										</Anchor>
+										<Anchor point="BOTTOMRIGHT" relativeTo="SimpleNotepadEditScrollFrame" relativePoint="BOTTOMRIGHT">
+											<Offset>
+												<AbsDimension x="23" y="0"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+									<Gradient>
+										<MinColor r="0.1" g="0.1" b="0.1"/>
+										<MaxColor r="0" g="0" b="0"/>
+									</Gradient>
+								</Texture>
+							</Layer>
+						</Layers>
+						<ScrollChild>
+                            <!-- PROFFESIONS -->
+							<EditBox name="SimpleNotepadEditBoxP" resizable="true" multiLine="true" maxLines="500" letters="8192" nonspacewrap="true" spacing="1" autoFocus="false">
+								<Size>
+									<AbsDimension x="500" y="500"/>
+								</Size>
+								<Anchors>
+									<Anchor point="TOPLEFT"/>
+									<Anchor point="BOTTOMRIGHT"/>
+								</Anchors>
+								<Scripts>
+                                <OnLoad>
+                                        local text = SimpleNotepadEditBoxP:GetText()
+			                            local pos = string.find(text, "|")
+			
+			                            if pos ~= nil then
+				                        _G[SimpleNotepadEditBoxP:GetName() .. "Label"] = strsub(text, 0, pos-1)
+				                        _G[SimpleNotepadEditBoxP:GetName() .. "Tooltip"] = strsub(text, pos+1)
+			                            end
+                                    </OnLoad>
+		                            <OnEnter>
+			                            if _G[SimpleNotepadEditBoxP:GetName() .. "Tooltip"] ~= nil then
+				                        GameTooltip:SetOwner(SimpleNotepadEditBoxP, "ANCHOR_TOPLEFT")
+				                        GameTooltip:SetText(_G[SimpleNotepadEditBoxP:GetName() .. "Tooltip"], 1, 0.8, 0, 1, 1)
+			                        end
+		                            </OnEnter>
+		                            <OnCursorChanged>
+                                    SimpleNotepadEditBoxP_EditBoxCursor(self, y, h)
+                                    </OnCursorChanged>
+		                            <OnLeave>
+                                    GameTooltip:Hide()
+                                    </OnLeave>
+                                    <OnReceiveDrag>
+                                        SimpleNotepadEditBoxP_Drag()
+                                    </OnReceiveDrag>
+									<OnEditFocusGained>
+										SimpleNotepad.has_focus = 1
+									</OnEditFocusGained>
+									<OnTextChanged>
+										SimpleNotepad_OnTextChanged(self)
+									</OnTextChanged>
+									<OnEscapePressed>
+										self:ClearFocus();
+									</OnEscapePressed>
+								</Scripts>
+								<FontString inherits="GameFontHighlight"/>
+							</EditBox>
+						</ScrollChild>
+					</ScrollFrame>
+				</Frames>
+                <!-- SCROLL FRAME 4 -->
+                <Frames>
+				<ScrollFrame name="SimpleNotepadEditScrollFrame" inherits="UIPanelScrollFrameTemplate">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="6" y="-12"/>
+							</Offset>
+						</Anchor>
+					    <Anchor point="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="-26" y="8"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+						<Layers>
+							<Layer level="BORDER">
+								<Texture file="Interface\ChatFrame\ChatFrameBackground">
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeTo="SimpleNotepadEditScrollFrame" relativePoint="TOPRIGHT">
+											<Offset>
+												<AbsDimension x="0" y="0"/>
+											</Offset>
+										</Anchor>
+										<Anchor point="BOTTOMRIGHT" relativeTo="SimpleNotepadEditScrollFrame" relativePoint="BOTTOMRIGHT">
+											<Offset>
+												<AbsDimension x="23" y="0"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+									<Gradient>
+										<MinColor r="0.1" g="0.1" b="0.1"/>
+										<MaxColor r="0" g="0" b="0"/>
+									</Gradient>
+								</Texture>
+							</Layer>
+						</Layers>
+						<ScrollChild>
+                            <!-- TODO -->
+							<EditBox name="SimpleNotepadEditBoxT" resizable="true" multiLine="true" maxLines="500" letters="8192" nonspacewrap="true" spacing="1" autoFocus="false">
+								<Size>
+									<AbsDimension x="500" y="500"/>
+								</Size>
+								<Anchors>
+									<Anchor point="TOPLEFT"/>
+									<Anchor point="BOTTOMRIGHT"/>
+								</Anchors>
+								<Scripts>
+                                <OnLoad>
+                                        local text = SimpleNotepadEditBoxT:GetText()
+			                            local pos = string.find(text, "|")
+			
+			                            if pos ~= nil then
+				                        _G[SimpleNotepadEditBoxT:GetName() .. "Label"] = strsub(text, 0, pos-1)
+				                        _G[SimpleNotepadEditBoxT:GetName() .. "Tooltip"] = strsub(text, pos+1)
+			                            end
+                                    </OnLoad>
+		                            <OnEnter>
+			                            if _G[SimpleNotepadEditBoxT:GetName() .. "Tooltip"] ~= nil then
+				                        GameTooltip:SetOwner(SimpleNotepadEditBoxT, "ANCHOR_TOPLEFT")
+				                        GameTooltip:SetText(_G[SimpleNotepadEditBoxT:GetName() .. "Tooltip"], 1, 0.8, 0, 1, 1)
+			                        end
+		                            </OnEnter>
+		                            <OnCursorChanged>
+                                    SimpleNotepadEditBoxT_EditBoxCursor(self, y, h)
+                                    </OnCursorChanged>
+		                            <OnLeave>
+                                    GameTooltip:Hide()
+                                    </OnLeave>
+                                    <OnReceiveDrag>
+                                        SimpleNotepadEditBoxT_Drag()
+                                    </OnReceiveDrag>
+                                    <OnEditFocusGained>
+										SimpleNotepad.has_focus = 1
+									</OnEditFocusGained>
+									<OnTextChanged>
+										SimpleNotepad_OnTextChanged(self)
+									</OnTextChanged>
+									<OnEscapePressed>
+										self:ClearFocus();
+									</OnEscapePressed>
+								</Scripts>
+								<FontString inherits="GameFontHighlight"/>
+							</EditBox>
+						</ScrollChild>
+					</ScrollFrame>
+				</Frames>
+                <!-- SCROLL FRAME 5 -->
+                <Frames>
+				<ScrollFrame name="SimpleNotepadEditScrollFrame" inherits="UIPanelScrollFrameTemplate">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="6" y="-12"/>
+							</Offset>
+						</Anchor>
+					    <Anchor point="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="-26" y="8"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+						<Layers>
+							<Layer level="BORDER">
+								<Texture file="Interface\ChatFrame\ChatFrameBackground">
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeTo="SimpleNotepadEditScrollFrame" relativePoint="TOPRIGHT">
+											<Offset>
+												<AbsDimension x="0" y="0"/>
+											</Offset>
+										</Anchor>
+										<Anchor point="BOTTOMRIGHT" relativeTo="SimpleNotepadEditScrollFrame" relativePoint="BOTTOMRIGHT">
+											<Offset>
+												<AbsDimension x="23" y="0"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+									<Gradient>
+										<MinColor r="0.1" g="0.1" b="0.1"/>
+										<MaxColor r="0" g="0" b="0"/>
+									</Gradient>
+								</Texture>
+							</Layer>
+						</Layers>
+						<ScrollChild>
+                            <!-- RTIT -->
+							<EditBox name="SimpleNotepadEditBoxR" resizable="true" multiLine="true" maxLines="500" letters="8192" nonspacewrap="true" spacing="1" autoFocus="false">
+								<Size>
+									<AbsDimension x="500" y="500"/>
+								</Size>
+								<Anchors>
+									<Anchor point="TOPLEFT"/>
+									<Anchor point="BOTTOMRIGHT"/>
+								</Anchors>
+								<Scripts>
+                                <OnLoad>
+                                        local text = SimpleNotepadEditBoxR:GetText()
+			                            local pos = string.find(text, "|")
+			
+			                            if pos ~= nil then
+				                        _G[SimpleNotepadEditBoxR:GetName() .. "Label"] = strsub(text, 0, pos-1)
+				                        _G[SimpleNotepadEditBoxR:GetName() .. "Tooltip"] = strsub(text, pos+1)
+			                            end
+                                    </OnLoad>
+		                            <OnEnter>
+			                            if _G[SimpleNotepadEditBoxR:GetName() .. "Tooltip"] ~= nil then
+				                        GameTooltip:SetOwner(SimpleNotepadEditBoxR, "ANCHOR_TOPLEFT")
+				                        GameTooltip:SetText(_G[SimpleNotepadEditBoxR:GetName() .. "Tooltip"], 1, 0.8, 0, 1, 1)
+			                        end
+		                            </OnEnter>
+		                            <OnCursorChanged>
+                                    SimpleNotepadEditBoxR_EditBoxCursor(self, y, h)
+                                    </OnCursorChanged>
+		                            <OnLeave>
+                                    GameTooltip:Hide()
+                                    </OnLeave>
+                                    <OnReceiveDrag>
+                                        SimpleNotepadEditBoxR_Drag()
+                                    </OnReceiveDrag>
+									<OnEditFocusGained>
+										SimpleNotepad.has_focus = 1
+									</OnEditFocusGained>
+									<OnTextChanged>
+										SimpleNotepad_OnTextChanged(self)
+									</OnTextChanged>
+									<OnEscapePressed>
+										self:ClearFocus();
+									</OnEscapePressed>
+								</Scripts>
+								<FontString inherits="GameFontHighlight"/>
+							</EditBox>
+						</ScrollChild>
+					</ScrollFrame>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self:SetBackdropColor(.1,.1,.1,1)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+            <!-- BUTTON NOTES -->
+             <Button name="$parentTab1" inherits="CharacterFrameTabButtonTemplate" id="1" text="Notes">
+               <Anchors>
+                   <Anchor point="CENTER" relativePoint="BOTTOMLEFT">
+                       <Offset>
+                           <AbsDimension x="40" y="-12"/>
+                       </Offset>
+                   </Anchor>
+               </Anchors>
+               <Scripts>
+                   <OnClick>
+                       PanelTemplates_SetTab(SimpleNotepadFrame, 1);
+                       SimpleNotepadEditBoxN:Show();
+                       SimpleNotepadEditBoxC:Hide();
+                       SimpleNotepadEditBoxP:Hide();
+                       SimpleNotepadEditBoxT:Hide();
+                       SimpleNotepadEditBoxR:Hide();
+                       SimpleNotepad_Update();
+                   </OnClick>
+               </Scripts>
+           </Button>
+           <!-- BUTTON CHAR -->
+           <Button name="$parentTab2" inherits="CharacterFrameTabButtonTemplate" id="2" text="Char">
+               <Anchors>
+                   <Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT">
+                       <Offset>
+                           <AbsDimension x="-16" y="0"/>
+                       </Offset>
+                   </Anchor>
+               </Anchors>
+               <Scripts>
+                   <OnClick>
+                       PanelTemplates_SetTab(SimpleNotepadFrame, 2);
+                       SimpleNotepadEditBoxN:Hide();
+                       SimpleNotepadEditBoxC:Show();
+                       SimpleNotepadEditBoxP:Hide();
+                       SimpleNotepadEditBoxT:Hide();
+                       SimpleNotepadEditBoxR:Hide();
+                       SimpleNotepad_Update();
+                   </OnClick>
+               </Scripts>
+           </Button>
+           <!-- BUTTON PROFF -->
+           <Button name="$parentTab3" inherits="CharacterFrameTabButtonTemplate" id="3" text="Profs">
+               <Anchors>
+                   <Anchor point="LEFT" relativeTo="$parentTab2" relativePoint="RIGHT">
+                       <Offset>
+                           <AbsDimension x="-16" y="0"/>
+                       </Offset>
+                   </Anchor>
+               </Anchors>
+               <Scripts>
+                   <OnClick>
+                       PanelTemplates_SetTab(SimpleNotepadFrame, 3);
+                       SimpleNotepadEditBoxN:Hide();
+                       SimpleNotepadEditBoxC:Hide();
+                       SimpleNotepadEditBoxP:Show();
+                       SimpleNotepadEditBoxT:Hide();
+                       SimpleNotepadEditBoxR:Hide();
+                       SimpleNotepad_Update();
+                   </OnClick>
+               </Scripts>
+           </Button>
+           <!-- BUTTON TODO -->
+           <Button name="$parentTab4" inherits="CharacterFrameTabButtonTemplate" id="4" text="To Do">
+               <Anchors>
+                   <Anchor point="LEFT" relativeTo="$parentTab3" relativePoint="RIGHT">
+                       <Offset>
+                           <AbsDimension x="-16" y="0"/>
+                       </Offset>
+                   </Anchor>
+               </Anchors>
+               <Scripts>
+                   <OnClick>
+                       PanelTemplates_SetTab(SimpleNotepadFrame, 4);
+                       SimpleNotepadEditBoxN:Hide();
+                       SimpleNotepadEditBoxC:Hide();
+                       SimpleNotepadEditBoxP:Hide();
+                       SimpleNotepadEditBoxT:Show();
+                       SimpleNotepadEditBoxR:Hide();
+                       SimpleNotepad_Update();
+                   </OnClick>
+               </Scripts>
+           </Button>
+           <!-- BUTTON RTIT -->
+           <Button name="$parentTab5" inherits="CharacterFrameTabButtonTemplate" id="5" text="Raid">
+               <Anchors>
+                   <Anchor point="LEFT" relativeTo="$parentTab4" relativePoint="RIGHT">
+                       <Offset>
+                           <AbsDimension x="-16" y="0"/>
+                       </Offset>
+                   </Anchor>
+               </Anchors>
+               <Scripts>
+                   <OnClick>
+                       PanelTemplates_SetTab(SimpleNotepadFrame, 5);
+                       SimpleNotepadEditBoxN:Hide();
+                       SimpleNotepadEditBoxC:Hide();
+                       SimpleNotepadEditBoxP:Hide();
+                       SimpleNotepadEditBoxT:Hide();
+                       SimpleNotepadEditBoxR:Show();
+                       SimpleNotepad_Update();
+                   </OnClick>
+               </Scripts>
+           </Button>
+       <Scripts>
+           <OnLoad>
+               self.elapsed = 0;
+               PanelTemplates_SetNumTabs(SimpleNotepadFrame, 5);
+               PanelTemplates_SetTab(SimpleNotepadFrame, 1);
+           </OnLoad>
+           <OnShow>
+               PlaySound("UChatScrollButton");
+               PanelTemplates_SetTab(SimpleNotepadFrame, 1);
+               SimpleNotepadEditBoxN:Show();
+               SimpleNotepadEditBoxC:Hide();
+               SimpleNotepadEditBoxP:Hide();
+               SimpleNotepadEditBoxT:Hide();
+               SimpleNotepadEditBoxR:Hide();
+               SimpleNotepad_Update();
+           </OnShow>
+           <OnHide>
+               PlaySound("UChatScrollButton");
+           </OnHide>
+       </Scripts>
+       
+
+			<!-- FOCUSGRABBER IS JUST AN OVERLAY TO SET FOCUS SINCE MULTILINE EDITBOXES VARY IN SIZE -->
+			<Button name="SimpleNotepadFocusGrabber">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="SimpleNotepadEditFrame" relativePoint="TOPLEFT">
+						<Offset>
+							<AbsDimension x="8" y="-8"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="BOTTOMRIGHT" relativeTo="SimpleNotepadEditFrame" relativePoint="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="-8" y="8"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						SimpleNotepadEditBox:SetFocus();
+					</OnClick>
+				</Scripts>
+			</Button>
+
+			<!-- GRIP IN LOWER-RIGHT CORNER USED TO RESIZE WINDOW -->
+			<Button name="SimpleNotepadResizeGrip">
+				<Size>
+					<AbsDimension x="16" y="16"/>
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT">
+						<AbsDimension x="-1" y="-1"/>
+					</Anchor>
+				</Anchors>
+				<NormalTexture file="Interface\AddOns\SimpleNotepad\images\Buttons">
+					<TexCoords left="0" right=".125" top=".25" bottom=".375"/>
+				</NormalTexture>
+				<PushedTexture file="Interface\AddOns\SimpleNotepad\images\Buttons">
+					<TexCoords left="0" right=".125" top=".25" bottom=".375"/>
+				</PushedTexture>
+				<HighlightTexture file="Interface\AddOns\SimpleNotepad\images\Buttons" alphaMode="ADD">
+					<TexCoords left="0" right=".125" top=".25" bottom=".375"/>
+				</HighlightTexture>
+				<Scripts>
+					<OnMouseDown>
+						SimpleNotepadFrame:StartSizing()
+					</OnMouseDown>
+					<OnMouseUp>
+						SimpleNotepadFrame:StopMovingOrSizing()
+						SimpleNotepadEditBoxN:SetWidth(SimpleNotepadFrame:GetWidth()-50)
+                        SimpleNotepadEditBoxC:SetWidth(SimpleNotepadFrame:GetWidth()-50)
+                        SimpleNotepadEditBoxP:SetWidth(SimpleNotepadFrame:GetWidth()-50)
+                        SimpleNotepadEditBoxT:SetWidth(SimpleNotepadFrame:GetWidth()-50)
+                        SimpleNotepadEditBoxR:SetWidth(SimpleNotepadFrame:GetWidth()-50)
+					</OnMouseUp>
+				</Scripts>
+			</Button>
+  
+         
+    
+              <!-- SAVE/CANCEL BUTTONS -->   
+            <Button name="SNP_CancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
+				<Size>
+					<AbsDimension x="55" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="SimpleNotepadFrame" relativePoint="TOPLEFT" x="10" y="-32"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						SimpleNotepad_Cancel()
+					</OnClick>
+				</Scripts>
+			</Button>
+            
+             <Button name="SNP_SaveButton" inherits="UIPanelButtonTemplate" text="SAVE">
+				<Size>
+					<AbsDimension x="70" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="SimpleNotepadFrame" relativePoint="TOPLEFT" x="100" y="-32"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						SimpleNotepad_StoreText()
+					</OnClick>
+				</Scripts>
+			</Button>
+            
+             <Button name="SNP_CloseButton" inherits="UIPanelButtonTemplate" text="Close">
+				<Size>
+					<AbsDimension x="50" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="SimpleNotepadFrame" relativePoint="TOPLEFT" x="240" y="-32"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						SimpleNotepadFrame:Hide();
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				SimpleNotepad_OnLoad(self)
+                SimpleNotepad:RegisterForDrag("LeftButton")
+			</OnLoad>
+			<OnEvent>
+				SimpleNotepad_OnEvent(self)
+			</OnEvent>
+			<OnShow>
+				SimpleNotepad_OnShow(self)
+			</OnShow>
+			<OnHide>
+				SimpleNotepad_OnHide(self)
+			</OnHide>
+			<OnMouseDown>
+				SimpleNotepad_StartMoving(self,arg1)
+			</OnMouseDown>
+			<OnMouseUp>
+				SimpleNotepad_StopMoving(self,arg1)
+			</OnMouseUp>
+            <OnMouseDown>
+                if button == "RightButton" and not self.isMoving then
+                self:StartMoving();
+                self.isMoving = true;
+            end
+            </OnMouseDown>
+            <OnMouseUp>
+                if button == "RightButton" and self.isMoving then
+                self:StopMovingOrSizing();
+                self.isMoving = false;
+                end
+            </OnMouseUp>
+            <OnHide>
+                if ( self.isMoving ) then
+                self:StopMovingOrSizing();
+                self.isMoving = false;
+            end
+            </OnHide>
+		</Scripts>
+	</Frame>
+     
+       
+
+        
+</Ui>

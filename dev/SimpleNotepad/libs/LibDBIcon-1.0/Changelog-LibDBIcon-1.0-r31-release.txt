@@ -1,0 +1,20 @@
+------------------------------------------------------------------------
+r31 | funkydude | 2012-11-28 01:32:48 +0000 (Wed, 28 Nov 2012) | 1 line
+Changed paths:
+   A /tags/r31-release (from /trunk:30)
+
+Tagging as r31-release
+------------------------------------------------------------------------
+r30 | funkydude | 2012-11-28 01:22:14 +0000 (Wed, 28 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/LibDBIcon-1.0/LibDBIcon-1.0.lua
+   M /trunk/LibDBIcon-1.0.toc
+
+bump toc
+------------------------------------------------------------------------
+r29 | funkydude | 2012-09-17 23:06:46 +0000 (Mon, 17 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/LibDBIcon-1.0/LibDBIcon-1.0.lua
+
+Add support for iconR/G/B
+------------------------------------------------------------------------

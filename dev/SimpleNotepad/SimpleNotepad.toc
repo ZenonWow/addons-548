@@ -1,0 +1,24 @@
+## Interface: 50400
+## Title: SimpleNotepad|cff007fff by Jaxom of Hellfire|r.
+## Author: Manager/Author = Jaxom of Hellfire.
+## Version: 1.3.9 beta
+## Notes: This is a simple notepad, it keeps notes for you and your Characters and has Drag and Drop Item Link for each page. Just drag the Icon to the cursor.
+## X-Curse-Packaged-Version: 1.3.9 beta
+## X-Curse-Project-Name: SimpleNotepad
+## X-donate: http://wow.curseforge.com/addons/simple-notepad/
+## X-Credits: To Mumm of Hellfire for wanting a simple no fuss, resizable notepad so she could remember stuff like which poison to put on when a rogue. :D
+## X-License: All Rights Reserved unless otherwise explicitly stated
+## X-Website: http://wow.curseforge.com/addons/simple-notepad/
+## X-Localizations: enUS (Any help with Locale would be appreciated)
+## X-Embeds: LibStub, CallbackHandler-1.0, ChatThrottleLib, AceConfig-3.0, AceLocale-3.0, LibDataBroker-1.1, LibDBIcon-1.0,
+## X-Category: Misc
+## OptionalDeps: LibStub,CallbackHandler-1.0,ChatThrottleLib,LibDataBroker-1.1,LibDBIcon-1.0
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## SavedVariables: SimpleNotepad_Vars
+## SavedVariablesPerCharacter: SimpleNotepad_Varsc
+
+# Load Libraries
+embeds.xml
+# Load addon
+SimpleNotepad.xml
