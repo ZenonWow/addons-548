@@ -16,14 +16,15 @@ EventTracker:RegisterEvent('PLAYER_ALIVE')
 -- First timestamp when starting to load
 EventTracker.LogMsgs = {}
 --EventTracker.LogFrame = nil
-EventTracker.LastLoadEventTime = GetTime()
+EventTracker.LastLoadEventMs = debugprofilestop()
 EventTracker.LastLoggedIn = false
 
 local LogMsgs = EventTracker.LogMsgs
 local LogFrame = nil
 
 local function log(msg)
-	msg = '['..date("%H:%M:%S")..' ('..GetTime()..'s)] '.. msg
+	local nowMs = debugprofilestop()
+	msg = "["..date("%H:%M:%S").." ("..nowMs.." ms)] ".. msg
 	if  LogMsgs  then  table.insert(LogMsgs, msg)  end
 	if  LogFrame  then  LogFrame:AddMessage(msg)  end
 end
@@ -59,14 +60,17 @@ end
 local tostringall = tostringall
 
 function EventTracker:OnEvent(event, ...)
-	local now = GetTime()
+	local nowMs = debugprofilestop()
 	local params = string.join(', ', tostringall(...))
-	log(event.."("..params.."): elapsed: ".. (now - self.LastLoadEventTime) .." sec")
-	self.LastLoadEventTime = now
+	log(event.."("..params.."): elapsed: ".. (nowMs - self.LastLoadEventMs) .." ms")
+	self.LastLoadEventMs = nowMs
 	
 	if  self[event]  then  self[event](self, event, ...)  end
 end
 
+
+EventTracker:OnEvent("before LoadAddOn", "Blizzard_BindingUI")
+LoadAddOn('Blizzard_BindingUI')
 
 EventTracker:CheckLoggedIn()
 EventTracker:SetScript('OnEvent', EventTracker.OnEvent)

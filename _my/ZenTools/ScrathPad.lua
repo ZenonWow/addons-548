@@ -13,6 +13,10 @@
 /dump debug.getinfo(1)
 /dump debug.getinfo(2)
 /dump GetMouseFocus():GetID()
+
+/run a=LibStub('LibDataBroker-1.1'):GetDataObjectByName('FasterCamera') ; print(a.label, a.text, a.value, a.type)
+/run a=LibStub('LibDataBroker-1.1'):GetDataObjectByName('BagSync') ; print(a.label, a.text, a.value, a.type)
+/dump a.label, a.text
 --]]
 
 

@@ -1,15 +1,19 @@
 Squeenix: enabled
 Mappy: disabled
+
 tekChat: disabled
 tekplayermenu: disabled
 tekPopbar: disabled
 picoPriority: disabled
 TinyInspect: disabled
+
 Autopsy: enabled
 BindPad: enabled
 mapSearch: enabled
 MyFonts: enabled
-SpellSearch: enabled
+SpellSearch: disabled
+
+
 Ovale: enabled
 Watcher: disabled
 NeedToKnow: disabled
@@ -19,68 +23,91 @@ TellMeWhen: disabled
 TellMeWhen_Options: disabled
 Raven: disabled
 Ellipsis: enabled
-AdiButtonAuras: enabled
-AuraFrames: enabled
+AdiButtonAuras: disabled
+AuraFrames: disabled
 Details: disabled
-Skada: enabled
+Skada: disabled
+
+
 Aurora: disabled
 AltzUI: disabled
 LUI: disabled
-TransparentChatBubbles: enabled
+
 !ClassColors: disabled
 oGlow: disabled
 oUF: disabled
 oUF_Mlight: disabled
 oUF_MovableFrames: disabled
+
 Immersion: disabled
 Storyline: disabled
+
+
 AddonLoader: enabled
-ACP: enabled
-stAddonmanager: enabled
-Ampere: enabled
+ACP: disabled
+Ampere: disabled
 addonaddoff: disabled
-toomanyaddons: disabled
+
 AddonUsage: enabled
 iCPU: enabled
 MacroBank: disabled
+
 FriendShare: disabled
 FriendsShare: disabled
 FriendsWithBenefits: disabled
 SyncFriends: disabled
+
+ChocolateBar: enabled
+ButtonBin: disabled
+Bazooka: disabled
+DockingStation: disabled
+StatBlockCore: disabled
+
+BlizzMove: enabled
 Dominos: enabled
 Bartender4: disabled
+ExtraQuestButton: disabled
 TinyExtraBars: enabled
 ButtonForge: disabled
 ActionSwap2: disabled
-ButtonFacade: enabled
-Masque: enabled
+ButtonFacade: disabled
+Masque: disabled
+
 InspectEquip: disabled
 IQ: disabled
 ShowItemLevel: disabled
 !InspectFix: disabled
 Reforgenator: disabled
 Outfitter: disabled
+
 MikScrollingBattleText: enabled
 sct: disabled
 xCT+: disabled
+
 DevPad: enabled
 Hack: disabled
 LuaBrowser: enabled
 TinyPad: enabled
 ViragDevTool: enabled
 WowLua: enabled
+
 TomTom: enabled
 TomTomLite: disabled
+
 AdvancedIconSelector: enabled
+
 GnomishVendorShrinker: enabled
 GnomishAuctionShrinker: disabled
 Auctionator: enabled
 AuctionLite: disabled
 AuctionMaster: disabled
+
 AckisRecipeList: enabled
 Skillet: disabled
 Archy: disabled
+
 PetJournalEnhanced: disabled
+
 BankStack: enabled
 AdiBags: enabled
 BagSync: enabled
@@ -88,42 +115,43 @@ Combuctor: disabled
 BagBrother: disabled
 ArkInventory: disabled
 ArkInventoryRules: disabled
+
 Butsu: disabled
 XLoot: enabled
-Bazooka: enabled
-ButtonBin: enabled
-ChocolateBar: enabled
-DockingStation: enabled
-StatBlockCore: enabled
+
 AllPlayed: disabled
 Broker_CPU: enabled
 Broker_Garbage: disabled
 EmoteLDB: disabled
+
 Spy: enabled
 Examiner: enabled
 LiteMount: enabled
+
 Explorer: enabled
 FlightMap: disabled
 MozzFullWorldMap: disabled
 HandyNotes_SummerFestival: disabled
 LorewalkersHelper: disabled
+
 LoseControl: disabled
 LoseControlFix: disabled
 NPCScan: disabled
 NPCScan.Overlay: disabled
+
 oUF_Adirelle: enabled
 -oUF_Freebgrid: disabled
 -oUF_Lanerra: disabled
 -oUF_Mlight: disabled
 -oUF_Phanx: disabled
+
 Kui_Nameplates: disabled
 TidyPlates: enabled
+
 TipTop: enabled
 TipTac: disabled
 TipTacItemRef: disabled
 TipTacTalents: disabled
-BlizzMove: enabled
+
 Leatrix_Plus: enabled
 Viewporter: disabled
-DockingStation_Config: disabled
-ChocolateBar_Options: enabled

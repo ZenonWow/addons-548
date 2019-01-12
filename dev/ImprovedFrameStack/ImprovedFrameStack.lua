@@ -210,7 +210,7 @@ end
 /run GetMouseFocus():SetBackdropColor()
 --]]
 
-local highlighter
+local highlighter, mouseOverFrame
 local highBackdrop = { 
 	bgFile = "Interface/Tooltips/UI-Tooltip-Background", 
 	edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
@@ -221,6 +221,9 @@ local highBackdrop = {
 
 local function HighlightFrame(newFrame)
 	if  newFrame == WorldFrame  then  newFrame = nil  end
+	if  newFrame == mouseOverFrame  then  return  end
+	mouseOverFrame = newFrame
+	
 	if  not highlighter  then
 		if  not newFrame  then  return  end
 		highlighter = CreateFrame('Frame', "HighlighterFrame")
@@ -229,12 +232,11 @@ local function HighlightFrame(newFrame)
 		highlighter:SetBackdrop(highBackdrop)
 		highlighter:SetBackdropColor(0.3,0.3,0.3,0.5)
 		highlighter:SetBackdropBorderColor(0.5,1,0.5,0.75)
-		
 	end
 	
 	--highlighter:SetParent(newFrame)
 	local ran, res = pcall(highlighter.SetParent, highlighter, newFrame)
-	if  not ran  then  print("Frame "..(newFrame.GetName and newFrame:GetName() or "?").." not a good parent") ; highlighter:SetParent(nil) ; newFrame = nil  end
+	if  not ran  then  print("Frame "..(not newFrame and 'nil' or newFrame.GetName and newFrame:GetName() or "?")..": ".. res) ; highlighter:SetParent(nil) ; newFrame = nil  end
 	
 	if  newFrame  then
 		highlighter:SetAllPoints()

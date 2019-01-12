@@ -420,7 +420,7 @@ end
 
 function ViragDevTool:FromStrToFunc(str)
 	local body = "return "..str
-	local ran, compiled = pcall(loadstring, body)
+	local ran, compiled = pcall(loadstring, body, str)
 	if  not ran  then  self:print('"'..body..'" failed to compile:  '.. compiled)  end
 	-- Pack multiple returns into an array with .n = return count
 	-- Solo return is not packed
