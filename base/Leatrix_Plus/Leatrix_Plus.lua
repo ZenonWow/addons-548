@@ -36,17 +36,18 @@
 ----------------------------------------------------------------------
 
 -- Addon keyword for registering hooks
-	local LEAPLUS = 'LeaPlus'
+	local ADDON_NAME, _A = ...		-- ADDON_NAME == name of addon folder, _A == addon namespace
 
 --  Create global tables if they don't exist
-	_G.LeaPlus = _G.LeaPlus or {}
-	local LeaPlus = _G.LeaPlus
-	LeaPlusDB = LeaPlusDB or {}
-	LeaPlusDC = LeaPlusDC or {}
+	_G.LeaPlusDB = _G.LeaPlusDB or {}		-- overridden by loading SavedVariables
+	_G.LeaPlusDC = _G.LeaPlusDC or {}
 
 -- 	Create local tables to store configuration and frames
 	-- Local Config
 	local LeaPlusLC = {}
+	-- Config descriptors: setters, getters
+	_A.OptionDesc = _A.OptionDesc or {}
+	local OptionDesc = _A.OptionDesc
 	-- Config Button
 	local LeaPlusCB = {}
 	local LeaDropList = {}
@@ -313,7 +314,7 @@
 		or	(LeaPlusLC["ManageBnetReq"]			~= LeaPlusDB["ManageBnetReq"])			-- Manage friend requests
 
 		-- Settings
-		or	(LeaPlusLC["ShowMinimapIcon"]		~= LeaPlusDB["ShowMinimapIcon"])		-- Show minimap button
+		-- or	(LeaPlusLC["ShowMinimapIcon"]		~= LeaPlusDB["ShowMinimapIcon"])		-- Show minimap button
 
 		-- Set the reload button state
 		then
@@ -534,8 +535,12 @@
 
 		-- Load a boolean variable or set it to default
  		local function LoadVarChk(var, def)
+			local varDesc = OptionDesc[var]
 			-- Set config variable to saved value
 			local value = LeaPlusDB[var]
+			-- Or use getter to load it
+			if  varDesc and varDesc.get  then  value = varDesc:get()  end
+			
 			if  value == false  or  value == true  then  LeaPlusLC[var] = value
 			elseif  value == "On"  then  LeaPlusLC[var] = true
 			elseif  value == "Off" then  LeaPlusLC[var] = false
@@ -543,6 +548,8 @@
 				-- If variable is not On/Off/true/false or missing then set it to default
 				LeaPlusLC[var] = def
 			end
+			
+			if  varDesc and varDesc.onLoaded  then  varDesc:onLoaded(LeaPlusLC[var])  end
 		end
 
 		-- Load a numeric variable and set it to default if it's not within a given range
@@ -773,7 +780,9 @@
 
 		-- Settings
 		LoadVarChk("ShowMinimapIcon", true)				-- Show minimap button
-		LoadVarNum("MinimapIconPos", -65, -180, 180)	-- Minimap button position
+		-- LeaPlusLC.ShowMinimapIcon = not LeaPlusDB.minimap.hide
+		-- LoadVarNum("MinimapIconPos", -65, -180, 180)	-- Minimap button position
+
 		LoadVarChk("ShowStartTag", true)				-- Show startup message
 		LoadVarChk("VersionChecker", true)				-- Show version warning
 		LoadVarChk("OpenPlusAtHome", false)				-- Show home on startup
@@ -990,8 +999,11 @@
 		LeaPlusDB["BlockBnetReq"]			= LeaPlusLC["BlockBnetReq"]
 
 		-- Settings
-		LeaPlusDB["ShowMinimapIcon"] 		= LeaPlusLC["ShowMinimapIcon"]
-		LeaPlusDB["MinimapIconPos"] 		= LeaPlusLC["MinimapIconPos"]
+		-- ShowMinimapIcon is Live - instantly saved
+		-- LeaPlusDB["ShowMinimapIcon"] 		= LeaPlusLC["ShowMinimapIcon"]
+		-- OptionDesc.ShowMinimapIcon.set(LeaPlusLC.ShowMinimapIcon)
+		-- LeaPlusDB["MinimapIconPos"] 		= LeaPlusLC["MinimapIconPos"]
+
 		LeaPlusDB["ShowStartTag"]			= LeaPlusLC["ShowStartTag"]
 		LeaPlusDB["VersionChecker"]			= LeaPlusLC["VersionChecker"]
 		LeaPlusDB["OpenPlusAtHome"]			= LeaPlusLC["OpenPlusAtHome"]
@@ -1021,7 +1033,12 @@
 ----------------------------------------------------------------------
 
 --	The Live bit
-	function LeaPlusLC:Live()
+	function LeaPlusLC:Live(var, value)
+		local varDesc = OptionDesc[var]
+		if  varDesc  then
+			if  varDesc.set  then  varDesc:set(value)  end
+			return
+		end
 
 		----------------------------------------------------------------------
 		--	Automatically accept Dungeon Finder queue requests
@@ -2691,10 +2708,12 @@
 				end
 			end
 			
-			for i = 1, NUM_CHAT_WINDOWS do
+			-- for i = 1, NUM_CHAT_WINDOWS do
+			local i = 1
+			do
 				local tab = _G['ChatFrame'..i..'Tab']
 				if  not tab  then
-					assert(tab, "LeaPlus.UseEasyChatResizing: ChatFrame"..i.."Tab is missing.")
+					assert(tab, "Leatrix UseEasyChatResizing: ChatFrame"..i.."Tab is missing.")
 				elseif  enable  then
 					--tab:HookScript('OnMouseDown', ChatFrameTab_OnMouseDown)
 					tab.hookedOnMouseDown = tab:GetScript('OnMouseDown')
@@ -2703,7 +2722,6 @@
 					tab:SetScript('OnMouseUp', ChatFrameTab_OnMouseUp)
 					--tab:SetScript('OnClick', ChatFrameTab_OnClick)
 				else
-					--if  tab.UnhookScript  then  tab:UnhookScript('OnMouseDown', ChatFrameTab_OnMouseDown, LEAPLUS)  end
 					tab:SetScript('OnMouseDown', tab.hookedOnMouseDown)
 					tab:SetScript('OnMouseUp', nil)
 					tab:SetScript('OnClick', tab.hookedOnClick)
@@ -2981,171 +2999,6 @@
 				SideDressUpModelResetButton:Click() -- Done first in case any slots refuse to clear
 				for i = 1, 19 do
 					SideDressUpModel:UndressSlot(i) -- Done this way to prevent issues with Undress
-				end
-			end)
-
-		end
-
-		----------------------------------------------------------------------
-		--	Minimap button
-		----------------------------------------------------------------------
-
-		if LeaPlusLC["ShowMinimapIcon"] then
-	
-			-- Create minimap button
-			local minibtn = CreateFrame("Button", "LeaPlusMapBtn", Minimap)
-			LeaPlusCB["MiniMapButton"] = minibtn
-			minibtn:SetSize(32,32)
-			minibtn:SetMovable(true)
-			minibtn:SetFrameStrata("MEDIUM")
-			minibtn:SetNormalTexture("Interface/COMMON/Indicator-Green.png")
-			minibtn:SetPushedTexture("Interface/COMMON/Indicator-Green.png")
-			minibtn:SetHighlightTexture("Interface/COMMON/Indicator-Green.png")
-			minibtn:RegisterForClicks("AnyUp")
-
-			local function UpdateMapBtn()
-				local Xpoa, Ypoa = GetCursorPosition()
-				local Xmin, Ymin = Minimap:GetLeft(), Minimap:GetBottom()
-				Xpoa = Xmin - Xpoa / Minimap:GetEffectiveScale() + 70
-				Ypoa = Ypoa / Minimap:GetEffectiveScale() - Ymin - 70
-				LeaPlusLC["MinimapIconPos"] = math.deg(math.atan2(Ypoa, Xpoa))
-				minibtn:SetPoint("TOPLEFT", "Minimap", "TOPLEFT", 52 - (80 * cos(LeaPlusLC["MinimapIconPos"])), (80 * sin(LeaPlusLC["MinimapIconPos"])) - 52)
-			end
-
-			-- Control movement
-			minibtn:RegisterForDrag("LeftButton")
-			minibtn:SetScript("OnDragStart", function()
-				minibtn:StartMoving()
-				minibtn:SetScript("OnUpdate", UpdateMapBtn)
-			end)
-
-			minibtn:SetScript("OnDragStop", function ()
-				minibtn:StopMovingOrSizing();
-				minibtn:SetUserPlaced(false);
-				minibtn:SetScript("OnUpdate", nil)
-				UpdateMapBtn();
-			end)
-
-			-- Set position
-			minibtn:ClearAllPoints();
-			minibtn:SetPoint("TOPLEFT","Minimap","TOPLEFT",52-(80*cos(LeaPlusLC["MinimapIconPos"])),(80*sin(LeaPlusLC["MinimapIconPos"]))-52)
-
-			-- Control clicks
-			minibtn:SetScript("OnClick", function(self,arg1)
-				-- Prevent options panel from showing if version panel or Blizzard options panel is showing
-				if InterfaceOptionsFrame:IsShown() or VideoOptionsFrame:IsShown() or ChatConfigFrame:IsShown() then return end
-				if LeaPlusLC["VersionPanel"] and LeaPlusLC["VersionPanel"]:IsShown() then return end
-				-- Left button down
-				if arg1 == "LeftButton" then
-
-					-- Control key modifier toggles target tracking
-					if IsControlKeyDown() and not IsShiftKeyDown() then
-						for i = 1, GetNumTrackingTypes() do
-							local name, texture, active, category = GetTrackingInfo(i)
-							if name == MINIMAP_TRACKING_TARGET then
-								if active == 1 then
-									SetTracking(i, false)
-									ActionStatus_DisplayMessage("Target Tracking Disabled", true);
-								else
-									SetTracking(i, true)
-									ActionStatus_DisplayMessage("Target Tracking Enabled", true);
-								end
-							end
-						end
-						return
-					end
-
-					-- Shift key modifier toggles the music
-					if IsShiftKeyDown() and not IsControlKeyDown() then
-						Sound_ToggleMusic();
-						return
-					end
-
-					-- Shift key and control key toggles Zygor addon
-					if IsShiftKeyDown() and IsControlKeyDown() then
-						LeaPlusLC:ZygorToggle();
-						return
-					end
-
-					-- No modifier key toggles the options panel
-					if LeaPlusLC["PageF"]:IsShown() then
-						LeaPlusLC:HideFrames();
-					else
-						LeaPlusLC:HideFrames();
-						LeaPlusLC["PageF"]:Show();
-					end
-					if LeaPlusLC["OpenPlusAtHome"] == false then
-						LeaPlusLC["Page"..LeaPlusLC["LeaStartPage"]]:Show()
-					else
-						LeaPlusLC["Page0"]:Show();
-					end
-				end
-
-				-- Right button down
-				if arg1 == "RightButton" then
-
-					-- Control key modifier does nothing (yet)
-					if IsControlKeyDown() and not IsShiftKeyDown() then
-						return
-					end
-
-					-- Shift key modifier toggles coordinates
-					if IsShiftKeyDown() and not IsControlKeyDown() then
-						if LeaPlusLC["StaticCoordsEn"] then
-							if LeaPlusLC["StaticCoords"] then
-								LeaPlusLC["StaticCoords"] = false
-								ActionStatus_DisplayMessage("Coordinates Disabled", true);
-							else
-								LeaPlusLC["StaticCoords"] = true
-								SetMapToCurrentZone();
-								ActionStatus_DisplayMessage("Coordinates Enabled", true);
-							end
-							-- Run the coordinates refresh function
-							LeaPlusLC:RefreshStaticCoords();
-							-- Update side panel checkbox if it's showing
-							if LeaPlusCB["StaticCoords"]:IsShown() then
-								LeaPlusCB["StaticCoords"]:Hide();
-								LeaPlusCB["StaticCoords"]:Show();
-							end
-						end
-						return
-					end
-
-					-- Shift key and control key toggles maximised window mode
-					if IsShiftKeyDown() and IsControlKeyDown() then
-						if GetCVar("gxWindow") == "1" then
-							if LeaPlusLC:PlayerInCombat() then
-								return
-							else
-								SetCVar("gxMaximize", tostring(1 - GetCVar("gxMaximize")));
-								RestartGx();
-							end
-						end
-						return
-					end
-
-					-- No modifier key toggles error text
-					if LeaPlusDB["HideErrorFrameText"] then -- Checks global
-						if LeaPlusLC["ShowErrorsFlag"] == 1 then 
-							LeaPlusLC["ShowErrorsFlag"] = 0
-							minibtn:SetNormalTexture("Interface/COMMON/Indicator-Red.png")
-							minibtn:SetPushedTexture("Interface/COMMON/Indicator-Red.png")
-							minibtn:SetHighlightTexture("Interface/COMMON/Indicator-Red.png")
-							ActionStatus_DisplayMessage("Error frame text will be shown", true);
-						else
-							LeaPlusLC["ShowErrorsFlag"] = 1
-							minibtn:SetNormalTexture("Interface/COMMON/Indicator-Green.png")
-							minibtn:SetPushedTexture("Interface/COMMON/Indicator-Green.png")
-							minibtn:SetHighlightTexture("Interface/COMMON/Indicator-Green.png")
-							ActionStatus_DisplayMessage("Error frame text will be hidden", true);
-						end
-						return
-					end
-				end
-
-				-- Middle button modifier
-				if arg1 == "MiddleButton" then
-					-- Nothing (yet)
 				end
 			end)
 
@@ -5959,8 +5812,11 @@
 -- 	L64: Default Events
 ----------------------------------------------------------------------
 
+	local Quests = {}
+	_A.Quests = Quests
+
 	local function  IsDebugLogging()
-		return  LeaPlus.debug  or  LeaPlus.tempDebug  or  (IsAltKeyDown()  and  IsControlKeyDown())
+		return  _A.debug  or  Quests.tempDebug  or  (IsAltKeyDown()  and  IsControlKeyDown())
 	end
 
 	function GetQuestLogInfoByTitle(searchTitle)
@@ -6017,7 +5873,7 @@
 		if  IsAltKeyDown()  then
 			if  IsControlKeyDown()  then
 				-- Hold Alt-Control to enable debugging. Auto-accepting will happen as usual, but the quest is not added to AutoQuestTitles.
-				LeaPlus.tempDebug = true
+				Quests.tempDebug = true
 				return true
 			end
 			-- Disabling automatic actions is first in precedence
@@ -6032,7 +5888,7 @@
 			if  not AutoQuestTitles[title]  then  LeaPlusLC:Print("Will ".. actionText ..": ".. GetQuestString(questID, title))  end
 			AutoQuestTitles[title] = questID
 			return true
-		elseif  LeaPlus.tempDisableAutoQuest  then
+		elseif  Quests.tempDisableAutoQuest  then
 			-- Do nothing if disabled when clicking npc (on gossip frame)
 			return false
 		else
@@ -6042,9 +5898,9 @@
 
 	local function CheckRepeatedEvent(event, questID)
 		local now = GetTime()
-		LeaPlus.lastEvent = LeaPlus.lastEvent or {}
-		LeaPlus.lastEvent[event] = LeaPlus.lastEvent[event] or { timeStamp = 0 }
-		local lastEvent = LeaPlus.lastEvent[event]
+		Quests.lastEvent = Quests.lastEvent or {}
+		Quests.lastEvent[event] = Quests.lastEvent[event] or { timeStamp = 0 }
+		local lastEvent = Quests.lastEvent[event]
 		
 		if  lastEvent.questID ~= questID  or  1 < now - lastEvent.timeStamp  then
 			lastEvent.questID = questID
@@ -6200,17 +6056,17 @@
 
 		-- Automatically accept chosen quests from gossip menu
 		if  event == "GOSSIP_SHOW"  then
-			LeaPlus.tempDebug = nil
+			Quests.tempDebug = nil
 			if  IsShiftKeyDown()  or  IsControlKeyDown()  or  IsAltKeyDown()  then
-				LeaPlus.tempDisableAutoGossip = true
-				LeaPlus.tempDisableAutoQuest = true
+				Quests.tempDisableAutoGossip = true
+				Quests.tempDisableAutoQuest = true
 				-- Hold both Alt and Control when opening gossip frame to keep on logging until the quest frame is closed
 				if  IsControlKeyDown()  and  IsAltKeyDown()
-				then  LeaPlus.tempDebug = true
+				then  Quests.tempDebug = true
 				else  return  end
 			else
 				-- In case gossip is shown again without closing it first. Maybe there is no such case.
-				LeaPlus.tempDisableAutoQuest = LeaPlus.tempDisableAutoGossip
+				Quests.tempDisableAutoQuest = Quests.tempDisableAutoGossip
 			end
 			
 			-- Automatically select the first auto-complete quest from gossip menu
@@ -6279,7 +6135,7 @@
 		if  event == "GOSSIP_CLOSED"  then
 			-- Next time gossip is shown it will be auto-accepting again
 			if  IsDebugLogging()  then  LeaPlusLC:Print(event)  end
-			LeaPlus.tempDisableAutoGossip = nil
+			Quests.tempDisableAutoGossip = nil
 		end
 		
 		----------------------------------------------------------------------
@@ -6310,7 +6166,7 @@
 				LeaPlusLC:Print("Auto accept: ".. GetQuestString(questID, title))
 				if not QuestGetAutoAccept() then
 					-- If quest requires an accept click
-					LeaPlus.questAcceptID = questID
+					Quests.questAcceptID = questID
 					AcceptQuest()
 				else
 					-- If it's automatically accepted, just close the window
@@ -6324,7 +6180,7 @@
 		if  event == "QUEST_ACCEPT_CONFIRM"  and  not IsShiftKeyDown()  then
 			local questID = GetQuestID()
 			-- If this is still the last accepted quest then confirm
-			local confirm = LeaPlus.questAcceptID == questID
+			local confirm = Quests.questAcceptID == questID
 			if  IsDebugLogging()  then  LeaPlusLC:Print( event ..", is last accepted quest: ".. tostring(confirm) )  end
 			if  confirm  then
 				ConfirmAcceptQuest()
@@ -6336,7 +6192,7 @@
 		if  event == "QUEST_ACCEPTED"  then
 			-- QuestFrame is now closed, previous events are not expected to repeat, or cause a loop
 			if  IsDebugLogging()  then  LeaPlusLC:Print(event)  end
-			LeaPlus.questAcceptID = nil
+			Quests.questAcceptID = nil
 			return
 		end
 
@@ -6378,12 +6234,12 @@
 		if event == "QUEST_FINISHED" then
 			if  IsDebugLogging()  then  LeaPlusLC:Print(event)  end
 			local now = GetTime()
-			LeaPlus.lastEvent = LeaPlus.lastEvent or {}
-			LeaPlus.lastEvent.QUEST_DETAIL   = { timeStamp = now }
-			LeaPlus.lastEvent.QUEST_PROGRESS = { timeStamp = now }
-			LeaPlus.lastEvent.QUEST_COMPLETE = { timeStamp = now }
-			LeaPlus.tempDisableAutoQuest = nil
-			LeaPlus.questAcceptID = nil
+			Quests.lastEvent = Quests.lastEvent or {}
+			Quests.lastEvent.QUEST_DETAIL   = { timeStamp = now }
+			Quests.lastEvent.QUEST_PROGRESS = { timeStamp = now }
+			Quests.lastEvent.QUEST_COMPLETE = { timeStamp = now }
+			Quests.tempDisableAutoQuest = nil
+			Quests.questAcceptID = nil
 		end
 
 		----------------------------------------------------------------------
@@ -7062,14 +6918,11 @@
 
 		-- Process clicks
 		Cbox:SetScript('OnClick', function()
-			if Cbox:GetChecked() == nil then
-				LeaPlusLC[field] = false
-			elseif Cbox:GetChecked() == 1 then
-				LeaPlusLC[field] = true
-			end
+			local value = Cbox:GetChecked() and true or false
+			LeaPlusLC[field] = value
 			LeaPlusLC:SetDim(); -- Lock invalid options
 			LeaPlusLC:ReloadCheck(); -- Show reload button if needed
-			LeaPlusLC:Live(); -- Run live code
+			LeaPlusLC:Live(field, value); -- Run live code
 		end)
 	end
 
@@ -7601,7 +7454,7 @@
 
 	pg = "Page6";
 
-	LeaPlusLC:MakeTx(LeaPlusLC[pg], "Quests"					, 	146, -72);
+	LeaPlusLC:MakeTx(LeaPlusLC[pg], "LeaPlus"					, 	146, -72);
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "ShowQuestLevels"				,	"Show quest levels*"			,	146, -92, 	"If checked, quest levels will be shown in the quest log.\n\n* Requires UI reload.")
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AutoAcceptQuests"			,	"Accept chosen quests (Ctrl)"					,	146, -112, 	"Hold the Control key when you click on a quest while talking to a quest giver to select to be accepted automatically.\n\nHold the Shift key when you talk to a quest giver to over-ride this setting.\n\nHold the Shift key when you click the quest to stop accepting automatically.")
 	LeaPlusLC:MakeCB(LeaPlusLC[pg], "AcceptOnlyDailys"			,	"Dailies"					,	166, -132, 	"If checked, all daily quests will be accepted automatically.\n\Hold the Shift key when you talk to a quest giver to over-ride this setting.")
