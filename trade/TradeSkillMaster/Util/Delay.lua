@@ -10,6 +10,7 @@
 
 local TSM = select(2, ...)
 LibStub("AceTimer-3.0"):Embed(TSM)
+local AceBucket = LibStub("AceBucket")
 
 --[[
 local delays = {}
@@ -20,8 +21,6 @@ local timers = {}
 local repeatOnUpdates = {}
 local updateFrame
 local asyncCallbacks = {}
-local eventBuckets = {}
-local fireBuckets = {}
 
 
 --[[
@@ -205,35 +204,11 @@ end
 
 
 
-local function FireBucket(bucket, byTimer)
-	if  byTimer  then  bucket.timerID = nil  end
-	bucket.lastCallback = GetTime()
-	bucket.callback()
-end
-
-local function BucketHandler(bucket, event, ...)
-	-- Do nothing if already scheduled
-	if  bucket.timerID  then  return  end
-
-	local sinceLast = GetTime() - bucket.lastCallback
-	if  sinceLast > bucket.bucketTime  then
-		fireBuckets[bucket] = bucket
-		if  not updateFrame:IsShown()  then  updateFrame:Show()  end
-	else
-		bucket.timerID = TSM:ScheduleTimer(FireBucket, bucket.bucketTime - sinceLast, bucket, 'timer')
-	end
-end
-
-
 -- TSMAPI:CreateEventBucket(event, callback, bucketTime) works slightly differently from AceBucket.
 -- After no events for bucketTime period the first event triggers the callback in the next framedraw (next OnUpdate cycle).
 -- In comparison AceBucket delays the first event by bucketTime in every case.
 function TSMAPI:CreateEventBucket(event, callback, bucketTime)
-	local bucket = { event = event, callback = callback, bucketTime = bucketTime or 0, lastCallback = 0 }
-	eventBuckets[event] = eventBuckets[event] or {}
-	tinsert(eventBuckets[event], bucket)
-	TSM:RegisterEvent(event, BucketHandler, bucket)
-	--CreateUpdateFrame()
+	AceBucket:RegisterBucketEvent(event, bucketTime or 0, callback, 0)
 end
 
 
@@ -277,15 +252,6 @@ end
 
 
 local function OnUpdate(self, elapsed)
-	--for  bucket  in fireBuckets do
-	local bucket = next(fireBuckets)
-	if  bucket  then
-		fireBuckets[bucket] = nil
-		-- Remove first, order matters: if bucket.callback() causes an error there will be no infinite loop.
-		FireBucket(bucket)
-		return
-	end
-	
 	for  callback  in pairs(asyncCallbacks) do
 		asyncCallbacks[callback] = nil
 		callback()
