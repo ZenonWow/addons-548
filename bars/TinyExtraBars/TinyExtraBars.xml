@@ -441,62 +441,6 @@
 		</Scripts>
 	</Frame>
 	
-	<Button name="TinyExtraBarsMinimapButtonTemplate" enableMouse="true" movable="true" frameStrata="MEDIUM" clampedToScreen="true" virtual="true">
-		<Size>
-			<AbsDimension x="18" y="18"/>
-		</Size>
-		<Layers>
-			<Layer level="BACKGROUND">
-				<Texture name="$parentIcon" parentKey="icon" file="Interface\AddOns\TinyExtraBars\textures\CreateBar"/>
-			</Layer>
-			<Layer level="ARTWORK">
-				<Texture name="$parentArtwork" file="Interface/Minimap/MiniMap-TrackingBorder">
-					<Size>
-						<AbsDimension x="54" y="54"/>
-					</Size>
-					<Anchors>
-						<Anchor point="TOPLEFT" x="-8" y="6"/>
-					</Anchors>
-				</Texture>
-			</Layer>
-			<Layer level="HIGHLIGHT">
-				<Texture name="$parentHighlight" file="Interface/Minimap/UI-Minimap-ZoomButton-Highlight" alphaMode="ADD">
-					<Size>
-						<AbsDimension x="34" y="34"/>
-					</Size>
-					<Anchors>
-						<Anchor point="CENTER" x="-1" y="-1"/>
-					</Anchors>
-				</Texture>
-			</Layer>
-		</Layers>
-		<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
-		<Scripts>
-			<OnLoad>
-				TinyExtraBarsMinimapButton_OnLoad(self)
-			</OnLoad>
-			<OnEnter>
-				GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-				GameTooltip:SetText("TinyExtraBars|r |n|cFF55FF55Left Mouse |cFFFFFFFFTinyExtraBars|n|cFF55FF55Right Mouse |cFFFFFFFFMove Button", nil, nil, nil, nil, 1)
-			</OnEnter>
-			<OnLeave>
-				GameTooltip:Hide()
-			</OnLeave>
-			<OnMouseDown>
-				if (IsMouseButtonDown("RightButton")) then 
-					self:StartMoving()
-				end
-			</OnMouseDown>
-			<OnMouseUp>
-				self:StopMovingOrSizing()
-				TinyExtraBarsMinimapButton_OnMouseUp(self, button)
-			</OnMouseUp>
-			<OnClick>
-				TinyExtraBarsMinimapButton_OnClick(self, button)
-			</OnClick>
-		</Scripts>
-	</Button>
-	
 	<CheckButton name="TinyExtraBarsButtonTemplate" inherits="SecureHandlerStateTemplate, SecureHandlerShowHideTemplate, SecureActionButtonTemplate, ActionButtonTemplate" virtual="true">
 		<Layers>
 			<Layer level="ARTWORK" textureSubLevel = "3" alphaMode="ADD">

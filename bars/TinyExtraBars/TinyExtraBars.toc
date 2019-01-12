@@ -4,7 +4,7 @@
 ## Version: 1.16
 ## Notes: Tiny extra action bars
 ## SavedVariables: TinyExtraBars_Global
-## SavedVariablesPerCharacter: TinyExtraBars_PerChar
+##-- SavedVariablesPerCharacter: TinyExtraBars_PerChar
 ## OptionalDeps: ButtonFacade
 
 libs\libstub\LibStub.lua

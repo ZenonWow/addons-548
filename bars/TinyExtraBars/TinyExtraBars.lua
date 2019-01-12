@@ -1,8 +1,12 @@
+--[[
+/run TinyExtraBars_Global.minimap.hide = true
+--]]
+local ADDON_NAME, _ADDON = ...		-- ADDON_NAME == name of addon folder, _ADDON == addon environment/namespace
 local EnteringWorldOrVariablesLoaded = 0
 local UpdateMacroCount = 0
 local EventFrame
 local EventHandlersTable = {}
-local toolsFrame, overlayFrame, minimapButton
+local toolsFrame, overlayFrame
 local IsInit
 --preset
 local presetFrame
@@ -668,6 +672,7 @@ local function Init()
 		return
 	end
 
+	local LibStub = _G.LibStub
 	assert(LibStub, "LibStub not found")
 
 	-- EasyStorage
@@ -675,8 +680,11 @@ local function Init()
 	
 	TinyExtraBars_Global = TinyExtraBars_Global or {}
 	TinyExtraBarsG = storage:New(TinyExtraBars_Global)
+	TinyExtraBarsPC = TinyExtraBarsG
+	--[[
 	TinyExtraBars_PerChar = TinyExtraBars_PerChar or {}
 	TinyExtraBarsPC = storage:New(TinyExtraBars_PerChar)
+	--]]
 
 	TinyExtraBars_CacheSpells()
 	
@@ -775,7 +783,9 @@ local function Init()
 	tinsert(UISpecialFrames, overlayFrame:GetName())
 
 	-- minimap button
-	minimapButton = CreateFrame('Button', 'TinyExtraBarsMinimapButton', Minimap, 'TinyExtraBarsMinimapButtonTemplate')
+	-- minimapButton = CreateFrame('Button', 'TinyExtraBarsMinimapButton', Minimap, 'TinyExtraBarsMinimapButtonTemplate')
+	TinyExtraBars_Global.minimap = TinyExtraBars_Global.minimap or {}
+	LibStub('LibDBIcon-1.0'):Register(ADDON_NAME, _ADDON.DataObject, TinyExtraBars_Global.minimap)
 
 	CreateFrame("BUTTON", "TEB_Toggler", UIParent, "SecureHandlerClickTemplate")
 	TEB_Toggler:SetAttribute("_onclick", TEB_ToggleSnippet)
@@ -797,9 +807,25 @@ local function Init()
 	SlashCmdList["TINYEXTRABARS"] = TinyExtraBars_SlashHandler
 end
 
-function TinyExtraBarsMinimapButton_OnClick(self, button)
+
+
+_ADDON.DataObject = {
+	type = "launcher",
+	icon = "Interface/AddOns/TinyExtraBars/textures/CreateBar",
+	-- PushedTexture file="Interface\Buttons\UI-Quickslot-Depress
+	label = "TinyExtraBars",
+	OnTooltipShow = function(tooltip)
+		if  not tooltip  or  not tooltip.SetText  then  return  end
+		tooltip:SetText("TinyExtraBars|r |n|cFF55FF55Left Mouse |cFFFFFFFFTinyExtraBars|n|cFF55FF55Right Mouse |cFFFFFFFFMove Button", nil, nil, nil, nil, 1)
+	end,
+})
+
+function _ADDON.DataObject.OnClick(frame, mouseButton)
 	if IsInit then
-		if (button == "LeftButton") then
+		if (mouseButton == "LeftButton") then
+			--[[if  IsShiftKeyDown()  then
+				TEB_LibKeyBound:?()
+			elseif  --]]
 			if toolsFrame:IsShown() then
 				toolsFrame:Hide()
 			elseif not(InCombatLockdown()) then
@@ -809,29 +835,11 @@ function TinyExtraBarsMinimapButton_OnClick(self, button)
 	end
 end
 
-function TinyExtraBarsMinimapButton_OnLoad(self)
-	local x = TinyExtraBarsG:Get({'minimap_button', 'x'}, 62 - (80 * cos(5)))
-	local y = TinyExtraBarsG:Get({'minimap_button', 'y'}, (80 * sin(5)) - 62)
-	self:SetPoint("TOPLEFT", "Minimap", "TOPLEFT", x, y)
-end
+-- Register launcher dataobject, make into a proxy
+_ADDON.DataObject = _G.LibStub("LibDataBroker-1.1"):NewDataObject(ADDON_NAME, _ADDON.DataObject)
 
-function TinyExtraBarsMinimapButton_OnMouseUp(self, button)
-	if (button == "RightButton") then
-		local minimap = _G["Minimap"]
-		if minimap then
-			local xf = self:GetLeft()
-			local yf = self:GetTop()
-			local xm = minimap:GetLeft()
-			local ym = minimap:GetTop()
-			--local s = frame:GetEffectiveScale()
-			--x, y = x/s, y/s
-			local x = xf - xm
-			local y = yf - ym
-			TinyExtraBarsG:Set({'minimap_button', 'x'}, x)
-			TinyExtraBarsG:Set({'minimap_button', 'y'}, y)
-		end
-	end
-end
+
+
 
 function TinyExtraBarsToggleCreateBar(forcedOff)
 	if forcedOff then
