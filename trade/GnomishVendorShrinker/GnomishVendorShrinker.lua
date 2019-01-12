@@ -45,8 +45,8 @@ for i=1,7 do quality_colors[i] = "|c".. select(4, GetItemQualityColor(i)) end
 
 
 local function print(...)  DEFAULT_CHAT_FRAME:AddMessage(...)  end
-local function tindexof(self, value)
-	for  i= 1,#self  do  if  self[i] == value  then  return i  end end
+local function tindexof(arr, item)
+	for i = 1,#arr	do  if  arr[i] == item  then  return i  end end
 end
 
 

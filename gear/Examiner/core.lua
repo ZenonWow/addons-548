@@ -20,7 +20,7 @@ ex.unitStats = unitStats;
 ex.info = info;
 
 -- Misc Constants
-local HOOK_DEFAULT_INSPECT = true;	-- Hook Default Inspect Frame -- Az: Disable for debugging
+local HOOK_DEFAULT_INSPECT = nil;	-- Hook Default Inspect Frame -- Az: Disable for debugging
 local DELAYED_INSPECT_TIME = 1;
 local CLASSIFICATION_NAMES = {
 	worldboss = BOSS,
@@ -744,7 +744,7 @@ function ex:ScanGear(unit)
 		local link = (GetInventoryItemLink(unit,slotId) or ""):match(LibGearExam.ITEMLINK_PATTERN);
 		info.Items[slotName] = LibGearExam:FixItemStringLevel(link,ex.info.level);	-- Fix item string level
 		
-		local strID = link:match("item:%d+")
+		local strID =  link  and  link:match("item:(%d+)")
 		local visibleID = GetInventoryItemID(unit,slotId)
 		if  visibleID ~= tonumber(strID)  then
 			info.TmogIDs[slotName] = visibleID
@@ -1097,6 +1097,7 @@ function ex.ItemButton_OnEnter(self,motion)
 	ex.ItemButton_UpdateTip(self)
 end
 	
+local TRANSMOGRIFIED =  _G.TRANSMOGRIFIED  or  "Transmogrified to:\n%s";   -- FrameXML/GlobalStrings.lua
 function ex.ItemButton_UpdateTip(self)
 	ex.showingTooltip = true;
 	if (cfg.tooltipSmartAnchor) then
@@ -1157,11 +1158,10 @@ function ex.ItemButton_UpdateTip(self)
 		-- Nothing
 	else
 		gtt:SetHyperlink(link)
-		--[[ TODO: print Transmogrified to: into reconstructed tooltip.
-		if  self.tmogLink  and  self.tmogLink ~= link  then  SetTmogToLink(self.tmogLink)
-		elseif  self.itemLink  and  self.itemLink ~= link  then  SetTmogFromLink(self.tmogLink)
-		end
-		--]]
+		-- gtt:SetHyperlink(link, self.tmogLink)
+		if  self.tmogLink  then  gtt:AddLine(format(TRANSMOGRIFIED, self.tmogLink))  end
+		-- TODO: print Transmogrified to: into item tooltip at proper line.
+		gtt:Show()
 	end
 end
 

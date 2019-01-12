@@ -27,14 +27,15 @@
 
 
 
-Prat = select(2, ...)
 
 --[[ BEGIN STANDARD HEADER ]] --
 
 -- Imports
 
 
+local ADDON_NAME, Prat = ...
 local _G = _G
+_G.Prat = Prat
 local LibStub = LibStub
 local tonumber = tonumber
 local tostring = tostring
@@ -43,7 +44,6 @@ local ipairs = ipairs
 local type = type
 local select = select
 local tinsert = tinsert
-local Prat = Prat
 local setmetatable, getmetatable = setmetatable, getmetatable
 local strfind = strfind
 local IsSecureCmd = IsSecureCmd
@@ -196,10 +196,9 @@ local defaults = {
 }
 local SOUND
 function addon:OnInitialize()
-  if _G.IsAddOnLoaded("Prat") == 1 then
+  if _G.IsAddOnLoaded("Prat") then
     Prat:Print(("Prat 2.0 was detected, and disabled. Please %s your UI."):format(GetReloadUILink()))
   end
-
   
   Prat.db = LibStub("AceDB-3.0"):New("Prat3DB", defaults, "Default")
 
@@ -219,7 +218,8 @@ function addon:OnInitialize()
     Media:Register(SOUND, k, v)
   end
 
-  AddonName = self.baseName
+	-- use ADDON_NAME when necessary
+  -- AddonName = self.baseName
 
   builtinSounds = nil
 
