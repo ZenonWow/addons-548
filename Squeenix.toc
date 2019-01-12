@@ -10,7 +10,7 @@
 ## X-Category: Map
 ## X-Icon: Interface\Icons\INV_Gizmo_BronzeFramework_01
 
-## LoadManagers: AddonLoader
+### LoadManagers: AddonLoader
 ## X-LoadOn-Always: delayed
 ## X-LoadOn-InterfaceOptions: Squeenix
 
