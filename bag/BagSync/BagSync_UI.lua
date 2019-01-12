@@ -4,8 +4,9 @@ local ADDON_NAME, ns = ...
 local BagSync = BagSync
 -- Localization
 local L = BAGSYNC_L
+local ADDON_LABEL = "BagSync"
 
-BINDING_HEADER_BAGSYNC = "BagSync"
+BINDING_HEADER_BAGSYNC = ADDON_LABEL
 BINDING_NAME_BAGSYNCTOGGLESEARCH = L["Toggle Search"]
 BINDING_NAME_BAGSYNCTOGGLETOKENS = L["Toggle Tokens"]
 BINDING_NAME_BAGSYNCTOGGLEPROFILES = L["Toggle Profiles"]
@@ -21,14 +22,11 @@ SLASH_BAGSYNC2 = "/bgs"
 --    LibDataBroker-1.1	    --
 ------------------------------
 
-local ldb = LibStub:GetLibrary("LibDataBroker-1.1")
-
-local dataobj = ldb:NewDataObject("BagSyncLDB", {
-	type = "data source",
+BagSync.dataobj = _G.LibStub("LibDataBroker-1.1"):NewDataObject(ADDON_LABEL, {
+	type = "launcher",
 	--icon = "Interface\\Icons\\INV_Misc_Bag_12",
 	icon = "Interface\\AddOns\\BagSync\\media\\icon",
-	label = "BagSync",
-	text = "BagSync",
+	label = ADDON_LABEL,
 		
 	OnClick = function(self, button)
 		if button == 'LeftButton' and BagSync_SearchFrame then
@@ -45,7 +43,7 @@ local dataobj = ldb:NewDataObject("BagSyncLDB", {
 	end,
 
 	OnTooltipShow = function(self)
-		self:AddLine("BagSync")
+		self:AddLine(ADDON_LABEL)
 		self:AddLine(L["Left Click = Search Window"])
 		self:AddLine(L["Right Click = BagSync Menu"])
 	end

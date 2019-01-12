@@ -19,7 +19,7 @@ libs\LibItemSearch-1.0.lua
 # libs\LibDBIcon-1.0.lua
 
 BagSync.lua
-BagSync_Minimap.lua
+# BagSync_Minimap.lua
 BagSync_Search.lua
 BagSync_Tokens.lua
 BagSync_Crafts.lua

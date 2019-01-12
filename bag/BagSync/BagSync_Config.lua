@@ -1,4 +1,13 @@
+-- Addon private namespace
+local ADDON_NAME, ns = ...
+-- Addon global namespace
+local _G = _G
+local BagSync = _G.BagSync
+-- Localization
 local L = BAGSYNC_L
+-- Imported from BagSync.lua
+local Debug = ns.Debug
+
 local currentPlayer = UnitName('player')
 local currentRealm = GetRealmName()
 local ver = GetAddOnMetadata("BagSync","Version") or 0
@@ -13,7 +22,7 @@ bgsOpt:SetScript("OnShow", function()
 		BagSyncConfig_GuildNames:SetChecked(BagSyncOpt["showGuildNames"])
 		BagSyncConfig_BothFactions:SetChecked(BagSyncOpt["enableFaction"])
 		BagSyncConfig_ClassColors:SetChecked(BagSyncOpt["enableUnitClass"])
-		BagSyncConfig_Minimap:SetChecked(BagSyncOpt["enableMinimap"])
+		BagSyncConfig_Minimap:SetChecked(not BagSyncOpt.minimap.hide)
 		BagSyncConfig_GuildInfo:SetChecked(BagSyncOpt["enableGuild"])
 		BagSyncConfig_MailboxInfo:SetChecked(BagSyncOpt["enableMailbox"])
 		BagSyncConfig_AuctionInfo:SetChecked(BagSyncOpt["enableAuction"])
@@ -113,14 +122,23 @@ local bgs_Minimap_Opt = CreateFrame("CheckButton", "BagSyncConfig_Minimap", bgsO
 bgs_Minimap_Opt:SetPoint("TOPLEFT", 16, -157)
 bgs_Minimap_Opt:SetScript("OnClick", function(frame)
 	if BagSyncOpt then
+		local LibDBIcon = _G.LibStub('LibDBIcon-1.0')
 		if frame:GetChecked() then
 			PlaySound("igMainMenuOptionCheckBoxOn")
+			BagSyncOpt.minimap.hide = nil
+			--[[
 			BagSyncOpt["enableMinimap"] = true
 			if BagSync_MinimapButton and not BagSync_MinimapButton:IsVisible() then BagSync_MinimapButton:Show() end
+			--]]
+			LibDBIcon:Show(ADDON_NAME)
 		else
 			PlaySound("igMainMenuOptionCheckBoxOff")
+			BagSyncOpt.minimap.hide = true
+			--[[
 			BagSyncOpt["enableMinimap"] = false
 			if BagSync_MinimapButton and BagSync_MinimapButton:IsVisible() then BagSync_MinimapButton:Hide() end
+			--]]
+			LibDBIcon:Hide(ADDON_NAME)
 		end
 	end			
 end)

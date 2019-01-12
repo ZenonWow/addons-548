@@ -89,7 +89,7 @@ local MatchItemData = BagSync.MatchItemData
 -------------------------
 
 local OptionDefaults = {
-	enableMinimap = true,
+	-- enableMinimap = true,
 	enableFaction = true,
 	enableUnitClass = false,
 	showTotal = true,

@@ -100,12 +100,18 @@ Debug("[".. date('%H:%M:%S') .."] BagSync:RegisterEvent('ADDON_LOADED')")
 -- ADDON_LOADED event sent for all addons after their SavedVariables has been loaded
 function BagSync:ADDON_LOADED(event, addonName)
 	if  addonName == ADDON_NAME  then
+		self:UnregisterEvent('ADDON_LOADED')
+		self.ADDON_LOADED = nil
 		Debug("[".. date('%H:%M:%S') .."] BagSync:ADDON_LOADED("..addonName..")")
 		-- SavedVariables loaded: check and reference it
 		ns.InitSavedDB()
 		self:SetRegisterEvents(true, ns.EventsToScan)
-		self:UnregisterEvent('ADDON_LOADED')
-		self.ADDON_LOADED = nil
+		
+		local BagSyncOpt = _G.BagSyncOpt
+		BagSyncOpt.minimap = BagSyncOpt.minimap or {}
+		local LibDBIcon = _G.LibStub('LibDBIcon-1.0')
+		LibDBIcon:Register(ADDON_NAME, self.dataobj, BagSyncOpt.minimap)
+		
 		if  IsLoggedIn()  and  self.PLAYER_ENTERING_WORLD  then
 			-- This is not happening in normal addon loading. IsLoggedIn() becomes true after all addons and SavedVariables are loaded.
 			-- Maybe can happen in delayed loading. In that case PLAYER_LOGIN and PLAYER_ENTERING_WORLD events were already fired earlier.
