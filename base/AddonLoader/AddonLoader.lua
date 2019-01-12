@@ -11,8 +11,8 @@
 -- AddonLoader:LoadAddOn(addonName, loadCondition)
 --]]
 
-local ADDON_NAME, private = ...
-local safecall = private.safecall
+local ADDON_NAME, _ADDON = ...
+local safecall = _ADDON.safecall
 local _G, tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown = 
       _G, tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown
 local EMPTY = {}  -- constant empty object to use in place of nil table reference
@@ -29,10 +29,10 @@ _G.AddonLoader = AddonLoader
 
 
 -- Debug(...) messages
-function private.tostrjoin(separator, ...)  return strjoin(separator, tostringall(...))  end
-local tostrjoin = private.tostrjoin
-function private.Debug(...)  if  AddonLoader.logFrame  then  AddonLoader.logFrame:AddMessage( tostrjoin(", ", ...) )  end end
-local Debug = private.Debug
+function _ADDON.tostrjoin(separator, ...)  return strjoin(separator, tostringall(...))  end
+local tostrjoin = _ADDON.tostrjoin
+function _ADDON.Debug(...)  if  AddonLoader.logFrame  then  AddonLoader.logFrame:AddMessage( tostrjoin(", ", ...) )  end end
+local Debug = _ADDON.Debug
 
 AddonLoader.logFrame = tekDebug  and  tekDebug:GetFrame("AddonLoader")  or  ChatFrame4
 if  not tekDebug  then  ChatFrame4:Show()  end
@@ -64,11 +64,7 @@ end
 -- Addon loading and initialization --
 --------------------------------------
 
--- The public API: substitute for builtin LoadAddOn(addonName).
--- The builtin LoadAddOn can be hooked and replaced.
--- Can be called either as a function or as a method:
--- AddonLoader.LoadAddOn(addonName, loadCondition)
--- AddonLoader:LoadAddOn(addonName, loadCondition)
+--[[
 function AddonLoader:LoadAddOn(addonName, loadCondition)
   -- Check if this is a function call like AddonLoader.LoadAddOn(addonName, loadCondition)
 	if  type(self) == 'table'  and  self.LoadAndInitialize  then
@@ -77,7 +73,10 @@ function AddonLoader:LoadAddOn(addonName, loadCondition)
 		-- Function call, shifting parameters to make place for self = AddonLoader
 		self, addonName, loadCondition, _nil  =  AddonLoader, self, addonName, loadCondition
 	end
+	
+	if  IsAddOnLoaded(addonName)  then  return true, "Already loaded"  end
 	assert( type(addonName) == 'string', "Usage: AddonLoader.LoadAddOn(addonName, loadCondition), expects string addonName, received "..type(addonName) )
+	
 	-- Use safecall to protect callers from any error that might occur while hacking the addon initialization.
 	--safecall( function() self:LoadAndInitialize(addonName, loadCondition) end )
 	-- Alternative:
@@ -87,25 +86,32 @@ function AddonLoader:LoadAddOn(addonName, loadCondition)
 	print( "AddonLoader.LoadAndInitialize("..tostring(addonName)..") failed, reverting to original LoadAddOn. Error:  "..tostring(loaded) )
 	return AddonLoader.origLoadAddOn(addonName)
 end
+--]]
 
---[[
+-- The public API: substitute for builtin LoadAddOn(addonName).
+-- The builtin LoadAddOn can be hooked and replaced.
+-- Can be called either as a function or as a method:
+-- AddonLoader.LoadAddOn(addonName, loadCondition)
 function AddonLoader.LoadAddOn(addonName, loadCondition, _shift)
 	local self = AddonLoader
   -- Check if this is a method call like AddonLoader:LoadAddOn(addonName, loadCondition)
 	if  type(addonName) == 'table'  and  addonName.LoadAndInitialize  then
-		-- Owns the method that will be called next, therefore it qualifies as self. Also shift the other parameters one left.
+		-- Owns the method that will be called next, therefore it qualifies as self. Shift the other parameters one left.
 		self, addonName, loadCondition  =  addonName, loadCondition, _shift
-	else
-		assert( type(addonName) == 'string', "Usage: AddonLoader.LoadAddOn(addonName, loadCondition), expects string addonName, received "..type(addonName) )
 	end
+	
+	if  IsAddOnLoaded(addonName)  then  return true, "Already loaded"  end
+	assert( type(addonName) == 'string', "Usage: AddonLoader.LoadAddOn(addonName, loadCondition), expects string addonName, received "..type(addonName) )
+	
 	-- Use safecall to protect callers from any error that might occur while hacking the addon initialization.
 	--safecall( function() self:LoadAndInitialize(addonName, loadCondition) end )
 	-- Alternative:
 	local ran, result = safecall(self.LoadAndInitialize, self, addonName, loadCondition)
-	if  not ran  then  print( "AddonLoader.LoadAddOn("..tostring(addonName)..") error:  "..tostring(result) )  end
-	return  ran  and  result
+	if  ran  then  return  loaded, result  end
+	
+	print( "AddonLoader.LoadAndInitialize("..tostring(addonName)..") failed, reverting to original LoadAddOn. Error:  "..tostring(loaded) )
+	return AddonLoader.origLoadAddOn(addonName)
 end
---]]
 
 AddonLoader.origLoadAddOn = LoadAddOn
 -- Hook LoadAddOn() globally. I wonder if UIParent will survive.
@@ -139,8 +145,6 @@ end
 
 
 function AddonLoader:LoadAndInitialize(addonName, loadCondition)
-	if  IsAddOnLoaded(addonName)  then  return true, "Already loaded"  end
-
 	-- Verify that the addon isn't disabled
 	local exactName, title, notes, enabled, loadable, reason, security = GetAddOnInfo(addonName)
 	--[[ https://wow.gamepedia.com/API_GetAddOnInfo
@@ -161,7 +165,7 @@ function AddonLoader:LoadAndInitialize(addonName, loadCondition)
 	local ran, result = safecall(function() this:BeforeLoadAddOn(addonName) end)
 
 	-- AddonCapture is loaded after AddonLoader. If the hooked _G.LoadAddOn() is called in the meantime, capturing is not possible.
-	local AddonCapture = private.AddonCapture
+	local AddonCapture = _ADDON.AddonCapture
 	-- Initialize capturing frames, event handlers and hooks interested in receiveing the events occuring during a normal addon load
 	local capture = AddonCapture  and  AddonCapture:StartCapture()
 
@@ -395,6 +399,7 @@ AddonLoader.lastUpdateTime = time()
 AddonLoader.lastUpdateGetTime = GetTime()
 AddonLoader.lastLoadTime = time()
 AddonLoader.lastLoadGetTime = GetTime()
+AddonLoader.lastLoadMs = debugprofilestop()
 
 
 
@@ -412,10 +417,11 @@ function AddonLoader:OnEvent(...)
 		local addonLoadEvent = { addonName = addonName, timeStamp = date("%H:%M:%S"), time = time(), GetTime = GetTime(), select(3, ...) }
 		self:AddAddonLoaded(addonLoadEvent)
 		
-		local now, nowGet = time(), GetTime()
-		Debug("ADDON_LOADED("..addonName.."):  time since last="..(now - self.lastLoadTime).." sec, GetTime() elapsed="..(nowGet - self.lastLoadGetTime).." sec")
+		local now, nowGet, nowMs = time(), GetTime(), debugprofilestop()
+		Debug("ADDON_LOADED("..addonName.."):  time since last="..(now - self.lastLoadTime).." sec, GetTime() elapsed="..(nowGet - self.lastLoadGetTime).." sec, debugprofile elapsed="..(nowMs - self.lastLoadMs).." ms")
 		self.lastLoadTime = now
 		self.lastLoadGetTime = nowGet
+		self.lastLoadMs = nowGet
 		
 		-- That's all to do for other addons. Only continue if THIS_ADDON_LOADED.
 		if  addonName ~= ADDON_NAME  then  return  end

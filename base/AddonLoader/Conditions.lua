@@ -21,15 +21,16 @@
 ## X-Load-Before:
 --]]
 
-local ADDON_NAME, private = ...
+local ADDON_NAME, _ADDON = ...
 local AddonLoader = AddonLoader
-local tostrjoin = private.tostrjoin
-local Debug = private.Debug
-local safecall = private.safecall
+local tostrjoin = _ADDON.tostrjoin
+local Debug = _ADDON.Debug
+local safecall = _ADDON.safecall
 local ConditionManager = AddonLoader.ConditionManager
 local _G, tostringall, tonumber, tostring, string, strjoin, type, pairs, ipairs, tremove, select, next, pcall, xpcall = 
       _G, tostringall, tonumber, tostring, string, strjoin, type, pairs, ipairs, tremove, select, next, pcall, xpcall
 local EMPTY = {}  -- constant empty object to use in place of nil table reference
+local LDB = _G.LibStub("LibDataBroker-1.1")
 
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
@@ -61,8 +62,8 @@ end
 --local function dontParse(fieldValue)  return fieldValue  end
 local dontParse = nil
 
-local function  tindexof(arr, item)
-	for  i= 1,#arr	do  if  arr[i] == item  then  return i  end end
+local function tindexof(arr, item)
+	for i = 1,#arr	do  if  arr[i] == item  then  return i  end end
 end
 
 local function strsplitObjectKey(hookedName)
@@ -71,7 +72,7 @@ local function strsplitObjectKey(hookedName)
 	return object, key
 end
 
-local packNonEmpty = private.packNonEmpty
+local packNonEmpty = _ADDON.packNonEmpty
 
 --[[
 local function strsplitPack(separator, str)
@@ -87,8 +88,8 @@ local function parseLuaObject(str)
 	if  not str  or  str[1] ~= '{'  or  str[#str] ~= '}'  then  return nil  end
 	
 	local body = "return "..str
-	local ran, result = safecall(loadstring, body)
-	if  not ran  or  type(result) ~= 'function'  then  return  end
+	local compiled, err = loadstring(body, str)
+	if  type(compiled) ~= 'function'  then  return ConditionManager.ReportFieldError("AddonLoader failed to parse lua object. " .. err)  end
 	local ran, object =  safecall(result)
 	return  ran  and  object
 end
@@ -99,11 +100,10 @@ end
 local function DeleteDataObject(dataobj)
 	-- Will this break? DataBrokers still have the reference.
 	-- Hopefully they overwrite it when the addon creates the real DataObject.
-	local ldb = LibStub:GetLibrary("LibDataBroker-1.1")
-	local name = ldb.namestorage[dataobj]
-	if  name  then  ldb.proxystorage[name] = nil  end
-	ldb.namestorage[dataobj] = nil
-	ldb.attributestorage[dataobj] = nil
+	local name = LDB.namestorage[dataobj]
+	if  name  then  LDB.proxystorage[name] = nil  end
+	LDB.namestorage[dataobj] = nil
+	LDB.attributestorage[dataobj] = nil
 end
 
 
@@ -378,7 +378,7 @@ ConditionManager.ConditionTemplates = {
 		eventList = {"ZONE_CHANGED_NEW_AREA", "PLAYER_ENTERING_WORLD", "ZONE_CHANGED", "ZONE_CHANGED_INDOORS", "MINIMAP_ZONE_CHANGED"},
 		parseMain = dontParse,
 		handler = function(cond, event, ...)
-			local BZ = LibStub and LibStub("LibBabble-Zone-3.0", true) -- silent check for BZ
+			local BZ = _G.LibStub("LibBabble-Zone-3.0", true) -- silent check for BZ
 			local subzone = string.trim(GetSubZoneText()) -- yeah really..
 			local realzone = GetRealZoneText()
 			for zone in cond.mainValue:gmatch('(%w[^,]+%w)') do
@@ -545,12 +545,12 @@ ConditionManager.ConditionTemplates = {
 	},{
 		condName = "LDB-Launcher",
 		parseMain = function(cond)
-			local icon, rest = strsplit(private.SPLIT_CHARS, cond.mainValue, 2)
+			local icon, rest = strsplit(_ADDON.SPLIT_CHARS, cond.mainValue, 2)
 			rest = rest  and  rest:trim()
 			-- the second part can be a string  or  an object definining any property
 			local dataobj, name = parseLuaObject(rest), nil
 			if  not dataobj  then
-				if  rest  then  name, rest = strsplit(private.SPLIT_CHARS, rest, 2)  end
+				if  rest  then  name, rest = strsplit(_ADDON.SPLIT_CHARS, rest, 2)  end
 				rest = rest  and  rest:trim()
 				dataobj = parseLuaObject(rest)  or  {}
 			end
@@ -580,13 +580,13 @@ ConditionManager.ConditionTemplates = {
 			cond.dataobjName =  name  or  dataobj.name  or  cond.addonName
 			cond.dataobjOnClick = dataobj.OnClick
 			cond.afterLoadFunc = function(cond)
-				local dataobj = LibStub:GetLibrary("LibDataBroker-1.1"):GetDataObjectByName(cond.dataobjName)
+				local dataobj = LDB:GetDataObjectByName(cond.dataobjName)
 				if  not dataobj  then  return  end
 				if  dataobj.OnClick == cond.dataobjOnClick  then  return  end
 				dataobj.OnClick( unpack(cond.dataobjOnClickParams or {}) )
 			end
 		
-			LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject(cond.dataobjName, dataobj)
+			LDB:NewDataObject(cond.dataobjName, dataobj)
 		end,
 	},
 

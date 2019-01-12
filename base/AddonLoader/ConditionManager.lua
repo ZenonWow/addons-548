@@ -18,20 +18,20 @@ AddonLoader.ConditionManager = ConditionManager
 AddonLoader.frame = ConditionManager  -- Deprecated: easy reference for use in X-LoadOn-Events
 
 
--- Metatable to auto-create empty inner tables when first referenced.
-local AutoCreateInnerTablesMT = { __index = function(self, key)  local subTable = {} ; self[key] = subTable ; return subTable  end }
--- Want optimized lua syntax: local AutoCreateInnerTablesMT = { __index = function(self, key)  return self[key] = {}  end }
+-- Import from CallbackHandler: metatable that auto-creates empty inner tables when first referenced.
+local AutoInnerTablesMeta = _G.AutoInnerTablesMeta  or  {__index = function(self, key) self[key] = {} return self[key] end}
+-- Want optimized lua syntax: local AutoInnerTablesMeta = { __index = function(self, key)  return self[key] = {}  end }
 
-ConditionManager.AddonMetadata = setmetatable({}, AutoCreateInnerTablesMT)
-ConditionManager.AddonOverrides = setmetatable({}, AutoCreateInnerTablesMT)
-ConditionManager.MergedConditions = setmetatable({}, AutoCreateInnerTablesMT)
+ConditionManager.AddonMetadata = setmetatable({}, AutoInnerTablesMeta)
+ConditionManager.AddonOverrides = setmetatable({}, AutoInnerTablesMeta)
+ConditionManager.MergedConditions = setmetatable({}, AutoInnerTablesMeta)
 
 ConditionManager.EventHooks = {}
 ConditionManager.FrameHooks = {}
 ConditionManager.SecureHooks = {}
 
 -- Slashes:  ["AddonName"] = { "ADDON_SLASH"="/slash", "ADDON_DOTHIS"="/dothis", .. }, ["AnotherAddon"] = ..
-ConditionManager.Slashes = setmetatable({}, AutoCreateInnerTablesMT)
+ConditionManager.Slashes = setmetatable({}, AutoInnerTablesMeta)
 
 
 
@@ -40,9 +40,17 @@ ConditionManager.Slashes = setmetatable({}, AutoCreateInnerTablesMT)
 -- Error source logging --
 --------------------------
 
-local function formatSourceField()
-	local field = ConditionManager.parsedField or ConditionManager.evaluatedCondition
+local function formatSourceField(field)
 	return  not field  and  ""  or  ("\nIn addon "..field.addonName.." / ## "..field.fieldName..": "..field.fieldValue)
+end
+
+function ConditionManager.ReportFieldError(fieldOrCond, msg)
+	if  not msg  and  type(fieldOrCond) == 'string')  then
+		msg, fieldOrCond = fieldOrCond,  ConditionManager.parsedField  or  ConditionManager.evaluatedCondition
+	end
+	msg = msg .. formatSourceField(fieldOrCond)
+	print(msg)
+	geterrorhandler()(msg)
 end
 
 
@@ -50,11 +58,10 @@ end
 -- Report eventual error to standard geterrorhandler(): BugGrabber or Swatter or Lua error popup.
 -- Then continue processing without the aborting all code in the current event handler.
 function private.safecall(unsafeFunc, ...)
-	local errorhandlerBeforeCall = geterrorhandler()
 	local function localErrorHandler(...)
 		local msg = "AddonLoader: safecall failed (no params): "  -- extra space intentional
-		print(msg .. tostrjoin(" ",...) .. formatSourceField())
-		return errorhandlerBeforeCall(...)
+		ConditionManager.ReportFieldError(msg .. tostrjoin(" ",...))
+		return geterrorhandler()(...)
 	end
 
 	if type(unsafeFunc) ~= "function" then  return  end
@@ -69,12 +76,12 @@ function private.safecall(unsafeFunc, ...)
 
 	local function localErrorHandler(...)
 		local msg = "AddonLoader: safecall failed (params: " .. tostrjoin(", ", unpack(tParams,1,nParams)) .. "): "
-		print(msg .. tostrjoin(" ",...) .. formatSourceField())
-		return errorhandlerBeforeCall(...)
+		ConditionManager.ReportFieldError(msg .. tostrjoin(" ",...))
+		return geterrorhandler()(...)
 	end
 
 	-- Unpack the parameters in the thunk
-	local function safecallThunk()  unsafeFunc( unpack(tParams,1,nParams) )  end
+	local function safecallThunk()  return unsafeFunc( unpack(tParams,1,nParams) )  end
 	-- Do the call through the thunk
 	return xpcall(safecallThunk, localErrorHandler)
 end
@@ -125,13 +132,13 @@ function ConditionManager.ParseLoadOnFunc(fieldOrCond)
 	
 	ConditionManager.parsedField = fieldOrCond
 	
-	--local ran, result = pcall(loadstring, fieldValue)
-	local ran, result = safecall(loadstring, fieldValue)
-	if  ran  and  type(result) == 'function'  then  setfenv(result, LoadOnFuncEnvironment)  end
+	local compiled, err = loadstring(fieldValue, fieldOrCond.fieldName)
+	if  type(compiled) ~= 'function'  then  return ConditionManager.ReportFieldError(fieldOrCond, "AddonLoader failed to parse function. " .. err)  end
 	
+	setfenv(compiled, LoadOnFuncEnvironment)
 	-- Caller might do more processing on this field, not finished with it yet
 	--ConditionManager.parsedField = nil
-	return  ran  and  result
+	return  compiled
 end
 
 
@@ -207,7 +214,7 @@ do
 		if  eventObj  then  return  eventObj  end
 		
 		-- First time reference, create it
-		eventObj = setmetatable({}, AutoCreateInnerTablesMT)
+		eventObj = setmetatable({}, AutoInnerTablesMeta)
 		Hooks[eventKey] = eventObj
 		-- Tries to install the dispatcher only the first time the EventObj is requested. If it fails there's no errormessage spam.
 		Hooks:InstallDispatcher(objectName, eventName, eventKey)

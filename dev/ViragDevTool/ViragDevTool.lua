@@ -420,12 +420,12 @@ end
 
 function ViragDevTool:FromStrToFunc(str)
 	local body = "return "..str
-	local ran, compiled = pcall(loadstring, body, str)
-	if  not ran  then  self:print('"'..body..'" failed to compile:  '.. compiled)  end
+	local compiled, err = loadstring(body, str)
+	if  not ran  then  self:print('"'..body..'" failed to compile:  '.. err)  end
 	-- Pack multiple returns into an array with .n = return count
 	-- Solo return is not packed
 	--return  ran  and  function()  return packOrSolo( compiled() )  end
-	return  ran  and  compiled
+	return  compiled
 end
 
 function ViragDevTool:AddWatch(bodyStr)
