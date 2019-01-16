@@ -63,7 +63,7 @@ end
 local dontParse = nil
 
 local function tindexof(arr, item)
-	for i = 1,#arr	do  if  arr[i] == item  then  return i  end end
+	for i = 1,#arr  do  if  arr[i] == item  then  return i  end end
 end
 
 local function strsplitObjectKey(hookedName)

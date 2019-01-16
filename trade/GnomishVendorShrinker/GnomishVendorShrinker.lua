@@ -43,12 +43,9 @@ local RECIPE = select(7, GetAuctionItemClasses())
 local quality_colors = setmetatable({}, {__index = function() return "|cffffffff" end})
 for i=1,7 do quality_colors[i] = "|c".. select(4, GetItemQualityColor(i)) end
 
-
-local function print(...)  DEFAULT_CHAT_FRAME:AddMessage(...)  end
 local function tindexof(arr, item)
-	for i = 1,#arr	do  if  arr[i] == item  then  return i  end end
+	for i = 1,#arr  do  if  arr[i] == item  then  return i  end end
 end
-
 
 
 

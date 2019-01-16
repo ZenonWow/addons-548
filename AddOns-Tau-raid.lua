@@ -1,7 +1,7 @@
 -- AddOns-Tau-raid-v548
 dofile('../mkAddOnsLinks.lua')
 local linkExpaAddOns = linkAddOns.A548
-local linkServerAddOns = linkAddOns.A735Fs
+local linkServerAddOns = linkAddOns.A548Tau
 
 
 linkExpaAddOns('_read/tek') [=[
@@ -266,7 +266,7 @@ Explorer: disabled
 MozzFullWorldMap: disabled
 
 LorewalkersHelper: disabled
-CandyBuckets = false,
+CandyBuckets = false
 
 Routes: disabled
 HandyNotes: disabled

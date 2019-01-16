@@ -10,7 +10,7 @@ cmd /c mklink AddOns.txt ..\..\AddOns.txt
 
 dofile('../mkAddOnsLinks.lua')
 local linkExpaAddOns = linkAddOns.A548
-local linkServerAddOns = linkAddOns.A735Fs
+local linkServerAddOns = linkAddOns.A548Tau
 
 
 linkExpaAddOns('_read/tek') [=[
@@ -306,7 +306,7 @@ Explorer: true
 MozzFullWorldMap: true
 
 LorewalkersHelper: disabled
-CandyBuckets = false,
+CandyBuckets = false
 
 Routes: true
 HandyNotes: true

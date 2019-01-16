@@ -1,7 +1,7 @@
 -- AddOns-Tau-zero-v548
 dofile('../mkAddOnsLinks.lua')
 local linkExpaAddOns = linkAddOns.A548
-local linkServerAddOns = linkAddOns.A735Fs
+local linkServerAddOns = linkAddOns.A548Tau
 
 
 linkExpaAddOns('base') [=[

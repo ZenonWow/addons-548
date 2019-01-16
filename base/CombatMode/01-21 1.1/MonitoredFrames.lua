@@ -175,10 +175,8 @@ CombatMode.FramesReleasingMouse2 = {
 
 
 
-local function  tindexof(array, item)
-	for  i= 1,#array	do
-		if  array[i] == item  then  return i  end
-	end
+local function tindexof(arr, item)
+	for i = 1,#arr  do  if  arr[i] == item  then  return i  end end
 end
 
 local function  tremovevalue(array, item)

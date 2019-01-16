@@ -1,0 +1,550 @@
+https://www.wowinterface.com/forums/showthread.php?t=35104
+--
+Animation roundup
+A thread to gather all the information on animations.
+
+Bookmarks
+
+3.1.0 API Changes
+http://forums.worldofwarcraft.com/th...Id=15443414368
+
+WoWPedia
+http://wowpedia.org/Widget_API#Region
+http://wowpedia.org/Widget_API#AnimationGroup
+http://wowpedia.org/Widget_API#Animation
+http://wowpedia.org/Widget_API#Animation_Derivatives
+
+WoW-Programming
+http://wowprogramming.com/docs/widge...AnimationGroup
+http://wowprogramming.com/docs/widgets/AnimationGroup
+http://wowprogramming.com/docs/widgets/Animation
+http://wowprogramming.com/docs/widgets/Alpha
+http://wowprogramming.com/docs/widgets/Rotation
+http://wowprogramming.com/docs/widgets/Scale
+http://wowprogramming.com/docs/widgets/Translation
+
+Examples
+
+Blackbox
+
+http://static.curseforge.net/content..._for_3.1.2.zip
+
+rFrameRotater
+http://code.google.com/p/rothui/sour...ameRotater.lua
+
+My goal is to create a small example library for each AnimationType.
+
+First gathering (subject of change)
+Code:
+    --define frame
+    
+    local f = CreateFrame("Frame")
+    ...
+
+    local ag = f:CreateAnimationGroup()    
+
+    local a1 = ag:CreateAnimation("Translation")
+    a1:SetOffset(x, y)    
+    a1:SetDuration(3)
+    a1:SetSmoothing("OUT")
+
+    local a2 = ag:CreateAnimation("Scale")
+    a2:SetScale(x, y)
+    a2:SetDuration(3)
+    a2:SetSmoothing("OUT")
+
+    local a3 = ag:CreateAnimation("Rotation")
+    a3:SetDegrees(180)
+    a3:SetDuration(3)
+    a3:SetSmoothing("OUT")
+    
+    local a4 = ag:CreateAnimation("Alpha")
+    a4:SetChange(-0.5)
+    a4:SetDuration(3)
+    a4:SetSmoothing("OUT")
+
+    ag:Play()
+__________________
+| Simple is beautiful.
+| WoWI AddOns | GitHub | Zork (WoW) | TDMOG
+"I wonder what the non-pathetic people are doing tonight?" - Rajesh Koothrappali (The Big Bang Theory)
+Last edited by zork : 09-15-14 at 07:35 AM.
+  	
+ 09-22-10, 07:44 AM	  #2
+zork
+A Pyroguard Emberseer
+ 
+
+
+Join Date: Jul 2008
+Posts: 1,729
+Copy of the complete original Blizzard article to prevent it from dying.
+
+This is the official list of changes to the UI API for the upcoming 3.1.0 patch. This thread will also contain detailed documentation for the new systems we are adding. Information here will be updated periodically, and this may not necessarily be a complete list. 
+Purpose
+A new animation system has been added to the WoW UI framework for patch 3.1.0. This system supports the XML specification of animation behaviors and it runs as efficiently as possible. Previously, animations could only be simulated by iteratively repositioning UI elements in Lua (via calls to SetPoint). The problems with that method were that it slowed the framerate of the game, it frequently led to code duplication, and it was not easy to develop new custom animation behaviors. In addition, rotation could not be accomplished by directly rotating frames. Instead, Scripters had to rotate texture coordinates within a texture to accomplish rotation.
+
+The new animation system addresses these problems. However, in its current state, the animation system causes UI elements to go through what can best be described as an out of body experience. For example, if a button is positioned at coordinates (50,50) and an animation moves it 50 pixels to the right (50,0), you would not be able to highlight the button by mousing over the button's position on the screen (100, 50). To highlight the button, you would instead have to mouse over the button's original position (50, 50) to highlight it. In other words, the Anchor system positions Regions and the Animation system makes them run around the screen until they're told to Stop. Animations may stop either by the programmer stopping them explicitly (via calls to animation Stop functions) or as a side effect of the Anchor system altering a Region's points (SetPoint, SetAllPoints, ClearAllPoints, OnDragStart)
+Tech Overview
+
+Animations operate on any UI element of type Region. At this time, Regions consist of Frames, FontStrings, and Textures.
+
+The abstract base type UIObject has subsumed the GetParent function of Region. The two new types Animation and AnimationGroup are both derived from UIObject.
+
+The new animation system is offset-based. This means that any animation applied to a Region will modify the Region's current values by an offset. What the offset is depends on the type of animation. For example, if you have a Translation animation with an offset of (5,5) and you play the animation on the Frame at position (25,30), the Frame will end up at position (30,35).
+
+The offset-based nature of this system means that multiple animations that play at the same time will stack. Using the previous example, if you have another Translation with an offset of (10,15) and you play the animation at the same time as the previous animation, then the Frame will smoothly travel from position (25,30) to position (40,45). 
+
+An entirely new set of tags have been introduced to support Animations in XML. You can start with one of the existing UI element tags: <Frame>, <Texture>, or <FontString>.
+
+Under one of these elements, you can make an <Animations> tag, which can contain any number of <AnimationGroup> tags, which can subsequently contain any number of specific Animation tags.
+XML
+Code:
+
+<Animations>
+
+Note: This is the opening tag you use to attach animations to a Region. Only one of these can be the child of any Region tag (<Frame>, <Texture>, <FontString>).
+
+Attributes
+
+      None
+
+Scripts
+
+      None
+
+Children
+
+      AnimationGroup
+
+<AnimationGroup>
+
+Note: Any number of these can be placed under an <Animations> tag. These control the playback and looping of groups of Animations.
+
+There are currently two looping types: one that can make the group repeat itself and one that can make the group play in reverse when it finishes.
+
+The order that animations play in is determined by the order attribute of the child animations. Animations are played in ascending order. If more than one animation specifies the same order, they will play simultaneously.
+
+Attributes
+
+      name
+            Name of the animation group.
+      inherits
+            Specifies a virtual AnimationGroup from which this group should inherit.
+      looping
+            An enumerated value. One of NONE, REPEAT, BOUNCE.
+            REPEAT replays the group when it finishes playing.
+            BOUNCE plays the group in reverse when it finishes playing. This produces a bouncing effect.
+
+Scripts
+
+      OnPlay
+            Fires when the Play function gets called on the group or one of its children.
+      OnPause
+            Fires when the Pause function is called on the group or one of its children.
+      OnStop
+            Fires when either the '''Stop''' function is called on the group or one of its children, when an ancestor frame implicitly stops animations (via SetPoint, SetParent, SetAllPoints, ClearAllPoints), or when an ancestor begins to Drag (via OnDragStart).
+            Arguments
+            requested - true if the Stop function was called on this group
+      OnUpdate
+            Fires after all animation updates for the current tick have been applied.
+            Passes a number parameter which stores the number of seconds since the last update.
+      OnFinished
+            Fires after this group finishes playing. This will not be fired for looping animation groups unless you call the '''Finish''' function on the group.
+            Arguments
+            requested - true if the "Finish" function was called on this group
+      OnLoop
+            Fires after this group finishes a loop cycle
+            Arguments
+            loopState - The loop state that this animation is transitioning to
+
+Children
+
+      Animation, Translation, Rotation, Scale, Alpha, and Scripts.
+
+
+ <Animation>
+
+Note: Base animation type. This type is not abstract even though it does not modify its parent UI elements by default. This type is for making custom animations via the OnUpdate script.
+
+Attributes
+
+      name
+            Name of the animation.
+      inherits
+            Specifies a virtual Animation from which this group should inherit.
+      startDelay
+            Seconds to delay before the animation begins updating.
+      endDelay
+            Seconds to delay after the animation finishes updating.
+      duration
+            Duration of the animation.
+      maxFramerate
+            Maximum frames per second that this animation updates its progress.
+      order
+            Order within the parent group which this animation plays.
+      smoothing
+            Smooths out the animation update progress. One of NONE, IN, OUT, or IN_OUT.
+
+Scripts
+
+      OnPlay
+            Fires when the Play function is called on this animation or its parent
+      OnPause
+            Fires when the Pause function is called on this animation or its parent
+      OnStop
+            Fires when either the Stop function is called on the group or one of its children, when an ancestor frame implicitly stops animations (via SetPoint, SetParent, SetAllPoints, ClearAllPoints), or when an ancestor begins to Drag (via OnDragStart).
+            Arguments
+            requested - true if the Stop function was called on this group.
+      OnUpdate
+            Fires after this animation has applied its update for the current tick. This may fire more than once per frame in low framerate conditions.
+            Arguments
+            elapsed - number of seconds applied to the current animation update
+      OnFinished
+            Fires after this Animation finishes playing.
+
+Children
+
+<Translation>
+
+Note: Inherits all attributes and scripts from <Animation>. Translates a Region from its current position by an offset.
+
+Attributes
+
+      offsetX
+            Amount to offset on the X-axis.
+      offsetY
+            Amount to offset on the Y-axis.
+
+
+<Rotation>
+
+      Note: Inherits all attributes and scripts from <Animation>. Rotates a Region by an amount specified either in degrees or radians.
+
+Attributes
+
+      radians
+            Amount of radians to rotate.
+      degrees
+            Amount of degrees to rotate. This is overriden by radians if both are specified.
+
+
+<Scale>
+
+Note: Inherits all attributes and scripts from <Animation>. Scales a Region by an amount. The Scale can be non-uniform.
+
+Attributes
+
+      scaleX
+            Amount to scale along the X-axis.
+      scaleY
+            Amount to scale along the Y-axis.
+
+
+<Alpha>
+
+Note: Inherits all attributes and scripts from <Animation>. Changes the normalized [0,1] alpha value of a Region by an amount.
+
+Attributes
+
+      change
+            Amount to change a Region's alpha. Note that amounts less than -1 or greater than +1 are clamped.
+
+Changes to Existing Types
+Code:
+
+Region
+
+    * Region:CreateAnimationGroup(["name"[,"inheritsFrom"]])
+      Create and return a new AnimationGroup as a child of this Region.
+
+    * Region:StopAnimating()
+      Stops any active animations on the Region and its children.
+
+    * Region:GetAnimationGroups()
+      Returns all AnimationGroups that are children of this Region
+
+    * Region:IsDragging()
+      True if this Region or its Parent is being dragged.
+New Types
+Code:
+
+Object
+    This is a new abstract type. Animations and Regions both derive from this type.
+
+    * Object:GetParent()
+      Moved from Region:GetParent(). This is essentially the same as the old version, except that you can no longer assume that your object has a Frame type in its hierarchy somewhere.
+AnimationGroup
+Code:
+
+This manages playback, order, and looping of its child Animations. Animations in a group will play in ascending order according to their order fields (accessible via SetOrder and GetOrder). If two or more Animations have the same order value, then they will play simultaneously. The next animation will not play until all Animations with that order value are done.
+
+    * AnimationGroup:Play()
+      Start playing the animations in this group.
+
+    * AnimationGroup:Pause()
+      Pause the animations in this group.
+
+    * AnimationGroup:Stop()
+      Stop all animations in this group.
+
+    * AnimationGroup:Finish()
+      Notify this group to stop playing once the current loop cycle is done. Does nothing if this group is not playing.
+
+    * AnimationGroup:GetProgress()
+      Returns the progress of this animation as a unit value [0,1].
+
+    * AnimationGroup:IsDone()
+      Returns true if the group has finished playing.
+
+    * AnimationGroup:IsPlaying()
+      Returns true if the group is playing.
+
+    * AnimationGroup:IsPaused()
+      Returns true if the group is paused.
+
+    * AnimationGroup:GetDuration()
+      Gets the total duration across all child Animations that the group will take to complete one loop cycle.
+
+    * AnimationGroup:SetLooping(loopType)
+      Sets the type of looping for the group. Input is [NONE, REPEAT, or BOUNCE].
+
+    * AnimationGroup:GetLooping()
+      Gets the type of looping for the group.
+
+    * AnimationGroup:GetLoopState()
+      Gets the current loop state of the group. Output is [NONE, FORWARD, or REVERSE].
+
+    * AnimationGroup:CreateAnimation("animationType", ["name"[,"inheritsFrom"]])
+      Create and return an Animation as a child of this group.
+
+    * AnimationGroup:HasScript()
+      Same as Frame:HasScript. Input is [OnLoad, OnPlay, OnPaused, OnStop, OnFinished, OnUpdate].
+
+    * AnimationGroup:GetScript()
+      Same as Frame:HasScript. Input is [OnLoad, OnPlay, OnPaused, OnStop, OnFinished, OnUpdate].
+
+    * AnimationGroup:SetScript()
+      Same as Frame:HasScript. Input is [OnLoad, OnPlay, OnPaused, OnStop, OnFinished, OnUpdate].
+
+
+Animation
+Code:
+
+This is a base animation type. This handles all animation timing and bookkeeping. An animation tag must always be parented by an AnimationGroup tag.
+
+    * Animation:Play()
+      Play the animation.
+
+    * Animation:Pause()
+      Pause the animation.
+
+    * Animation:Stop()
+      Stop the animation.
+
+    * Animation:IsDone()
+      Returns true if the animation has finished playing.
+
+    * Animation:IsPlaying()
+      Returns true if the animation is playing.
+
+    * Animation:IsPaused()
+      Returns true if the animation is paused.
+
+    * Animation:IsStopped()
+      Returns true if the animation is stopped.
+
+    * Animation:IsDelaying()
+      Returns true if the animation is in the middle of a start or end delay.
+
+    * Animation:GetElapsed()
+      Gets the amount of time in seconds that the animation has been playing for.
+
+    * Animation:SetStartDelay(delaySec)
+      Set the number of seconds that the animation delays before it starts to progress.
+
+    * Animation:GetStartDelay()
+      Get the number of seconds that the animation delays before it starts to progress.
+
+    * Animation:SetEndDelay(delaySec)
+      Set the number of seconds the animation delays after finishing.
+
+    * Animation:GetEndDelay()
+      Get the number of seconds the animation delays after finishing.
+
+    * Animation:SetDuration(durationSec)
+      Set the number of seconds it takes for the animation to progress from start to finish.
+
+    * Animation:GetDuration()
+      Get the number of seconds it takes for the animation to progress from start to finish.
+
+    * Animation:GetProgress()
+      Returns the progress of the animation as a unit value [0,1]. Ignores start and end delay.
+
+    * Animation:GetSmoothProgress()
+      Returns a smoothed, [0,1] progress value for the animation.
+
+    * Animation:GetProgressWithDelay()
+      Returns the progress of the animation combined with its start and end delay.
+
+    * Animation:SetMaxFramerate(framerate)
+      Sets the maximum frames per second that the animation will update its progress.
+
+    * Animation:GetMaxFramerate()
+      Gets the maximum frames per second that the animation will update its progress.
+
+    * Animation:SetOrder(order)
+      Sets the order that the animation plays within its parent group. Range is [1,100].
+
+    * Animation:GetOrder()
+      Gets the order of the animation within its parent group.
+
+    * Animation:SetSmoothing(smoothType)
+      Sets the smoothing type for the animation. Input is [IN,OUT, or IN_OUT].
+
+    * Animation:GetSmoothing()
+      Gets the smoothing type for the animation.
+
+    * Animation:SetParent(animGroup or "animGroupName")
+      Sets the parent for the animation. If the animation was not already a child of the parent, the parent will insert the animation into the proper order amongst its children.
+
+    * Animation:GetRegionParent()
+      Gets the Region object that the animation operates on. The region object is this Animation's parent's parent (the AnimationGroup's parent).
+
+    * Animation:HasScript("handler")
+      Same as Frame:HasScript, Input is [OnLoad, OnPlay, OnPaused, OnStop, OnFinished, OnUpdate].
+
+    * Animation:GetScript("handler")
+      Same as Frame:GetScript, Input is [OnLoad, OnPlay, OnPaused, OnStop, OnFinished, OnUpdate].
+
+    * Animation:SetScript("handler")
+      Same as Frame:SetScript, Input is [OnLoad, OnPlay, OnPaused, OnStop, OnFinished, OnUpdate].
+
+
+Translation
+Code:
+
+This is an affine transformation that moves a parent Region by an offset. Translation has all of the methods of Animation, plus the following:
+
+    * Translation:SetOffset(x, y)
+      Sets the offset that the animation's parent Region would travel.
+
+    * Translation:GetOffset()
+      Gets the offset that the animation's parent Region would travel.
+Rotation
+Code:
+
+This is an affine transformation that rotates a parent Region about an origin. Rotation has all of the methods of Animation, plus the following:
+
+    * Rotation:SetDegrees(degrees)
+      Sets the amount of degrees that the animation's parent Region would rotate.
+
+    * Rotation:GetDegrees()
+      Gets the amount of degrees that the animation's parent Region would rotate.
+
+    * Rotation:SetRadians(radians)
+      Sets the amount of radians that the animation's parent Region would travel.
+
+    * Rotation:GetRadians()
+      Sets the amount of radians that the animation's parent Region would travel.
+
+    * Rotation:SetOrigin(point, offsetX, offsetY)
+      Sets the animation's origin of rotation for its parent Region.
+
+    * Rotation:GetOrigin()
+      Gets the point, X offset, and Y offset of the animation's origin of rotation for its parent Region.
+Scale
+Code:
+
+This is an affine transformation that scales a parent Region about an origin. The scale can be non-uniform. Scale has all of the methods of Animation, plus the following:
+
+    * Scale:SetScale(x, y)
+      Sets the X scalar and the Y scalar that the animation's parent Region should scale by.
+
+    * Scale:GetScale()
+      Gets the X scalar and the Y scalar that the animation's parent Region should scale by.
+
+    * Scale:SetOrigin(point, offsetX, offsetY)
+      Sets the animation's origin of rotation for its parent Region.
+
+    * Scale:GetOrigin()
+      Gets the point, X offset, and Y offset of the animation's origin of rotation for its parent Region.
+Alpha
+Code:
+
+This animation changes the alpha value of its parent region. Alpha has all of the methods of Animation plus the following:
+
+    * Alpha:SetChange(change)
+      Sets the amount that the alpha value of this animation's parent Region changes by.
+
+    * Alpha:GetChange()
+      Gets the amount that the alpha value of this animation's parent Region changes by.
+
+
+__________________
+| Simple is beautiful.
+| WoWI AddOns | GitHub | Zork (WoW) | TDMOG
+"I wonder what the non-pathetic people are doing tonight?" - Rajesh Koothrappali (The Big Bang Theory)
+Last edited by zork : 09-22-10 at 07:52 AM.
+  	
+ 02-19-13, 09:09 AM	  #3
+Motig
+A Fallenroot Satyr
+ 
+
+
+Join Date: Apr 2010
+Posts: 23
+Thank you for this post, been really helpful 
+
+*Edit: Oops I guess I kind of resurrected this post from the dead! Didn't notice it was this old.
+  	
+ 08-15-14, 02:36 AM	  #4
+zork
+A Pyroguard Emberseer
+ 
+
+
+Join Date: Jul 2008
+Posts: 1,729
+Update for WoW patch 6.0
+== Animation System ==
+
+Animation system is receiving a few changes and various bug fixes.
+
+Alpha animation has fromAlpha and toAlpha. This is a variant from just a change delta.
+Scale animataion has fromScale and toScale.
+childKey is the same as targetKey with automatically pre-pending “$parent.$parent.”
+AnimGroups now have a “setToFinalAlpha” setting that will apply the animations final resulting alpha to all animating regions.
+Source: http://us.battle.net/wow/en/forum/topic/13421662064
+__________________
+| Simple is beautiful.
+| WoWI AddOns | GitHub | Zork (WoW) | TDMOG
+"I wonder what the non-pathetic people are doing tonight?" - Rajesh Koothrappali (The Big Bang Theory)
+Last edited by zork : 08-15-14 at 02:38 AM.
+  	
+ 08-15-14, 05:51 AM	  #5
+Duugu
+Premium Member
+ 
+
+
+Join Date: Nov 2006
+Posts: 851
+So many bugs. Not even a single one of them fixed. -.-
+  	
+ 08-15-14, 06:15 AM	  #6
+Resike
+A Pyroguard Emberseer
+
+Join Date: Mar 2010
+Posts: 1,277
+Originally Posted by Duugu 
+So many bugs. Not even a single one of them fixed. -.-
+Also each time Blizzard animates something on your srcreen, expect a ~20 fps drop while animating. This indicates even they can't use their own stuff properly.
+  	
+ 02-06-15, 04:36 AM	  #7
+zork
+A Pyroguard Emberseer
+ 
+

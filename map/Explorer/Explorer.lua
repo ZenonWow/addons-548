@@ -48,8 +48,6 @@ elseif GetLocale():match('es') then
 end
 
 
-local function print(...)  DEFAULT_CHAT_FRAME:AddMessage(...)  end
-
 
 function Explorer:ToggleCompleted(showCompleted)
 	if  showCompleted == nil  then  showCompleted = not Explorer.showCompleted  end

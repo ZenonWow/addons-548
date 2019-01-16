@@ -1,0 +1,57 @@
+http://old.wowace.com/Ace2_Memory_Concerns
+https://web.archive.org/web/20170630064442/http://old.wowace.com/Ace2_Memory_Concerns
+--
+Ace2 Memory Concerns
+This page is primarily written by Tekkub, the author of Warmup. He knows what he's talking about :P
+
+As more and more mods are converted to Ace2, more people are complaining about load-time stats reported from Warmup. This page will aim to clear up any confusion about the embed design and describe all your options an how to run Ace2 addons.
+
+So you've installed a bunch of Ace2 mods. You load into WoW and open up Warmup. Lo and behold it says these mods take up a lot more space then they used to, something is seriously wrong!
+
+Well, no, nothing is wrong. Here's why:
+
+In the "classic" design libraries were maintained only as separate addons. This had it's pros and cons...
+
+Pros:
+
+Library loads only once, before any addon that needs it
+Memory is only consumed by this single instance
+Disabling the library would disable all addons dependent upon it
+Cons:
+
+Users had to maintain the library, they needed to update it if an addon needed a newer version
+Addons were helpless against out of date libraries, the best they could do is check the version and whine at the user to update
+Some users think all libraries are bad and that dependencies should be avoided like the plague (Note: They are wrong)
+Users uninstall addons but don't know if they can remove the libraries
+These cons got in the way, so the new embed design was created and much rejoicing was had!
+
+Embeds allowed the Addon writer to take charge of maintaining the libraries packaged with his addon. Users no longer had to worry about the library, some might not even know it's there... Embedding also allows libraries to self-update, meaning if a user installs a newer addon that uses a certain library, all other addons that use it would get the new improved version as well. Naturally library authors have to take special consideration to never break old mods that use the library. Another big advantage is that different versions of libraries can co-exist, so if one mod uses v1.0 and another uses v2.0, both can run at the same time.
+
+But this design bring up a few issues. Simply put, every mod that has an embed must load the embed into memory, check it's version against the ones already loaded, and either update or discard the version it loaded. This means that warmup's stats are going to go up. Now the confusion lies in the fact that many users take Warmup's numbers to be absolute stats on an addon. This is wrong and here is why...
+
+
+Lets say we have three addons (X, Y, and Z) that use a library (L)
+
+L's memory use at load is 10 KiB
+X, Y, and Z each use 20 KiB
+In the "classic" library design, each mod and the library would load separately. Warmup would report back
+
+10, 20, 20, 20 (70 total)
+In the new embed design the library would be loaded with each addon that uses it, so warmup would report back
+
+30, 30, 30 (90 total)
+Suddenly my memory use has gone up 20 KiB! Not true, for the library was loaded 3 times, but 2 versions were thrown out and only one was kept. On the next garbage collection cycle that extra 20 KiB will be reclaimed.
+
+
+So to summarize:
+
+The extra memory Warmup reports is incorrect
+That extra memory is reclaimed at the next garbage collect cycle
+Only ONE copy of the library will remain in memory
+Warmup can only give a (very) rough idea of how much memory a mod uses. It does not speak gospel truth at all
+You, the user, get mods that easily implement impressive functionality, without having to worry about dependencies with no great sacrifice of resources
+Un-embedding
+Now for the user that has a handful of mods with embeds, this isn't a big deal... but what about users that have a bunch of embed-using addons? That added garbage churn can slow down load times, unfortunately. Now it might sound like some weird digression, but the solution is simple... go back to the classic dependencies. You heard me right! Embeds are designed so that a standalone version of the library can be made easily, and every library writer should still provide a standalone version. Addons using the libraries need to include an optional dependency on this standalone version so that it is loaded before the addon.
+
+If both standalone versions and OptDeps are provided, you can remove the libraries from the mod and simply update the standalone library as you always did before. This puts the work back in the user's hands, but it a completely optional step and only needed if the user wishes to lower their Warmup stats or speed up their SVN updates. As an added bonus, mods with embedded versions of the libraries won't break this method, so if one slips through the cracks the user won't get brutally boned.
+

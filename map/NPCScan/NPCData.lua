@@ -21,8 +21,6 @@ local L = private.L
 local ZN = private.ZONE_NAMES
 
 
-local function print(...)  DEFAULT_CHAT_FRAME:AddMessage(...)  end
-
 
 local NPC_DATA = {
 	[61]    = { world_id = ZN.EASTERN_KINGDOMS,         map_name = ZN.ELWYNN_FOREST,               is_tamable = false, is_achievement = false }, -- Thuros Lightfingers

@@ -1,0 +1,732 @@
+https://www.wowinterface.com/forums/showthread.php?t=47694&page=2
+--
+Page 2 of 4	<	1	2	3	4	>	
+ View First Unread  
+Thread Tools 	Display Modes 
+ 08-26-13, 09:51 AM	  #21
+Rainrider
+A Firelord
+
+Join Date: Nov 2008
+Posts: 452
+That's an interesting one, but is it really worth it? You add everything from _G you use in your addon to the addon namespace, even if you only access it once. An upvalue is still faster than the non-global environment and you loose the ability to access _G directly. Or am I wrong about it?
+  	
+ 08-26-13, 03:35 PM	  #22
+Phanx
+Cat.
+ 
+
+
+Join Date: Mar 2006
+Posts: 5,617
+That looks like a giant cluster**** and I would not recommend doing anything like it. If you need functions from one of your addon's files in another, just put them in the namespace table and call them as methods.
+
+Also, that's not really relevant to this thread. If you want to discuss using custom function environments, please take that discussion to its own thread.
+__________________
+Author/maintainer of Grid, PhanxChat, oUF_Phanx, and many more.
+Troubleshoot an addon • Turn any code into an addon • More addon resources
+Need help with your code? Post all of your actual code! Attach or paste your files.
+Please don’t PM me about addon bugs or code questions. Post a comment or forum thread instead!
+  	
+ 08-26-13, 09:11 PM	  #23
+kurapica.igas
+A Warpwood Thunder Caller
+Join Date: Aug 2011
+Posts: 98
+This is used to keep your variables not pollute the _G, and gain some code flexibility.Also, the up-value is not as quick as you think.
+
+Here is a test, a() function contains a long calculation, and after it, there are three call types :
+
+1. Define function in the global, call the global function directly.
+2. Define up-values, the use the up-values to "speed up" the calculation.
+3. Use the standalone environment, do the calculation.
+
+Lua Code:
+do
+    function a()
+        local sum = 0
+        for i = 1, 100000 do
+            sum = sum + i
+        end
+    end
+ 
+    oclock = os.clock
+ 
+    do
+        -- Normal calls
+        function callA()
+            collectgarbage()
+ 
+            local startTime = oclock()
+ 
+            for i = 1, 10000 do
+                a()
+            end
+ 
+            local finsih = oclock()
+ 
+            print("Normal cost ", finsih - startTime)
+        end
+ 
+        callA()
+    end
+ 
+    do
+        -- so la, loclock are up-value
+        local la = a
+        local loclock = oclock
+ 
+        function callA()
+            collectgarbage()
+            local startTime = loclock()
+ 
+            for i = 1, 10000 do
+                la()
+            end
+ 
+            local finsih = loclock()
+ 
+            print("Up-value cost ", finsih - startTime)
+        end
+ 
+        callA()
+    end
+ 
+    do
+        local addon = {}
+ 
+        if not getmetatable(addon) then
+            setmetatable(addon, {
+            __index = function(self,  key)
+                -- keep vars in the _G to the addon to reduce the access cost
+                local v = _G[key]
+                if v ~= nil then
+                    rawset(self, key, v)
+                    return rawget(self, key)
+                end
+            end,
+ 
+            __metatable = true,
+            })
+        end
+ 
+        setfenv(1, addon)
+ 
+        -- Make sure metatable operations won't happen again when call callA
+        a = a
+        oclock = oclock
+ 
+        -- so a, oclock are global in the environment, not up-value
+        function callA()
+            collectgarbage()
+            local startTime = oclock()
+ 
+            for i = 1, 10000 do
+                a()
+            end
+ 
+            local finsih = oclock()
+            
+            print("Standalone environment cost ", finsih - startTime)
+        end
+ 
+        callA()
+    end
+end
+
+The result may not be exactly because there are too many things should cost the cpu in the same time, but you can see a lot in it, I run these code three times in lua 5.1.2 on mac shell:
+
+Normal cost 16.129601
+Up-value cost 16.357202
+Standalone environment cost 16.308925
+Normal cost 16.197299
+Up-value cost 16.478886
+Standalone environment cost 16.390823
+Normal cost 16.203371
+Up-value cost 16.468056
+Standalone environment cost 16.404645
+So the up-value part is the slowest.
+
+In an addon, you don't need access all things in the _G, only what you need is saved to your addon, and if you want access something once, you always can do it like :
+
+print(_G.CAT_FORM)
+
+Just access if from _G table, you won't save the CAT_FORM in your addon.
+Last edited by kurapica.igas : 08-27-13 at 12:05 AM.
+  	
+ 08-26-13, 11:11 PM	  #24
+kurapica.igas
+A Warpwood Thunder Caller
+Join Date: Aug 2011
+Posts: 98
+Oh, one more thing, about the memory usage, the up-values cost much more if you use the local vars in many functions in your add-on, Here is a little test :
+
+Lua Code:
+do
+    clear = function() collectgarbage() return collectgarbage("count") end
+ 
+    for i = 1, 10 do
+        _G["a"..i] = function() end
+    end
+ 
+    memStep0 = clear()
+ 
+    do
+        local a1, a2, a3, a4, a5, a6, a7, a8, a9, a10 = a1, a2, a3, a4, a5, a6, a7, a8, a9, a10
+ 
+        for i = 1, 100 do
+            _G["A"..i] = function()
+                a1() a2() a3() a4() a5() a6() a7() a8() a9() a10()
+            end
+ 
+            _G["A"..i]()
+        end
+    end
+ 
+    memStep1 = clear()
+ 
+    do
+        local addon = {}
+        addon._Addon = addon  -- the addon itself
+ 
+        if not getmetatable(addon) then
+            setmetatable(addon, {
+            __index = function(self,  key)
+                -- keep vars in the _G to the addon to reduce the access cost
+                local v = _G[key]
+                if v ~= nil then
+                    rawset(self, key, v)
+                    return rawget(self, key)
+                end
+            end,
+ 
+            __metatable = true,
+            })
+        end
+ 
+        setfenv(1, addon)
+ 
+        for i = 1, 100 do
+            _Addon["A"..i] = function()
+                a1() a2() a3() a4() a5() a6() a7() a8() a9() a10()
+            end
+ 
+            _Addon["A"..i]()
+        end
+    end
+ 
+    memStep2 = clear()
+ 
+    print("Cost for up-values", memStep1 - memStep0)
+    print("Cost for standalone environment", memStep2 - memStep1)
+end
+
+So, here is the result:
+
+Cost for up-values	22.275390625
+Cost for standalone environment	9.9453125
+  	
+ 08-26-13, 11:42 PM	  #25
+SDPhantom
+A Pyroguard Emberseer
+ 
+
+
+Join Date: Jul 2006
+Posts: 1,732
+Originally Posted by Phanx 
+Originally Posted by Malsomnus 
+Phanx: Sorry, what I meant to say was not that I don't understand the statement, but that I don't understand the reasoning behind it, which appears counter-intuitive to me. 
+If we take your first and second examples, what do you gain by moving the variable into the loop? It seems like you just define 4 variables instead of just 1, which means more CPU time spent on creating the variable and more work for the GC.
+You're creating 4 string values and performing 4 variable assignments either way. It doesn't matter whether you're overwriting an existing variable or not, so you should use scoping appropriately, and keep your code clean.
+Explaining The Reason:
+The point of keeping variables in their relevant scope is akin to only allocating memory when you need to use it and proper cleanup when you don't in other languages. All this is done behind the scenes with Lua's garbage collector, but it's still a good practice to follow nonetheless. These so-called "good programming practices" make it easy and simple to program reliable code regardless of which language you're using.
+
+
+
+
+The code posted by Rainrider and Phanx are both correct, although the situations of the variables in question by each are completely different.
+__________________
+ESOUI AddOns | WoWInterface AddOns
+"All I want is a pretty girl, a decent meal, and the right to shoot lightning at fools."
+-Anders (Dragon Age: Origins - Awakening)
+  	
+ 08-27-13, 04:15 AM	  #26
+Malsomnus
+A Cobalt Mageweaver
+
+Join Date: Apr 2013
+Posts: 203
+Originally Posted by SDPhantom 
+Explaining The Reason:
+The point of keeping variables in their relevant scope is akin to only allocating memory when you need to use it and proper cleanup when you don't in other languages. All this is done behind the scenes with Lua's garbage collector, but it's still a good practice to follow nonetheless. These so-called "good programming practices" make it easy and simple to program reliable code regardless of which language you're using.
+
+The code posted by Rainrider and Phanx are both correct, although the situations of the variables in question by each are completely different.
+The only reason I was going on about it was because in my testing, merely defining a single variable in the local scope of an OnUpdate function slowed my game's performance to a crawl. Moving that variable outside that scope and reusing it immediately solved the problem. 
+While it's obvious that, code-wise, a variable should be defined in the smallest scope possible, I think that that is not a tip that belongs in a discussion about optimization 
+__________________
+SanityCheck - If you've ever said the words "Sorry, I forgot" then you need this add-on.
+
+Remember, every time you post a comment on an add-on, a kitten gets its wings!
+  	
+ 08-27-13, 04:28 AM	  #27
+Resike
+A Pyroguard Emberseer
+
+Join Date: Mar 2010
+Posts: 1,277
+So it is worth to upvalue globals now or not?
+  	
+ 08-27-13, 09:49 AM	  #28
+Lombra
+A Molten Giant
+ 
+
+
+Join Date: Nov 2006
+Posts: 554
+Originally Posted by Malsomnus 
+The only reason I was going on about it was because in my testing, merely defining a single variable in the local scope of an OnUpdate function slowed my game's performance to a crawl. Moving that variable outside that scope and reusing it immediately solved the problem.
+Can you paste the code of this test?
+__________________
+Grab your sword and fight the Horde!
+  	
+ 08-27-13, 04:40 PM	  #29
+Phanx
+Cat.
+ 
+
+
+Join Date: Mar 2006
+Posts: 5,617
+Originally Posted by Resike 
+So it is worth to upvalue globals now or not?
+There is no blanket answer to that question. If you're accessing a global in an OnUpdate script, CLEU handler, or other code path that runs frequently (especially in combat) then yes, you should upvalue it.
+
+If you're accessing the global in response to the user checking a box in your options panel, or in response to an event like PLAYER_LOGIN or PLAYER_REGEN_DISABLED that doesn't fire very often, then while you will technically see a speed improvement by upvaluing it, in practical terms there is no value in doing so, so I'd recommend you keep your code tidy and not clutter it up with a bunch of practically useless upvalues.
+__________________
+Author/maintainer of Grid, PhanxChat, oUF_Phanx, and many more.
+Troubleshoot an addon • Turn any code into an addon • More addon resources
+Need help with your code? Post all of your actual code! Attach or paste your files.
+Please don’t PM me about addon bugs or code questions. Post a comment or forum thread instead!
+  	
+ 08-27-13, 04:41 PM	  #30
+Phanx
+Cat.
+ 
+
+
+Join Date: Mar 2006
+Posts: 5,617
+Originally Posted by Malsomnus 
+The only reason I was going on about it was because in my testing, merely defining a single variable in the local scope of an OnUpdate function slowed my game's performance to a crawl. Moving that variable outside that scope and reusing it immediately solved the problem.
+Was that variable's value a table or function? If so, that is your problem, and it has nothing to do with where the variable is defined.
+
+But, without seeing the actual code in question, it's really pointless to talk about it.
+__________________
+Author/maintainer of Grid, PhanxChat, oUF_Phanx, and many more.
+Troubleshoot an addon • Turn any code into an addon • More addon resources
+Need help with your code? Post all of your actual code! Attach or paste your files.
+Please don’t PM me about addon bugs or code questions. Post a comment or forum thread instead!
+  	
+ 08-27-13, 08:30 PM	  #31
+kurapica.igas
+A Warpwood Thunder Caller
+Join Date: Aug 2011
+Posts: 98
+Well, if you need a var in the OnUpdate or something happened frequently, I suggest you may try the coroutine. Also a test example :
+
+1. First part is using a local var 'sum' to contains the sum result. And then we call it 10000 times.
+2. Second part is using a coroutine to keep everything, we also can it 10000 times.
+
+Lua Code:
+do
+    oclock = os.clock
+ 
+    do
+        local sum = 0
+ 
+        function Sum(num)
+            for i = 1, num do
+                sum = sum + i
+            end
+        end
+ 
+        function callSum()
+            collectgarbage()
+            local startTime = oclock()
+ 
+            for i = 1, 10000 do
+                Sum(i)
+            end
+ 
+            local finsih = oclock()
+ 
+            print("Result is", sum)
+            print("Up-value cost ", finsih - startTime)
+        end
+ 
+        callSum()
+    end
+ 
+    print("----------------------------")
+ 
+    do
+        create = coroutine.create
+        resume = coroutine.resume
+        running = coroutine.running
+        status = coroutine.status
+        wrap = coroutine.wrap
+        yield = coroutine.yield
+ 
+        function Sum(num)
+            local sum = 0
+ 
+            while num do
+                for i = 1, num do
+                    sum = sum + i
+                end
+                num = yield()
+            end
+ 
+            print("Result is", sum)
+        end
+ 
+        function callSum()
+            collectgarbage()
+            local startTime = oclock()
+            local thread = create(Sum)
+ 
+            for i = 1, 10000 do
+                resume(thread, i)
+            end
+ 
+            resume(thread)
+ 
+            local finsih = oclock()
+ 
+            print("Thread cost ", finsih - startTime)
+        end
+ 
+        callSum()
+    end
+end
+
+The result is :
+
+Result is	166716670000
+Up-value cost 1.406231
+----------------------------
+Result is	166716670000
+Thread cost 0.853961
+Normally, like an OnUpdate handler, you can do it like :
+
+Lua Code:
+local thread = create(function(...)
+    local var1, var2
+ 
+    while true do
+        -- Handle your code
+        yield()
+    end
+end)
+ 
+frame:SetScript("OnUpdate", function(self)
+    resume(thread)
+end)
+
+So, when your frame is visible, the thread will be called again and again, when not, the thread will be stop until the frame is shown again.
+
+But, if your handle code is tiny, just use upvalue, in the previous example, if you change the code 
+Lua Code:
+for i = 1, num do
+    sum = sum + i
+end
+To
+Lua Code:
+sum = sum + num
+
+The result should be 
+
+Result is	50005000
+Up-value cost 0.0021880000000003
+----------------------------
+Result is	50005000
+Thread cost 0.0052459999999996
+So, the choose is based on your code, and the coroutine is more complex than the upvalue, if you do it wrong, it may crash your game.
+  	
+ 08-27-13, 11:19 PM	  #32
+Phanx
+Cat.
+ 
+
+
+Join Date: Mar 2006
+Posts: 5,617
+Please stop derailing this "basic tips for optimization" thread with your posts about coroutines and custom function environments. If you want to post tutorials on those subjects, please do it a new thread.
+__________________
+Author/maintainer of Grid, PhanxChat, oUF_Phanx, and many more.
+Troubleshoot an addon • Turn any code into an addon • More addon resources
+Need help with your code? Post all of your actual code! Attach or paste your files.
+Please don’t PM me about addon bugs or code questions. Post a comment or forum thread instead!
+  	
+ 08-28-13, 01:08 AM	  #33
+ballagarba
+A Fallenroot Satyr
+ 
+
+Join Date: Mar 2009
+Posts: 22
+I find his stuff very interesting to be honest.
+
+1. Don't do premature optimization.
+2. Don't sacrifice readability for negligible optimizations.
+
+That being said, here's a PDF on performance tips for Lua written by its lead architect.
+
+http://www.lua.org/gems/sample.pdf
+Last edited by ballagarba : 08-28-13 at 01:10 AM.
+  	
+ 08-28-13, 04:32 AM	  #34
+kurapica.igas
+A Warpwood Thunder Caller
+Join Date: Aug 2011
+Posts: 98
+Originally Posted by ballagarba 
+I find his stuff very interesting to be honest.
+
+1. Don't do premature optimization.
+2. Don't sacrifice readability for negligible optimizations.
+
+That being said, here's a PDF on performance tips for Lua written by its lead architect.
+
+http://www.lua.org/gems/sample.pdf
+Thanks for the book. 
+
+I also take back the word 'The upvalue is the slowest', I'm confused about the result too, redo the test several times today, only 1 time the upvalue is slower than others, the diff between them is little.
+
+I prefer the custom environment just because after some time, the custom environment will store all things that the addon needed, from the point, the custom environment table will be stable compares to the _G.
+  	
+ 08-28-13, 10:18 AM	  #35
+Malsomnus
+A Cobalt Mageweaver
+
+Join Date: Apr 2013
+Posts: 203
+Originally Posted by ballagarba 
+1. Don't do premature optimization.
+2. Don't sacrifice readability for negligible optimizations.
+Yep. Every programmer should tattoo this somewhere, just to be on the safe side 
+__________________
+SanityCheck - If you've ever said the words "Sorry, I forgot" then you need this add-on.
+
+Remember, every time you post a comment on an add-on, a kitten gets its wings!
+  	
+ 08-29-13, 03:49 AM	  #36
+Kagura
+A Fallenroot Satyr
+Join Date: Nov 2008
+Posts: 21
+On the subject to declaring variables to their most confining scope next should be noted:
+Lua Code:
+local a
+for i=1, 5 do 
+    a = i
+end
+Code:
+-- Compiles into
+
+main <test.lua:0,0> (7 instructions, 28 bytes at 0x80049128)
+0+ params, 5 slots, 0 upvalues, 5 locals, 2 constants, 0 functions
+        1       [3]     LOADK           1 -1    ; 1
+        2       [3]     LOADK           2 -2    ; 5
+        3       [3]     LOADK           3 -1    ; 1
+        4       [3]     FORPREP         1 1     ; to 6
+        5       [4]     MOVE            0 4
+        6       [3]     FORLOOP         1 -2    ; to 5
+        7       [5]     RETURN          0 1
+]]
+
+Lua Code:
+for i=1, 5 do 
+    local a
+    a = i
+end
+
+Code:
+-- Compiles into
+
+main <test.lua:0,0> (8 instructions, 32 bytes at 0x80049128)
+0+ params, 5 slots, 0 upvalues, 5 locals, 2 constants, 0 functions
+        1       [2]     LOADK           0 -1    ; 1
+        2       [2]     LOADK           1 -2    ; 5
+        3       [2]     LOADK           2 -1    ; 1
+        4       [2]     FORPREP         0 2     ; to 7
+        5       [3]     LOADNIL         4 4
+        6       [4]     MOVE            4 3
+        7       [2]     FORLOOP         0 -3    ; to 5
+        8       [5]     RETURN          0 1
+]]
+and
+
+Lua Code:
+for i=1, 5 do 
+    local a = i
+end
+
+Code:
+-- Compiles into
+
+main <test.lua:0,0> (7 instructions, 28 bytes at 0x80049128)
+0+ params, 5 slots, 0 upvalues, 5 locals, 2 constants, 0 functions
+        1       [2]     LOADK           0 -1    ; 1
+        2       [2]     LOADK           1 -2    ; 5
+        3       [2]     LOADK           2 -1    ; 1
+        4       [2]     FORPREP         0 1     ; to 6
+        5       [3]     MOVE            4 3
+        6       [2]     FORLOOP         0 -2    ; to 5
+        7       [4]     RETURN          0 1
+As you can guess, the second is a bit slower, but it should also be noted that the gain from this is only going to be noticable for large amount of variable declarations.
+
+While doing a large amount of variable declarations, next should also be noted (I'll leave the compiled versions out since I don't want to pollute the thread):
+
+Lua Code:
+function UnitAura(unitId, index)
+end
+ 
+local startTime, endTime
+startTime = os.clock()
+for j = 1, 1000000 do
+    local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff, value1, value2, value3
+    for i = 1, 40 do
+        name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff, value1, value2, value3 = UnitAura("player", i)
+    end
+end
+endTime = os.clock()
+ 
+print(endTime-startTime)
+ 
+startTime = os.clock()
+for j = 1, 1000000 do
+    for i = 1, 40 do
+        local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff, value1, value2, value3 = UnitAura("player", i)
+    end
+end
+endTime = os.clock()
+ 
+print(endTime-startTime)
+ 
+startTime = os.clock()
+for j = 1, 1000000 do
+    for i = 1, 40 do
+        local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff, value1, value2, value3
+        name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff, value1, value2, value3 = UnitAura("player", i)
+    end
+end
+endTime = os.clock()
+ 
+print(endTime-startTime)
+ 
+--- Results
+$ lua test.lua
+5.859
+2.562
+6.375
+
+If you really want to optimize your addon, you need to look at compiled code and understand how function calls/lua stack works.
+  	
+ 08-29-13, 03:52 PM	  #37
+SDPhantom
+A Pyroguard Emberseer
+ 
+
+
+Join Date: Jul 2006
+Posts: 1,732
+This is still deviating from the point Phanx and I were making. Phanx is stating as a general rule that locals should stay in the tightest scope possible. My posts state that like most rules, there are some exceptions over the argument whether locals should stay in or out of loops.
+
+Among these is the point that when dealing with constants or CPU-intensive calculations that don't change in the loop, you're best left upvaluing them instead of having the loop reinitialize the variable with the same value multiple times.
+__________________
+ESOUI AddOns | WoWInterface AddOns
+"All I want is a pretty girl, a decent meal, and the right to shoot lightning at fools."
+-Anders (Dragon Age: Origins - Awakening)
+  	
+ 08-29-13, 05:38 PM	  #38
+Phanx
+Cat.
+ 
+
+
+Join Date: Mar 2006
+Posts: 5,617
+Yep, you guys are definitely missing the point. This is a thread about simple, general tips that don't require a lot of coding experience or deep knowledge of how Lua works internally -- it's not meant to cover every possible scenario, and it's not meant to delve into complicated schemes for extreme optimization of every single CPU cycle. I'm tired of asking, but if you want to provide lengthy benchmarking results and tutorials covering every possible exception to the rule, or extreme micro-optimization, please start your own threads for that stuff.
+__________________
+Author/maintainer of Grid, PhanxChat, oUF_Phanx, and many more.
+Troubleshoot an addon • Turn any code into an addon • More addon resources
+Need help with your code? Post all of your actual code! Attach or paste your files.
+Please don’t PM me about addon bugs or code questions. Post a comment or forum thread instead!
+  	
+ 09-04-13, 09:21 AM	  #39
+Resike
+A Pyroguard Emberseer
+
+Join Date: Mar 2010
+Posts: 1,277
+Originally Posted by Kagura 
+Lua Code:
+function UnitAura(unitId, index)
+end
+ 
+local startTime, endTime
+startTime = os.clock()
+for j = 1, 1000000 do
+    local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff, value1, value2, value3
+    for i = 1, 40 do
+        name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff, value1, value2, value3 = UnitAura("player", i)
+    end
+end
+endTime = os.clock()
+ 
+print(endTime-startTime)
+ 
+startTime = os.clock()
+for j = 1, 1000000 do
+    for i = 1, 40 do
+        local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff, value1, value2, value3 = UnitAura("player", i)
+    end
+end
+endTime = os.clock()
+ 
+print(endTime-startTime)
+ 
+startTime = os.clock()
+for j = 1, 1000000 do
+    for i = 1, 40 do
+        local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff, value1, value2, value3
+        name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff, value1, value2, value3 = UnitAura("player", i)
+    end
+end
+endTime = os.clock()
+ 
+print(endTime-startTime)
+ 
+--- Results
+$ lua test.lua
+5.859
+2.562
+6.375
+As soon as you going to start to use thoose varliabes in the second version, it's going to be as slow as the third one. The extra time for the first version comes from the lookup time and not beacuse it's not in the tightest scope.
+  	
+ 09-05-13, 07:20 AM	  #40
+Kagura
+A Fallenroot Satyr
+Join Date: Nov 2008
+Posts: 21
+Originally Posted by Resike 
+As soon as you going to start to use thoose varliabes in the second version, it's going to be as slow as the third one. The extra time for the first version comes from the lookup time and not beacuse it's not in the tightest scope.
+Actually it won't be slower. But Phanx is right, I think the thread is derailing too much from "simple optimization" to getting every bit of performance you can possibly get.
+
+p.s. If you are really curious, the test results with your suggestion is : here
+  	
+ Reply	
+Page 2 of 4	<	1	2	3	4	>	

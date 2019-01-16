@@ -1,0 +1,75 @@
+1x UNKNOWN ERROR
+[C]: in function `debugstack'
+!BugGrabber\BugGrabber.lua:435: in function <!BugGrabber\BugGrabber.lua:374>
+[C]: ?
+[C]: in function `error'
+[string "error()"]:1: in main chunk
+[C]: in function `RunScript'
+FrameXML\ChatFrame.lua:2036: in function `?'
+FrameXML\ChatFrame.lua:4315: in function `ChatEdit_ParseText'
+FrameXML\ChatFrame.lua:3969: in function `ChatEdit_SendText'
+FrameXML\ChatFrame.lua:4008: in function `ChatEdit_OnEnterPressed'
+[string "*:OnEnterPressed"]:1: in function <[string "*:OnEnterPressed"]:1>
+
+Locals:
+
+
+
+
+1x [string "NIL()"]:1: attempt to call global 'NIL' (a nil value)
+[C]: in function `debugstack'
+!BugGrabber\BugGrabber.lua:435: in function <!BugGrabber\BugGrabber.lua:374>
+[C]: in function `NIL'
+[string "NIL()"]:1: in main chunk
+[C]: in function `RunScript'
+FrameXML\ChatFrame.lua:2036: in function `?'
+FrameXML\ChatFrame.lua:4315: in function `ChatEdit_ParseText'
+FrameXML\ChatFrame.lua:3969: in function `ChatEdit_SendText'
+FrameXML\ChatFrame.lua:4008: in function `ChatEdit_OnEnterPressed'
+[string "*:OnEnterPressed"]:1: in function <[string "*:OnEnterPressed"]:1>
+
+Locals:
+(*temporary) = nil
+(*temporary) = "attempt to call global 'NIL' (a nil value)"
+
+
+
+
+1x [string "return NIL.NIL"]:1: attempt to index global 'NIL' (a nil value)
+[C]: in function `debugstack'
+!BugGrabber\BugGrabber.lua:435: in function <!BugGrabber\BugGrabber.lua:374>
+[C]: ?
+[string "return NIL.NIL"]:1: in function `func'
+Blizzard_DebugTools\Dump.lua:389: in function `DevTools_DumpCommand'
+FrameXML\ChatFrame.lua:2295: in function `?'
+FrameXML\ChatFrame.lua:4315: in function `ChatEdit_ParseText'
+FrameXML\ChatFrame.lua:3969: in function `ChatEdit_SendText'
+FrameXML\ChatFrame.lua:4008: in function `ChatEdit_OnEnterPressed'
+[string "*:OnEnterPressed"]:1: in function <[string "*:OnEnterPressed"]:1>
+
+Locals:
+(*temporary) = nil
+(*temporary) = nil
+(*temporary) = "attempt to index global 'NIL' (a nil value)"
+
+
+
+
+Message: BugGrabber.GrabError() looping while handling error:
+Interface\AddOns\!BugGrabber\BugGrabber.lua:677: attempt to index local 'self' (a number value)
+Time: 01/15/19 08:08:18
+Count: 1
+Stack: (tail call): ?
+(tail call): ?
+[C]: in function `xpcall'
+Interface\AddOns\!BugGrabber\BugGrabber.lua:553: in function <Interface\AddOns\!BugGrabber\BugGrabber.lua:511>
+(tail call): ?
+[C]: ?
+Interface\AddOns\!BugGrabber\BugGrabber.lua:677: in function <Interface\AddOns\!BugGrabber\BugGrabber.lua:656>
+
+Locals: (*temporary) = 0.043000001460314
+(*temporary) = <function> defined =[C]:-1
+
+
+
+
