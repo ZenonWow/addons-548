@@ -137,59 +137,6 @@ if  BFBindingMode  then  BFBindingMode:Hide()  end
 
 
 
-
-
-
-function GetActionButtonNameMy(id)
-	-- 6->2 5->3 4->4 3->5 2->6
-	if id <= 12 then  return 'ActionButton' .. id
-	elseif id <= 24 then  return 'MultiBarBottomLeftButton' .. (id-12)
-	elseif id <= 36 then  return 'MultiBarBottomRightButton' .. (id-24)
-	elseif id <= 48 then  return 'MultiBarLeftButton' .. (id-36)
-	elseif id <= 60 then  return 'MultiBarRightButton' .. (id-48)
-	--elseif id <= 72 then  return 'DominosActionButton' .. (id-60)
-	else  return 'DominosActionButton' .. (id-60)
-	end
-end
-
-function GetActionButtonNameOrig(id)
-	if id <= 12 then  return 'ActionButton' .. id
-	elseif id <= 24 then  return 'DominosActionButton' .. (id-12)
-	elseif id <= 36 then  return 'MultiBarRightButton' .. (id-24)
-	elseif id <= 48 then  return 'MultiBarLeftButton' .. (id-36)
-	elseif id <= 60 then  return 'MultiBarBottomRightButton' .. (id-48)
-	elseif id <= 72 then  return 'MultiBarBottomLeftButton' .. (id-60)
-	else  return 'DominosActionButton' .. (id-60)
-	end
-end
-
-local GetActionButtonName = GetActionButtonNameOrig
-
---[[
-http://wowwiki.wikia.com/wiki/SecureHandlers
-http://wowwiki.wikia.com/wiki/RestrictedEnvironment
-SpellIsTargeting()
-/run TestActionButtonIDs()
---]]
-function TestActionButtonIDs()
-	for i = 1,120  do
-		local n = GetActionButtonName(i)
-		local id = _G[n]  and  (_G[n]:GetID() or '<noID>')  or  '<noButton>'
-		print(i..'. '.. n ..' -> '.. id)
-	end
-end
-
---[[
-	if id <= 12 then  b = _G['ActionButton' .. id]
-	elseif id <= 24 then  return CreateFrame('CheckButton', 'DominosActionButton' .. (id-12), nil, 'ActionBarButtonTemplate')
-	elseif id <= 36 then  return _G['MultiBarRightButton' .. (id-24)]
-	elseif id <= 48 then  return _G['MultiBarLeftButton' .. (id-36)]
-	elseif id <= 60 then  return _G['MultiBarBottomRightButton' .. (id-48)]
-	elseif id <= 72 then  return _G['MultiBarBottomLeftButton' .. (id-60)]
-	else  return CreateFrame('CheckButton', 'DominosActionButton' .. (id-60), nil, 'ActionBarButtonTemplate')
-	end
---]]
-
 --[[
 /dump GetCVar('autoLootDefault')
 /run SetAutoLootDefault(0)
@@ -210,6 +157,65 @@ MainMenuBarBackpackButton:SetScript('OnLeave',nil)
 MainMenuBarBackpackButton:SetScript('OnEvent',nil)
 --]]
 
+--[[
+embedded:
+LibStub.AceEvent3:Embed(receiver)
+receiver:RegisterEvent("PLAYER_LOGIN")    -- calls receiver:PLAYER_LOGIN(...)
+receiver:RegisterEvent("PLAYER_LOGIN", "OnLogin")    -- calls receiver:OnLogin()
+receiver:RegisterEvent("PLAYER_LOGIN", OnLogin)    -- calls OnLogin() without a self
+receiver.RegisterEvent("callbackname", "PLAYER_LOGIN", OnLogin)    -- technically possible oddity
+global:
+-- confusing parameter order as receiver comes before event
+LibStub.AceEvent3.RegisterEvent(receiver, "PLAYER_LOGIN")
+LibStub.AceEvent3.RegisterEvent(receiver, "PLAYER_LOGIN", "OnLogin")
+LibStub.AceEvent3.RegisterEvent(receiver, "PLAYER_LOGIN", OnLogin)
+LibStub.AceEvent3.RegisterEvent("callbackname", "PLAYER_LOGIN", OnLogin)
+desired:
+-- fix parameter order when using target:RegisterEvent(...) (not allowed at minor = 6)
+-- if self == target then receiver parameter comes after event parameter
+-- receiver can be the function itself, not just string
+LibStub.AceEvent3:RegisterEvent("PLAYER_LOGIN", receiver)
+LibStub.AceEvent3:RegisterEvent("PLAYER_LOGIN", receiver, "OnLogin")
+LibStub.AceEvent3:RegisterEvent("PLAYER_LOGIN", "callbackname", OnLogin)
+LibStub.AceEvent3:RegisterEvent("PLAYER_LOGIN", OnLogin)
+
+--]]
+
+function tkeys(t)	local ks = {}	for k in t do ks[ks+1] = k end	return ks end
+
+function tkeys(t)
+	local ks = {}
+	for k in pairs(t) do ks[ks+1] = k end
+	return ks
+ end
+
+function tvalues(t)
+	local ks = {}
+	for k,v in pairs(t) do ks[ks+1] = v end
+	return ks
+end
+
+--[[
+SetAddonEnv(...)
+local ADDON_NAME, _ENV = SetAddonEnv(...)
+
+AddonEnvMeta.NoGlobals = false
+AddonEnvMeta.GlobalProxy = { __index = _G }
+
+-- local ADDON_NAME, _ADDON = SetAddonEnv.GlobalProxy(...)
+-- local ADDON_NAME, _ADDON = SetAddonEnv.NoGlobals(...)
+for  kind  in next, AddonEnvMeta do
+	SetAddonEnv[kind] = function (ADDON_NAME, _ADDON)
+		setfenv(2, setmetatable(_ADDON, AddonEnvMeta[kind] or nil)
+		_ADDON.ADDON_NAME = ADDON_NAME
+		_ADDON._ADDON = _ADDON
+		_ADDON._G = _G
+		return ADDON_NAME, _ADDON
+	end
+end
+
+
+--]]
 
 
 -- Secure wrapper  function  WorldMapFrame_PreClick(self, button, down)

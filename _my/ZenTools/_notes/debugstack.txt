@@ -1,3 +1,57 @@
+-- with ErrorHandlerDispatcher:
+/dump xpcall(function() geterrorhandler()("With geterrorhandler") end, geterrorhandler())
+0: [C]:: in function 'debugstack'
+1: !BugGrabber\BugGrabber.lua:539: in function 'debugstack'		-- BugGrabber.debugstack()
+2: !BugGrabber\BugGrabber.lua:463: in function <!BugGrabber\BugGrabber.lua:400>		-- GrabError()
+3: !BugGrabber\BugGrabber.lua:579: in function <!BugGrabber\BugGrabber.lua:579>		-- handlerThunk()
+4: [C]:: in function 'xpcall'
+5: !BugGrabber\BugGrabber.lua:589: in function <!BugGrabber\BugGrabber.lua:547>		-- ErrorHandlerDispatcher()
+6: !BugGrabber\BugGrabber.lua:544: in function <!BugGrabber\BugGrabber.lua:544>		-- PublicErrorHandler ()
+-> 7: [C]:: in function 'error'
+8: [string "return xpcall(function() error("Hello XPcal..."]:1: in function <[string "return xpcall(function() error("Hello XPcal..."]:1>
+9: [C]:: in function 'xpcall'
+10: [string "return xpcall(function() error("Hello XPcal..."]:1: in function 'func'
+11: Blizzard_DebugTools\Dump.lua:389: in function 'DevTools_DumpCommand'
+
+/run error()
+1x UNKNOWN ERROR
+0: [C]:: in function 'debugstack'
+1: !BugGrabber\BugGrabber.lua:539: in function 'debugstack'		-- BugGrabber.debugstack()
+2: !BugGrabber\BugGrabber.lua:463: in function <!BugGrabber\BugGrabber.lua:400>		-- GrabError()
+3: !BugGrabber\BugGrabber.lua:579: in function <!BugGrabber\BugGrabber.lua:579>		-- handlerThunk()
+4: [C]:: in function 'xpcall'
+5: !BugGrabber\BugGrabber.lua:589: in function <!BugGrabber\BugGrabber.lua:547>		-- ErrorHandlerDispatcher()
+6: !BugGrabber\BugGrabber.lua:543: in function <!BugGrabber\BugGrabber.lua:543>		-- PublicErrorHandler ()
+-> 7: [C]:: ?
+[C]:: in function 'error'
+[string "error()"]:1: in main chunk
+
+
+
+
+1x [string "function Bugger:DisplayError() ERR.ERR() en..."]:1: attempt to index global 'ERR' (a nil value)
+[string "function Bugger:DisplayError() ERR.ERR() en..."]:1: in function `DisplayError'
+!BugGrabber(r203-release)\BugGrabber.lua:820: in function <!BugGrabber\BugGrabber.lua:820>
+[C]: in function `xpcall'
+!BugGrabber(r203-release)\BugGrabber.lua:820: in function `PrintErrorObject'
+!BugGrabber(r203-release)\BugGrabber.lua:877: in function `HandleBugLink'
+!BugGrabber(r203-release)\BugGrabber.lua:857: in function `SetHyperlink'
+FrameXML\ItemRef.lua:225: in function <FrameXML\ItemRef.lua:1>
+[C]: ?
+...aceBlizzard_CombatLog\Blizzard_CombatLog.lua:3620: in function `orgfunc'
+Prat-3.0(r935)\services\links.lua:98: in function <Prat-3.0\services\links.lua:88>
+(tail call): ?
+(tail call): ?
+FrameXML\ChatFrame.lua:3267: in function <FrameXML\ChatFrame.lua:3266>
+[C]: in function `ChatFrame_OnHyperlinkShow'
+[string "*:OnHyperlinkClick"]:1: in function <[string "*:OnHyperlinkClick"]:1>
+
+Locals:
+nil
+
+
+
+
 /dump NIL.NIL()
 1x [string "return NIL.NIL()"]:1: attempt to index global 'NIL' (a nil value)
 [C]:: ?

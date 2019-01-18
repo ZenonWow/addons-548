@@ -36,7 +36,7 @@
 ----------------------------------------------------------------------
 
 -- Addon keyword for registering hooks
-	local ADDON_NAME, _A = ...		-- ADDON_NAME == name of addon folder, _A == addon namespace
+	local ADDON_NAME, _ADDON = ...		-- ADDON_NAME == name of addon folder, _ADDON == addon namespace
 
 --  Create global tables if they don't exist
 	_G.LeaPlusDB = _G.LeaPlusDB or {}		-- overridden by loading SavedVariables
@@ -45,9 +45,10 @@
 -- 	Create local tables to store configuration and frames
 	-- Local Config
 	local LeaPlusLC = {}
+	_ADDON.LeaPlusLC = LeaPlusLC
 	-- Config descriptors: setters, getters
-	_A.OptionDesc = _A.OptionDesc or {}
-	local OptionDesc = _A.OptionDesc
+	local OptionDesc = _ADDON.OptionDesc or {}
+	_ADDON.OptionDesc = OptionDesc
 	-- Config Button
 	local LeaPlusCB = {}
 	local LeaDropList = {}
@@ -5813,10 +5814,10 @@
 ----------------------------------------------------------------------
 
 	local Quests = {}
-	_A.Quests = Quests
+	_ADDON.Quests = Quests
 
 	local function  IsDebugLogging()
-		return  _A.debug  or  Quests.tempDebug  or  (IsAltKeyDown()  and  IsControlKeyDown())
+		return  _ADDON.debug  or  Quests.tempDebug  or  (IsAltKeyDown()  and  IsControlKeyDown())
 	end
 
 	function GetQuestLogInfoByTitle(searchTitle)

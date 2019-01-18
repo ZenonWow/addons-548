@@ -1,8 +1,9 @@
 ----------------------------------------------------------------------
 --	Minimap button
 ----------------------------------------------------------------------
-local ADDON_NAME, _A = ...		-- ADDON_NAME == name of addon folder, _A == addon environment/namespace
-local OptionDesc = _A.OptionDesc
+local ADDON_NAME, _ADDON = ...		-- ADDON_NAME == name of addon folder, _ADDON == addon environment/namespace
+local _G, _ENV = _G, AddonEnv.SetGlobalProxy(...)
+local OptionDesc = _ADDON.OptionDesc
 
 local LibDBIcon = _G.LibStub('LibDBIcon-1.0')
 
@@ -20,7 +21,7 @@ OptionDesc.ShowMinimapIcon = {
 		end
 	end,
 	onLoaded = function (desc)
-		LibDBIcon:Register(ADDON_NAME, _A.DataObject, _G.LeaPlusDB.minimap)
+		LibDBIcon:Register(ADDON_NAME, _ADDON.DataObject, _G.LeaPlusDB.minimap)
 	end,
 }
 
@@ -40,7 +41,7 @@ local DataObject = {
 		tooltip:AddLine("Shift+Right-Click: toggles coordinates")
 		tooltip:AddLine("Shift+Ctrl+Right-Click: toggles maximised window mode")
 	end,
-})
+}
 
 
 function DataObject.OnClick(frame, mouseButton)
@@ -166,7 +167,7 @@ end
 
 
 -- Register launcher dataobject, make into a proxy
-_A.DataObject = _G.LibStub("LibDataBroker-1.1"):NewDataObject(ADDON_NAME, DataObject)
+_ADDON.DataObject = _G.LibStub("LibDataBroker-1.1"):NewDataObject(ADDON_NAME, DataObject)
 
 
 

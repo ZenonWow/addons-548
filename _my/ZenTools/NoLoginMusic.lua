@@ -17,6 +17,12 @@ To reenable:
 
 
 local ADDON_NAME, private = ...
+local _G = _G
+
+-- SavedVariable
+local NoLoginMusicDB
+
+-- Profile names
 local onLoginScreen = 'onLoginScreen'
 local inWorld = 'inWorld'
 
@@ -54,12 +60,12 @@ local NoLoginMusic = CreateFrame('Frame', 'NoLoginMusic')
 
 function NoLoginMusic:Disable()
 	NoLoginMusicDB.disabled = true
-	self.currentProfile = nil
+	-- NoLoginMusicDB._loadedProfile = nil
 end
 
 function NoLoginMusic:Enable()
 	NoLoginMusicDB.disabled = nil
-	--self.currentProfile = inWorld
+	--NoLoginMusicDB._loadedProfile = inWorld
 end
 
 function NoLoginMusic:EditLoginProfile()
@@ -82,11 +88,20 @@ end
 
 function NoLoginMusic:ADDON_LOADED(event, addonName)
 	if  addonName ~= ADDON_NAME  then  return  end
-	NoLoginMusicDB =  NoLoginMusicDB  or  defaultSettings
+	
+	NoLoginMusicDB =  _G.NoLoginMusicDB  or  defaultSettings
+	_G.NoLoginMusicDB = NoLoginMusicDB
 	if  NoLoginMusicDB.disabled  then  return  end
 	
-	-- IsLoggedIn() check: don't save if delayed-loading addon (tho it makes no sense to delayed-load this).
-	if  not IsLoggedIn()  then  self:SaveProfile(onLoginScreen)  end
+	-- Check if onLoginScreen profile was loaded before logout.
+	if  NoLoginMusicDB._loadedProfile ~= onLoginScreen  then
+		print(_G.YELLOW_FONT_COLOR_CODE.."NoLoginMusic:|r failed to load login screen sound settings before last exit. This is expected only if the client crashed.")
+	elseif  not IsLoggedIn()  then
+		-- IsLoggedIn() check: don't save if delayed-loading addon (tho it makes not much sense to delay-load this).
+		self:SaveProfile(onLoginScreen)
+  end
+	
+	-- Load sound settings for play-time.
 	self:LoadProfile(inWorld)
 end
 
@@ -108,13 +123,13 @@ NoLoginMusic:Hide()
 -- Profile saving loading
 --[[ unused
 function NoLoginMusic:SetProfile(profileName, saveProfile)
-	if  saveProfile  and  self.currentProfile ~= profileName  then  self:SaveProfile(saveProfile)  end
+	if  saveProfile  and  NoLoginMusicDB._loadedProfile ~= profileName  then  self:SaveProfile(saveProfile)  end
 	self:LoadProfile(profileName)
 end
 --]]
 
 function NoLoginMusic:SaveProfile(profileName)
-	profileName =  profileName  or  self.currentProfile
+	profileName =  profileName  or  NoLoginMusicDB._loadedProfile
 	if  not profileName  then  return false  end
 	
 	local savedCVars =  NoLoginMusicDB[profileName]  or  defaultSavedCVars
@@ -135,7 +150,7 @@ function NoLoginMusic:LoadProfile(profileName)
 		SetCVar(cvar, value)
 	end
 	
-	self.currentProfile = profileName
+	NoLoginMusicDB._loadedProfile = profileName
 	return true
 end
 

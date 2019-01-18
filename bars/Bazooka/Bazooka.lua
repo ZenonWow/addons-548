@@ -178,8 +178,8 @@ local PluginDefaults = {
     alignment = "LEFT",
 }
 
-local Icon = [[Interface\AddOns\]] .. AppName .. [[\bzk_locked.tga]]
-local UnlockedIcon = [[Interface\AddOns\]] .. AppName .. [[\bzk_unlocked.tga]]
+local UnlockedIcon = [[Interface\AddOns\]] .. AppName .. [[\bzk_locked.tga]]
+local Icon = [[Interface\AddOns\]] .. AppName .. [[\bzk_unlocked.tga]]
 local HighlightImage = [[Interface\AddOns\]] .. AppName .. [[\highlight.tga]]
 local EmptyPluginWidth = 1
 local NearSquared = 32 * 32
@@ -2464,7 +2464,7 @@ function Bazooka:setupLDB()
         type = "launcher",
         icon = self.db.profile.locked and Icon or UnlockedIcon,
         OnClick = function(frame, button)
-            if button == "LeftButton" then
+            if button == "LeftButton" and IsShiftKeyDown() then
                 self:toggleLocked()
             elseif button == "RightButton" then
                 self:openConfigDialog()
@@ -2602,6 +2602,7 @@ end
 -- register slash command
 
 SLASH_BAZOOKA1 = "/bazooka"
+SLASH_BAZOOKA2 = "/baz"
 SlashCmdList["BAZOOKA"] = function(msg)
     msg = strtrim(msg or "")
     if msg == "locked" then

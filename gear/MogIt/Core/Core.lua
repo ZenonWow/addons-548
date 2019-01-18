@@ -258,6 +258,9 @@ function mog:ADDON_LOADED(addon)
 				module:MogItLoaded()
 			end
 		end
+		
+		if IsLoggedIn() then self:PLAYER_LOGIN() end
+		
 	elseif mog.modules[addon] then
 		mog.modules[addon].loaded = true;
 		if mog.menu.active == mog.menu.modules then
@@ -267,6 +270,9 @@ function mog:ADDON_LOADED(addon)
 end
 
 function mog:PLAYER_LOGIN()
+	mog.frame:UnregisterEvent("PLAYER_LOGIN")
+	mog.PLAYER_LOGIN = nil
+	
 	mog:LoadSettings()
 	self.frame:SetScript("OnSizeChanged", function(self, width, height)
 		mog.db.profile.gridWidth = width;

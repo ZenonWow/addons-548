@@ -174,9 +174,9 @@ function linkAddOns.str(rootFolder, list)
 	for  line  in  list:gmatch('[^\n]+')  do
 		--line = line:trim()
 		local addon, subFolder = strsplit('=:', line, 2)
-		addon, subFolder = addon:trim(), subFolder:trim()
+		addon, subFolder = addon:trim(), subFolder and subFolder:trim()
 		
-		if  subFolder == 'false'  or  subFolder == 'disabled'  then
+		if  subFolder == 'false'  or  subFolder == 'disabled'  then    -- or  subFolder == ''  then
 			-- skip disabled
 		elseif  addon == ''  or  addon:sub(1,2) == '--'  then
 			-- skip empty and comment

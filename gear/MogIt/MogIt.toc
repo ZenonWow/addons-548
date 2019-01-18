@@ -24,7 +24,7 @@
 ## X-Curse-Repository-ID: wow/mogit/mainline
 
 ## SavedVariables: MogItDB, MogItWishlist
-## OptionalDeps: DataStore_Containers
+## OptionalDeps: Ace3, DataStore_Containers
 
 ##- LoadManagers: AddonLoader
 ## X-LoadOn-Login:  LowPrio

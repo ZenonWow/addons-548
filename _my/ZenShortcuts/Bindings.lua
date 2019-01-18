@@ -27,14 +27,11 @@ _G["BINDING_NAME_CLICK ClearTargetButton:LeftButton"] = "Clear Target (unselect)
 -- "Unselect Target"
 
 
-local ADDON_NAME, AddonPrivate = ...
+local ADDON_NAME, _ADDON = ...
+local _G = _G
+-- setfenv(1, setmetatable(_ADDON, {__index = _G}) )  -- Lookup variable references in global namespace if not found in local-private
 local ZenShortcuts = _G[ADDON_NAME] or {}
---local _G = getfenv(0)
 _G[ADDON_NAME] = ZenShortcuts
---setmetatable(AddonPrivate, {__index = _G})  -- Lookup variable references in global namespace if not found in local-private
---setfenv(1, AddonPrivate)
-
-local function print(...)  DEFAULT_CHAT_FRAME:AddMessage(...)  end
 
 
 
@@ -151,13 +148,15 @@ end
 -- Many or all vehicles are perceived by the user as mounts with extras,
 -- therefore the user would expect to be able to Dismount them.
 -- This hook does that in a securehook, to prevent any creeping tainting that might come up.
+--[[
 function  ZenShortcuts.Dismount()
 	--print( 'ZenShortcuts.Dismount():  IsMounted()= ' .. tostring(IsMounted()) .. '  UnitInVehicle()= ' .. tostring(UnitInVehicle('player')) )
-	--VehicleExit()
-	securecall('VehicleExit')
+	--securecall('VehicleExit')
+	VehicleExit()
 end
 hooksecurefunc('Dismount', ZenShortcuts.Dismount)
-
+--]]
+hooksecurefunc('Dismount', VehicleExit)
 
 
 ----[[
