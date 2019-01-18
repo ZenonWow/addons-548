@@ -1,10 +1,9 @@
-
-local addonName, addon = ...
-if not addon.healthCheck then return end
-local L = addon.L
+local ADDON_NAME, addon = ...
+local _G, L = _G, addon.L
+if  not _G.BugGrabber  then  return  end
 
 local frame = CreateFrame("Frame", nil, InterfaceOptionsFramePanelContainer)
-frame.name = addonName
+frame.name = ADDON_NAME
 frame:Hide()
 
 frame:SetScript("OnShow", function(frame)
@@ -23,7 +22,7 @@ frame:SetScript("OnShow", function(frame)
 
 	local title = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 	title:SetPoint("TOPLEFT", 16, -16)
-	title:SetText(addonName)
+	title:SetText(ADDON_NAME)
 
 	local autoPopup = newCheckbox(
 		L["Auto popup"],
@@ -48,9 +47,9 @@ frame:SetScript("OnShow", function(frame)
 			function(self, value)
 				BugSackLDBIconDB.hide = not value
 				if BugSackLDBIconDB.hide then
-					icon:Hide(addonName)
+					icon:Hide(ADDON_NAME)
 				else
-					icon:Show(addonName)
+					icon:Show(ADDON_NAME)
 				end
 			end)
 		minimap:SetPoint("TOPLEFT", chatFrame, "BOTTOMLEFT", 0, -8)
@@ -87,13 +86,13 @@ frame:SetScript("OnShow", function(frame)
 	end
 	BugSackFontSizeText:SetText(L["Font size"])
 
-	local media = addon:EnsureLSM3()
-	if media then
+	local LSM = _G.LibStub("LibSharedMedia-3.0", true)
+	if LSM then
 		local dropdown = CreateFrame("Frame", "BugSackSoundDropdown", frame, "UIDropDownMenuTemplate")
 		dropdown:SetPoint("LEFT", fontSizeDropdown, "RIGHT", 150, 0)
 		dropdown.initialize = function()
 			wipe(info)
-			for idx, sound in next, media:List("sound") do
+			for idx, sound in next, LSM:List("sound") do
 				info.text = sound
 				info.value = sound
 				info.func = function(self)

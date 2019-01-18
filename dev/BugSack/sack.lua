@@ -1,22 +1,17 @@
-local addonName, addon = ...
-if not addon.healthCheck then return end
-local L = addon.L
+local ADDON_NAME, addon = ...
+local _G, L = _G, addon.L
+if  not _G.BugGrabber  then  return  end
 
--- The sack
-local window = nil
-
--- What state is the sack in?
-local state = "BugSackTabAll"
-local searchResults = {}
+-- What activeTab is the sack in?
+local activeTab = "BugSackTabSession"
+local searchResults = nil
 local searchThrough = nil
 
--- Frame state variables
-local currentErrorIndex = nil -- Index of the error in the currentSackContents currently shown
+-- Frame activeTab variables
 local currentSackContents = nil -- List of all the errors currently navigated in the sack
-local currentSackSession = nil -- Current session ID available in the sack
-local currentErrorObject = nil
-
-local tabs = nil
+local currentErrorObject = nil -- Current errorObject shown. Normative.
+local currentErrorIndex = nil -- Index of currentErrorObject in the currentSackContents, or nil if window.UpdateErrors() needs to be run.
+local currentBeforeSearch = nil -- Restore selected if Esc is pressed in search.
 
 local countLabel, sessionLabel, textArea = nil, nil, nil
 local nextButton, prevButton, sendButton = nil, nil, nil
@@ -27,65 +22,64 @@ local countFormat = "%d/%d" -- 1/10
 local sourceFormat = L["Sent by %s (%s)"]
 local localFormat = L["Local (%s)"]
 
+local function tindexof(arr, item)
+	for i = 1,#arr  do  if  arr[i] == item  then  return i  end end
+end
+
 -- Updates the total bug count and so forth.
-local lastState = nil
-local function updateSackDisplay(forceRefresh)
-	if state ~= lastState then forceRefresh = true end
-	lastState = state
+-- local lastState = nil
 
-	if forceRefresh then
-		currentErrorObject = nil
-		currentErrorIndex = nil
-	else
-		currentErrorObject = currentSackContents and currentSackContents[currentErrorIndex]
-	end
+local window = CreateFrame("Frame", "BugSackFrame", UIParent)
+BugSack.window = window
+window:Hide()
 
-	if state == "BugSackTabAll" then
-		currentSackContents = addon:GetErrors()
-		currentSackSession = BugGrabber:GetSessionId()
-	elseif state == "BugSackTabSession" then
-		local s = BugGrabber:GetSessionId()
-		currentSackContents = addon:GetErrors(s)
-		currentSackSession = s
-	elseif state == "BugSackTabLast" then
-		local s = BugGrabber:GetSessionId() - 1
-		currentSackContents = addon:GetErrors(s)
-		currentSackSession = s
-	elseif state == "BugSackSearch" then
-		currentSackSession = -1
+function window:UpdateErrors(selectExistingError)
+	-- Delay update until next ShowUIPanel(window)
+	if  not self:IsShown()  then  return false  end
+
+	-- if activeTab ~= lastState then selectLast = true end
+	-- lastState = activeTab
+
+	local sId = BugGrabber:GetSessionId()
+	if  searchResults  then
 		currentSackContents = searchResults
+	elseif activeTab == "BugSackTabAll" then
+		currentSackContents = addon:GetAllErrors()
+	elseif activeTab == "BugSackTabSession" then
+		currentSackContents = addon:GetSessionErrors()
+	elseif activeTab == "BugSackTabLast" then
+		currentSackContents = addon:GetPreviousErrors()
 	end
+	
+	self:UpdateSelected(selectExistingError)
+end
 
+function window:UpdateSelected(selectExistingError)
+	-- currentSackContents is nil when window is hidden
+	if  not currentSackContents  then  return false  end
+
+	-- Find the currentErrorIndex index in the new error list.
 	local size = #currentSackContents
-	local eo = nil
-
-	if forceRefresh then
-		-- We need to reset the currently shown error to the highest index
-		eo = currentSackContents[size]
+	local eo = currentErrorObject
+	currentErrorIndex = currentErrorObject  and  tindexof(currentSackContents, currentErrorObject)
+	if  selectExistingError  and  not currentErrorIndex  then
 		currentErrorIndex = size
-	else
-		-- we need to adapt the currentErrorIndex index to the new error list
-		for i, v in next, currentSackContents do
-			if v == currentErrorObject then
-				currentErrorIndex = i
-				eo = v
-				break
-			end
-		end
+		currentErrorObject = currentSackContents[currentErrorIndex]
+		eo = currentErrorObject
 	end
-	if not eo then eo = currentSackContents[currentErrorIndex] end
-	if not eo then eo = currentSackContents[size] end
-	if currentSackSession == -1 then currentSackSession = eo.session end
 
-	if size > 0 then
+	if  eo  then
+		currentErrorObject = eo
 		local source = nil
 		if eo.source then source = sourceFormat:format(eo.source, "error")
 		else source = localFormat:format("error") end
+
 		if eo.session == BugGrabber:GetSessionId() then
 			sessionLabel:SetText(sessionFormat:format(L["Today"], source, eo.session))
 		else
 			sessionLabel:SetText(sessionFormat:format(eo.time, source, eo.session))
 		end
+
 		countLabel:SetText(countFormat:format(currentErrorIndex, size))
 		textArea:SetText(addon:FormatError(eo))
 
@@ -102,86 +96,108 @@ local function updateSackDisplay(forceRefresh)
 		if sendButton then sendButton:Enable() end
 	else
 		countLabel:SetText()
-		if currentSackSession == BugGrabber:GetSessionId() then
+		if  searchResults  then
+			sessionLabel:SetText("")
+			textArea:SetText(L["No bugs match your search."])
+		elseif  activeTab == "BugSackTabSession"  then
 			sessionLabel:SetText(("%s (%d)"):format(L["Today"], BugGrabber:GetSessionId()))
-		else
-			sessionLabel:SetText(("%d"):format(currentSackSession))
+			textArea:SetText(L["You have no bugs, yay!"])
+		elseif  activeTab == "BugSackTabLast"  then
+			sessionLabel:SetText("Previous sessions")
+			textArea:SetText(L["No bugs from previous sessions."])
+		elseif  activeTab == "BugSackTabAll"  then
+			sessionLabel:SetText("All bugs")
+			textArea:SetText(L["You have no bugs, yay!"])
 		end
-		textArea:SetText(L["You have no bugs, yay!"])
 		nextButton:Disable()
 		prevButton:Disable()
 		if sendButton then sendButton:Disable() end
 	end
 
-	for i, t in next, tabs do
-		if state == t:GetName() then
-			PanelTemplates_SelectTab(t)
-		else
-			PanelTemplates_DeselectTab(t)
-		end
-	end
-end
-hooksecurefunc(addon, "UpdateDisplay", function()
-	if not window or not window:IsShown() then return end
-	-- can't just hook it right in because it would pass |self| as forceRefresh
-	updateSackDisplay()
-end)
+end     -- window:UpdateSelected()
+
 
 -- Only invoked when actually clicking a tab
-local function setActiveMethod(tab)
+local function SetActiveTab(tab)
 	searchLabel:Hide()
 	searchBox:Hide()
 	sessionLabel:Show()
-	wipe(searchResults)
-	if searchThrough then
-		wipe(searchThrough)
-		searchThrough = nil
+
+	searchResults = nil
+	searchThrough = nil
+
+	activeTab =  type(tab) == "table"  and  tab:GetName()  or  tab
+
+	for  i,t  in ipairs(window.tabs) do
+		if activeTab == t:GetName() then  PanelTemplates_SelectTab(t)
+		else  PanelTemplates_DeselectTab(t)
+		end
 	end
 
-	state = type(tab) == "table" and tab:GetName() or tab
-	updateSackDisplay(true)
+	window:UpdateErrors(true)
+	-- window:UpdateErrors()
 end
 
-local function clearSearch()
-	setActiveMethod("BugSackTabAll")
+
+
+local function ClearSearch(restoreCurrent)
+	if  restoreCurrent  then  currentErrorObject = currentBeforeSearch  end
+	searchResults = nil
+	searchThrough = nil
+	currentBeforeSearch = nil
+	
+	-- SetActiveTab("BugSackTabSession")
+	window:UpdateErrors()
 end
 
-local function filterSack(editbox)
-	for i, t in next, tabs do
-		PanelTemplates_DeselectTab(t)
-	end
-	wipe(searchResults)
-
+local function FilterSack(editbox)
 	local text = editbox:GetText()
 	-- If there's no text in the box, we reset to all bugs so the search can start over
 	if not searchThrough or not text or text:trim():len() == 0 then
-		state = "BugSackTabAll"
+		-- activeTab = "BugSackTabAll"
+		searchResults = nil
 	else
-		for i, err in next, searchThrough do
+		if  not currentBeforeSearch  then  currentBeforeSearch = currentErrorObject  end
+		local res = {}
+		for  i,err  in ipairs(searchThrough) do
 			if err.message and err.message:find(text) then
-				searchResults[#searchResults + 1] = err
+				res[#res+1] = err
 			elseif err.stack and err.stack:find(text) then
-				searchResults[#searchResults + 1] = err
+				res[#res+1] = err
 			elseif err.locals and err.locals:find(text) then
-				searchResults[#searchResults + 1] = err
+				res[#res+1] = err
 			end
 		end
-		state = "BugSackSearch"
+		searchResults = res
 	end
-	updateSackDisplay(true)
+	
+	-- activeTab = "BugSackSearch"
+	window:UpdateErrors(true)
+	-- window:UpdateErrors()
 end
 
-local function createBugSack()
-	window = CreateFrame("Frame", "BugSackFrame", UIParent)
-	--UIPanelWindows.BugSackFrame = { area = "center", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
-	--HideUIPanel(window)
-	UIPanelWindows.BugSackFrame = { area = "right", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
-	window:Hide()
 
-	window:SetFrameStrata("FULLSCREEN_DIALOG")
-	window:SetWidth(500)
-	--window:SetHeight(500 / 1.618)
-	--window:SetWidth(600)
+
+function window:Init()
+	local window = self
+	-- Run only once
+	window.Init = nil
+	window:SetScript('OnShow', window.OnShow)
+	window:SetScript('OnHide', window.OnHide)
+
+	-- To be in the center of attention it closed UIGameMenu on auto-popup. A problem, if you wanted to get to interace options to disable auto-popup.
+	--UIPanelWindows.BugSackFrame = { area = "center", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
+	--UIPanelWindows.BugSackFrame = { area = "right", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
+	--HideUIPanel(window)
+	-- Or disable auto-layout altogether, but still close when pressing Esc.
+	UISpecialFrames[#UISpecialFrames+1] = 'ScriptErrorsFrame'    -- Builtin annoyance is persistent even after Esc
+	UISpecialFrames[#UISpecialFrames+1] = window:GetName()
+
+	window:SetFrameStrata("HIGH")
+	-- window:SetFrameStrata("FULLSCREEN_DIALOG")
+	-- window:SetWidth(500)
+	-- window:SetHeight(500 / 1.618)
+	window:SetWidth(600)
 	window:SetHeight(400)
 	window:SetPoint("CENTER")
 	window:SetMovable(true)
@@ -189,15 +205,6 @@ local function createBugSack()
 	window:RegisterForDrag("LeftButton")
 	window:SetScript("OnDragStart", window.StartMoving)
 	window:SetScript("OnDragStop", window.StopMovingOrSizing)
-	window:SetScript("OnShow", function()
-		--PlaySound("igQuestLogOpen")
-	end)
-	window:SetScript("OnHide", function()
-		--PlaySound("igQuestLogClose")
-		currentErrorObject = nil
-		currentSackSession = nil
-		currentSackContents = nil
-	end)
 
 	local titlebg = window:CreateTexture(nil, "BORDER")
 	titlebg:SetTexture("Interface\\PaperDollInfoFrame\\UI-GearManager-Title-Background")
@@ -270,7 +277,7 @@ local function createBugSack()
 
 	local close = CreateFrame("Button", nil, window, "UIPanelCloseButton")
 	close:SetPoint("TOPRIGHT", 2, 1)
-	close:SetScript("OnClick", addon.CloseSack)
+	close:SetScript("OnClick", function()  HideUIPanel(window)  end)
 
 	countLabel = window:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 	countLabel:SetPoint("TOPRIGHT", titlebg, -6, -3)
@@ -285,8 +292,15 @@ local function createBugSack()
 	sessionLabel:SetScript("OnHide", function()
 		window:StopMovingOrSizing()
 	end)
-	sessionLabel:SetScript("OnMouseUp", function()
+	sessionLabel:SetScript("OnMouseUp", function(self, mouseButton)
 		window:StopMovingOrSizing()
+		if  mouseButton == "RightButton"  then
+			if  IsAltKeyDown()  then  addon:Reset()
+			else
+				InterfaceOptionsFrame_OpenToCategory(ADDON_NAME)
+				InterfaceOptionsFrame_OpenToCategory(ADDON_NAME)
+			end
+		end
 	end)
 	sessionLabel:SetScript("OnMouseDown", function()
 		window:StartMoving()
@@ -297,7 +311,11 @@ local function createBugSack()
 		searchBox:Show()
 		searchThrough = currentSackContents
 	end)
-	local quickTips = "|cff44ff44Double-click|r to filter bug reports. After you are done with the search results, return to the full sack by selecting a tab at the bottom. |cff44ff44Left-click|r and drag to move the window. |cff44ff44Right-click|r to close the sack and open the interface options for BugSack."
+	local quickTips = 
+[[|cff44ff44Double-click|r to filter bug reports. After you are done with the search results, return to the full sack by selecting a tab at the bottom.
+|cff44ff44Left-click|r and drag to move the window.
+|cff44ff44Right-click|r to open the interface options for BugSack.
+|cff44ff44Alt+Right-click|r to delete all bugs.]]
 	sessionLabel:SetScript("OnEnter", function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", -8, 8)
 		GameTooltip:AddLine("Quick tips")
@@ -337,8 +355,9 @@ local function createBugSack()
 		self:ClearFocus()
 		self:SetText("")
 	end)
-	searchBox:SetScript("OnEscapePressed", clearSearch)
-	searchBox:SetScript("OnTextChanged", filterSack)
+	searchBox:SetScript("OnEscapePressed", function()  ClearSearch(true)  end)
+	searchBox:SetScript("OnEnterPressed", ClearSearch)
+	searchBox:SetScript("OnTextChanged", FilterSack)
 	searchBox:SetAutoFocus(false)
 	searchBox:SetPoint("TOPLEFT", searchLabel, "TOPRIGHT", 6, 1)
 	searchBox:SetPoint("BOTTOMRIGHT", countLabel, "BOTTOMLEFT", -3, -1)
@@ -349,12 +368,11 @@ local function createBugSack()
 	nextButton:SetWidth(130)
 	nextButton:SetText(L["Next >"])
 	nextButton:SetScript("OnClick", function()
-		if IsShiftKeyDown() then
-			currentErrorIndex = #currentSackContents
-		else
-			currentErrorIndex = currentErrorIndex + 1
+		if  IsShiftKeyDown()  then  currentErrorIndex = #currentSackContents
+		elseif  not currentErrorIndex  then  currentErrorIndex = 1
+		elseif  currentErrorIndex < #currentSackContents  then  currentErrorIndex = currentErrorIndex + 1
 		end
-		updateSackDisplay()
+		window:SelectError(currentSackContents[currentErrorIndex])
 	end)
 
 	prevButton = CreateFrame("Button", "BugSackPrevButton", window, "UIPanelButtonTemplate")
@@ -362,12 +380,11 @@ local function createBugSack()
 	prevButton:SetWidth(130)
 	prevButton:SetText(L["< Previous"])
 	prevButton:SetScript("OnClick", function()
-		if IsShiftKeyDown() then
-			currentErrorIndex = 1
-		else
-			currentErrorIndex = currentErrorIndex - 1
+		if  IsShiftKeyDown()  then  currentErrorIndex = 1
+		elseif  not currentErrorIndex  then  currentErrorIndex = #currentSackContents
+		elseif  1 < currentErrorIndex  then  currentErrorIndex = currentErrorIndex - 1
 		end
-		updateSackDisplay()
+		window:SelectError(currentSackContents[currentErrorIndex])
 	end)
 
 	if addon.Serialize then
@@ -399,75 +416,93 @@ local function createBugSack()
 	--textArea:SetWidth(450)
 	--textArea:SetWidth(550)
 	textArea:SetWidth(scroll:GetWidth())
-
+	textArea:SetAllPoints()
 	scroll:SetScrollChild(textArea)
 
-	local all = CreateFrame("Button", "BugSackTabAll", window, "CharacterFrameTabButtonTemplate")
-	all:SetFrameStrata("FULLSCREEN")
-	all:SetPoint("TOPLEFT", window, "BOTTOMLEFT", 0, 8)
-	all:SetText(L["All bugs"])
-	all:SetScript("OnLoad", nil)
-	all:SetScript("OnShow", nil)
-	all:SetScript("OnClick", setActiveMethod)
-	all.bugs = "all"
-
+	local tabs = {}
+	window.tabs = tabs
 	local session = CreateFrame("Button", "BugSackTabSession", window, "CharacterFrameTabButtonTemplate")
-	session:SetFrameStrata("FULLSCREEN")
-	session:SetPoint("LEFT", all, "RIGHT")
+	-- session:SetFrameStrata("FULLSCREEN")
+	session:SetPoint("TOPLEFT", window, "BOTTOMLEFT", 0, 8)
 	session:SetText(L["Current session"])
 	session:SetScript("OnLoad", nil)
 	session:SetScript("OnShow", nil)
-	session:SetScript("OnClick", setActiveMethod)
+	session:SetScript("OnClick", SetActiveTab)
 	session.bugs = "currentSession"
+	tabs[#tabs+1] = session
 
 	local last = CreateFrame("Button", "BugSackTabLast", window, "CharacterFrameTabButtonTemplate")
-	last:SetFrameStrata("FULLSCREEN")
-	last:SetPoint("LEFT", session, "RIGHT")
-	last:SetText(L["Previous session"])
+	-- last:SetFrameStrata("FULLSCREEN")
+	last:SetPoint("LEFT", tabs[#tabs], "RIGHT")
+	last:SetText(L["Previous sessions"])
 	last:SetScript("OnLoad", nil)
 	last:SetScript("OnShow", nil)
-	last:SetScript("OnClick", setActiveMethod)
+	last:SetScript("OnClick", SetActiveTab)
 	last.bugs = "previousSession"
+	tabs[#tabs+1] = last
 
-	tabs = {all, session, last}
-	local size = 500 / 3
-	for i, t in next, tabs do
-		PanelTemplates_TabResize(t, nil, size, size)
-		if i == 1 then
-			PanelTemplates_SelectTab(t)
-		else
-			PanelTemplates_DeselectTab(t)
-		end
+	local all = CreateFrame("Button", "BugSackTabAll", window, "CharacterFrameTabButtonTemplate")
+	-- all:SetFrameStrata("FULLSCREEN")
+	all:SetPoint("LEFT", tabs[#tabs], "RIGHT")
+	all:SetText(L["All bugs"])
+	all:SetScript("OnLoad", nil)
+	all:SetScript("OnShow", nil)
+	all:SetScript("OnClick", SetActiveTab)
+	all.bugs = "all"
+	tabs[#tabs+1] = all
+
+	local size = window:GetWidth() / 3
+	for  i, t  in ipairs(tabs) do  PanelTemplates_TabResize(t, nil, size, size)  end
+	SetActiveTab(activeTab)
+
+	-- Call real OnShow handler.
+	window:OnShow()
+end
+-- END window:Init()
+
+
+
+function window:OnShow()
+	-- PlaySound("igQuestLogOpen")
+	self:UpdateErrors()
+end
+
+function window:OnHide()
+	--PlaySound("igQuestLogClose")
+	ClearSearch()
+	currentSackContents = nil
+	currentErrorObject  = nil
+	currentErrorIndex   = nil
+	currentBeforeSearch = nil
+end
+
+-- Init() runs once when BugSackFrame is first opened. Replaces itself with window:OnShow().
+window:SetScript('OnShow', window.Init)
+
+
+
+function window:Toggle()
+	-- return  self:IsShown()  and  _G.HideUIPanel(self)  or  _G.ShowUIPanel(self)
+	-- Same:
+	return _G.ToggleFrame(self)
+end
+
+function window:SelectError(errorObject)
+	if  not errorObject  then  return false  end
+	currentErrorObject = errorObject
+	
+	local sId, sessionId = errorObject.session, BugGrabber:GetSessionId()
+	local errorOnTab =  sId == sessionId  and  "BugSackTabSession"
+		or  sId == sessionId - 1  and  "BugSackTabLast"
+		or  "BugSackTabAll"
+	if  activeTab ~= errorOnTab  and  activeTab ~= "BugSackTabAll"  then
+		SetActiveTab(errorOnTab)
+	elseif  searchResults  and  not tindexof(searchResults, errorObject)  then
+		ClearSearch()
+	else
+		self:UpdateSelected()
 	end
 end
 
--- Called when the sack is supposed to be opened or refreshed,
--- and can only be called by :OpenSack or something that is available
--- from the sack window, so we know that currentSackContents is set.
-local function show()
-	if createBugSack then
-		createBugSack()
-		createBugSack = nil
-	end
-	updateSackDisplay()
-	ShowUIPanel(window)
-end
 
-function addon:CloseSack()
-	HideUIPanel(window)
-end
-
-function addon:OpenSack(errorObject)
-	if window and window:IsShown() then
-		-- Window is already open, we just need to update various texts.
-		return
-	end
-
-	-- XXX we should show the most recent error (from this session) that has not previously been shown in the sack
-	-- XXX so, 5 errors are caught, the user clicks the icon, we start it at the first of those 5 errors.
-	--[[if not currentSackContents then
-		currentSackContents = BugGrabber:GetDB(currentSackSession)
-	end]]
-	show()
-end
 

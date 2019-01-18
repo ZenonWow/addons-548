@@ -1,18 +1,13 @@
-
-local addonName, addon = ...
+local ADDON_NAME, addon = ...
+local _G, L = _G, addon.L
+local BugGrabber = BugGrabber
 
 -----------------------------------------------------------------------
 -- Make sure we are prepared
 --
 
 local function print(...) _G.print("|cff259054BugSack:|r", ...) end
-if not LibStub then
-	print("BugSack requires LibStub.")
-	return
-end
 
-local L = addon.L
-local BugGrabber = BugGrabber
 if not BugGrabber then
 	local msg = L["|cffff4411BugSack requires the |r|cff44ff44!BugGrabber|r|cffff4411 addon, which you can download from the same place you got BugSack. Happy bug hunting!|r"]
 	local f = CreateFrame("Frame")
@@ -28,102 +23,118 @@ if not BugGrabber then
 end
 
 -- We seem fine, let the world access us.
-_G[addonName] = addon
-addon.healthCheck = true
+_G[ADDON_NAME] = addon
+
+
+local LSM
+
+function addon:InitLSM()
+	if  LSM  then  return  end
+	LSM = _G.LibStub("LibSharedMedia-3.0", true)
+	if  not LSM  then  return  end
+	LSM:Register("sound", "TMW - Ding 1",  [[Interface\Addons\BugSack\Media\Ding1.ogg]])
+	LSM:Register("sound", "BugSack: Fatality", [[Interface\AddOns\BugSack\Media\error.ogg]])
+end
+
 
 -----------------------------------------------------------------------
 -- Utility
 --
 
+local eventFrame = CreateFrame("Frame")
+-- eventFrame:Hide()
+
 do
-	-- bah this should be local but we need it in config.lua
-	local media = nil
-	function addon:EnsureLSM3()
-		if media then return media end
-		media = LibStub("LibSharedMedia-3.0", true)
-		if media then
-			media:Register("sound", "BugSack: Fatality", "Interface\\AddOns\\BugSack\\Media\\error.ogg")
+	local lastUpdate = 0
+	local lastNotify = 0
+	
+	local function UpdateDisplay()
+		lastUpdate = _G.GetTime()
+		-- Update dataobject and frame if open.
+		if  addon.window  then  addon.window:UpdateErrors()  end
+		if  addon.dataobject  then  addon.dataobject:UpdateErrors()  end
+	end
+
+	local function ScheduleUpdateDisplay()
+		-- Create a Timer to UpdateDisplay() after 2 seconds.
+		-- This will update the changes from the last 2 seconds.
+		if  not eventFrame.timer  then
+			eventFrame.anim = eventFrame:CreateAnimationGroup()
+			eventFrame.anim:SetLooping('NONE')
+			eventFrame.timer = eventFrame.anim:CreateAnimation()
+			eventFrame.timer:SetScript('OnFinished', UpdateDisplay)
+			eventFrame.timer:SetDuration(2)
 		end
-		return media
+		if  not eventFrame.anim:IsPlaying()  then
+			eventFrame.anim:Play()
+		end
+	end
+	
+	function addon:BugGrabber_BugGrabbed(event, errorObject)
+		-- print("BugSack:BugGrabber_BugGrabbed("..tostring(errorObject and errorObject.message)..")")
+		-- Delay until end of loading screen. PLAYER_LOGIN() will call it.
+		if  not IsLoggedIn()  then  return  end
+		
+		-- No more errors if errorObject == nil - BugGrabber:Reset() happened.
+		if  not errorObject  then  return  end
+		
+		-- Throttle down to one UpdateDisplay() every 2 seconds.
+		local now = _G.GetTime()
+		if  2 <= now - lastUpdate  then  UpdateDisplay()
+		else  ScheduleUpdateDisplay()
+		end
+		
+		-- Throttle the notifications to one per 10 seconds.
+		if  now - lastNotify < 10  then  return  end
+		lastNotify = now
+		if not self.db.mute then
+			local sound = LSM and LSM:Fetch("sound", self.db.soundMedia)
+			PlaySoundFile(sound)
+		end
+		if  self.db.chatframe then
+			if  BugGrabber.PrintErrorLink  then  BugGrabber.PrintErrorLink(errorObject)
+			else  print(L["There's a bug in your soup!"])
+			end
+		end
+		if  self.db.auto  and  not InCombatLockdown()  then
+			-- Open frame and select new error.
+			self:OpenSack(errorObject)
+		end
 	end
 end
 
-local onError
+
+-- Register with BugGrabber
 do
-	local lastError = nil
-	function onError(event, errorObject)
-		if not lastError or GetTime() > (lastError + 2) then
-			if not addon.db.mute then
-				local media = addon:EnsureLSM3()
-				if media then
-					local sound = media:Fetch("sound", addon.db.soundMedia) or "Interface\\AddOns\\BugSack\\Media\\error.ogg"
-					PlaySoundFile(sound)
-				else
-					PlaySoundFile("Interface\\AddOns\\BugSack\\Media\\error.ogg")
-				end
-			end
-			if addon.db.chatframe then
-				print(L["There's a bug in your soup!"])
-			end
-			lastError = GetTime()
-		end
-		-- If the frame is shown, we need to update it.
-		if (addon.db.auto and not InCombatLockdown()) or (BugSackFrame and BugSackFrame:IsShown()) then
-			addon:OpenSack(errorObject)
-		end
-		addon:UpdateDisplay()
-	end
+	BugGrabber.RegisterCallback(addon, 'BugGrabber_BugGrabbed')  -- register addon:BugGrabber_BugGrabbed(event, errorObject)
+	if  BugGrabber.DisplayAddons  then  table.insert(BugGrabber.DisplayAddons, addon)  end    -- _G.BugSack
+	-- BugGrabber.PrintErrorLinks = false    -- Still print errors if OnError fails.
 end
+
+-- Register chat command
+do
+	SlashCmdList.BugSack = function()
+		InterfaceOptionsFrame_OpenToCategory(ADDON_NAME)
+		InterfaceOptionsFrame_OpenToCategory(ADDON_NAME)
+	end
+	SLASH_BugSack1 = "/bugsack"
+	SLASH_BugSack2 = "/bs"
+end
+
+
 
 -----------------------------------------------------------------------
 -- Event handling
 --
 
-local eventFrame = CreateFrame("Frame")
-eventFrame:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
+eventFrame:SetScript("OnEvent", function(self, event, ...) self[event](self, event, ...) end)
 eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("PLAYER_LOGIN")
 
-function eventFrame:ADDON_LOADED(loadedAddon)
-	if loadedAddon ~= addonName then return end
+function eventFrame:ADDON_LOADED(event, loadedAddon)
+	if loadedAddon ~= ADDON_NAME then return end
 	self:UnregisterEvent("ADDON_LOADED")
-
-	local ac = LibStub("AceComm-3.0", true)
-	if ac then ac:Embed(addon) end
-	local as = LibStub("AceSerializer-3.0", true)
-	if as then as:Embed(addon) end
-
-	local popup = _G.StaticPopupDialogs
-	if type(popup) ~= "table" then popup = {} end
-	if type(popup.BugSackSendBugs) ~= "table" then
-		popup.BugSackSendBugs = {
-			text = L["Send all bugs from the currently viewed session (%d) in the sack to the player specified below."],
-			button1 = L["Send"],
-			button2 = CLOSE,
-			timeout = 0,
-			whileDead = true,
-			hideOnEscape = true,
-			hasEditBox = true,
-			OnAccept = function(self, data)
-				local recipient = self.editBox:GetText()
-				addon:SendBugsToUser(recipient, data)
-			end,
-			OnShow = function(self)
-				self.button1:Disable()
-			end,
-			EditBoxOnTextChanged = function(self, data)
-				local t = self:GetText()
-				if t:len() > 2 and not t:find("%s") then
-					self:GetParent().button1:Enable()
-				else
-					self:GetParent().button1:Disable()
-				end
-			end,
-			enterClicksFirstButton = true,
-			--OnCancel = function() show() end, -- Need to wrap it so we don't pass |self| as an error argument to show().
-			preferredIndex = STATICPOPUP_NUMDIALOGS,
-		}
-	end
+	self.ADDON_LOADED = nil
 
 	if type(BugSackDB) ~= "table" then BugSackDB = {} end
 	local sv = BugSackDB
@@ -132,65 +143,68 @@ function eventFrame:ADDON_LOADED(loadedAddon)
 	if type(sv.mute) ~= "boolean" then sv.mute = false end
 	if type(sv.auto) ~= "boolean" then sv.auto = false end
 	if type(sv.chatframe) ~= "boolean" then sv.chatframe = false end
-	if type(sv.soundMedia) ~= "string" then sv.soundMedia = "BugSack: Fatality" end
+	if type(sv.soundMedia) ~= "string" then sv.soundMedia = "TMW - Ding 1" end
 	if type(sv.fontSize) ~= "string" then sv.fontSize = "GameFontHighlight" end
 	addon.db = sv
 
-	addon:EnsureLSM3()
+	if  addon.dataobject  then  addon.dataobject:OnAddonLoaded()  end
 
-	self.ADDON_LOADED = nil
+	addon:InitComm()
+	--error('test')
 end
 
-function eventFrame:PLAYER_LOGIN()
+function eventFrame:PLAYER_LOGIN(event)
 	self:UnregisterEvent("PLAYER_LOGIN")
+	self.PLAYER_LOGIN = nil
+	addon:InitLSM()
 
+	--[[
+	-- TODO: pop up a tooltip on ldb dataobject or minimap icon to inform the user about any errors before this (while loading)
 	-- Make sure we grab any errors fired before bugsack loaded.
 	local session = addon:GetErrors(BugGrabber:GetSessionId())
 	if #session > 0 then onError() end
-
-	if addon.RegisterComm then
-		addon:RegisterComm("BugSack", "OnBugComm")
+	--]]
+	if  BugGrabber.GetSessionErrors  then
+		-- New version with separate session DBs.
+		-- Show errors if there is at least one error.
+		local sessionDB = BugGrabber:GetSessionErrors()
+		if  sessionDB[1]  then  addon:BugGrabber_BugGrabbed(event, sessionDB[1])  end
+	else
+		-- Old version with flat DB containing errors from all sessions.
+		-- Show errors if there last error is from this session.
+		local db, sessionId = BugGrabber:GetDB(), BugGrabber:GetSessionId()
+		if  db[#db].session == sessionId  then  addon:BugGrabber_BugGrabbed(event, db[#db])  end
 	end
-
-	-- Set up our error event handler
-	BugGrabber.RegisterCallback(addon, "BugGrabber_BugGrabbed", onError)
-
-	SlashCmdList.BugSack = function()
-		InterfaceOptionsFrame_OpenToCategory(addonName)
-		InterfaceOptionsFrame_OpenToCategory(addonName)
-	end
-	SLASH_BugSack1 = "/bugsack"
-
-	self.PLAYER_LOGIN = nil
 end
 
 -----------------------------------------------------------------------
 -- API
 --
 
-function addon:UpdateDisplay()
-	-- noop, hooked by displays
+-- Call on user interaction (clicking error link).
+function addon:DisplayError(errorObject)
+	return addon:OpenSack(errorObject, true)
 end
 
-do
-	local errors = {}
-	function addon:GetErrors(sessionId)
-		-- XXX I've never liked this function, maybe a BugGrabber redesign is in order,
-		-- XXX where we have one subtable in the DB per session ID.
-		if sessionId then
-			wipe(errors)
-			local db = BugGrabber:GetDB()
-			for i, e in next, db do
-				if sessionId == e.session then
-					errors[#errors + 1] = e
-				end
-			end
-			return errors
-		else
-			return BugGrabber:GetDB()
-		end
+-- Call for auto-popup. Does not change the current error if already open.
+function addon:OpenSack(errorObject, selectIfOpen)
+	if  not self.window  then  return false  end
+	-- If already open then leave the selected error as it is.
+	if  selectIfOpen  or  not self.window:IsShown()  then
+		self.window:SelectError(errorObject)
+		ShowUIPanel(self.window)
 	end
 end
+
+function addon:CloseSack()
+	HideUIPanel(self.window)
+end
+
+function addon:Reset()
+	self:CloseSack()
+	BugGrabber:Reset()
+end
+
 
 do
 	local function colorStack(ret)
@@ -223,6 +237,7 @@ do
 	end
 	addon.ColorLocals = colorLocals
 
+	-- Method for BugGrabber.DisplayAddons:
 	local errorFormat = "%dx %s\n\nLocals:\n%s"
 	function addon:FormatError(err)
 		local s = colorStack(tostring(err.message) .. "\n" .. tostring(err.stack))
@@ -231,10 +246,89 @@ do
 	end
 end
 
-function addon:Reset()
-	BugGrabber:Reset()
-	self:UpdateDisplay()
-	print(L["All stored bugs have been exterminated painfully."])
+
+
+function addon:GetPreviousErrors()
+	if  BugGrabber.GetPreviousErrors  then
+		return BugGrabber:GetPreviousErrors()
+	else
+		local errors = {}
+		local db = BugGrabber:GetDB()
+		sessionId =  BugGrabber:GetSessionId()
+		-- Select errors before this sessionId
+		for i = 1,#db do
+			if sessionId == db[i].session then  break  end
+			errors[#errors+1] = db[i]
+		end
+		return errors
+	end
+end
+
+function addon:GetSessionErrors()
+	if  BugGrabber.GetSessionErrors  then
+		return BugGrabber:GetSessionErrors()
+	else
+		local errors = {}
+		local db = BugGrabber:GetDB()
+		sessionId =  BugGrabber:GetSessionId()
+		-- Select errors with this sessionId
+		for i = 1,#db do
+			if sessionId == db[i].session then
+				errors[#errors+1] = db[i]
+			end
+		end
+		return errors
+	end
+end
+
+function addon:GetAllErrors()
+	return  BugGrabber:GetDB()
+end
+
+
+
+
+function addon:InitComm()
+	local ac = _G.LibStub("AceComm-3.0", true)
+	if ac then ac:Embed(addon) end
+	local as = _G.LibStub("AceSerializer-3.0", true)
+	if as then as:Embed(addon) end
+
+	if addon.RegisterComm then
+		addon:RegisterComm("BugSack", "OnBugComm")
+	end
+
+	local popup = _G.StaticPopupDialogs
+	if type(popup) ~= "table" then popup = {} end
+	if type(popup.BugSackSendBugs) ~= "table" then
+		popup.BugSackSendBugs = {
+			text = L["Send all bugs from the currently viewed session (%d) in the sack to the player specified below."],
+			button1 = L["Send"],
+			button2 = CLOSE,
+			timeout = 0,
+			whileDead = true,
+			hideOnEscape = true,
+			hasEditBox = true,
+			OnAccept = function(self, data)
+				local recipient = self.editBox:GetText()
+				addon:SendBugsToUser(recipient, data)
+			end,
+			OnShow = function(self)
+				self.button1:Disable()
+			end,
+			EditBoxOnTextChanged = function(self, data)
+				local t = self:GetText()
+				if t:len() > 2 and not t:find("%s") then
+					self:GetParent().button1:Enable()
+				else
+					self:GetParent().button1:Disable()
+				end
+			end,
+			enterClicksFirstButton = true,
+			--OnCancel = function() show() end, -- Need to wrap it so we don't pass |self| as an error argument to show().
+			preferredIndex = STATICPOPUP_NUMDIALOGS,
+		}
+	end
 end
 
 -- Sends the current session errors to another player using AceComm-3.0

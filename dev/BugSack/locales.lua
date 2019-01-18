@@ -510,5 +510,8 @@ L["You've received %d bugs from %s."] = "Hai ricevuto %d bug da %s."
 
 end
 
-addon.L = L
+addon.L = setmetatable(L, { __index = function(self, key)
+	-- print('BugSack missing translation for "'..key..'"')
+	return key
+end })
 

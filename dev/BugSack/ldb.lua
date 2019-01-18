@@ -1,66 +1,79 @@
-local addonName, addon = ...
-if not addon.healthCheck then return end
-local L = addon.L
-
-local ldb = LibStub:GetLibrary("LibDataBroker-1.1", true)
-if not ldb then return end
-
-local plugin = ldb:NewDataObject(addonName, {
-	type = "data source",
-	text = "0",
-	icon = "Interface\\AddOns\\BugSack\\Media\\icon",
-})
-
+local ADDON_NAME, addon = ...
+local _G, L = _G, addon.L
 local BugGrabber = BugGrabber
+if  not BugGrabber  then  return  end
 
-function plugin.OnClick(self, button)
-	if button == "RightButton" then
-		InterfaceOptionsFrame_OpenToCategory(addonName)
-		InterfaceOptionsFrame_OpenToCategory(addonName)
+local LDB = LibStub:GetLibrary("LibDataBroker-1.1", true)
+if not LDB then return end
+
+local ICON_GREEN = [[Interface\AddOns\BugSack\Media\icon]]
+local ICON_RED   = [[Interface\AddOns\BugSack\Media\icon_red]]
+local ICON_TEKERR = [[Interface\Icons\INV_Elemental_Primal_Fire]]
+
+local dataobj = {
+	type = "data source",
+	label = "Bugs",
+	-- text = "0",
+	icon = ICON_GREEN,
+}
+
+function dataobj.OnClick(self, mouseButton)
+	if  mouseButton == "RightButton"  then
+		InterfaceOptionsFrame_OpenToCategory(ADDON_NAME)
+		InterfaceOptionsFrame_OpenToCategory(ADDON_NAME)
 	else
 		if  IsModifiedClick()  then
 			if IsAltKeyDown() then  addon:Reset()  end
 			if IsControlKeyDown() and IsShiftKeyDown() then  ReloadUI()  end
-			
-		elseif BugSackFrame and BugSackFrame:IsShown() then
-			addon:CloseSack()
 		else
-			addon:OpenSack()
+			addon.window:Toggle()
 		end
 	end
 end
 
-hooksecurefunc(addon, "UpdateDisplay", function()
-	local count = #addon:GetErrors(BugGrabber:GetSessionId())
-	plugin.text = count
-	plugin.icon = count == 0 and "Interface\\AddOns\\BugSack\\Media\\icon" or "Interface\\AddOns\\BugSack\\Media\\icon_red"
-end)
-
 do
-	local hint = L["|cffeda55fClick|r to open BugSack with the last bug. |cffeda55fCtrl+Shift-Click|r to reload the user interface. |cffeda55fAlt-Click|r to clear the sack."]
+	local errorsInTooltip = 8
+	local hint = 
+[[|cffeda55fClick|r to toggle BugSack bugs window.
+|cffeda55fCtrl+Shift-Click|r to reload the user interface.
+|cffeda55fAlt-Click|r to clear all bugs.]]
 	local line = "%d. %s (x%d)"
-	function plugin.OnTooltipShow(tt)
-		local errs = addon:GetErrors(BugGrabber:GetSessionId())
-		if #errs == 0 then
+	function dataobj.OnTooltipShow(tt)
+		local errors = addon:GetSessionErrors()
+		if #errors == 0 then
 			tt:AddLine(L["You have no bugs, yay!"])
 		else
-			tt:AddLine(addonName)
-			for i, err in next, errs do
+			tt:AddLine(ADDON_NAME)
+			local from = max(#errors-errorsInTooltip+1, 1)
+			for  i = #errors, from, -1  do
+				local err = errors[i]
 				tt:AddLine(line:format(i, addon.ColorStack(err.message), err.counter), .5, .5, .5)
-				if i > 8 then break end
 			end
 		end
 		tt:AddLine(" ")
 		tt:AddLine(hint, 0.2, 1, 0.2, 1)
+		tt:Show()
 	end
 end
 
-local f = CreateFrame("Frame")
-f:SetScript("OnEvent", function()
-	local icon = LibStub("LibDBIcon-1.0", true)
-	if not icon then return end
+
+
+
+function dataobj:UpdateErrors()
+	local count = #addon:GetSessionErrors()
+	-- print("BugSack.dataobject:UpdateErrors() count="..count)
+	self.text = tostring(count)
+	self.icon =  count == 0  and  ICON_GREEN  or  ICON_RED
+end
+
+function dataobj:OnAddonLoaded()
+	local LibDBIcon = LibStub("LibDBIcon-1.0", true)
+	if not LibDBIcon then return end
 	if not BugSackLDBIconDB then BugSackLDBIconDB = {} end
-	icon:Register(addonName, plugin, BugSackLDBIconDB)
-end)
-f:RegisterEvent("PLAYER_LOGIN")
+	LibDBIcon:Register(ADDON_NAME, self, BugSackLDBIconDB)
+	self.OnAddonLoaded = nil
+	self:UpdateErrors()
+end
+
+addon.dataobject = LDB:NewDataObject(ADDON_NAME, dataobj)
 

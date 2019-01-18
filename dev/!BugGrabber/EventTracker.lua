@@ -2,6 +2,8 @@
 /run EventTracker.PrintLog()
 --]]
 
+PlaySound([[Interface\Addons\TellMeWhen\Sounds\Ding3.ogg]])
+
 local  EventTracker = CreateFrame('Frame', 'EventTracker', UIParent)
 EventTracker:RegisterEvent('ADDON_LOADED')
 EventTracker:RegisterEvent('SAVED_VARIABLES_TOO_LARGE')
@@ -37,7 +39,25 @@ function EventTracker.PrintLog(frame)
 end
 
 
+local addCount = 0
+function EventTracker:ADDON_LOADED(event, addonName)
+	addCount = addCount + 1
+	if  addCount >= 10  then  
+		addCount = 0
+		PlaySound([[Interface\Addons\TellMeWhen\Sounds\Ding4.ogg]])
+	end
+end
+
+function EventTracker:VARIABLES_LOADED()
+	PlaySound([[Interface\Addons\TellMeWhen\Sounds\Ding5.ogg]])
+end
+
+function EventTracker:PLAYER_LOGIN()
+	PlaySound([[Interface\Addons\TellMeWhen\Sounds\Ding6.ogg]])
+end
+
 function EventTracker:PLAYER_ENTERING_WORLD()
+	PlaySound([[Interface\Addons\TellMeWhen\Sounds\Ding7.ogg]])
 	LogFrame = tekDebug  and  tekDebug:GetFrame("EventTracker")
 	if  LogFrame  then
 		self.LogFrame = LogFrame
@@ -69,12 +89,15 @@ function EventTracker:OnEvent(event, ...)
 end
 
 
-EventTracker:OnEvent("before LoadAddOn", "Blizzard_BindingUI")
-LoadAddOn('Blizzard_BindingUI')
-
 EventTracker:CheckLoggedIn()
 EventTracker:SetScript('OnEvent', EventTracker.OnEvent)
 EventTracker:Show()
+
+
+-- Order test
+EventTracker:OnEvent("before LoadAddOn", "Blizzard_BindingUI")
+LoadAddOn('Blizzard_BindingUI')
+EventTracker:OnEvent("after LoadAddOn", "Blizzard_BindingUI")
 
 
 

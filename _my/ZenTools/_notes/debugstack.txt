@@ -1,3 +1,43 @@
+/dump NIL.NIL()
+1x [string "return NIL.NIL()"]:1: attempt to index global 'NIL' (a nil value)
+[C]:: ?
+[string "return NIL.NIL()"]:1: in function 'func'
+Blizzard_DebugTools\Dump.lua:389: in function 'DevTools_DumpCommand'
+FrameXML\ChatFrame.lua:2295: in function '?'
+FrameXML\ChatFrame.lua:4315: in function <FrameXML\ChatFrame.lua:4262>
+[C]:: in function 'ChatEdit_ParseText'
+FrameXML\ChatFrame.lua:3969: in function 'ChatEdit_SendText'
+FrameXML\ChatFrame.lua:4008: in function 'ChatEdit_OnEnterPressed'
+[string "*:OnEnterPressed"]:1: in function <[string "*:OnEnterPressed"]:1>
+
+Locals:
+(*temporary) = nil
+(*temporary) = nil
+(*temporary) = "attempt to index global 'NIL' (a nil value)"
+
+
+
+
+/run NIL.NIL()
+1x [string "NIL.NIL()"]:1: attempt to index global 'NIL' (a nil value)
+[C]:: ?
+[string "NIL.NIL()"]:1: in main chunk
+[C]:: in function 'RunScript'
+FrameXML\ChatFrame.lua:2036: in function '?'
+FrameXML\ChatFrame.lua:4315: in function <FrameXML\ChatFrame.lua:4262>
+[C]:: in function 'ChatEdit_ParseText'
+FrameXML\ChatFrame.lua:3969: in function 'ChatEdit_SendText'
+FrameXML\ChatFrame.lua:4008: in function 'ChatEdit_OnEnterPressed'
+[string "*:OnEnterPressed"]:1: in function <[string "*:OnEnterPressed"]:1>
+
+Locals:
+(*temporary) = nil
+(*temporary) = nil
+(*temporary) = "attempt to index global 'NIL' (a nil value)"
+
+
+
+
 1x UNKNOWN ERROR
 [C]: in function `debugstack'
 !BugGrabber\BugGrabber.lua:435: in function <!BugGrabber\BugGrabber.lua:374>
@@ -69,6 +109,156 @@ Interface\AddOns\!BugGrabber\BugGrabber.lua:677: in function <Interface\AddOns\!
 
 Locals: (*temporary) = 0.043000001460314
 (*temporary) = <function> defined =[C]:-1
+
+
+
+
+Message: BugGrabber.GrabError() looping while handling error:
+Interface\AddOns\!BugGrabber\BugGrabber.lua:1003: attempt to call global 'setupCallbacks' (a nil value)
+Time: 01/16/19 02:39:09
+Count: 1
+Stack: Interface\AddOns\!BugGrabber\BugGrabber.lua:384: in function <Interface\AddOns\!BugGrabber\BugGrabber.lua:367>
+(tail call): ?
+[C]: in function `setupCallbacks'
+Interface\AddOns\!BugGrabber\BugGrabber.lua:1003: in function `?'
+Interface\AddOns\!BugGrabber\BugGrabber.lua:1026: in function <Interface\AddOns\!BugGrabber\BugGrabber.lua:1026>
+
+Locals: msg = "BugGrabber.GrabError() looping while handling error:
+Interface\AddOns\!BugGrabber\BugGrabber.lua:1003: attempt to call global 'setupCallbacks' (a nil value)"
+now = 1547602749
+time = <function> defined =[C]:-1
+BugGrabber = <table> {
+ internalError = "BugGrabber.GrabError() looping while handling error:
+Interface\AddOns\!BugGrabber\BugGrabber.lua:1003: attempt to call global 'setupCallbacks' (a nil value)"
+}
+ 
+ 
+ 
+ 
+ 1x Dominos\actionButton.lua:102: attempt to concatenate global 'ORANGE_FONT_COLOR' (a table value)
+[C]:: in function 'debugstack'
+!BugGrabber\BugGrabber.lua:538: in function 'debugstack'
+!BugGrabber\BugGrabber.lua:462: in function <!BugGrabber\BugGrabber.lua:399>
+!BugGrabber\BugGrabber.lua:578: in function <!BugGrabber\BugGrabber.lua:578>
+[C]:: in function 'xpcall'
+!BugGrabber\BugGrabber.lua:588: in function <!BugGrabber\BugGrabber.lua:546>
+!BugGrabber\BugGrabber.lua:542: in function <!BugGrabber\BugGrabber.lua:542>
+[C]:: ?
+Dominos\actionButton.lua:102: in function 'ExchangeMixedup'
+[string "ExchangeMixedup()"]:1: in main chunk
+[C]:: in function 'RunScript'
+FrameXML\ChatFrame.lua:2036: in function '?'
+FrameXML\ChatFrame.lua:4315: in function 'ChatEdit_ParseText'
+FrameXML\ChatFrame.lua:3969: in function 'ChatEdit_SendText'
+FrameXML\ChatFrame.lua:4008: in function 'ChatEdit_OnEnterPressed'
+[string "*:OnEnterPressed"]:1: in function <[string "*:OnEnterPressed"]:1>
+
+Locals:
+errorParam = "Dominos\actionButton.lua:102: attempt to concatenate global 'ORANGE_FONT_COLOR' (a table value)"
+isRuntimeError = true
+(for index) = 1
+(for limit) = 1
+(for step) = 1
+i = 1
+dispatchingError = nil
+
+
+
+
+1x [string "return xpcall(function() error("Hello XPcal..."]:1: Hello XPcall - geterrorhandler
+[C]:: in function 'debugstack'
+!BugGrabber\BugGrabber.lua:539: in function 'debugstack'		-- BugGrabber.debugstack()
+!BugGrabber\BugGrabber.lua:463: in function <!BugGrabber\BugGrabber.lua:400>		-- GrabError()
+!BugGrabber\BugGrabber.lua:579: in function <!BugGrabber\BugGrabber.lua:579>		-- handlerThunk()
+[C]:: in function 'xpcall'
+!BugGrabber\BugGrabber.lua:589: in function <!BugGrabber\BugGrabber.lua:547>		-- ErrorHandlerDispatcher()
+!BugGrabber\BugGrabber.lua:544: in function <!BugGrabber\BugGrabber.lua:544>		-- PublicErrorHandler ()
+[C]:: in function 'error'
+[string "return xpcall(function() error("Hello XPcal..."]:1: in function <[string "return xpcall(function() error("Hello XPcal..."]:1>
+[C]:: in function 'xpcall'
+[string "return xpcall(function() error("Hello XPcal..."]:1: in function 'func'
+Blizzard_DebugTools\Dump.lua:389: in function 'DevTools_DumpCommand'
+FrameXML\ChatFrame.lua:2295: in function '?'
+FrameXML\ChatFrame.lua:4315: in function <FrameXML\ChatFrame.lua:4262>
+[C]:: in function 'ChatEdit_ParseText'
+FrameXML\ChatFrame.lua:3969: in function 'ChatEdit_SendText'
+FrameXML\ChatFrame.lua:4008: in function 'ChatEdit_OnEnterPressed'
+[string "*:OnEnterPressed"]:1: in function <[string "*:OnEnterPressed"]:1>
+
+
+
+
+1x [string "return xpcall(function() return NIL.NIL end..."]:1: bad argument #2 to 'xpcall' (value expected)
+[C]:: in function 'debugstack'
+!BugGrabber\BugGrabber.lua:539: in function 'debugstack'
+!BugGrabber\BugGrabber.lua:463: in function <!BugGrabber\BugGrabber.lua:400>
+!BugGrabber\BugGrabber.lua:579: in function <!BugGrabber\BugGrabber.lua:579>
+[C]:: in function 'xpcall'
+!BugGrabber\BugGrabber.lua:589: in function <!BugGrabber\BugGrabber.lua:547>
+!BugGrabber\BugGrabber.lua:543: in function <!BugGrabber\BugGrabber.lua:543>		-- RuntimeErrorHandler()
+[C]:: ?				-- anonymous funtion <-- error
+[C]:: in function 'xpcall'
+[string "return xpcall(function() return NIL.NIL end..."]:1: in function 'func'
+Blizzard_DebugTools\Dump.lua:389: in function 'DevTools_DumpCommand'
+FrameXML\ChatFrame.lua:2295: in function '?'
+FrameXML\ChatFrame.lua:4315: in function <FrameXML\ChatFrame.lua:4262>
+[C]:: in function 'ChatEdit_ParseText'
+FrameXML\ChatFrame.lua:3969: in function 'ChatEdit_SendText'
+FrameXML\ChatFrame.lua:4008: in function 'ChatEdit_OnEnterPressed'
+[string "*:OnEnterPressed"]:1: in function <[string "*:OnEnterPressed"]:1>
+
+Locals:
+errorParam = "[string "return xpcall(function() return NIL.NIL end..."]:1: bad argument #2 to 'xpcall' (value expected)"
+isRuntimeError = true
+(for index) = 1
+(for limit) = 1
+(for step) = 1
+i = 1
+dispatcherLevel = 1
+
+
+
+
+1x With geterrorhandler
+[C]:: in function 'debugstack'
+!BugGrabber\BugGrabber.lua:539: in function 'debugstack'
+!BugGrabber\BugGrabber.lua:463: in function <!BugGrabber\BugGrabber.lua:400>
+!BugGrabber\BugGrabber.lua:579: in function <!BugGrabber\BugGrabber.lua:579>
+[C]:: in function 'xpcall'
+!BugGrabber\BugGrabber.lua:589: in function <!BugGrabber\BugGrabber.lua:547>
+!BugGrabber\BugGrabber.lua:544: in function <!BugGrabber\BugGrabber.lua:544>		-- PublicErrorHandler()
+[string "return xpcall(function() geterrorhandler()(..."]:1: in function <[string "return xpcall(function() geterrorhandler()(..."]:1>
+[C]:: in function 'xpcall'
+[string "return xpcall(function() geterrorhandler()(..."]:1: in function 'func'
+Blizzard_DebugTools\Dump.lua:389: in function 'DevTools_DumpCommand'
+FrameXML\ChatFrame.lua:2295: in function '?'
+FrameXML\ChatFrame.lua:4315: in function <FrameXML\ChatFrame.lua:4262>
+[C]:: in function 'ChatEdit_ParseText'
+FrameXML\ChatFrame.lua:3969: in function 'ChatEdit_SendText'
+FrameXML\ChatFrame.lua:4008: in function 'ChatEdit_OnEnterPressed'
+[string "*:OnEnterPressed"]:1: in function <[string "*:OnEnterPressed"]:1>
+
+
+
+
+1x UNKNOWN ERROR
+[C]:: in function 'debugstack'
+!BugGrabber\BugGrabber.lua:539: in function 'debugstack'
+!BugGrabber\BugGrabber.lua:463: in function <!BugGrabber\BugGrabber.lua:400>
+!BugGrabber\BugGrabber.lua:579: in function <!BugGrabber\BugGrabber.lua:579>
+[C]:: in function 'xpcall'
+!BugGrabber\BugGrabber.lua:589: in function <!BugGrabber\BugGrabber.lua:547>
+!BugGrabber\BugGrabber.lua:543: in function <!BugGrabber\BugGrabber.lua:543>
+[C]:: ?
+[C]:: in function 'error'
+[string "error()"]:1: in main chunk
+[C]:: in function 'RunScript'
+FrameXML\ChatFrame.lua:2036: in function '?'
+FrameXML\ChatFrame.lua:4315: in function <FrameXML\ChatFrame.lua:4262>
+[C]:: in function 'ChatEdit_ParseText'
+FrameXML\ChatFrame.lua:3969: in function 'ChatEdit_SendText'
+FrameXML\ChatFrame.lua:4008: in function 'ChatEdit_OnEnterPressed'
+[string "*:OnEnterPressed"]:1: in function <[string "*:OnEnterPressed"]:1>
 
 
 

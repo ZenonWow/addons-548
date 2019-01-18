@@ -18,8 +18,15 @@ _G.LuaTests = LuaTests
 /dump strsplit(" ,", "  1, ,2,,,3   4  ,")
 /dump select('#', nil, 1, nil, nil)
 /dump geterrorhandler()("Hello Handler")
+/dump tostring(geterrorhandler())
+/dump tostringall(pcall(geterrorhandler))
+/dump tostringall(xpcall(geterrorhandler, nil))
+/dump tostringall(xpcall(BugGrabber.original.geterrorhandler, nil))
+/dump tostringall(BugGrabber.original.geterrorhandler(), BugGrabber.RuntimeErrorHandler, geterrorhandler(), BugGrabber.PublicErrorHandler)
 /dump pcall(function() error("Hello Pcall") end)
 /dump xpcall(function() error("Hello XPcall") end)
+/dump xpcall(function() geterrorhandler()("With geterrorhandler") end, geterrorhandler())
+/dump xpcall(function() return NIL.NIL end)
 /dump xpcall(function() error("Hello XPcall - print") end, function(...) print(...) end))
 /dump xpcall(function() error("Hello XPcall - geterrorhandler") end, geterrorhandler())
 /dump  1, 2 or 2.5, (3,3.5), nil, 5, nil
@@ -38,16 +45,16 @@ local fields = {
 
 --[[
 /dump 'MissingAddon', LoadAddOn('MissingAddon')
-/dump 'DisabledAddon', LoadAddOn('tekChat'), 'Loaded?', IsAddOnLoaded('tekChat')
-/dump SlashCmdList  -- is wiped after hashing the contents
-/run LuaTests.SlashTest()
-/st 1 2 3    4		5    		
-/run LuaTests.FieldTest()
+/dump 'DisabledAddon', LoadAddOn('tekErr'), 'Loaded?', IsAddOnLoaded('tekErr')
 /run LuaTests.SetScript()
 /run LuaTests.HookScript()
 /run LuaTests.hooksecurefunc()
 /run LuaTests.pcall()
 /run LuaTests.AceTimer()
+/dump SlashCmdList  -- is wiped after hashing the contents
+/run LuaTests.SlashTest()
+/st 1 2 3    4		5    		
+/run LuaTests.FieldTest()
 --]]
 
 function LuaTests.SlashTest()

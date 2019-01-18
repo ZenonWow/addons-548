@@ -66,15 +66,16 @@ Bugger.dataObject = {
 	end,
 	OnTooltipShow = function(tt)
 		local total = Bugger:GetNumErrors()
+		local errorsInTooltip = 8
 
 		tt:AddDoubleLine(BUGGER, total > 0 and total or "", nil, nil, nil, 1, 1, 1)
 
 		if total > 0 then
 			tt:AddLine(" ")
-			local errors = BugGrabber:GetDB()
-			for i = 1, min(total, 3) do
-				local err = errors[#errors + 1 - i]
-				tt:AddLine(format("%s%d.|r %s", c.GRAY, total + 1 - i, Bugger:FormatError(err, true)), 1, 1, 1)
+			local errors = BugGrabber.GetSessionErrors  and  BugGrabber:GetSessionErrors()  or  BugGrabber:GetDB()
+			local from = max(#errors-errorsInTooltip+1, 1)
+			for i = #errors, from, -1 do
+				tt:AddLine(format("%s%d.|r %s", c.GRAY, total + 1 - i, Bugger:FormatError(errors[i], true)), 1, 1, 1)
 			end
 			tt:AddLine(" ")
 		end
@@ -89,32 +90,26 @@ Bugger.dataObject = {
 ------------------------------------------------------------------------
 
 function Bugger:OnLoad()
+	BugGrabber.RegisterCallback(self, "BugGrabber_BugGrabbed")
+	-- Register :DisplayError() and :FormatError() callbacks
+	if  BugGrabber.DisplayAddons  then  table.insert(BugGrabber.DisplayAddons, self)  end
+
 	LibStub("LibDataBroker-1.1"):NewDataObject(BUGGER, self.dataObject)
 
 	-- Only create a minimap icon if the user doesn't have another Broker display
 	local displays = { "Barrel", "Bazooka", "ButtonBin", "ChocolateBar", "DockingStation", "HotCorners", "NinjaPanel", "StatBlockCore", "TitanPanel" }
-	if GetAddOnEnableState then
+	local character = UnitName("player")
+
+	-- MOP
+	local GetAddOnEnableState = GetAddOnEnableState  or  function(character, addonName)  local _,_,_,enabled = GetAddOnInfo(addonName) ; return enabled  end
+	for i = 1, #displays do
 		-- WOD
-		local character = UnitName("player")
-		for i = 1, #displays do
-			if GetAddOnEnableState(character, displays[i]) then
-				return
-			end
-		end
-	else
-		-- MOP
-		for i = 1, #displays do
-			local _, _, _, enabled = GetAddOnInfo(displays[i])
-			if enabled then
-				return
-			end
-		end
+		if GetAddOnEnableState(character, displays[i]) then  return  end
 	end
 	LibStub("LibDBIcon-1.0"):Register(BUGGER, self.dataObject, self.db.minimap)
 end
 
 function Bugger:OnLogin()
-	BugGrabber.RegisterCallback(self, "BugGrabber_BugGrabbed")
 	if self:GetNumErrors() > 0 then
 		return self:BugGrabber_BugGrabbed()
 	end
@@ -131,30 +126,40 @@ end)
 
 ------------------------------------------------------------------------
 
-function Bugger:GetNumErrors(session)
-	local errors = BugGrabber:GetDB()
-	local total = #errors
-	if total == 0 then return 0 end
-
-	if session == "all" then
-		return total, 1, total
-	end
-
-	if session == "previous" then
-		session = BugGrabber:GetSessionId() - 1
+function Bugger:GetErrors(session)
+	local newApi, errors = true
+	if  (not session  or session == 'current') and BugGrabber.GetSessionErrors  then
+		errors = BugGrabber:GetSessionErrors()
+	elseif  session == 'previous'  and  BugGrabber.GetPreviousErrors  then
+		errors = BugGrabber:GetPreviousErrors()
 	else
-		session = BugGrabber:GetSessionId()
+		newApi, errors = session == 'all', BugGrabber:GetDB()
+	end
+	
+	local total = #errors
+
+	if  newApi  then  return errors, 1, total  end
+	if  total == 0  then  return errors, 1, 0  end
+	-- if  session == "all"  then  return errors, 1, total  end    -- newApi == true
+
+	local sessionId = BugGrabber:GetSessionId()
+	local previousCount = total
+
+	for  i = 1,total  do
+		if  errors[i].session == sessionId  then  previousCount = i-1 ; break  end
 	end
 
-	local total, first, last = 0
-	for i = 1, #errors do
-		if errors[i].session == session then
-			total = total + 1
-			first = first or i
-			last = i
-		end
+	local currentCount = total - previousCount
+	if  session == "previous"  then
+		return errors, 1, previousCount
+	else
+		return errors, previousCount+1, total
 	end
-	return total, first, last
+end
+
+function Bugger:GetNumErrors(session)
+	local errors, first, last = Bugger:GetErrors(session)
+	return last - first + 1
 end
 
 ------------------------------------------------------------------------
@@ -180,6 +185,8 @@ function Bugger:BugGrabber_BugGrabbed(callback, err)
 		if self.db.sound then
 			PlaySoundFile(self.db.sound, "Master")
 		end
+		-- Update frame
+		self:ShowError(self.error)
 	end
 	self.lastError = GetTime()
 end
@@ -188,9 +195,9 @@ end
 
 do
 	local FILE_TEMPLATE   = c.GRAY .. "%1%2\\|r%3:" .. c.GREEN .. "%4|r" .. c.GRAY .. "%5|r%6"
-	local STRING_TEMPLATE = c.GRAY .. "%1[string |r\"" .. c.BLUE .. "%2\"|r" .. c.GRAY .. "]|r:" .. c.GREEN .. "%3|r" .. c.GRAY .. "%4|r%5"
+	local STRING_TEMPLATE = c.GRAY .. "%1[loadstring(|r?,\"" .. c.BLUE .. "%2\"|r" .. c.GRAY .. ")]|r:" .. c.GREEN .. "%3|r" .. c.GRAY .. "%4|r%5"
 	local NAME_TEMPLATE   = c.BLUE .. "'%1'|r"
-	local IN_C = c.GOLD .. "[C]|r" .. c.GRAY .. ":|r"
+	local IN_C = c.GOLD .. "[game engine]|r" .. c.GRAY .. ":|r"
 
 	function Bugger:FormatStack(message, stack)
 		message = message and tostring(message)
@@ -248,6 +255,20 @@ end
 
 ------------------------------------------------------------------------
 
+local function tindexof(arr, item)
+	for i = 1,#arr  do  if  arr[i] == item  then  return i  end end
+end
+
+function Bugger:DisplayError(errorObject)
+	local current =  errorObject.session == BugGrabber:GetSessionId()
+	local session =  current  and  'current'  or  'previous'
+	local errors = self:GetErrors(session)
+	local index = tindexof(errors, errorObject)
+	self:ShowSession(session, index)
+end
+
+------------------------------------------------------------------------
+
 function Bugger:ShowError(index)
 	if not self.frame then
 		self:SetupFrame()
@@ -255,8 +276,8 @@ function Bugger:ShowError(index)
 
 	self.frame:Show()
 
-	local errors = BugGrabber:GetDB()
-	local total, first, last = self:GetNumErrors(self.session)
+	local errors, first, last = self:GetErrors(self.session)
+	local total = last - first + 1
 
 	if total == 0 then
 		self.error = 0
@@ -268,10 +289,14 @@ function Bugger:ShowError(index)
 		self.indexLabel:SetText("")
 		self.previous:Disable()
 		self.next:Disable()
-		self.clear:SetEnabled(#errors > 0)
+		local otherErrors = 0 < #errors
+			or  BugGrabber.GetSessionErrors and 0 < #BugGrabber:GetSessionErrors()
+			or  BugGrabber.GetPreviousErrors and 0 < #BugGrabber:GetPreviousErrors()
+		self.clear:SetEnabled(otherErrors)
 		return
 	end
 
+	-- local last = first + total - 1
 	local err = index and index >= first and index <= last and errors[index]
 	if not err then
 		index = last
@@ -302,7 +327,7 @@ end
 
 ------------------------------------------------------------------------
 
-function Bugger:ShowSession(session)
+function Bugger:ShowSession(session, index)
 	if session ~= "all" and session ~= "previous" then
 		session = "current"
 	end
@@ -321,7 +346,7 @@ function Bugger:ShowSession(session)
 	end
 
 	self.session = session
-	self:ShowError()
+	self:ShowError(index)
 end
 
 ------------------------------------------------------------------------
@@ -359,12 +384,12 @@ function Bugger:SetupFrame()
 	self.editBox:SetFontObject(GameFontHighlight)
 	self.editBox:SetTextColor(0.9, 0.9, 0.9)
 
-	local addWidth = 150
+	local addWidth = 200
 	self.frame:SetWidth(self.frame:GetWidth() + addWidth)
 	self.scrollFrame:SetWidth(self.scrollFrame:GetWidth() + addWidth - 4)
 	self.editBox:SetWidth(self.editBox:GetWidth() + addWidth)
 
-	local addHeight = 50
+	local addHeight = 150
 	self.frame:SetHeight(self.frame:GetHeight() + addHeight)
 	self.scrollFrame:SetHeight(self.scrollFrame:GetHeight() + addHeight - 4)
 
@@ -430,16 +455,16 @@ function Bugger:SetupFrame()
 		self.tabs[i] = tab
 	end
 
-	self.tabs[1].session = "all"
-	self.tabs[1]:SetText(L["All Errors"])
+	self.tabs[1].session = "current"
+	self.tabs[1]:SetText(L["Current Session"])
 	self.tabs[1]:SetPoint("TOPLEFT", self.frame, "BOTTOMLEFT", 8, 7)
 
 	self.tabs[2].session = "previous"
-	self.tabs[2]:SetText(L["Previous Session"])
+	self.tabs[2]:SetText(L["Previous Sessions"])
 	self.tabs[2]:SetPoint("TOPLEFT", self.tabs[1], "TOPRIGHT")
 
-	self.tabs[3].session = "current"
-	self.tabs[3]:SetText(L["Current Session"])
+	self.tabs[3].session = "all"
+	self.tabs[3]:SetText(L["All Errors"])
 	self.tabs[3]:SetPoint("TOPLEFT", self.tabs[2], "TOPRIGHT")
 
 	-- TODO: add button for opening options
