@@ -19,19 +19,19 @@ AddonLoader.frame = ConditionManager  -- Deprecated: easy reference for use in X
 
 
 -- Import from CallbackHandler: metatable that auto-creates empty inner tables when first referenced.
-local AutoInnerTablesMeta = _G.AutoInnerTablesMeta  or  {__index = function(self, key) self[key] = {} return self[key] end}
--- Want optimized lua syntax: local AutoInnerTablesMeta = { __index = function(self, key)  return self[key] = {}  end }
+local AutoCreateTablesMeta = _G.AutoCreateTablesMeta  or  {__index = function(self, key) self[key] = {} return self[key] end}
+-- Want optimized lua syntax: local AutoCreateTablesMeta = { __index = function(self, key)  return self[key] = {}  end }
 
-ConditionManager.AddonMetadata = setmetatable({}, AutoInnerTablesMeta)
-ConditionManager.AddonOverrides = setmetatable({}, AutoInnerTablesMeta)
-ConditionManager.MergedConditions = setmetatable({}, AutoInnerTablesMeta)
+ConditionManager.AddonMetadata = setmetatable({}, AutoCreateTablesMeta)
+ConditionManager.AddonOverrides = setmetatable({}, AutoCreateTablesMeta)
+ConditionManager.MergedConditions = setmetatable({}, AutoCreateTablesMeta)
 
 ConditionManager.EventHooks = {}
 ConditionManager.FrameHooks = {}
 ConditionManager.SecureHooks = {}
 
 -- Slashes:  ["AddonName"] = { "ADDON_SLASH"="/slash", "ADDON_DOTHIS"="/dothis", .. }, ["AnotherAddon"] = ..
-ConditionManager.Slashes = setmetatable({}, AutoInnerTablesMeta)
+ConditionManager.Slashes = setmetatable({}, AutoCreateTablesMeta)
 
 
 
@@ -214,7 +214,7 @@ do
 		if  eventObj  then  return  eventObj  end
 		
 		-- First time reference, create it
-		eventObj = setmetatable({}, AutoInnerTablesMeta)
+		eventObj = setmetatable({}, AutoCreateTablesMeta)
 		Hooks[eventKey] = eventObj
 		-- Tries to install the dispatcher only the first time the EventObj is requested. If it fails there's no errormessage spam.
 		Hooks:InstallDispatcher(objectName, eventName, eventKey)
