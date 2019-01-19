@@ -109,8 +109,14 @@ function _G.debugprofilestart()  return _G.debugprofilestop()  end
 
 -- Max number of errors stored in a session.
 MAX_BUGGRABBER_ERRORS = 1000
--- If we get more errors than this per second, we stop all capturing
-BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE = 10
+-- If we get more errors than this per second, overflowing errors are ignored (dropped)
+-- BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE = 10
+BugGrabber.throttle = {
+	perSec = 1,
+	maxBurst = 10,
+	allowed = 10,
+	updatedTime = GetTime(),
+}
 
 -- By default print errors if there are no handlers for BugGrabber_BugGrabbed. BugSack is one.
 BugGrabber.PrintErrorLinks = nil
@@ -161,11 +167,11 @@ end
 
 -- Shorthand to the saved previousDB[#previousDB].
 -- Available from the start, even before loading SavedVariables.
-local currentSessionDB = {}
+local sessionDB, sessionMessages = {}, {}
 -- These come from the SavedVariables
 local currentSessionId, previousDB
--- Error messages captured in the last framedraw.
-local newError = {}
+-- Error message batch to send to callbacks.
+local errorsToSend = {}
 
 -- The registered errorhandler
 local ErrorHandler
@@ -183,6 +189,48 @@ local chatLinkFormat = "|Hbuggrabber:%s:%s|h|cffff0000[Error %s]|r|h"
 
 
 -----------------------------------------------------------------------
+-- Store error to SavedVariables.
+
+function BugGrabber:StoreError(errorObject)
+	-- Deprecated, other addons should not be using it anyway.
+	print("BugGrabber:StoreError() is not supported anymore.")
+end
+
+-- Forward declaration
+local StoreError, SendError
+
+-- local
+function StoreError(errorMessage, err)
+	-- Add to errorMessage map
+	sessionMessages[errorMessage] = err
+	sessionDB[#sessionDB+1] = err
+	
+	-- Save only the last MAX_BUGGRABBER_ERRORS errors (otherwise the SV gets too big)
+	if #sessionDB > MAX_BUGGRABBER_ERRORS then
+		table.remove(sessionDB, 1)
+	end
+	
+	if  allErrors  and  #allErrors < MAX_BUGGRABBER_ERRORS  then
+		-- Note: allErrors will become inconsistent if MAX_BUGGRABBER_ERRORS is reached. At that point does not really matter.
+		allErrors[#allErrors+1] = errorObject
+	end
+	
+	SendError(errorMessage, err)
+end
+
+-- local
+function SendError(errorMessage, err)
+	-- Notify listeners (callbacks) in next OnUpdate()
+	if  not errorsToSend[errorMessage]  then
+		errorsToSend[#errorsToSend+1] = err
+		errorsToSend[errorMessage] = err
+		-- Show frame to run OnUpdate() on next framedraw, that will notifiy callbacks.
+		original.pcall(frame.Show, frame)
+	end
+end
+
+
+-----------------------------------------------------------------------
 -- Internal-error handler
 --
 
@@ -194,48 +242,36 @@ local function safe_print(...)
 	-- _ = original.pcall(getprinthandler(), msg)  or  original.pcall(original.printhandler, msg)    -- if any addon would overwrite the printhandler
 end
 
-local function reportInternalError(message, whileError)
+local function reportInternalError(errorMessage)
 	local now = time()
 	-- Report only once every minute
-	if  BugGrabber.internalErrorTime  and  now - BugGrabber.internalErrorTime < 60  then  return message  end
+	if  BugGrabber.internalErrorTime  and  now - BugGrabber.internalErrorTime < 60  then  return errorMessage  end
 	BugGrabber.internalErrorTime = now
 	
 	-- Store the error
 	local err = {
-		message = message,
-		stack = original.pcall(original.debugstack, 3),
-		locals = original.pcall(original.debuglocals, 3),
-		-- calleeLocals = original.pcall(original.debuglocals, 4),
+		message = errorMessage,
+		stack = select(2, original.pcall(original.debugstack, 3) ),
+		locals = select(2, original.pcall(original.debuglocals, 3) ),
+		-- calleeLocals = select(2, original.pcall(original.debuglocals, 4) ),
 		session = currentSessionId,
 		time = date("%Y/%m/%d %H:%M:%S"),
 		counter = 1,
 	}
 	
 	BugGrabber.internalError = err
-	newError[#newError+1] = err
-	
-	-- Show frame to run OnUpdate() on next framedraw. It notifies callbacks and checks if ErrorHandlerDispatcher returned correctly, clearing dispatcherLevel.
-	original.pcall(frame.Show, frame)
-	
-	-- Save it
-	original.pcall(BugGrabber.StoreError, BugGrabber, err)
-	
-	-- Append outer error message for printing.
-	local withError = message
-	if  whileError  then
-		withError = withError .. "\n"..MESSAGE_COLOR.."While handling original error:|r\n" .. tostring(whileError)
-	end
+	StoreError(errorMessage, err)
 	
 	-- Custom print implementation to avoid recursively calling  original.geterrorhandler()(errorObject)
-	safe_print(withError)
+	safe_print(errorMessage)
 	
 	if  not BugGrabber.poppedOriginalHandler  then
 		-- Show Bliz Lua Error frame once until BugGrabber:Reset()
 		BugGrabber.poppedOriginalHandler = now
-		original.pcall(original.errorhandler, withError)
+		original.pcall(original.errorhandler, errorMessage)
 	end
 	
-	return message
+	return errorMessage
 end
 
 if  original.errorhandler ~= _G._ERRORMESSAGE  then
@@ -246,9 +282,9 @@ end
 -- The global seterrorhandler() will just print a message.
 _G.seterrorhandler = function(newhandler)
 	local caller = original.debugstack(2, 1, 0) or ""
-	local fileName, addonName = caller:match([[^Interface\AddOns\((.-)\.-):]])
-	local pre = fileName and fileName..": "  or  "Another addon "
-	reportInternalError(pre.."conflicts with BugGrabber as it intends to override the errorhandler. If this causes an issue, then disable one of the addons or consult with the developers.")
+	local fileName, addonName = caller:match([[AddOns\((.-)\.-:.-:)]])
+	local pre = fileName  or  "Another addon"
+	reportInternalError(pre.." conflicts with BugGrabber as it intends to override the errorhandler. If this causes an issue, then disable one of the addons or consult with the developers.")
 	return false
 end
 
@@ -258,87 +294,56 @@ original.seterrorhandler(ErrorHandler)
 
 
 -----------------------------------------------------------------------
--- Store error to SavedVariables.
-
-function BugGrabber:StoreError(errorObject)
-	currentSessionDB[#currentSessionDB+1] = errorObject
-	
-	-- Save only the last MAX_BUGGRABBER_ERRORS errors (otherwise the SV gets too big)
-	if #currentSessionDB > MAX_BUGGRABBER_ERRORS then
-		table.remove(currentSessionDB, 1)
-	end
-	
-	if  allErrors  and  #allErrors < MAX_BUGGRABBER_ERRORS  then
-		-- Note: allErrors will become inconsistent if MAX_BUGGRABBER_ERRORS is reached. At that point does not really matter.
-		allErrors[#allErrors+1] = errorObject
-	end
-end
-
-
------------------------------------------------------------------------
 -- Error handler: GrabError() collects and saves stacktrace and local variables
 
 local GrabError
 do
 	-- Forward declaration of functions used in GrabError()
-	local findVersions, fetchFromDatabase
-	-- Throttle error spam.
-	local msgsAllowed = BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE
-	local msgsAllowedLastTime = GetTime()
+	local checkTooManyErrors, findVersions
 	-- Error on previous recursion level.
 	local grabbingError = nil
-	
-	function GrabError(errorParam, options)
-		local errorMessage =  tostring(errorParam)
-		if  grabbingError   then
-			if  errorMessage:find("BugGrabber")  then
-				return reportInternalError(FUNCTION_COLOR.."BugGrabber.GrabError()|r"..MESSAGE_COLOR.." internal error:|r\n".. errorMessage)
-			else
-				return reportInternalError(FUNCTION_COLOR.."BugGrabber.GrabError()|r"..MESSAGE_COLOR.." looping while handling error:|r\n".. errorMessage)
-			end
+
+	-- local
+	function GrabError(errorMessage, options)
+		local errorMessageStr =  tostring(errorMessage)
+		if  grabbingError  then
+			local msg =  errorMessageStr:find("BugGrabber")  and  " internal error:|r\n"  or  " looping while handling error:|r\n"
+			return reportInternalError(FUNCTION_COLOR.."BugGrabber.GrabError()|r"..MESSAGE_COLOR..msg..errorMessageStr)
 		end
+
 		-- Save error on previous recursion level.
 		local parentError = grabbingError
-		grabbingError = errorParam
+		grabbingError = errorMessage
 
-		-- Flood protection --
-		msgsAllowed = msgsAllowed + (GetTime()-msgsAllowedLastTime)*BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE
-		msgsAllowedLastTime = GetTime()
-		if msgsAllowed < 1 then
-			if  not BugGrabber.paused  then
-				if  ADDON_NAME == STANDALONE_NAME  then
-					reportInternalError(errorMessage)
-					safe_print(FUNCTION_COLOR.."BugGrabber:|r "..L.BUGGRABBER_STOPPED)
-				end
-				BugGrabber.paused = true
-				triggerEvent("BugGrabber_CapturePaused")
-			end
-			grabbingError = parentError
-			return errorParam
-		end
-
-		BugGrabber.paused = false
-		if msgsAllowed > BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE then
-			msgsAllowed = BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE
-		end
-		msgsAllowed = msgsAllowed - 1
-
-		-- Grab it --
-		local sanitizedMessage = findVersions(errorMessage)
-
-		-- Insert the error into the correct database if it's not there already.
-		-- If it is, just increment the counter.
-		local fromdb = fetchFromDatabase(sanitizedMessage)
-		-- fetchFromDatabase removed the errorObject from currentSessionDB, if it was found.
-
-		local err = fromdb  or  type(options) == 'table'  and  options
-
-		if  fromdb  then
-			-- err = fromdb
-			err.session = currentSessionId
+		-- Get previous error with same message from the database.
+		local err = sessionMessages[errorMessage]
+		if  err  then
 			err.counter = err.counter + 1
-		else
-			local stack =  err and err.stack  or  _G.debugstack(2)
+			-- Notify listeners (callbacks) in next OnUpdate()
+			if  not errorsToSend[errorMessage]  then
+				errorsToSend[#errorsToSend+1] = err
+				errorsToSend[errorMessage] = err
+				frame:Show()
+			end
+			-- Repeated errorMessage handled.
+			-- Note: sometimes the same errorMessage comes from a different callstack.
+			-- This is not checked by BugGrabber. The other stacktrace is not saved.
+			grabbingError = parentError
+			return
+		end
+
+		-- Check if some error is generating more than 1 individual errorMessage per second.
+		if  checkTooManyErrors()  then
+			grabbingError = parentError
+			return
+		end
+
+		-- Shorten file paths and insert version numbers into message.
+		local sanitizedMessage = findVersions(errorMessageStr)
+
+		do
+			err =  type(options) == 'table' and options  or  {}
+			local stack =  err.stack  or  _G.debugstack(2)
 			--[[ Callstack from here:
 /run error()
 0: [C]: in function `debugstack'		-- BugGrabber.debugstack()
@@ -371,42 +376,46 @@ do
 			err.calleeLocals = _G.debuglocals(4)
 			err.session = currentSessionId
 			err.time = date("%Y/%m/%d %H:%M:%S")
+			err.timestamp = time()
 			err.counter = 1
 		end
 
 		-- Save to DB
-		BugGrabber:StoreError(err)
-		newError[errorParam] = err
-
-		-- Notify listeners (callbacks) in next OnUpdate()
-		newError[#newError+1] = err
-		original.pcall(frame.Show, frame)
+		StoreError(errorMessage, err)
 
 		-- If this function is aborted by an error then  grabbingError  is not cleared.
 		grabbingError = parentError
-		return errorParam
+		return errorMessage
 	end
 
 
-	-- Find and remove repeated error from currentSessionDB.
-	function fetchFromDatabase(findMessage)
-		local found
-		local t = currentSessionDB
-		for  i = #t,1,-1  do
-			if  t[i].message == findMessage  then
-				-- Index from the end is the same in allErrors.
-				local inAll = i + #allErrors - #t
-				found = table.remove(t, i)
-				if  allErrors  then
-					if  found == allErrors[inAll]  then
-						table.remove(allErrors, inAll)
-					else
-						safe_print("Inconsistency: BugGrabber:GetDB()["..inAll.."] ~= BugGrabber:GetSessionErrors()["..i.."]. Clear all bugs.")
-					end
+	-- Throttle error spam.
+	-- local
+	function checkTooManyErrors()
+		local thr, now = BugGrabber.throttle, GetTime()
+		thr.allowed = thr.allowed + (now - thr.updatedTime) * thr.perSec
+		thr.updatedTime = now
+		if  1 <= thr.allowed  then
+			thr.allowed = min(thr.maxBurst, thr.allowed - 1)
+			if  thr.allowed == thr.maxBurst  and  BugGrabber.Throttling  then
+				BugGrabber.Throttling = false
+				triggerEvent("BugGrabber_Throttling", false)
+				if  ADDON_NAME == STANDALONE_NAME  then
+					safe_print(FUNCTION_COLOR.."BugGrabber:|r "..L.BUGGRABBER_SPAM_FINISHED)
 				end
-				return found
+			end
+			return
+		end
+
+		if  not BugGrabber.Throttling  then
+			BugGrabber.Throttling = true
+			triggerEvent("BugGrabber_Throttling", true)
+			-- triggerEvent("BugGrabber_CapturePaused")
+			if  ADDON_NAME == STANDALONE_NAME  then
+				safe_print(FUNCTION_COLOR.."BugGrabber:|r "..L.BUGGRABBER_SPAM_THROTTLING)
 			end
 		end
+		return true
 	end
 
 
@@ -461,7 +470,7 @@ do
 
 		--[[
 		local escapeCache = setmetatable({}, { __index = function(self, key)
-			local escaped = key:gsub("([%.%-%(%)%+])", "%%%1")
+			local escaped = key:gsub("([%.%-%(%)%+%*])", "%%%1")
 			self[key] = escaped
 			return escaped
 		end })
@@ -511,6 +520,8 @@ do
 			"()(%a+%-%d%.?%d?)()",       -- Anything-#.#, where .# is optional
 			"()(Lib%u%a+%-?%d?%.?%d?)()" -- LibXanything-#.#, where X is any capital letter and -#.# is optional
 		} --]]
+
+		-- local
 		function findVersions(line)
 			-- if not line or line:find("FrameXML\\") then return line end
 			line = line:gsub(addonRegex, appendAddonVersion)
@@ -528,161 +539,6 @@ ErrorHandler = GrabError
 original.seterrorhandler(ErrorHandler)
 
 
-
---[[
------------------------------------------------------------------------
--- ErrorHandlerDispatcher manages multiple error handlers.
-
-local ErrorHandlers = {}
-
-local runningErrorHandlers = {}
-local dispatcherLevel = nil
-local dispatchingError
-local skipStackFrames = 0
-local hooked = {}
-hooked.debugstack, hooked.debuglocals = _G.debugstack, _G.debuglocals
--- skipStackFrames + 1: skip the hook BugGrabber.debugstack() aswell
-function BugGrabber.debugstack (skip, ...)  return hooked.debugstack (type(skip) == 'number'  and  skip > 1  and  skip + skipStackFrames + 1  or  skip, ...)  end
-function BugGrabber.debuglocals(skip, ...)  return hooked.debuglocals(type(skip) == 'number'  and  skip > 1  and  skip + skipStackFrames + 1  or  skip, ...)  end
-
-local ErrorHandlerDispatcher
-
--- The global errorhandler that dispatches to registered errorhandlers, including GrabError.
-function BugGrabber.ErrorHandlerDispatcher(errorParam, options)
-	local parentLevel = dispatcherLevel
-	dispatcherLevel = (parentLevel or 0) + 1
-	if  2 < dispatcherLevel  then
-		if  dispatcherLevel <= 3 then
-			-- Called recursively 2 times:  error() -> dispatcher 1 -> error() -> dispatcher 2 -> error() -> dispatcher 3.
-			reportInternalError(FUNCTION_COLOR.."BugGrabber.ErrorHandlerDispatcher()|r"..MESSAGE_COLOR.." entered an infinite loop while handling error:|r\n"..tostring(errorParam))
-		else
-			-- This got out of hand. Do nothing.
-		end
-		dispatcherLevel = parentLevel
-		return errorParam
-	end
-	
-	if  dispatchingError == errorParam  then
-		-- Called recursively with same error parameter: very likely it was called from an additionalHandler intending to replace the Bliz handler.
-		-- Swatter would do this if disabled with /swat disable. No problem as Swatter addon should not be loaded.
-		-- Other addons hopefully don't hook like this. Although if it happens this code will just report and return.
-		local ran, caller = original.pcall(original.debugstack, 4, 1, 0)
-		reportInternalError( FUNCTION_COLOR.."BugGrabber.ErrorHandlerDispatcher()|r"..MESSAGE_COLOR.." recursively called from hooking errorhandler:|r\n"
-			..(caller or "<debugstack() failed>").."\nWhile handling error:|r\n" .. tostring(errorParam) )
-		dispatcherLevel = parentLevel
-		return errorParam
-	end
-	
-	-- Show frame to run OnUpdate() on next framedraw. It notifies callbacks and checks if ErrorHandlerDispatcher returned correctly, clearing dispatcherLevel.
-	original.pcall(frame.Show, frame)
-	
-	-- Hook debug functions to skip the dispatcher from the callstack.
-	hooked.debugstack, hooked.debuglocals = _G.debugstack, _G.debuglocals
-	_G.debugstack, _G.debuglocals = BugGrabber.debugstack, BugGrabber.debuglocals
-	local handlersRan, handler, firstResult, wasError = 0
-	-- local function handlerThunk()  local res = handler(errorParam, options) ; return res  end  -- Disable tail cail for readable stacktrace.
-	local function handlerThunk()  return handler(errorParam, options)  end
-	
-	for  i = 1,#ErrorHandlers  do
-		handler = ErrorHandlers[i]
-		if  not runningErrorHandlers[handler]  then
-			-- Catching errors in handlers will recurse, then skip the faulty errorhandler.
-			runningErrorHandlers[handler] = handler
-			skipStackFrames = 4    -- skip RuntimeErrorHandler, ErrorHandlerDispatcher, xpcall, handlerThunk -- tailcall is visible in stacktrace
-			local ran, result
-			-- If recursive (internal error in a handler) then fail silently (pcall) and reportInternalError at the end.
-			if  not parentLevel  then  ran, result = original.xpcall(handlerThunk, RuntimeErrorHandler)
-			else  ran, result = original.pcall(handler, errorParam, options)
-			end
-			skipStackFrames = 0
-			runningErrorHandlers[handler] = nil
-			firstResult = firstResult  or  ran and result
-			if  ran  then
-				handlersRan = handlersRan + 1
-			elseif  not wasError  then
-				reportInternalError( FUNCTION_COLOR.."BugGrabber.ErrorHandlerDispatcher()|r"..MESSAGE_COLOR.." encountered internal error in errorhandler:|r\n".. tostring(result) )
-				reportInternalError( errorParam )
-				wasError = true
-			end
-		end
-	end
-	
-	-- Restore hooked debug functions. Errorhandlers are expected to not change these permanently, otherwise their hook is lost.
-	_G.debugstack, _G.debuglocals = hooked.debugstack, hooked.debuglocals
-	
-	-- If GrabError failed then use Bliz errorhandler.
-	if  not wasError  and  not newError[errorParam]  then  reportInternalError(FUNCTION_COLOR.."BugGrabber|r"..MESSAGE_COLOR.." failed to save error:|r\n"..tostring(errorParam))  end
-	
-	dispatcherLevel = parentLevel
-	-- xpcall() will return what this errorhandler returns:
-	return firstResult or errorParam
-end
--- END BugGrabber.ErrorHandlerDispatcher()
-ErrorHandlerDispatcher = BugGrabber.ErrorHandlerDispatcher
-
-
--- BugGrabber.ErrorHandlerDispatcher = ErrorHandlerDispatcher
-BugGrabber.GrabError = GrabError
-
-local internalHandlers = {} 
-internalHandlers[GrabError] = true
-internalHandlers[ErrorHandlerDispatcher] = true
-internalHandlers[original.errorhandler] = true
-
-
--- Add additional errorhandler.
-function BugGrabber.adderrorhandler(additionalHandler)
-	assert(additionalHandler, "Provide parameter additionalHandler for BugGrabber.adderrorhandler(additionalHandler: function)")
-	if  internalHandlers[additionalHandler]  then
-		-- local old = geterrorhandler() ; seterrorhandler(otherHandler) ; dosomthin() ; seterrorhandler(old)  -- results in old == ErrorHandlerDispatcher
-		-- meaning it is meant to remove the last added otherHandler
-		return BugGrabber.removeerrorhandler()
-	elseif  not ErrorHandlers[additionalHandler]  then
-		ErrorHandlers[#ErrorHandlers+1] = additionalHandler
-		ErrorHandlers[additionalHandler] = additionalHandler
-	else
-		-- Added again, so ignore. Probably a result of calling seterrorhandler(additionalHandler) twice, maybe there was a seterrorhandler(otherHandler) in between.
-	end
-end
-
--- Remove additional errorhandler.
-function BugGrabber.removeerrorhandler(handler)
-	-- Remove the last added handler if not specified. If specified, it is probably the last one, so search in reverse from the end.
-	local index =  not handler  and  #ErrorHandlers  or  tindexOfRev(ErrorHandlers, handler)  or  0
-	-- Do not remove ErrorHandlers[1] == ErrorHandlerDispatcher  and  return if #ErrorHandlers == 0
-	if  index <= 1  then  return nil  end
-	
-	-- Remove from the array
-	local found = table.remove(ErrorHandlers, index)
-	-- Remove from the map. If it wasn't found in the array then remove the provided handler.
-	ErrorHandlers[found or handler] = nil
-	return found
-end
-
-function BugGrabber.geterrorhandler()  return  ErrorHandler  end
-
-
------------------------------------------------------------------------
--- Replace the global errorhandler
-
--- The first handler.
-BugGrabber.adderrorhandler(GrabError)
-
-if  original.errorhandler ~= _G._ERRORMESSAGE  then
-	print("The builtin errorhandler has already been hooked before BugGrabber loaded. BugGrabber will replace it and call it if an error occurs.")
-	print("To avoid this message disable one of the addons, or add the  "..ORANGE_FONT_COLOR_CODE.."OptionalDeps: !BugGrabber|r  field to the other addon's .toc file.")
-	BugGrabber.adderrorhandler(original.errorhandler)
-end
-
--- Replace GrabError with ErrorHandlerDispatcher.
-ErrorHandler = RuntimeErrorHandler
-original.seterrorhandler(ErrorHandler)
-
--- The global seterrorhandler() will add the errorhandler without replacing other handlers.
-_G.seterrorhandler = BugGrabber.adderrorhandler
-_G.geterrorhandler = BugGrabber.geterrorhandler
-
---]]
 
 
 -----------------------------------------------------------------------
@@ -702,6 +558,7 @@ function BugGrabber.RegisterCallback(...)
 	return BugGrabber.RegisterCallback(...)
 end
 
+	-- local
 function triggerEvent(eventName, ...)
 	if  not callbacks  then  return  end
 	local handlers = rawget(callbacks.events, eventName)
@@ -713,7 +570,6 @@ end
 
 -- Notify callbacks (BugSack, Bugger) in the next draw cycle.
 function frame:OnUpdate(elapsed)
-	local err = newError[1]
 	if  dispatcherLevel  then
 		reportInternalError(FUNCTION_COLOR.."BugGrabber.ErrorHandlerDispatcher()|r"..MESSAGE_COLOR.." did not run to completion.|r")
 		-- Reset to indicate ErrorHandlerDispatcher is not running.
@@ -721,10 +577,12 @@ function frame:OnUpdate(elapsed)
 	end
 	
 	-- No OnUpdate() until next error.
-	wipe(newError)
 	self:Hide()
 	
-	local handled = triggerEvent("BugGrabber_BugGrabbed", err)
+	local sendBatch, err = errorsToSend, errorsToSend[1]
+	errorsToSend = {}
+	
+	local handled = triggerEvent("BugGrabber_BugGrabbed", err, sendBatch)
 	if  err  then
 		if  BugGrabber.PrintErrorLinks == nil and not handled  or  BugGrabber.PrintErrorLinks  then
 			BugGrabber.PrintErrorLink(err)
@@ -737,10 +595,10 @@ end
 -- Returns nil before ADDON_LOADED (SavedVariables loaded)
 function BugGrabber:GetSessionId()  return currentSessionId  end
 -- Returns true if BugGrabber catches too many errors and stopped saving all of them (throttled down).
-function BugGrabber:IsPaused() return self.paused end
+function BugGrabber:IsPaused() return self.Throttling end
 
 -- Get errors in current session.
-function BugGrabber:GetSessionErrors()  return currentSessionDB  end
+function BugGrabber:GetSessionErrors()  return sessionDB  end
 -- Get archived errors from previous sessions.
 function BugGrabber:GetPreviousErrors()  return previousDB or {}  end
 
@@ -750,34 +608,40 @@ function BugGrabber:GetDB()
 	if  allErrors  then  return allErrors  end
 	-- If only one session then return it.
 	if  not previousDB  or  #previousDB == 0  then
-		allErrors = currentSessionDB
+		allErrors = sessionDB
 		return allErrors
 	end
 	
 	-- Otherwise concatenate session arrays.
 	allErrors = {}
-	for  _, err  in ipairs(previousDB) do        allErrors[#allErrors+1] = err  end
-	for  _, err  in ipairs(currentSessionDB) do  allErrors[#allErrors+1] = err  end
+	for  _, err  in ipairs(previousDB) do  allErrors[#allErrors+1] = err  end
+	for  _, err  in ipairs(sessionDB) do  allErrors[#allErrors+1] = err  end
 	return allErrors
 end
 
 -- Delete all errors.
-function BugGrabber:Reset()
+function BugGrabber:Reset(category)
+	category = category or 'all'
+
 	self.poppedOriginalHandler = nil
 	self.internalError = nil
 	self.internalErrorTime = nil
 	
 	-- Reset to indicate ErrorHandlerDispatcher is not running.
 	dispatcherLevel = nil
-	wipe(newError)
 	
 	allErrors = nil
-	wipe(currentSessionDB)
-	if  currentSessionId  then  currentSessionId = 1  end
-	if  _G.BugGrabberDB  then  _G.BugGrabberDB.session = currentSessionId  end
-	if  previousDB  then
-		wipe(previousDB)
-		-- _G.BugGrabberDB.previousDB (== previousDB) is empty as a result.
+	
+	if  category == 'all'  or  category == 'current'  then
+		wipe(sessionDB)
+	end
+	if  category == 'all'  or  category == 'previous'  then
+		previousDB = nil
+		if  _G.BugGrabberDB  then  _G.BugGrabberDB.previousErrors = nil  end
+	end
+	if  currentSessionId  and  not previousDB  and  #sessionDB == 0  then
+		currentSessionId = 1
+		if  _G.BugGrabberDB  then  _G.BugGrabberDB.session = currentSessionId  end
 	end
 	
 	-- Update display
@@ -798,7 +662,7 @@ function BugGrabber:GetErrorByID(errorId)
 	local objId = "table: "..errorId
 	-- errorId == objId:sub(8)
 	
-	local t = currentSessionDB
+	local t = sessionDB
 	for  i = #t,1,-1  do  if  tostring(t[i]) == objId  then  return t[i]  end end
 	if  not previousDB  then  return  end
 	t = previousDB[sIdx]
@@ -906,29 +770,17 @@ local function initDatabase()
 	elseif  lastDB  then
 		-- No previousDB so lastDB becomes previousDB.
 		previousDB = lastDB
-		sv.previousErrors = previousDB
 	elseif  not previousDB  then
-		-- Empty previousDB to avoid nil pointer. Not saved to sv.previousErrors
-		previousDB = {}
-		sv.previousErrors = nil
 	else
 		-- 0 < #previousDB  and  previousDB == sv.previousErrors
 	end
+	sv.previousErrors = previousDB
 
 	-- Increase currentSessionId
-	currentSessionId = sv.previousErrors and type(sv.session) == "number" and sv.session + 1  or  1
+	currentSessionId = previousDB and type(sv.session) == "number" and sv.session + 1  or  1
 	sv.session = currentSessionId
-	-- Store currentSessionDB: errors from this session.
-	sv.errors = currentSessionDB
-
-	-- If there were any load errors, we need to iterate them,
-	-- set the session id and add previous error counter, if any.
-	for  i,err  in ipairs(currentSessionDB)  do
-		err.session = currentSessionId -- Update the session ID directly
-		local existed = fetchFromDatabase(err.message)
-		if  existed  then  err.counter = err.counter + existed.counter  end
-		-- existed was removed from previousDB.
-	end
+	-- Store sessionDB: errors from this session.
+	sv.errors = sessionDB
 
 	-- load locales
 	if type(BugGrabber.LoadTranslations) == "function" then
@@ -1093,10 +945,10 @@ registerAddonActionEvents()
 --
 
 local function slashHandler(indexStr)
-	local index =  indexStr  and  tonumber(indexStr)  or  #currentSessionDB
-	local err = type(index) == "number" and currentSessionDB[index]
+	local index =  indexStr  and  tonumber(indexStr)  or  #sessionDB
+	local err = type(index) == "number" and sessionDB[index]
 	if  not err  then
-		print(L.USAGE:format(#currentSessionDB))
+		print(L.USAGE:format(#sessionDB))
 		return
 	end
 	BugGrabber.PrintErrorObject(err)

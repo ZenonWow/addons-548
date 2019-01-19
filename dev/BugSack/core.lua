@@ -75,14 +75,14 @@ do
 		-- Delay until end of loading screen. PLAYER_LOGIN() will call it.
 		if  not IsLoggedIn()  then  return  end
 		
-		-- No more errors if errorObject == nil - BugGrabber:Reset() happened.
-		if  not errorObject  then  return  end
-		
 		-- Throttle down to one UpdateDisplay() every 2 seconds.
 		local now = _G.GetTime()
-		if  2 <= now - lastUpdate  then  UpdateDisplay()
+		if  2 <= now - lastUpdate  or  not errorObject  then  UpdateDisplay()
 		else  ScheduleUpdateDisplay()
 		end
+		
+		-- No more errors if errorObject == nil - BugGrabber:Reset() happened.
+		if  not errorObject  then  return  end
 		
 		-- Throttle the notifications to one per 10 seconds.
 		if  now - lastNotify < 10  then  return  end
