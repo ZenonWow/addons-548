@@ -9,12 +9,14 @@
 NoLoginMusic.lua
 Media.lua
 
+DominosSwap.lua
 # ActionBarChatLink.lua
 # PlaySoundOverride.lua
 
 LibContainerFrameCleanup.lua
 LibCloseOneWindow.lua
 ChangeInspectGearOrder.lua
+UIPanelWindows.lua
 
 BlackMarketTracker.lua
 BlackMarketTracker.xml

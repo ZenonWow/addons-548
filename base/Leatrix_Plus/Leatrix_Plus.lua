@@ -45,6 +45,7 @@
 -- 	Create local tables to store configuration and frames
 	-- Local Config
 	local LeaPlusLC = {}
+	_ADDON.LeaPlusDB = LeaPlusDB
 	_ADDON.LeaPlusLC = LeaPlusLC
 	-- Config descriptors: setters, getters
 	local OptionDesc = _ADDON.OptionDesc or {}

@@ -29,20 +29,16 @@ end)
 --[[ TODO: 
 find BattlePetTooltip:SetScript
 /run _G.ChatFrame_OpenChat("/cast Inner Fire")  ;  _G.ChatEdit_SendText(editbox, 1)
-/run reportActionButtons()
 /dump debuglocals()
 /dump GetPlayerInfoByGUID('0x010B0000002ADF67')  -- Tessa
-/dump LibStub("AceDB-3.0").minors    -- 29, last was 25
 /run FriendsFrame_ShowDropdown('Dallaryen', 1, 1, 'WHISPER', ChatFrame1)   -- taints?
 HandleModifiedItemClick táskából vendornak??
--- geterrorhandler(), xpcall(f, errhandler) <-> pcall(f, args...)
 -+ AceDB: purge profileKeys
 -- AuctionMaster: delayed fix
 -- X-LoadOn-Frames
 -- AutoBar scale: a nagyobbik dimenzio hasson csak
 -- TODO: securemousewheelhandler
 -- TODO: color fill, yield
--- /dump combatlog-name-link, leatrix/addonloader reloadui-link
 -- LibRelativeFrames
 ## X-LoadOn-Events: UNIT_SPELLCAST_SENT, UNIT_SPELLCAST_START
 ## X-LoadOn-UNIT_SPELLCAST_SENT: LoadAddOn('Quartz')
@@ -59,20 +55,6 @@ CLASS profileKeys clean
 --]]
 
 --[[
---tDeleteItem()
--- investigate UISpecialFrames -- UIPanelWindows
-/run UIPanelWindows.GameMenuFrame    = nil
-/dump BlackMarketFrame:GetRect()
-/dump MailFrame:GetRect()
-/run f= MailFrame ; for i=1,f:GetNumPoints() do print(strjoin(',', tostringall(f:GetPoint(i)) )) end
-/run f= BlackMarketFrame ; for i=1,f:GetNumPoints() do print(strjoin(',', tostringall(f:GetPoint(i)) )) end
-/run BlackMarketFrame:SetPoint('TOPLEFT',10,-20)
-/run MailFrame:SetPoint('TOPLEFT',10,-20)
-/run TradeFrame:SetPoint('TOPLEFT',10,-20)
-/run MerchantFrame:SetPoint('TOPLEFT',10,-20)
-/run MailFrame:ClearAllPoints() ; MailFrame:SetHeight(400) ; MailFrame:SetWidth(300) ; MailFrame:SetPoint('TOPLEFT',10,-20)
-/run ToggleFrame(MailFrame)
-/dump MailFrame:IsShown()
 /run DisableAddOn('Dominos')
 /run EnableAddOn('Dominos')
 /dump SetModifiedClick('ATTACHSIMILAR','ALT')
@@ -87,52 +69,9 @@ CLASS profileKeys clean
 /run LoadAddOn('MogIt')
 /run LoadAddOn('Postal')  LoadAddOn('InboxMailBag')
 
-/run Examiner:ClearAllPoints() Examiner:SetPoint('TOPLEFT', 20, -20)
+/run EventTracker.PrintLog()
+/run reportActionButtons()
 --]]
-
-UIPanelWindows.InterfaceOptionsFrame = nil
-UIPanelWindows.CharacterFrame        = nil
-UIPanelWindows.SpellBookFrame        = nil
-UIPanelWindows.TaxiFrame             = nil
-UIPanelWindows.TradeFrame            = nil
-UIPanelWindows.LootFrame             = nil
-UIPanelWindows.MerchantFrame         = nil
-UIPanelWindows.MailFrame             = nil
-UIPanelWindows.DressUpFrame          = nil
-UIPanelWindows.FriendsFrame          = nil
-UIPanelWindows.WorldMapFrame         = nil
-UIPanelWindows.ChatConfigFrame       = nil
-UIPanelWindows.GameMenuFrame         = nil
-UISpecialFrames[#UISpecialFrames+1] = "CharacterFrame"
-UISpecialFrames[#UISpecialFrames+1] = "SpellBookFrame"
--- UISpecialFrames[#UISpecialFrames+1] = "TaxiFrame"
-UISpecialFrames[#UISpecialFrames+1] = "TradeFrame"
--- UISpecialFrames[#UISpecialFrames+1] = "LootFrame"
-UISpecialFrames[#UISpecialFrames+1] = "MerchantFrame"
-UISpecialFrames[#UISpecialFrames+1] = "MailFrame"
-UISpecialFrames[#UISpecialFrames+1] = "DressUpFrame"
-UISpecialFrames[#UISpecialFrames+1] = "FriendsFrame"
-UISpecialFrames[#UISpecialFrames+1] = "WorldMapFrame"
-UISpecialFrames[#UISpecialFrames+1] = "ChatConfigFrame"
-UISpecialFrames[#UISpecialFrames+1] = "GameMenuFrame"
-UISpecialFrames[#UISpecialFrames+1] = "ScriptErrorsFrame"    -- Later loaded from Blizzard_DebugTools
-CharacterFrame:SetPoint('TOPLEFT',10,-20)
-SpellBookFrame:SetPoint('TOPLEFT',10,-20)
--- TaxiFrame:SetPoint('TOPLEFT',10,-20)
--- TradeFrame:SetPoint('TOPLEFT',10,-20)
-MerchantFrame:SetPoint('TOPLEFT',10,-20)
-MailFrame:SetPoint('TOPLEFT',10,-20)
---DressUpFrame:SetPoint('TOPRIGHT',-10,-20)
-FriendsFrame:SetPoint('TOPRIGHT',-10,-20)
-
-
-LossOfControlFrame:SetPoint('CENTER', 0, 100)
-
-
--- BFBindingMode is UISpecialFrames[8], it's Shown but not visible (offscreen)
-if  BFBindingMode  then  BFBindingMode:Hide()  end
---BFBindingMode:SetPoint('TOPLEFT',10,-20)
---tDeleteItem(UISpecialFrames, BFBindingMode)
 
 
 
@@ -155,67 +94,26 @@ MainMenuBarBackpackButton:SetScript('OnReceiveDrag',nil)
 MainMenuBarBackpackButton:SetScript('OnEnter',nil)
 MainMenuBarBackpackButton:SetScript('OnLeave',nil)
 MainMenuBarBackpackButton:SetScript('OnEvent',nil)
+
+/dump tkeys(LibStub.short)
 --]]
 
---[[
-embedded:
-LibStub.AceEvent3:Embed(receiver)
-receiver:RegisterEvent("PLAYER_LOGIN")    -- calls receiver:PLAYER_LOGIN(...)
-receiver:RegisterEvent("PLAYER_LOGIN", "OnLogin")    -- calls receiver:OnLogin()
-receiver:RegisterEvent("PLAYER_LOGIN", OnLogin)    -- calls OnLogin() without a self
-receiver.RegisterEvent("callbackname", "PLAYER_LOGIN", OnLogin)    -- technically possible oddity
-global:
--- confusing parameter order as receiver comes before event
-LibStub.AceEvent3.RegisterEvent(receiver, "PLAYER_LOGIN")
-LibStub.AceEvent3.RegisterEvent(receiver, "PLAYER_LOGIN", "OnLogin")
-LibStub.AceEvent3.RegisterEvent(receiver, "PLAYER_LOGIN", OnLogin)
-LibStub.AceEvent3.RegisterEvent("callbackname", "PLAYER_LOGIN", OnLogin)
-desired:
--- fix parameter order when using target:RegisterEvent(...) (not allowed at minor = 6)
--- if self == target then receiver parameter comes after event parameter
--- receiver can be the function itself, not just string
-LibStub.AceEvent3:RegisterEvent("PLAYER_LOGIN", receiver)
-LibStub.AceEvent3:RegisterEvent("PLAYER_LOGIN", receiver, "OnLogin")
-LibStub.AceEvent3:RegisterEvent("PLAYER_LOGIN", "callbackname", OnLogin)
-LibStub.AceEvent3:RegisterEvent("PLAYER_LOGIN", OnLogin)
 
---]]
-
-function tkeys(t)	local ks = {}	for k in t do ks[ks+1] = k end	return ks end
+function tkeys(t)	local ks = {}	for k in next,t do ks[#ks+1] = k end	return ks end
 
 function tkeys(t)
 	local ks = {}
-	for k in pairs(t) do ks[ks+1] = k end
+	for k in pairs(t) do ks[#ks+1] = k end
 	return ks
  end
 
 function tvalues(t)
 	local ks = {}
-	for k,v in pairs(t) do ks[ks+1] = v end
+	for k,v in pairs(t) do ks[#ks+1] = v end
 	return ks
 end
 
---[[
-SetAddonEnv(...)
-local ADDON_NAME, _ENV = SetAddonEnv(...)
 
-AddonEnvMeta.NoGlobals = false
-AddonEnvMeta.GlobalProxy = { __index = _G }
-
--- local ADDON_NAME, _ADDON = SetAddonEnv.GlobalProxy(...)
--- local ADDON_NAME, _ADDON = SetAddonEnv.NoGlobals(...)
-for  kind  in next, AddonEnvMeta do
-	SetAddonEnv[kind] = function (ADDON_NAME, _ADDON)
-		setfenv(2, setmetatable(_ADDON, AddonEnvMeta[kind] or nil)
-		_ADDON.ADDON_NAME = ADDON_NAME
-		_ADDON._ADDON = _ADDON
-		_ADDON._G = _G
-		return ADDON_NAME, _ADDON
-	end
-end
-
-
---]]
 
 
 -- Secure wrapper  function  WorldMapFrame_PreClick(self, button, down)

@@ -10,7 +10,7 @@
 
 local TSM = select(2, ...)
 LibStub("AceTimer-3.0"):Embed(TSM)
-local AceBucket = LibStub("AceBucket")
+local AceBucket = LibStub("AceBucket-3.0")
 
 --[[
 local delays = {}

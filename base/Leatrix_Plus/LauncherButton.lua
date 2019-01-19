@@ -1,19 +1,31 @@
 ----------------------------------------------------------------------
 --	Minimap button
 ----------------------------------------------------------------------
-local ADDON_NAME, _ADDON = ...		-- ADDON_NAME == name of addon folder, _ADDON == addon environment/namespace
-local _G, _ENV = _G, AddonEnv.SetGlobalProxy(...)
-local OptionDesc = _ADDON.OptionDesc
+
+-- Import
+local IsShiftKeyDown,IsControlKeyDown = IsShiftKeyDown,IsControlKeyDown
+local ActionStatus_DisplayMessage = ActionStatus_DisplayMessage
+
+local _G, _ADDON = LibEnv.UseAddonEnv(...)
+-- _ADDON = addon environment/namespace
+-- local ADDON_NAME = _ADDON.ADDON_NAME    -- ADDON_NAME = ... = name of addon folder
+-- local OptionDesc = _ADDON.OptionDesc
+
+
+-- Global vars/functions common for all files in this addon. Format also understood by Mikk's FindGlobals script.
+local FGDATA = _G.FindGlobals  and  _G.FindGlobals([==[
+	-- GLOBALS: ADDON_NAME,OptionDesc,LeaPlusLC,LeaPlusDB
+]==])
 
 local LibDBIcon = _G.LibStub('LibDBIcon-1.0')
 
 
 OptionDesc.ShowMinimapIcon = {
 	get = function (desc)
-		return  not (LeaPlusDB.minimap and _G.LeaPlusDB.minimap.hide)
+		return  not (_ADDON.LeaPlusDB.minimap and _ADDON.LeaPlusDB.minimap.hide)
 	end,
 	set = function (desc, value)
-		local LeaPlusDB = _G.LeaPlusDB
+		local LeaPlusDB = _ADDON.LeaPlusDB
 		LeaPlusDB.minimap = LeaPlusDB.minimap or {}
 		LeaPlusDB.minimap.hide = not value or nil
 		if  value  then  LibDBIcon:Show(ADDON_NAME)
@@ -21,7 +33,7 @@ OptionDesc.ShowMinimapIcon = {
 		end
 	end,
 	onLoaded = function (desc)
-		LibDBIcon:Register(ADDON_NAME, _ADDON.DataObject, _G.LeaPlusDB.minimap)
+		LibDBIcon:Register(ADDON_NAME, _ADDON.DataObject, _ADDON.LeaPlusDB.minimap)
 	end,
 }
 
@@ -45,6 +57,7 @@ local DataObject = {
 
 
 function DataObject.OnClick(frame, mouseButton)
+	local LeaPlusLC = _ADDON.LeaPlusLC
 	-- Prevent options panel from showing if version panel or Blizzard options panel is showing
 	-- if InterfaceOptionsFrame:IsShown() or VideoOptionsFrame:IsShown() or ChatConfigFrame:IsShown() then return end
 	if LeaPlusLC["VersionPanel"] and LeaPlusLC["VersionPanel"]:IsShown() then  return LeaPlusLC["VersionPanel"]:Hide()  end
@@ -53,9 +66,10 @@ function DataObject.OnClick(frame, mouseButton)
 
 		-- Control key modifier toggles target tracking
 		if IsControlKeyDown() and not IsShiftKeyDown() then
-			for i = 1, GetNumTrackingTypes() do
+			local GetTrackingInfo,SetTracking = _G.GetTrackingInfo,_G.SetTracking
+			for i = 1, _G.GetNumTrackingTypes() do
 				local name, texture, active, category = GetTrackingInfo(i)
-				if name == MINIMAP_TRACKING_TARGET then
+				if name == _G.MINIMAP_TRACKING_TARGET then
 					if active == 1 then
 						SetTracking(i, false)
 						ActionStatus_DisplayMessage("Target Tracking Disabled", true);
@@ -70,7 +84,7 @@ function DataObject.OnClick(frame, mouseButton)
 
 		-- Shift key modifier toggles the music
 		if IsShiftKeyDown() and not IsControlKeyDown() then
-			Sound_ToggleMusic();
+			_G.Sound_ToggleMusic();
 			return
 		end
 
@@ -110,15 +124,16 @@ function DataObject.OnClick(frame, mouseButton)
 					ActionStatus_DisplayMessage("Coordinates Disabled", true);
 				else
 					LeaPlusLC["StaticCoords"] = true
-					SetMapToCurrentZone();
+					_G.SetMapToCurrentZone();
 					ActionStatus_DisplayMessage("Coordinates Enabled", true);
 				end
 				-- Run the coordinates refresh function
 				LeaPlusLC:RefreshStaticCoords();
 				-- Update side panel checkbox if it's showing
-				if LeaPlusCB["StaticCoords"]:IsShown() then
-					LeaPlusCB["StaticCoords"]:Hide();
-					LeaPlusCB["StaticCoords"]:Show();
+				local StaticCoords = _ADDON.StaticCoords
+				if StaticCoords:IsShown() then
+					StaticCoords:Hide()
+					StaticCoords:Show()
 				end
 			end
 			return
@@ -126,19 +141,19 @@ function DataObject.OnClick(frame, mouseButton)
 
 		-- Shift key and control key toggles maximised window mode
 		if IsShiftKeyDown() and IsControlKeyDown() then
-			if GetCVar("gxWindow") == "1" then
+			if _G.GetCVar("gxWindow") == "1" then
 				if LeaPlusLC:PlayerInCombat() then
 					return
 				else
-					SetCVar("gxMaximize", tostring(1 - GetCVar("gxMaximize")));
-					RestartGx();
+					_G.SetCVar("gxMaximize", tostring(1 - _G.GetCVar("gxMaximize")));
+					_G.RestartGx();
 				end
 			end
 			return
 		end
 
 		-- No modifier key toggles error text
-		if LeaPlusDB["HideErrorFrameText"] then -- Checks global
+		if _ADDON.LeaPlusDB["HideErrorFrameText"] then -- Checks global
 			if LeaPlusLC["ShowErrorsFlag"] == 1 then 
 				LeaPlusLC["ShowErrorsFlag"] = 0
 				minibtn:SetNormalTexture("Interface/COMMON/Indicator-Red.png")
