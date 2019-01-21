@@ -17,7 +17,7 @@ Core.lua
 Options.lua
 Display.lua
 Filters.lua
-Migratons.lua
+Migrations.lua
 
 Defaults\Defaults.lua
 Defaults\Hunter.lua

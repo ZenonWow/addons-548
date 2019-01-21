@@ -1,5 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-	<Include file="libs\LibSharedMedia-3.0\lib.xml"/>
+	<!-- <Include file="libs\LibSharedMedia-3.0\lib.xml"/> -->
 	<Script file="texture_picker.lua"/>
 	<Script file="Dominos_Quest.lua"/>
 </Ui>

@@ -13,28 +13,28 @@
 ## SavedVariables: ChocolateBarDB
 
 #@no-lib-strip@
-libs\LibStub\LibStub.lua
-libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
-libs\AceAddon-3.0\AceAddon-3.0.xml
-libs\AceDB-3.0\AceDB-3.0.xml
-libs\AceConsole-3.0\AceConsole-3.0.xml
-libs\AceEvent-3.0\AceEvent-3.0.xml
-libs\AceLocale-3.0\AceLocale-3.0.xml
-libs\LibSharedMedia-3.0\lib.xml
+# libs\LibStub\LibStub.lua
+# libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+# libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+# libs\AceAddon-3.0\AceAddon-3.0.xml
+# libs\AceDB-3.0\AceDB-3.0.xml
+# libs\AceConsole-3.0\AceConsole-3.0.xml
+# libs\AceEvent-3.0\AceEvent-3.0.xml
+# libs\AceLocale-3.0\AceLocale-3.0.xml
+# libs\LibSharedMedia-3.0\lib.xml
 libs\LibJostle-3.0\LibJostle-3.0.lua
 #@end-no-lib-strip@
 
-libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 
 localization\enUS.lua
-localization\deDE.lua
-localization\esES.lua
-localization\frFr.lua
-localization\koKR.lua
-localization\zhCN.lua
-localization\zhTW.lua
-localization\ptBR.lua
-localization\ruRU.lua
+# localization\deDE.lua
+# localization\esES.lua
+# localization\frFr.lua
+# localization\koKR.lua
+# localization\zhCN.lua
+# localization\zhTW.lua
+# localization\ptBR.lua
+# localization\ruRU.lua
 
 Core.lua
 DragAndDrop.lua

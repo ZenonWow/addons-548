@@ -5,6 +5,10 @@
 ## Author: Tuller
 ## Dependencies: Dominos
 ## OptionalDeps: LibSharedMedia-3.0
-embeds.xml
+
+
+# embeds.xml
+
 localization.xml
 xp.lua
+
