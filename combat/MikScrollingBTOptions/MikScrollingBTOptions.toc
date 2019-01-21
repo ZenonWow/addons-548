@@ -1,5 +1,5 @@
 ## Interface: 50400
-## Title: MSBT [|cffffff80Options|r]
+## Title: Mik's Scrolling Battle Text [|cffffff80Options|r]
 ## Author: Mikord
 ## Notes: Load on demand options for Mik's Scrolling Battle Text
 ## Dependencies: MikScrollingBattleText

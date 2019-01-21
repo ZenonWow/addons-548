@@ -1680,8 +1680,10 @@ local masterProfile = {
 local function ShowOptions()
  -- Load the options module if it's not already loaded.
  local optionsName = "MSBTOptions"
- if (not IsAddOnLoaded(optionsName)) then
+ local optionsName2 = "MikScrollingBTOptions"
+ if  not IsAddOnLoaded(optionsName)  and  not IsAddOnLoaded(optionsName2)  then
   local loaded, failureReason = LoadAddOn(optionsName)
+  if not loaded then  loaded, failureReason = LoadAddOn(optionsName2)  end
   
   -- Display an error message indicating why the module wasn't loaded if it
   -- didn't load properly.
@@ -1692,7 +1694,7 @@ local function ShowOptions()
  end
 
  -- Display the main frame if the options module is loaded.
- if (IsAddOnLoaded(optionsName)) then MSBTOptions.Main.ShowMainFrame() end
+ if  IsAddOnLoaded(optionsName) or IsAddOnLoaded(optionsName2)  then MSBTOptions.Main.ShowMainFrame() end
 end
 
 -- ****************************************************************************
