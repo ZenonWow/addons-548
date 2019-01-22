@@ -1622,7 +1622,7 @@ function FormatXP(xp)
 end
 
 -- Fonction that format the money string
--- The result is a string with embeded coin icons
+-- The result is a string with embedded coin icons
 function FormatMoney(money)
 	local goldString, silverString, copperString;
 	local gold = floor(money / (_G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD));

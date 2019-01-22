@@ -118,7 +118,7 @@ function module:NewStat(name)
 end
 
 function module:StatOnEnable()
-	-- Embeded functionality.
+	-- Embedded functionality.
 
 	-- Shortcuts.
 	local stat = self.stat
@@ -260,7 +260,7 @@ function module:IsTooltipLocked()
 end
 
 function module:LDBEnterTooltip()
-	-- Embeded functionality.
+	-- Embedded functionality.
 
 	-- Check if tooltip is available.
 	if module:IsTooltipLocked() then return end
@@ -294,7 +294,7 @@ function module:LDBEnterTooltip()
 end
 
 function module:LDBLeaveTooltip()
-	-- Embeded functionality.
+	-- Embedded functionality.
 
 	if self.dataobject.tooltip then
 		-- Hide custom tooltip.

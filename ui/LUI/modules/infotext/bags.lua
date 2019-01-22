@@ -64,7 +64,7 @@ function Bags:OnCreate()
 	stat.OnEnable = stat.BAG_UPDATE
 
 	function stat:OnTooltipShow()
-		-- Embeded functionality: self = GameToolTip
+		-- Embedded functionality: self = GameToolTip
 
 		local freeslots, totalslots = {}, {}
 		for i=0, NUM_BAG_SLOTS do

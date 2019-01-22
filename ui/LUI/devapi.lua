@@ -298,7 +298,7 @@ end
 
 ----------------------------------------------
 --											--
--- 		Embeded New Option Functions		--
+-- 		Embedded New Option Functions		--
 --											--
 ----------------------------------------------
 
@@ -772,7 +772,7 @@ end
 --end
 
 --[[
-	This function is embeded in any target that calls the ..:NewPosSliders() function.
+	This function is embedded in any target that calls the ..:NewPosSliders() function.
 	
 	You can call it no args to update all position options or with the same object you handed to ..:NewPosSliders() to update that set of position options
 ]]

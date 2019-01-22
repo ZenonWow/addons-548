@@ -365,7 +365,7 @@ else
 			private.RescanLDBObjects() --scan LibDataBroker objects for any additions or changes.
 			frame:UnregisterEvent("PLAYER_LOGIN")
 		elseif event == "ADDON_LOADED" and arg == "SlideBar" then
-			--removed the needlessly complex string variable system. Were not using Cvar or embeded anymore
+			--removed the needlessly complex string variable system. Were not using Cvar or embedded anymore
 			if not SlideBarConfig or type(SlideBarConfig) == "string" then
 				SlideBarConfig = {}
 			end
