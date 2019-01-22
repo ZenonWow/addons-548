@@ -4,16 +4,16 @@
 ## Author: Mongusious
 ## X-Email: 
 
-X-NoComma
-X-JustComma:
-X-CommaUndSpace: 
-X-CommaUnd4Space:    
-X-CommaUndTab:	
-X-CommaUnd2Tab:		
-X-Trimm:    		    <-4s2t4s    		    4s2t4s->    		    
-X-Dupli: 1
-X-Dupli: 2
-X-Dupli: 3
+## X-NoComma
+## X-JustComma:
+## X-CommaUndSpace: 
+## X-CommaUnd4Space:    
+## X-CommaUndTab:	
+## X-CommaUnd2Tab:		
+## X-Trimm:    		    <-4s2t4s    		    4s2t4s->    		    
+## X-Dupli: 1
+## X-Dupli: 2
+## X-Dupli: 3
 
 
 FindGlobals.lua

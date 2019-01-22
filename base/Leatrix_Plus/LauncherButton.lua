@@ -22,10 +22,10 @@ local LibDBIcon = _G.LibStub('LibDBIcon-1.0')
 
 OptionDesc.ShowMinimapIcon = {
 	get = function (desc)
-		return  not (_ADDON.LeaPlusDB.minimap and _ADDON.LeaPlusDB.minimap.hide)
+		return  not (_G.LeaPlusDB.minimap and _G.LeaPlusDB.minimap.hide)
 	end,
 	set = function (desc, value)
-		local LeaPlusDB = _ADDON.LeaPlusDB
+		local LeaPlusDB = _G.LeaPlusDB
 		LeaPlusDB.minimap = LeaPlusDB.minimap or {}
 		LeaPlusDB.minimap.hide = not value or nil
 		if  value  then  LibDBIcon:Show(ADDON_NAME)
@@ -33,7 +33,7 @@ OptionDesc.ShowMinimapIcon = {
 		end
 	end,
 	onLoaded = function (desc)
-		LibDBIcon:Register(ADDON_NAME, _ADDON.DataObject, _ADDON.LeaPlusDB.minimap)
+		LibDBIcon:Register(ADDON_NAME, _ADDON.DataObject, _G.LeaPlusDB.minimap)
 	end,
 }
 
@@ -153,7 +153,7 @@ function DataObject.OnClick(frame, mouseButton)
 		end
 
 		-- No modifier key toggles error text
-		if _ADDON.LeaPlusDB["HideErrorFrameText"] then -- Checks global
+		if _G.LeaPlusDB["HideErrorFrameText"] then -- Checks global
 			if LeaPlusLC["ShowErrorsFlag"] == 1 then 
 				LeaPlusLC["ShowErrorsFlag"] = 0
 				minibtn:SetNormalTexture("Interface/COMMON/Indicator-Red.png")

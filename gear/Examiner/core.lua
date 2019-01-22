@@ -748,7 +748,7 @@ function ex:ScanGear(unit)
 		local visibleID = GetInventoryItemID(unit,slotId)
 		if  visibleID ~= tonumber(strID)  then
 			info.TmogIDs[slotName] = visibleID
-			print("InvSlot ".. slotId .." tmog: ".. select(2,GetItemInfo(visibleID)))
+			print(slotName..": linkID="..tostring(strID).." visibleID="..tostring(visibleID).." "..(select(2,GetItemInfo(visibleID)) or "<data not loaded>") )
 		end
 		
 		if (link) then
@@ -1051,7 +1051,7 @@ function ex.ItemButton_UpdateTexture(button)
 	--local itemName, itemLink, itemRarity, itemLevel, _, _, _, _, _, itemTexture = GetItemInfoNilSafe(link)
 	if  link  then
 		itemName, itemLink, itemRarity, itemLevel, _, _, _, _, _, itemTexture = GetItemInfo(link)
-		print("ItemButton_UpdateTexture(link="..tostring(link).."): ", itemLink, itemTexture )
+		-- print("ItemButton_UpdateTexture(link="..tostring(link).."): ", itemLink, itemTexture )
 		button.texture:SetTexture(itemTexture  or  ex.ITEM_ICON_UNKNOWN);
 	else
 		button.texture:SetTexture(button.bgTexture);
@@ -1098,6 +1098,7 @@ function ex.ItemButton_OnEnter(self,motion)
 end
 	
 local TRANSMOGRIFIED =  _G.TRANSMOGRIFIED  or  "Transmogrified to:\n%s";   -- FrameXML/GlobalStrings.lua
+TRANSMOGRIFIED = "|cffff80ff"..TRANSMOGRIFIED.."|r"
 function ex.ItemButton_UpdateTip(self)
 	ex.showingTooltip = true;
 	if (cfg.tooltipSmartAnchor) then
@@ -1164,6 +1165,17 @@ function ex.ItemButton_UpdateTip(self)
 		gtt:Show()
 	end
 end
+
+--[[
+/dump GameTooltipTextLeft4:GetText()
+/dump GameTooltipTextLeft4:GetTextColor()
+[06:54:33] Dump: value=GameTooltipTextLeft4:GetTextColor()
+[06:54:33] [1]=0.99999779462814,
+[06:54:33] [2]=0.50195968151093,
+[06:54:33] [3]=0.99999779462814,
+[06:54:33] [4]=0.99999779462814
+--]]
+
 
 --------------------------------------------------------------------------------------------------------
 --                                           Slash Handling                                           --

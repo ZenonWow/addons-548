@@ -57,6 +57,15 @@ local fields = {
 /run LuaTests.FieldTest()
 --]]
 
+function LuaTests.MetaTableTest()
+	obj = setmetatable({}, { __tostring = function() return nil end }) ; print( "tostring() returns type '"..type( tostring(obj) ).."' if __tostring returns nil." )
+	-- print(tostring( (function() end)() ))
+	print(tostring(1,2))
+	obj = setmetatable({}, { __index = "Hello! Nothin 'ere." }) ; print(obj.something)
+	obj = setmetatable({}, { __index = false }) ; print(obj.something)
+end
+
+
 function LuaTests.SlashTest()
 	SlashCmdList.SlashTest = function(...)  print(strjoin("|",...))  end
 	_G.SLASH_SlashTest1 = "/st"
@@ -83,6 +92,22 @@ function LuaTests.SetScript()
 	f:SetScript('OnShow', fOnShow, 1)
 	print("f.OnShow = "..tostring(f:GetScript('OnShow')))
 	f:Show() f:Hide()
+	--[[
+	2x attempt to call a number value
+[game engine]:: in function 'Show'
+ZenTestZone\LuaTests.lua:85: in function 'SetScript'
+[loadstring(?,"LuaTests.SetScript()")]:1: in main chunk
+[game engine]:: in function 'RunScript'
+FrameXML\ChatFrame.lua:2036: in function '?'
+FrameXML\ChatFrame.lua:4315: in function <FrameXML\ChatFrame.lua:4262>
+[game engine]:: in function 'ChatEdit_ParseText'
+FrameXML\ChatFrame.lua:3969: in function 'ChatEdit_SendText'
+FrameXML\ChatFrame.lua:4008: in function 'ChatEdit_OnEnterPressed'
+[loadstring(?,"*:OnEnterPressed")]:1: in function <[loadstring(?,"*:OnEnterPressed")]:1>
+
+Locals:
+fOnShow = <function> defined @ZenTestZone\LuaTests.lua:72
+	--]]
 	print("0: SetScript, 1, 2")
 	f:SetScript('OnShow', fOnShow, 1, 2)
 	print("f.OnShow = "..tostring(f:GetScript('OnShow')))
@@ -110,6 +135,24 @@ function LuaTests.HookScript()
 	print("f.OnShow = "..tostring(f:GetScript('OnShow')))
 	f:Show() f:Hide()
 end
+--[[
+[14:37:46] 阿依土鳖公主 has gone offline.
+[15:25:02] ESC -> CloseOneWindow(): UISpecialFrames[20] == ScriptErrorsFrame
+[15:25:03] f:IsShown() = 1
+[15:25:03] f.OnShow = nil
+[15:25:03] 0: Hooked once
+[15:25:03] f.OnShow = function: 26780420
+[15:25:03] fOnShowHook():
+[15:25:03] 0: Hooked 2 times
+[15:25:03] f.OnShow = function: 32EE28A8
+[15:25:03] fOnShowHook():
+[15:25:03] fOnShowHook():
+[15:25:03] 2: Hooked 3 times
+[15:25:03] f.OnShow = function: 32EE2928
+[15:25:03] fOnShowHook():
+[15:25:03] fOnShowHook():
+[15:25:03] fOnShowHook():
+--]]
 
 
 function Dummy1()
@@ -151,6 +194,30 @@ function LuaTests.hooksecurefunc()
 	hooksecurefunc('Dummy1', Dummyhook1b)
 	Dummy1()
 end
+--[[
+[15:25:56]     call Dummy1():
+[15:25:56] Dummy1
+[15:25:56] Dummyhook1
+[15:25:56]     Dummy1orig = Dummy1, call Dummy1orig():
+[15:25:56] Dummy1
+[15:25:56] Dummyhook1
+[15:25:56]     Dummy1 = nil, call Dummy1orig():
+[15:25:56] Dummy1
+[15:25:56] Dummyhook1
+[15:25:56]     Dummy1 = Dummy2, call Dummy1orig():
+[15:25:56] Dummy1
+[15:25:56] Dummyhook1
+[15:25:56]     Dummy1 = Dummy2, call Dummy1():
+[15:25:56] Dummy2
+[15:25:56]     Dummy1 = Dummy1orig, call Dummy1():
+[15:25:56] Dummy1
+[15:25:56] Dummyhook1
+[15:25:56]     call Dummy1() with hooks 1,1b,1b:
+[15:25:56] Dummy1
+[15:25:56] Dummyhook1
+[15:25:56] Dummyhook1b
+[15:25:56] Dummyhook1b
+--]]
 
 function LuaTests.pcall()
 	eh = geterrorhandler()
@@ -160,7 +227,11 @@ function LuaTests.pcall()
 	xpeh = select(2,xpcall(geterrorhandler, geterrorhandler()))
 	print("xpcall errorhandler  = "..tostring(xpeh))
 end
-
+--[[
+[15:26:57] errorhandler        = function: 28E0E710
+[15:26:57] pcall errorhandler  = function: 28E0E710
+[15:26:57] xpcall errorhandler  = function: 28E0E710
+--]]
 
 local updFrame = CreateFrame('Frame')
 updFrame:Hide()
@@ -176,7 +247,7 @@ function afterEE(self)   print('afterEE: +'..getElapsed()..'ms') ; updFrame:Hide
 function LuaTests.AceTimer()
 	lastMs = debugprofilestop()
 	print("AceTimer:ScheduleTimer(after0, 0)")
-	local AceTimer = _G.LibStub.AceTimer
+	local AceTimer = _G.LibStub.AceTimer3
 	updFrame:Show()
 	AceTimer:ScheduleTimer(after00, 0, 0)
 	AceTimer:ScheduleTimer(after00, 0.01, 0.01)

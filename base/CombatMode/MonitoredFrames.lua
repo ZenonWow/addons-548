@@ -42,7 +42,8 @@ CombatMode.FramesToHook = {
 	"ACP_AddonList",      "PlayerTalentFrame",  "PVEFrame",           "EncounterJournal",
 	"PetJournalParent",   "AccountantFrame",
 	
-	"ImmersionFrame",			"BagnonFrameinventory","AdiBagsContainer1",	"ElephantFrame",
+	"ImmersionFrame",			"BagnonFrameinventory",		"ElephantFrame",
+	"AdiBagsContainer1","AdiBackpack","AdiBank",
 	"GwCharacterWindow",	"GwCharacterWindowsMoverFrame",
 	
 	--"WhoFrame","ChannelFrame",	-- new in client 7.0?  these are children of FriendsFrame, only need to monitor that
@@ -56,6 +57,8 @@ CombatMode.FramesToHook = {
 
 
 
+local tDeleteItem = _G.tDeleteItem  -- from FrameXML/Util.lua
+
 -- tableProto is prototype (class) for tables with shorthand functions:
 local tableProto= {}
 Addon.tableProto= tableProto
@@ -67,12 +70,15 @@ function  tableProto:indexOf(item)
 	end
 end
 
+tableProto.removeFirst = tDeleteItem
+--[[
 function  tableProto:removeFirst(item)
 	-- not using  self:indexOf()  so it's not necessary to set as metatable (inherit) tableProto
 	-- also it makes  self:indexOf()  non-virtual, that is cannot be overridden in a subclass/instance
 	local i= tableProto.indexOf(self, item)
 	return  i  and  table.remove(self, i)
 end
+--]]
 
 function  tableProto:setInsertLast(item)
 	if  tableProto.indexOf(self, item)  then  return false  end
@@ -130,50 +136,64 @@ local function FrameOnHide(frame)
 	CombatMode:UpdateMouselook(true, 'FrameOnHide')
 end
 
-CombatMode.FramesOnScreen= {}
-setmetatable(CombatMode.FramesOnScreen, { __index= tableProto } )
+CombatMode.FramesOnScreen= setmetatable({}, { __index= tableProto } )
+
+-- Weak valued hashmap to allow garbagecollecting frames
+CombatMode.HookedFrames= setmetatable({}, { __mode = "v" })
 
 
+
+function  CombatMode:HookFrame(frameName)
+	-- does not work for child frames like "MovieFrame.CloseDialog"
+	local frame = _G[frameName]
+	-- local frame= getglobal(frameName)		-- neither does this
+	if  not frame  then   return  end
+	
+	self.HookedFrames[frameName] = frame
+	
+	frame:HookScript('OnShow', FrameOnShow)
+	if  not frame:GetScript('OnShow')  then  frame:SetScript('OnShow', FrameOnShow)  end
+	frame:HookScript('OnHide', FrameOnHide)
+	if  not frame:GetScript('OnHide')  then  frame:SetScript('OnHide', FrameOnHide)  end
+	
+	if  frame:IsVisible()  then
+		CombatMode:LogFrame('  CM:HookUpFrames():  '.. CombatMode.colors.show .. frame:GetName() ..'|r is already visible')
+		CombatMode.FramesOnScreen:setInsertLast(frame)
+	end
+end
 
 
 function  CombatMode:HookUpFrames()
 	self:LogInit('CombatMode:HookUpFrames()')
-	local missingFrames
-	self.HookedFrames= self.HookedFrames or {}
-	-- there is no way to unhook/rehook frames, therefore HookedFrames can be dropped/removed
-  for  idx, frameName  in  ipairs(self.FramesToHook)  do
-		
-		local frame= _G[frameName]		-- does not work for child frames like "MovieFrame.CloseDialog"
-		-- local frame= getglobal(frameName)		-- neither does this
-		
-		if  self.HookedFrames  and  self.HookedFrames[frameName]  then
-			self:LogInit('Frame hooked again:  ' .. frameName)
-			
-		elseif  frame  then
-			self.HookedFrames[frameName]= frame
-			frame:HookScript('OnShow', FrameOnShow)
-			frame:HookScript('OnHide', FrameOnHide)
-			if  frame:IsVisible()  then
-				CombatMode:LogFrame('  CM:HookUpFrames():  '.. CombatMode.colors.show .. frame:GetName() ..'|r is already visible')
-				CombatMode.FramesOnScreen:setInsertLast(frame)
-			end
-			
-		else
-			-- missing frames returned
-			-- to be indexed if loaded later
-			missingFrames= missingFrames or {}
-			table.insert(missingFrames, frameName)
-			--missingFrames[#missingFrames+1]= frameName
-		end
-  end
+	local missingFrames = {}
 	
-	-- frames not found are kept
-	if  missingFrames  and  self:IsLogging('Init')  and  self.logging.Anomaly  then
+	for  idx, frameName  in  ipairs(self.FramesToHook)  do
+		if  self.HookedFrames[frameName]  then  print('CombatMode:HookUpFrames(): frame hooked again:  ' .. frameName)  end
+		local frame= self:HookFrame(frame)
+		if  not frame  then	
+			-- missing frames stored for a next round
+			missingFrames[frameName] = frameName
+			missingFrames[#missingFrames+1]= frameName
+		end
+	end
+	
+	self.FramesToHook= missingFrames
+	if  0 < #missingFrames  and  self:IsLogging('Init')  and  self.logging.Anomaly  then
 		--local missingList= table.concat(missingFrames, ', ')		-- this can be long
 		self:LogInit('  CM:HookUpFrames():  missing '.. #missingFrames ..' frames.  List them by entering   /dump CombatMode.FramesToHook')
 	end
-	self.FramesToHook= missingFrames
 end
+
+
+hooksecurefunc('CreateFrame', function(frameType, frameName, ...)
+	if  not CombatMode.FramesToHook[frameName]  then  return  end
+	
+	local frame = CombatMode:HookFrame(frameName)
+  if  frame  then
+		CombatMode.FramesToHook[frameName] = nil
+		tDeleteItem(CombatMode.FramesToHook, frameName)
+	end
+end)
 
 
 

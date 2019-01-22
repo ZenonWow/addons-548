@@ -1,0 +1,9 @@
+1x [loadstring(?,"Init Player Team")]:205: attempt to index field '?' (a nil value)
+[loadstring(?,"Init Player Team")]:205: in function 'InitTeam'
+[loadstring(?,"PetBattle - 0. Init and Main Loop")]:55: in main chunk
+
+Locals:
+
+
+
+

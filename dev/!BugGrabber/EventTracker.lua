@@ -46,6 +46,11 @@ function EventTracker:ADDON_LOADED(event, addonName)
 		addCount = 0
 		PlaySound([[Interface\Addons\TellMeWhen\Sounds\Ding4.ogg]])
 	end
+	UpdateAddOnMemoryUsage()
+	local mem2 = GetAddOnMemoryUsage("Ace2")
+	local mem3 = GetAddOnMemoryUsage("Ace3")
+	local mem = GetAddOnMemoryUsage(addonName)
+	log("Ace2 mem:"..mem2.." Ace3 mem:"..mem3.." "..addonName.." mem:"..mem)
 end
 
 function EventTracker:VARIABLES_LOADED()

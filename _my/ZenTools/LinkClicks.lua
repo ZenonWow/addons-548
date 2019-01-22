@@ -2,7 +2,7 @@ local ADDON_NAME, private = ...
 local LinkClicks = {}
 
 
-
+--[[
 function LinkClicks.HandleModifiedItemClick(link)
 	if  LinkClicks.lastItemLink == link  then  return  end
 	print( "ModifiedItemClick (raw): ".. link:gsub('|', '||') )
@@ -25,7 +25,7 @@ hooksecurefunc('HandleModifiedItemClick', LinkClicks.HandleModifiedItemClick)
 hooksecurefunc('ChatEdit_InsertLink', LinkClicks.ChatEdit_InsertLink)
 hooksecurefunc('SetItemRef', LinkClicks.SetItemRef)
 hooksecurefunc('SendWho', LinkClicks.SendWho)
-
+--]]
 
 
 
@@ -80,7 +80,7 @@ end
 function LinkClicks.SendChatLink(linkRef, fullLink, mouseButton, sourceFrame)
 	-- The focused editbox has priority over registered frames.
 	local editbox = GetCurrentKeyBoardFocus()
-	local ran, consumed = RunFrameScript(editbox, 'OnChatLink', fullLink, linkRef, sourceFrame)  end
+	local ran, consumed = RunFrameScript(editbox, 'OnChatLink', fullLink, linkRef, sourceFrame)
 	-- If it handled the link then the frames won't be notified.
 	if  ran and consumed  then  return true  end
 	
@@ -215,18 +215,34 @@ end
 
 
 
+--[[
 do
 	--if  MacroFrameText  then  MacroFrameText:SetScript('OnChatLink', MacroFrameText_OnChatLink)  end
-	
 	for  i = 1, STATICPOPUP_NUMDIALOGS  do
 		local editBox = _G["StaticPopup"..i.."EditBox"]
 		editBox:SetScript('OnChatLink', StaticPopupEditBox_OnChatLink)
 	end
+
 	for  i = 1, NUM_CHAT_WINDOWS  do
 		local editBox = _G["ChatFrame"..i].editBox
 		editBox:SetScript('OnChatLink', ChatFrameEditBox_OnChatLink)
 	end
 end
+
+
+1x ZenTools\LinkClicks.lua:223: StaticPopup1EditBox doesn't have a "OnChatLink" script
+[game engine]:: ?
+[game engine]:: in function 'SetScript'
+ZenTools\LinkClicks.lua:223: in main chunk
+
+Locals:
+(*temporary) = StaticPopup1EditBox {
+ 0 = <userdata>
+}
+(*temporary) = "OnChatLink"
+(*temporary) = <function> defined @ZenTools\LinkClicks.lua:139
+
+--]]
 
 
 

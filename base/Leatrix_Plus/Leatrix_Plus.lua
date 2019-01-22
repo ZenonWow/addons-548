@@ -39,13 +39,14 @@
 	local ADDON_NAME, _ADDON = ...		-- ADDON_NAME == name of addon folder, _ADDON == addon namespace
 
 --  Create global tables if they don't exist
+--[[
 	_G.LeaPlusDB = _G.LeaPlusDB or {}		-- overridden by loading SavedVariables
 	_G.LeaPlusDC = _G.LeaPlusDC or {}
+--]]
 
 -- 	Create local tables to store configuration and frames
 	-- Local Config
 	local LeaPlusLC = {}
-	_ADDON.LeaPlusDB = LeaPlusDB
 	_ADDON.LeaPlusLC = LeaPlusLC
 	-- Config descriptors: setters, getters
 	local OptionDesc = _ADDON.OptionDesc or {}
@@ -118,6 +119,7 @@
 --	Lock and dim invalid options
 	function LeaPlusLC:SetDim()
 
+		local LeaPlusDB = LeaPlusDB
 		local lockItem
 		
 		-- Whisper invite
@@ -250,6 +252,8 @@
 
 	-- Set the reload button state
 	function LeaPlusLC:ReloadCheck()
+
+		local LeaPlusDB, LeaPlusLC = LeaPlusDB, LeaPlusLC
 
 		-- Automation
 		if	(LeaPlusLC["ManageTradeGuild"]		~= LeaPlusDB["ManageTradeGuild"])		-- Manage blockers
@@ -534,6 +538,11 @@
 
 -- 	Copy globals to locals
 	function LeaPlusLC:Load()
+
+		_G.LeaPlusDB = _G.LeaPlusDB or {}		-- overridden by loading SavedVariables
+		_G.LeaPlusDC = _G.LeaPlusDC or {}
+		_ADDON.LeaPlusDB = LeaPlusDB
+		_ADDON.LeaPlusDC = LeaPlusDC
 
 		-- Load a boolean variable or set it to default
  		local function LoadVarChk(var, def)

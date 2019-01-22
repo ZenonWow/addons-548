@@ -58,6 +58,7 @@ CLASS profileKeys clean
 /run DisableAddOn('Dominos')
 /run EnableAddOn('Dominos')
 /dump SetModifiedClick('ATTACHSIMILAR','ALT')
+/dump IsAddOnLoaded('TradeSkillMaster_Mailing')
 /run LoadAddOn('TradeSkillMaster_Mailing')
 /run LoadAddOn('TradeSkillMaster_Auctioning')
 /run LoadAddOn('TradeSkillMaster_Shopping')

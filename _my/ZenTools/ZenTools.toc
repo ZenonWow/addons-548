@@ -28,7 +28,9 @@ DebugTools.lua
 MacroClicks.lua
 MouseWheelHandlers.lua
 
-LinkClicks.lua  # taints logout in 7.3.5?
+# taints logout in 7.3.5?
+#LinkClicks.lua
+
 # MyDebug.lua
 # MyMouseEventDemo.lua
 # TargetWatcher.lua

@@ -1,0 +1,59 @@
+[06:58:47] Total time played: 7 days, 7 hours, 55 minutes, 4 seconds
+[07:01:07] [5] [Uchigatana]: csokolom sör van e valamerre?:DDD
+[07:04:27] BMT.OnUpdate() when not at npc
+[07:05:20] Found tooltip tmog line: Transmogrified to:
+Sword Breaker's Bulwark
+[07:05:20] FeetSlot: linkID=95734 visibleID=18824 [Magma Tempered Boots]
+[07:06:36] Type '/help' for a listing of a few commands.
+[07:06:41] InterfaceOptionsFrame_OpenToCategory(Controls) displayedPanel:  Controls
+[07:09:27] ChatFrameTab_OnMouseUp(ChatFrame1Tab,LeftButton)
+[07:10:57] BackSlot: linkID=nil visibleID=28765 [Stainless Cloak of the Pure Hearted]
+[07:10:57] FeetSlot: linkID=nil visibleID=16919 [Boots of Transcendence]
+[07:10:57] Found tooltip tmog line: Transmogrified to:
+Belt of the Long Road
+[07:10:57] Found tooltip tmog line: Transmogrified to:
+Replica General's Satin Leggings
+[07:10:57] Found tooltip tmog line: Transmogrified to:
+Boots of Transcendence
+[07:10:57] Found tooltip tmog line: Transmogrified to:
+Imperial Silk Gloves
+[07:10:57] Found tooltip tmog line: Transmogrified to:
+Stainless Cloak of the Pure Hearted
+[07:10:57] Found tooltip tmog line: Transmogrified to:
+Staff of Immaculate Recovery
+[07:10:57] BackSlot: linkID=96011 visibleID=28765 [Stainless Cloak of the Pure Hearted]
+[07:10:57] FeetSlot: linkID=95223 visibleID=16919 [Boots of Transcendence]
+[07:10:57] WaistSlot: linkID=96154 visibleID=30036 [Belt of the Long Road]
+[07:10:57] ChestSlot: linkID=96381 visibleID=7518 [Gossamer Robe]
+[07:10:57] HeadSlot: linkID=95296 visibleID=30152 [Cowl of the Avatar]
+[07:10:57] MainHandSlot: linkID=94805 visibleID=32344 [Staff of Immaculate Recovery]
+[07:10:57] HandsSlot: linkID=95295 visibleID=86313 [Imperial Silk Gloves]
+[07:10:57] ShoulderSlot: linkID=95299 visibleID=30154 [Mantle of the Avatar]
+[07:10:57] LegsSlot: linkID=96111 visibleID=77902 [Replica General's Satin Leggings]
+[07:10:57] Found tooltip tmog line: Transmogrified to:
+Cowl of the Avatar
+[07:10:57] Found tooltip tmog line: Transmogrified to:
+Mantle of the Avatar
+[07:10:57] Found tooltip tmog line: Transmogrified to:
+Gossamer Robe
+[07:10:57] Found tooltip tmog line: Transmogrified to:
+Belt of the Long Road
+[07:10:57] Found tooltip tmog line: Transmogrified to:
+Replica General's Satin Leggings
+[07:10:57] Found tooltip tmog line: Transmogrified to:
+Boots of Transcendence
+[07:10:57] Found tooltip tmog line: Transmogrified to:
+Imperial Silk Gloves
+[07:10:57] Found tooltip tmog line: Transmogrified to:
+Stainless Cloak of the Pure Hearted
+[07:10:57] Found tooltip tmog line: Transmogrified to:
+Staff of Immaculate Recovery
+[07:10:57] BackSlot: linkID=96011 visibleID=28765 [Stainless Cloak of the Pure Hearted]
+[07:10:57] FeetSlot: linkID=95223 visibleID=16919 [Boots of Transcendence]
+[07:10:57] WaistSlot: linkID=96154 visibleID=30036 [Belt of the Long Road]
+[07:10:57] ChestSlot: linkID=96381 visibleID=7518 [Gossamer Robe]
+[07:10:57] HeadSlot: linkID=95296 visibleID=30152 [Cowl of the Avatar]
+[07:10:57] MainHandSlot: linkID=94805 visibleID=32344 [Staff of Immaculate Recovery]
+[07:10:57] HandsSlot: linkID=95295 visibleID=86313 [Imperial Silk Gloves]
+[07:10:57] ShoulderSlot: linkID=95299 visibleID=30154 [Mantle of the Avatar]
+[07:10:57] LegsSlot: linkID=96111 visibleID=77902 [Replica General's Satin Leggings]

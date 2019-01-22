@@ -130,7 +130,9 @@ local L = {
 	ADDON_CALL_PROTECTED = "[%s] AddOn '%s' tried to call the protected function '%s'.",
 	ADDON_CALL_PROTECTED_MATCH = "^%[(.*)%] (AddOn '.*' tried to call the protected function '.*'.)$",
 	ADDON_DISABLED = "|cffffff00!BugGrabber and %s cannot coexist; %s has been forcefully disabled. If you want to, you may log out, disable !BugGrabber, and enable %s.|r",
-	BUGGRABBER_STOPPED = "There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.",
+	-- BUGGRABBER_STOPPED = "There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.",
+	SPAM_THROTTLING = "Too many new errors generated continuously, only one per second is saved.",
+	SPAM_FINISHED = "Error spam has finished.",
 	ERROR_DETECTED = "%s |cffffff00captured, click the link for more information.|r",
 	ERROR_UNABLE = "|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r",
 	NO_DISPLAY_1 = "|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r",
@@ -185,7 +187,7 @@ frame:Hide()
 
 -- Error links
 local playerName = UnitName("player")
-local chatLinkFormat = "|Hbuggrabber:%s:%s|h|cffff0000[Error %s]|r|h"
+local chatLinkFormat = "|Hbuggrabber:%s:%s|h|cffff0000[Error: "..LIGHTYELLOW_FONT_COLOR_CODE.."%s|r]|r|h"
 
 
 -----------------------------------------------------------------------
@@ -343,7 +345,7 @@ do
 
 		do
 			err =  type(options) == 'table' and options  or  {}
-			local stack =  err.stack  or  _G.debugstack(2)
+			local stack =  err.stack  or  _G.debugstack(3)
 			--[[ Callstack from here:
 /run error()
 0: [C]: in function `debugstack'		-- BugGrabber.debugstack()
@@ -372,8 +374,8 @@ do
 			err = err or {}
 			err.message = sanitizedMessage
 			err.stack = table.concat(stackFrames, "\n")
-			err.locals = _G.debuglocals(3)
-			err.calleeLocals = _G.debuglocals(4)
+			err.locals = _G.debuglocals(4)
+			err.calleeLocals = _G.debuglocals(5)
 			err.session = currentSessionId
 			err.time = date("%Y/%m/%d %H:%M:%S")
 			err.timestamp = time()
@@ -401,7 +403,7 @@ do
 				BugGrabber.Throttling = false
 				triggerEvent("BugGrabber_Throttling", false)
 				if  ADDON_NAME == STANDALONE_NAME  then
-					safe_print(FUNCTION_COLOR.."BugGrabber:|r "..L.BUGGRABBER_SPAM_FINISHED)
+					safe_print(FUNCTION_COLOR.."BugGrabber:|r "..L.SPAM_FINISHED)
 				end
 			end
 			return
@@ -412,7 +414,7 @@ do
 			triggerEvent("BugGrabber_Throttling", true)
 			-- triggerEvent("BugGrabber_CapturePaused")
 			if  ADDON_NAME == STANDALONE_NAME  then
-				safe_print(FUNCTION_COLOR.."BugGrabber:|r "..L.BUGGRABBER_SPAM_THROTTLING)
+				safe_print(FUNCTION_COLOR.."BugGrabber:|r "..L.SPAM_THROTTLING)
 			end
 		end
 		return true
@@ -486,7 +488,7 @@ do
 			findLibName = nil
 			
 			if ran and version then
-				withVersion = (prefix ~= 1 and prefix or "") .. name.."("..version..")" .. (type(tail) == "string" and tail or "")
+				withVersion = (prefix ~= 1 and prefix or "") .. name.."(v"..version..")" .. (type(tail) == "string" and tail or "")
 			else
 				withVersion = false
 			end

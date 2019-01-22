@@ -1,0 +1,122 @@
+http://wowprogramming.com/docs/api_categories.html#debug
+--
+Debugging and Profiling functions
+FrameXML_Debug - Enables or disables logging of XML loading
+GetAddOnCPUUsage - Returns the amount of CPU time used by an addon
+GetAddOnMemoryUsage - Returns the amount of memory used by an addon
+GetDebugAnimationStats - This function is not yet documented
+GetDebugSpellEffects - This function is not yet documented
+GetEventCPUUsage - Returns information about the CPU usage of an event
+GetFrameCPUUsage - Returns information about CPU usage by a frame's script handlers
+GetFramerate - Returns the number of frames per second rendered by the client
+GetFunctionCPUUsage - Returns information about CPU usage by a function
+GetNetStats - Returns information about current network connection performance
+GetScriptCPUUsage - Returns the total CPU time used by the scripting system
+GetTaxiBenchmarkMode - Returns whether flight path benchmark mode is enabled
+ResetCPUUsage - Resets CPU usage statistics
+SetTaxiBenchmarkMode - Enables or disables flight path benchmark mode
+UpdateAddOnCPUUsage - Updates addon CPU profiling information
+UpdateAddOnMemoryUsage - Updates addon memory usage information
+debugprofilestart - Starts/resets the high resolution profiling timer
+debugprofilestop - Returns the value of the profiling timer
+debugstack - Returns information about the current function call stack
+geterrorhandler - Returns the current error handler function
+getprinthandler - Returns the function currently used for `print()` outputframexml
+issecurevariable - Returns whether a variable is secure (and if not, which addon tainted it)
+print - Outputs a list of values (in the main chat window by default)framexml
+print - Outputs a list of values (in the main chat window by default)framexml
+seterrorhandler - Changes the error handler to a specified function
+setprinthandler - Sets a new function to be used for `print()` outputframexml
+tostringall - Alternative to `tostring()` for bulk conversion of valuesframexml
+
+
+
+http://wowprogramming.com/docs/api/GetScriptCPUUsage.html
+--
+Returns the total CPU time used by the scripting system. Only returns valid data if the scriptProfile CVar is set to 1; returns 0 otherwise.
+Signature:
+usage = GetScriptCPUUsage()
+Returns:
+usage - Amount of CPU time used by the scripting system (in milliseconds) since the UI was loaded or ResetCPUUsage() was last called (number)
+
+
+
+http://wowprogramming.com/docs/api/GetAddOnCPUUsage.html
+--
+Returns the amount of CPU time used by an addon. Only returns valid data if the scriptProfile CVar is set to 1; returns 0 otherwise.
+The value returned is from a cache only updated when calling UpdateAddOnCPUUsage(). This value is the sum of GetFunctionCPUUsage() for all functions created on the addon's behalf -- note that if the addon calls external functions which in turn create new functions, the new functions are considered to belong to the addon.
+Signature:
+usage = GetAddOnCPUUsage("name") or GetAddOnCPUUsage(index)
+Arguments:
+name - Name of an addon (name of the addon's folder and TOC file, not the Title found in the TOC) (string)
+index - Index of an addon in the addon list (between 1 and GetNumAddOns()) (number)
+Returns:
+usage - Amount of CPU time used by the addon (in milliseconds) since the UI was loaded or ResetCPUUsage() was last called (number)
+
+
+
+http://wowprogramming.com/docs/api/GetEventCPUUsage.html
+--
+Returns information about the CPU usage of an event. Only returns valid data if the scriptProfile CVar is set to 1; returns 0 otherwise.
+Signature:
+usage, numEvents = GetEventCPUUsage(["event"])
+Arguments:
+event - Name of an event; if omitted, returns usage information for all events (string)
+Returns:
+usage - Amount of CPU time used by handlers for the event (in milliseconds) since the UI was loaded or ResetCPUUsage() was last called (number)
+numEvents - Number of times the event has fired this session (number)
+
+
+
+http://wowprogramming.com/docs/api/GetFrameCPUUsage.html
+--
+Returns information about CPU usage by a frame's script handlers. Only returns valid data if the scriptProfile CVar was set to 1 on last UI reload; returns 0 otherwise.
+OnUpdate CPU usage is not included (tested at ver 6.0.3). Other scripts (e.g. OnEvent, OnShow) are included.
+Note that the CPU time is the sum of the time spent in the frame's CURRENT script handler functions, so if you change the handlers, or nil them out, the reported CPU time will change.
+Signature:
+usage, calls = GetFrameCPUUsage(frame, includeChildren)
+Arguments:
+frame - A Frame object (table)
+includeChildren - True to include CPU usage by children of the frame; false to include only the frame itself. Default is TRUE. (boolean)
+Returns:
+usage - Amount of CPU time used by the frame's script handlers (in milliseconds) since the UI was loaded or ResetCPUUsage() was last called (number)
+calls - Number of function calls made from the frame's script handlers (number)
+
+
+
+http://wowprogramming.com/docs/api/GetFunctionCPUUsage.html
+--
+Returns information about CPU usage by a function. Only returns valid data if the scriptProfile CVar is set to 1; returns 0 otherwise.
+Signature:
+usage, calls = GetFunctionCPUUsage(function, includeSubroutines)
+Arguments:
+function - A function reference (function)
+includeSubroutines - True to include time spent in other functions called by the given function; false to count only time spent in the function body (boolean)
+Returns:
+usage - Amount of CPU time used by the function (in milliseconds) since the UI was loaded or ResetCPUUsage() was last called (number)
+calls - Number times the function was called (number)
+
+
+
+
+http://wowprogramming.com/docs/api/UpdateAddOnMemoryUsage.html
+--
+Updates addon memory usage information. See GetAddOnMemoryUsage() for the updated data.
+Signature:
+UpdateAddOnMemoryUsage()
+
+
+http://wowprogramming.com/docs/api/GetAddOnMemoryUsage.html
+--
+Returns the amount of memory used by an addon. The value returned is from a cache only updated when calling UpdateAddOnMemoryUsage().
+Signature:
+mem = GetAddOnMemoryUsage("name") or GetAddOnMemoryUsage(index)
+Arguments:
+name - Name of an addon (name of the addon's folder and TOC file, not the Title found in the TOC) (string)
+index - Index of an addon in the addon list (between 1 and GetNumAddOns()) (number)
+Returns:
+mem - Memory usage of the addon (in kilobytes) (number)
+
+
+
+
