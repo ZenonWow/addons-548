@@ -23,6 +23,7 @@ _G[BUGGER] = Bugger
 
 Bugger.db = "BuggerDB"
 Bugger.dbDefaults = {
+	autoshow = false,
 	chat  = true,  -- show a message in the chat frame when an error is captured
 	sound = false, -- play a sound when an error is captured
 	minimap = {},
@@ -30,7 +31,7 @@ Bugger.dbDefaults = {
 
 ------------------------------------------------------------------------
 
-local MIN_INTERVAL = 10
+local MIN_INTERVAL = 30
 
 local ICON_GRAY  = "Interface\\AddOns\\Bugger\\Icons\\Bug-Gray"
 local ICON_GREEN = "Interface\\AddOns\\Bugger\\Icons\\Bug-Green"
@@ -67,6 +68,8 @@ Bugger.dataObject = {
 	OnTooltipShow = function(tt)
 		local total = Bugger:GetNumErrors()
 		local errorsInTooltip = 8
+		Bugger.lastTooltip = tt
+		Bugger.lastTooltipOwner = tt:GetOwner()
 
 		tt:AddDoubleLine(BUGGER, total > 0 and total or "", nil, nil, nil, 1, 1, 1)
 
@@ -100,13 +103,20 @@ function Bugger:OnLoad()
 	local displays = { "Barrel", "Bazooka", "ButtonBin", "ChocolateBar", "DockingStation", "HotCorners", "NinjaPanel", "StatBlockCore", "TitanPanel" }
 	local character = UnitName("player")
 
+	local defaultHide = false
 	-- MOP
 	local GetAddOnEnableState = GetAddOnEnableState  or  function(character, addonName)  local _,_,_,enabled = GetAddOnInfo(addonName) ; return enabled  end
 	for i = 1, #displays do
 		-- WOD
-		if GetAddOnEnableState(character, displays[i]) then  return  end
+		if GetAddOnEnableState(character, displays[i]) then  defaultHide = true ; break  end
 	end
-	LibStub("LibDBIcon-1.0"):Register(BUGGER, self.dataObject, self.db.minimap)
+	
+	local LibDBIcon = LibStub("LibDBIcon-1.0")
+	LibDBIcon:Register(BUGGER, self.dataObject, self.db.minimap)
+	if  self.db.minimap.hide == nil  then
+		-- LibDBIcon:Toggle(BUGGER, not defaultHide)
+		if  defaultHide  then  LibDBIcon:Show(BUGGER)  else  LibDBIcon:Hide(BUGGER)  end
+	end
 end
 
 function Bugger:OnLogin()
@@ -174,21 +184,42 @@ end
 		counter = 1,
 	}
 ]]
-function Bugger:BugGrabber_BugGrabbed(callback, err)
+function Bugger:BugGrabber_BugGrabbed(event, err, newErrors)
 	self.dataObject.text = self:GetNumErrors()
 	self.dataObject.icon = ICON_RED
+	
+	local tt = Bugger.lastTooltip
+	if  tt and tt:GetOwner() == Bugger.lastTooltipOwner and tt:IsShown()  then
+		-- Update tooltip if visible.
+		tt:Hide()
+		self.dataObject.OnTooltipShow(tt)
+	else
+		Bugger.lastTooltip = nil
+	end
+	
+	local open = self.frame and self.frame:IsShown()
+	if  not err  then
+		if open then  self:ShowError(self.error)  end
+		return
+	end
 
-	if (self.lastError or 0) + MIN_INTERVAL < GetTime() then
+	local now = time()
+	if  MIN_INTERVAL < now - (self.lastError or 0)  then
+		self.lastError = now
 		if self.db.chat then
 			self:Print(L["An error has been captured!"])
 		end
+		--[[
 		if self.db.sound then
-			PlaySoundFile(self.db.sound, "Master")
+			local sound = LibStub("LibSharedMedia-3.0"):Fetch("sound", self.db.soundMedia)
+			PlaySoundFile(sound, "Master")
 		end
+		--]]
 		-- Update frame
-		self:ShowError(self.error)
+		if open then  self:ShowError(self.error)
+		elseif  self.db.autoshow  then  self:ShowError()
+		end
 	end
-	self.lastError = GetTime()
 end
 
 ------------------------------------------------------------------------
@@ -289,10 +320,12 @@ function Bugger:ShowError(index)
 		self.indexLabel:SetText("")
 		self.previous:Disable()
 		self.next:Disable()
+		--[[
 		local otherErrors = 0 < #errors
 			or  BugGrabber.GetSessionErrors and 0 < #BugGrabber:GetSessionErrors()
 			or  BugGrabber.GetPreviousErrors and 0 < #BugGrabber:GetPreviousErrors()
-		self.clear:SetEnabled(otherErrors)
+		--]]
+		self.clear:SetEnabled(false)
 		return
 	end
 
@@ -373,6 +406,7 @@ function Bugger:SetupFrame()
 	self.scrollFrame = ScriptErrorsFrameScrollFrame
 	self.editBox     = ScriptErrorsFrameScrollFrameText
 	self.title       = self.frame.title
+	self.options     = CreateFrame("Button", nil, self.frame)
 	self.indexLabel  = self.frame.indexLabel
 	self.previous    = self.frame.previous
 	self.next        = self.frame.next
@@ -388,6 +422,7 @@ function Bugger:SetupFrame()
 	self.frame:SetWidth(self.frame:GetWidth() + addWidth)
 	self.scrollFrame:SetWidth(self.scrollFrame:GetWidth() + addWidth - 4)
 	self.editBox:SetWidth(self.editBox:GetWidth() + addWidth)
+	-- self.editBox:SetAllPoints()
 
 	local addHeight = 150
 	self.frame:SetHeight(self.frame:GetHeight() + addHeight)
@@ -396,12 +431,42 @@ function Bugger:SetupFrame()
 	self.scrollFrame:SetPoint("TOPLEFT", 16, -32)
 	self.scrollFrame.ScrollBar:SetPoint("TOPLEFT", self.scrollFrame, "TOPRIGHT", 6, -13)
 
+	self.options:SetPoint("TOPRIGHT", -32, -8)
+	self.options:SetText("X")
+	self.options:SetSize(16, 16)
+	self.options:SetScript("OnClick", function()
+		-- level, value, dropDownFrame, anchorName, xOffset, yOffset, menuList, button, autoHideDelay
+		ToggleDropDownMenu(nil, nil, Bugger.menu, self, 0, 0, nil, nil, 10)
+	end)
+--[[
+/dump Bugger.frame:GetRect()
+/dump Bugger.editBox:GetRect()
+/dump Bugger.scrollFrame:GetRect()
+/run Bugger.editBox:SetAllPoints()
+/run Bugger.scrollFrame:SetAllPoints()
+/run Bugger.scrollFrame:SetPoint("BOTTOMRIGHT", -8, -8)
+[08:57:24] Dump: value=Bugger.frame:GetRect()
+[08:57:24] [1]=664.79998082526,
+[08:57:24] [2]=172.00000196808,
+[08:57:24] [3]=384.00002699084,
+[08:57:24] [4]=260.00000590425
+[08:57:40] Dump: value=Bugger.editBox:GetRect()
+[08:57:40] [1]=676.79996255022,
+[08:57:40] [2]=258.64002764874,
+[08:57:40] [3]=343.00004744483,
+[08:57:40] [4]=143.35999892037
+[08:57:43] Dump: value=Bugger.scrollFrame:GetRect()
+[08:57:43] [1]=676.79996255022,
+[08:57:43] [2]=208.00001911851,
+[08:57:43] [3]=343.00004744483,
+[08:57:43] [4]=193.99998045976
+--]]
 	self.clear:ClearAllPoints()
 	self.clear:SetPoint("BOTTOMLEFT", 12, 12)
 	self.clear:SetText(CLEAR_ALL)
 	self.clear:SetWidth(self.clear:GetFontString():GetStringWidth() + 20)
 	self.clear:SetScript("OnClick", function()
-		BugGrabber:Reset()
+		BugGrabber:Reset(Bugger.session)
 		self:ShowError()
 	end)
 
@@ -498,6 +563,10 @@ menu.soundFunc = function(self, arg1, arg2, checked)
 	Bugger.db.sound = checked
 end
 
+menu.autoshowFunc = function(self, arg1, arg2, checked)
+	Bugger.db.autoshow = checked
+end
+
 menu.iconFunc = function(self, arg1, arg2, checked)
 	Bugger.db.minimap.hide = not checked
 	LibStub("LibDBIcon-1.0"):Refresh(BUGGER, Bugger.db.minimap)
@@ -517,6 +586,13 @@ menu.initialize = function(_, level)
 	UIDropDownMenu_AddButton(info, level)
 
 	info = UIDropDownMenu_CreateInfo()
+	info.text = L["Auto-popup frame"]
+	info.func = menu.autoshowFunc
+	info.checked = Bugger.db.autoshow
+	info.keepShownOnClick = 1
+	UIDropDownMenu_AddButton(info, level)
+
+	info = UIDropDownMenu_CreateInfo()
 	info.text = L["Chat frame alerts"]
 	info.func = menu.chatFunc
 	info.checked = Bugger.db.chat
@@ -529,7 +605,7 @@ menu.initialize = function(_, level)
 	info.checked = Bugger.db.sound
 	info.keepShownOnClick = 1
 	UIDropDownMenu_AddButton(info, level)
-]]
+--]]
 	if LibStub("LibDBIcon-1.0"):IsRegistered(BUGGER) then
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["Minimap icon"]

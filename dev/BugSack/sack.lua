@@ -62,10 +62,12 @@ function window:UpdateSelected(selectExistingError)
 	local size = #currentSackContents
 	local eo = currentErrorObject
 	currentErrorIndex = currentErrorObject  and  tindexof(currentSackContents, currentErrorObject)
-	if  selectExistingError  and  not currentErrorIndex  then
+	if  not currentErrorIndex  then
 		currentErrorIndex = size
-		currentErrorObject = currentSackContents[currentErrorIndex]
-		eo = currentErrorObject
+		if  selectExistingError  then
+			currentErrorObject = currentSackContents[currentErrorIndex]
+			eo = currentErrorObject
+		end
 	end
 
 	if  eo  then

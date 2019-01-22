@@ -112,8 +112,14 @@ frame:RegisterEvent("ADDON_LOADED")
 function frame:ADDON_LOADED(event, name)
 	if name ~= ADDON then return end
 
+	local function createDB(varname)
+		-- return  _G[varname] ||= {}    -- same in jss
+		local db = _G[varname]
+		if  not db  then  db = {} ; _G[varname] = db  end
+		return db
+	end
 	local function initDB(db, defaults)
-		if type(db) ~= "table" then db = {} end
+		if type(db) ~= "table" then  db = {}  end
 		if type(defaults) ~= "table" then return db end
 		for k, v in pairs(defaults) do
 			if type(v) == "table" then
@@ -125,12 +131,12 @@ function frame:ADDON_LOADED(event, name)
 		return db
 	end
 	if addon.db then
-		addon.db = _G[addon.db]
-		addon.db = initDB(addon.db, addon.dbDefaults)
+		assert(type(addon.db) == 'string', "AddonStub:ADDON_LOADED() requires "..ADDON..".db = '<name of SavedVariable>'")
+		addon.db = initDB(createDB(addon.db), addon.dbDefaults)
 	end
 	if addon.dbpc then
-		addon.dbpc = _G[addon.dbpc]
-		addon.dbpc = initDB(addon.dbpc, addon.dbpcDefaults)
+		assert(type(addon.dbpc) == 'string', "AddonStub:ADDON_LOADED() requires "..ADDON..".db = '<name of SavedVariablePerChar>'")
+		addon.dbpc = initDB(createDB(addon.dbpc), addon.dbpcDefaults)
 	end
 
 	self:UnregisterEvent("ADDON_LOADED")

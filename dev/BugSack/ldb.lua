@@ -39,7 +39,10 @@ do
 |cffeda55fAlt-Click|r to clear all bugs.]]
 	local line = "%d. %s (x%d)"
 	function dataobj.OnTooltipShow(tt)
+		addon.lastTooltip = tt
+		addon.lastTooltipOwner = tt:GetOwner()
 		local errors = addon:GetSessionErrors()
+		
 		if #errors == 0 then
 			tt:AddLine(L["You have no bugs, yay!"])
 		else
@@ -64,7 +67,18 @@ function dataobj:UpdateErrors()
 	-- print("BugSack.dataobject:UpdateErrors() count="..count)
 	self.text = tostring(count)
 	self.icon =  count == 0  and  ICON_GREEN  or  ICON_RED
+
+	local tt = addon.lastTooltip
+	if  tt and tt:GetOwner() == addon.lastTooltipOwner and tt:IsShown()  then
+		-- Update tooltip if visible.
+		tt:Hide()
+		self.OnTooltipShow(tt)
+	else
+		addon.lastTooltip = nil
+	end
+	
 end
+
 
 function dataobj:OnAddonLoaded()
 	local LibDBIcon = LibStub("LibDBIcon-1.0", true)
