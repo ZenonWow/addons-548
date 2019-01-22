@@ -3,40 +3,36 @@
 
 <!--<Script file="Utf8\utf8.lua"/>-->
 
-<!--@no-lib-strip@-->
+<!--@no-lib-strip@--
+<Script  file="LibStub\LibStub.lua" />
+<Script  file="CallbackHandler-1.0\CallbackHandler-1.0.lua" />
 
-<!-- Loaded from shared Ace3 addon:
+<Script  file="LibSharedMedia-3.0\LibSharedMedia-3.0.lua" />
+<Script  file="LibDataBroker-1.1\LibDataBroker-1.1.lua" />
+<Script  file="LibDBIcon-1.0\LibDBIcon-1.0.lua" />
 
-<Script file="LibStub\LibStub.lua"/>
-<Include file="CallbackHandler-1.0\CallbackHandler-1.0.xml" />
+<Script  file="AceAddon-3.0\AceAddon-3.0.lua" />
 
-<Script file="LibDataBroker-1.1\LibDataBroker-1.1.lua"/>
-<Script file="LibDBIcon-1.0\LibDBIcon-1.0.lua"/>
+<Script  file="AceEvent-3.0\AceEvent-3.0.lua" />
+<Script  file="AceTimer-3.0\AceTimer-3.0.lua" />
+<Script  file="AceHook-3.0\AceHook-3.0.lua" />
+<Script  file="AceDB-3.0\AceDB-3.0.lua" />
+<Script  file="AceDBOptions-3.0\AceDBOptions-3.0.lua" />
 
-<Include file="AceAddon-3.0\AceAddon-3.0.xml" />
-<Include file="AceDB-3.0\AceDB-3.0.xml" />
-<Include file="AceDBOptions-3.0\AceDBOptions-3.0.xml" />
+<Script  file="AceConsole-3.0\AceConsole-3.0.lua" />
 
-<Include file="AceTimer-3.0\AceTimer-3.0.xml" />
-<Include file="AceEvent-3.0\AceEvent-3.0.xml" />
-<Include file="AceHook-3.0\AceHook-3.0.xml" />
-
-<Include file="AceConsole-3.0\AceConsole-3.0.xml" />
 <Include file="AceGUI-3.0\AceGUI-3.0.xml" />
-<Include file="AceGUI-3.0-SharedMediaWidgets\widget.xml"/>
+<Include file="AceGUI-3.0-SharedMediaWidgets\widget.xml" />
 <Include file="AceConfig-3.0\AceConfig-3.0.xml" />
 
-<Include file="LibSharedMedia-3.0\lib.xml"/>
+<Script  file="AceTab-3.0\AceTab-3.0.lua" />
+<!--@end-no-lib-strip@-->
 
-END Loaded from shared Ace3 addon -->
+<Script  file="..\..\Ace3\AceTab-3.0\AceTab-3.0.lua" />
 
-
-<Include file="AceTab-3.0\AceTab-3.0.xml" />
-
-<Include file="LibChatAnims\LibChatAnims.xml"/>
-<Include file="LibSink-2.0\lib.xml"/>
-
-<Include file="LibAlts-1.0\lib.xml"/>
+<Script  file="LibChatAnims\LibChatAnims.lua" />
+<Script  file="LibSink-2.0\LibSink-2.0.lua" />
+<Script  file="LibAlts-1.0\LibAlts-1.0.lua" />
 
 <!--@end-no-lib-strip@-->
 

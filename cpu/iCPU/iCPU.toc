@@ -17,20 +17,20 @@
 ## X-LoadOn-Login: LowPrio
 
 
-# Libraries#
-# Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
-# Libs\LibStub\Libstub.lua
-# Libs\libdatabroker-1-1\LibDataBroker-1.1.lua
+# Libraries
+
+# Libs\LibStub\LibStub.lua
+# Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+# Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+# Libs\AceDB-3.0\AceDB-3.0.lua
+# Libs\AceEvent-3.0\AceEvent-3.0.lua
+# Libs\AceTimer-3.0\AceTimer-3.0.lua
+# Libs\AceLocale-3.0\AceLocale-3.0.lua
+# Libs\AceGUI-3.0\AceGUI-3.0.lua
+# Libs\AceConfig-3.0\AceConfig-3.0.xml
 
 Libs\iLib\lib.xml
-Libs\LibCrayon-3.0\lib.xml
-
-# Libs\AceGUI-3.0\AceGUI-3.0.xml
-# Libs\AceConfig-3.0\AceConfig-3.0.xml
-# Libs\AceDB-3.0\AceDB-3.0.xml
-# Libs\AceEvent-3.0\AceEvent-3.0.xml
-# Libs\AceLocale-3.0\AceLocale-3.0.xml
-# Libs\AceTimer-3.0\AceTimer-3.0.xml
+Libs\LibCrayon-3.0\LibCrayon-3.0.lua
 
 # Locales
 Locales\Locales.xml
