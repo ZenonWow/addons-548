@@ -10,7 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Memory" -- L["Memory"]
-local ldbName = name
 local tt
 local ttName = name.."TT"
 local GetNumAddOns,GetAddOnMemoryUsage,GetAddOnInfo = GetNumAddOns,GetAddOnMemoryUsage,GetAddOnInfo
@@ -52,7 +51,7 @@ I[name] = {iconfile="Interface\\Addons\\"..addon.."\\media\\memory"}
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show how much memory are consumed through your addons."],
 	events = {
 		"PLAYER_ENTERING_WORLD"
@@ -62,8 +61,7 @@ ns.modules[name] = {
 		mem_max_addons = -1,
 		addonpanel = "none"
 	},
-	config_allowed = {
-	},
+	config_allowed = nil,
 	config = {
 		height = 68,
 		elements = {
@@ -112,14 +110,9 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(self)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-end
 
---[[ ns.modules[name].onevent = function(self,event,msg) end ]]
-
-ns.modules[name].onupdate = function(self)
-	local obj = self.obj or ns.LDB:GetDataObjectByName(ldbName)
+module.onupdate = function(self)
+	local obj = self.obj
 	local total, all = updateMemoryData(true)
 
 	local unit = "kb"
@@ -131,11 +124,7 @@ ns.modules[name].onupdate = function(self)
 	obj.text = string.format ("%.2f", total) .. C("suffix",unit)
 end
 
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
-ns.modules[name].ontooltip = function(tt)
+module.ontooltip = function(tt)
 	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
 
 	local unit
@@ -214,19 +203,19 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self)
+module.onenter = function(self)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	tt = ns.LQT:Acquire(ttName, 3, "LEFT","RIGHT", "RIGHT")
-	ns.modules[name].ontooltip(tt)
+	module.ontooltip(tt)
 	ns.createTooltip(self,tt)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,false,true); end
+module.onleave = function(self)
+	ns.hideTooltip(tt,ttName,false,true)
 end
 
-ns.modules[name].onclick = function(self,button)
+module.onclick = function(self,button)
 	local shift = IsShiftKeyDown()
 	
 	if button == "RightButton" and shift then
@@ -265,5 +254,8 @@ ns.modules[name].onclick = function(self,button)
 	end
 end
 
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

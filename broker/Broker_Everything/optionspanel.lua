@@ -50,15 +50,9 @@ ns.OP.createBrokerPanel = function(panel)
 		return panel:MakeToggle(
 			"name", name, 
 			"description", desc, 
-			"default", Broker_EverythingDB[varname].enabled,
-			"getFunc", function() return Broker_EverythingDB[varname].enabled end, 
-			"setFunc", function(value)
-				Broker_EverythingDB[varname].enabled = value
-				if value==true and ns.LDB:GetDataObjectByName(varname)==nil then
-					ns.moduleInit(varname)
-					if ns.modules[varname].onevent then ns.modules[varname].onevent({},"ADDON_LOADED") end
-				end
-			end
+			"default", ns.modules[varname].enabled ~= false,
+			"getFunc", function() return ns.isEnabled(varname) end, 
+			"setFunc", function(value)  ns.enableModule(varname, value)  end
 		)
 	end
 

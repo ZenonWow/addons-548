@@ -11,7 +11,6 @@
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 	local name = "Follower" -- L["Follower"]
-	local ldbName = name
 	local tt -- tooltips
 	local ttName = name.."TT"
 	local followers = {available={}, onmission={}, onwork={}, onresting={}, unknown={},num=0};
@@ -26,7 +25,7 @@
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-	ns.modules[name] = {
+	local module = {
 		desc = L["Broker to show your different currencies."],
 		--icon_suffix = "_Neutral",
 		enabled = false,
@@ -37,8 +36,8 @@
 			"GARRISON_FOLLOWER_REMOVED"
 		},
 		updateinterval = 30,
-		config_defaults = {},
-		config_allowed = {},
+		config_defaults = nil,
+		config_allowed = nil,
 		config = nil
 	}
 
@@ -155,36 +154,29 @@
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-	--[[ ns.modules[name].init = function(self) end ]]
 
-	ns.modules[name].onevent = function(self,event,msg)
+	module.onevent = function(module,event,msg)
 		getFollowers();
-		local obj = ns.LDB:GetDataObjectByName(ldbName)
+		local obj = module.obj
 		obj.text = ("%s/%s/%s/%s"):format(C("ltblue",followers.onresting_num),C("yellow",followers.onmission_num+followers.onwork_num),C("green",followers.available_num),followers.num);
 		if delay == false then
-			C_Timer.After(10,ns.modules[name].onevent)
+			C_Timer.After(10,module.onevent)
 			delay = true
 		end
 	end
 
-	ns.modules[name].onupdate = function(self)
+	module.onupdate = function(module)
 		if UnitLevel("player")>=90 and followers.num==0 then
 			-- stupid blizzard forgot to trigger this event after all types of long distance ports (teleport/portals/homestones)...
-			ns.modules[name].onevent(self,"GARRISON_FOLLOWER_LIST_UPDATE")
+			module.onevent(module,"GARRISON_FOLLOWER_LIST_UPDATE")
 		end
 	end
-
-	--[[ ns.modules[name].optionspanel = function(panel) end ]]
-
-	--[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
-	--[[ ns.modules[name].ontooltip = function(self) end ]]
-
 
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-	ns.modules[name].onenter = function(self)
+
+	module.onenter = function(self)
 		if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 		tt = ns.LQT:Acquire(name.."TT", 6, "LEFT", "RIGHT", "RIGHT", "CENTER", "CENTER", "CENTER")
@@ -192,13 +184,9 @@
 		ns.createTooltip(self, tt)
 	end
 
-	ns.modules[name].onleave = function(self)
-		if (tt) then ns.hideTooltip(tt,ttName,true); end
+	module.onleave = function(self)
+		ns.hideTooltip(tt,ttName,true)
 	end
-
-	--[[ ns.modules[name].onclick = function(self,button) end ]]
-
-	--[[ ns.modules[name].ondblclick = function(self,button) end ]]
 
 
 
@@ -209,3 +197,9 @@
 
 	wo is das event, wenn eine completed mission erfolgreich abgegeben wurde??
 ]]
+
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
+

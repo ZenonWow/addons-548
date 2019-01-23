@@ -12,7 +12,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Bags" -- L["Bags"]
-local ldbName = name
 local ttName = name.."TT"
 local tt = nil
 local ContainerIDToInventoryID,GetInventoryItemLink = ContainerIDToInventoryID,GetInventoryItemLink
@@ -53,7 +52,7 @@ I[name] = {iconfile="Interface\\icons\\inv_misc_bag_08",coords={0.05,0.95,0.05,0
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show filled, total and free count of blag slots"],
 	events = {
 		"PLAYER_LOGIN",
@@ -175,17 +174,15 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-end
-
-ns.modules[name].init_configs = function()
+--[[
+module.preinit = function()
 	if Broker_EverythingDB[name].freespace == nil then
 		Broker_EverythingDB[name].freespace = true
 	end
 end
+--]]
 
-ns.modules[name].onevent = function(self,event,msg)
+module.onevent = function(self,event,msg)
 	local f, t = BagsFreeUsed()
 	local u = t - f
 	local p = u / t
@@ -196,7 +193,7 @@ ns.modules[name].onevent = function(self,event,msg)
 
 	if Broker_EverythingDB[name].freespace == false then
 		txt = u .. "/" .. t
-	elseif Broker_EverythingDB[name].freespace == true then
+	else
 		txt = (t - u) .. " ".. L["free"]
 	end
 
@@ -206,17 +203,10 @@ ns.modules[name].onevent = function(self,event,msg)
 		c = "dkyellow"
 	end
 
-	local obj = self.obj or ns.LDB:GetDataObjectByName(ldbName) or {}
-	obj.text = C(c,txt)
+	self.obj.text = C(c,txt)
 end
 
---[[ ns.modules[name].onupdate =  function(self) end ]]
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
-ns.modules[name].ontooltip = function(tt)
+module.ontooltip = function(tt)
 	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
 	local f, total = BagsFreeUsed()
 	local l, c, n
@@ -269,30 +259,33 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self)
+module.onenter = function(self)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	tt = ns.LQT:Acquire(ttName, 3, "LEFT", "RIGHT", "RIGHT")
-	ns.modules[name].ontooltip(tt)
+	module.ontooltip(tt)
 	ns.createTooltip(self,tt)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,true); end
+module.onleave = function(self)
+	ns.hideTooltip(tt,ttName,true)
 end
 
-ns.modules[name].onclick = function(self,button)
+module.onclick = function(self,button)
 	if button == "RightButton" then
 		if Broker_EverythingDB[name].freespace == false then
-			Broker_EverythingDB[name].freespace  = true
+			Broker_EverythingDB[name].freespace = nil
 		else
 			Broker_EverythingDB[name].freespace = false
 		end
-		ns.modules[name].onevent(self)
+		module.onevent(self)
 	else
 		securecall("ToggleBackpack")
 	end
 end
 
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

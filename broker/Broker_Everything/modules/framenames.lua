@@ -10,7 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Framenames" -- L["Framenames"]
-local ldbName = name
 local tt = nil
 local ttName = name.."TT"
 local string = string
@@ -25,7 +24,7 @@ I[name] = {iconfile="Interface\\Addons\\"..addon.."\\media\\equip"}
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show names of frames under the mouse."],
 	enabled = false,
 	events = {},
@@ -88,19 +87,12 @@ end
 -- module (BE internal) functions --
 ------------------------------------
 
-ns.modules[name].init = function(self)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-	if self then
-		local dataobj = self.obj or ns.LDB:GetDataObjectByName(ldbName)
-		dataobj.text = L[name]
-	end
+module.initbroker = function(dataobj)
+	dataobj.text = L[name]
 end
 
-
---[[ ns.modules[name].onevent = function(self,event,msg) end ]]
-
-ns.modules[name].onupdate = function(self)
-	local dataobj = self.obj or ns.LDB:GetDataObjectByName(ldbName)
+module.onupdate = function(self)
+	local dataobj = self.obj
 	local F = nil
 	local f = GetMouseFocus()
 	if (not f) then
@@ -147,11 +139,7 @@ ns.modules[name].onupdate = function(self)
 	]]
 end
 
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
-ns.modules[name].ontooltip = function(tt)
+module.ontooltip = function(tt)
 	--if (ns.tooltipChkOnShowModifier(false)) then tt:Hide(); return; end
 	tt:Hide();
 end
@@ -160,11 +148,10 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self) end -- prevent displaying tt
+module.onenter = function(self) end -- prevent displaying tt
 
---[[ ns.modules[name].onleave = function(self) end ]]
 
---[[ ns.modules[name].onclick = function(self,button) end ]]
-
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

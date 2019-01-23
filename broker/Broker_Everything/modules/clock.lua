@@ -10,7 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Clock" -- L["Clock"]
-local ldbName = name
 local tt
 local ttName = name.."TT"
 local GetGameTime = GetGameTime
@@ -28,7 +27,7 @@ I[name] = {iconfile="Interface\\Addons\\"..addon.."\\media\\clock"}
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show realm or local time"],
 	events = {"TIME_PLAYED_MSG"},
 	updateinterval = 1,
@@ -39,8 +38,7 @@ ns.modules[name] = {
 		timeLocal = true,
 		showSeconds = false
 	},
-	config_allowed = {
-	},
+	config_allowed = nil,
 	config = {
 		height = 52,
 		elements = {
@@ -111,23 +109,14 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-end
-
-ns.modules[name].onevent = function(self,event,...)
+module.onevent = function(self,event,...)
 	if event=="TIME_PLAYED_MSG" then
 		played = true
 	end
 end
 
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
-ns.modules[name].onupdate = function(self)
+module.onupdate = function(self)
 	if not self then self = {} end
-	self.obj = self.obj or ns.LDB:GetDataObjectByName(ldbName)
 
 	local h24 = Broker_EverythingDB[name].format24
 	local dSec = Broker_EverythingDB[name].showSeconds
@@ -139,13 +128,13 @@ ns.modules[name].onupdate = function(self)
 	end
 end
 
-ns.modules[name].ontimeout = function(self)
+module.ontimeout = function(self)
 	if played==false then
 		--RequestTimePlayed()
 	end
 end
 
-ns.modules[name].ontooltip = function(tt)
+module.ontooltip = function(tt)
 	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
 	ns.tooltipScaling(tt)
 	local h24 = Broker_EverythingDB[name].format24
@@ -177,7 +166,7 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self)
+module.onenter = function(self)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	tt = ns.LQT:Acquire(ttName, 2 , "LEFT", "RIGHT" )
@@ -185,36 +174,33 @@ ns.modules[name].onenter = function(self)
 	ns.createTooltip(self,tt)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,true); end
-	if (tt2) then ns.hideTooltip(tt2,ttName2,true); end --?
+module.onleave = function(self)
+	ns.hideTooltip(tt,ttName,true)
+	-- ns.hideTooltip(tt2,ttName2,true) --?
 end
 
-ns.modules[name].onclick = function(self,button)
+module.onclick = function(self,button)
 	local shift = IsShiftKeyDown()
 	if  shift  and  button == "RightButton"  then
-		if Broker_EverythingDB[name].timeLocal == true then
+		if Broker_EverythingDB[name].timeLocal ~= false then
 			Broker_EverythingDB[name].timeLocal = false
 		else
-			Broker_EverythingDB[name].timeLocal = true
+			Broker_EverythingDB[name].timeLocal = nil
 		end
-		ns.modules[name].onupdate(self)
+		module.onupdate(self)
 	elseif  not shift   and  button == "RightButton" then
 		securecall("ToggleTimeManager")
 	elseif  shift  and  button == "LeftButton"  then 
-		if Broker_EverythingDB[name].format24 == true then
+		if Broker_EverythingDB[name].format24 ~= false then
 			Broker_EverythingDB[name].format24 = false
 		else
-			Broker_EverythingDB[name].format24 = true
+			Broker_EverythingDB[name].format24 = nil
 		end
-		ns.modules[name].onupdate(self)
+		module.onupdate(self)
 	else
 		securecall("ToggleCalendar")
 	end
 end
-
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
-
 
 
 
@@ -236,4 +222,9 @@ Other Countries
 <5 chooseable>
 
 ]]
+
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

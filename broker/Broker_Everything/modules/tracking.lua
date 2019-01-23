@@ -10,7 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Tracking" -- L["Tracking"]
-local ldbName = name
 local tt = nil
 local GetNumTrackingTypes,GetTrackingInfo = GetNumTrackingTypes,GetTrackingInfo
 
@@ -25,7 +24,7 @@ I[name] = {iconfile="Interface\\minimap\\tracking\\none"}
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show what you are currently tracking. You can also change the tracking types from this broker."],
 	events = {
 		"MINIMAP_UPDATE_TRACKING",
@@ -37,8 +36,7 @@ ns.modules[name] = {
 		displaySelection = true,
 		hideMinimapButton = false
 	},
-	config_allowed = {
-	},
+	config_allowed = nil,
 	config = {
 		height=52,
 		elements = {
@@ -83,17 +81,16 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
+module.preinit = function()
 	if Broker_EverythingDB[name].hideMinimapButton then
 		ns.hideFrame("MiniMapTracking")
 	end
 end
 
-ns.modules[name].onevent = function(self,event,msg)
+module.onevent = function(self,event,msg)
 	local numActive, trackActive = updateTracking()
 	local n = L[name]
-	local dataobj = self.obj or ns.LDB:GetDataObjectByName(ldbName)
+	local dataobj = self.obj
 
 	if Broker_EverythingDB[name].displaySelection then
 		if numActive == 0 then 
@@ -116,13 +113,7 @@ ns.modules[name].onevent = function(self,event,msg)
 	dataobj.text = n
 end
 
---[[ ns.modules[name].onupdate = function(self) end ]]
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
-ns.modules[name].ontooltip = function(tt)
+module.ontooltip = function(tt)
 	if (ns.tooltipChkOnShowModifier(false)) then tt:Hide(); return; end
 
 	local numActive, trackActive = updateTracking()
@@ -149,13 +140,12 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
---[[ ns.modules[name].onenter = function(self) end ]]
-
---[[ ns.modules[name].onleave = function(self) end ]]
-
-ns.modules[name].onclick = function(self,button)
+module.onclick = function(self,button)
 	ToggleDropDownMenu(1, nil, MiniMapTrackingDropDown, self, 0, 0)
 end
 
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

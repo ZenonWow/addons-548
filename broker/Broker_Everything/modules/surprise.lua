@@ -10,7 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Surprise" -- L["Surprise"]
-local ldbName = name
 local ttName = name.."TT"
 local tt = nil
 local ITEM_DURATION,ITEM_COOLDOWN,ITEM_LOOTABLE=1,2,3
@@ -40,10 +39,11 @@ I[name] = {iconfile="Interface\\Icons\\INV_misc_gift_01",coords={0.05,0.95,0.05,
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show, equip, delete, update and save equipment sets"],
 	events = {
 		"PLAYER_ENTERING_WORLD",
+		"BAG_UPDATE",
 	},
 	updateinterval = 10,
 	config_defaults = nil,
@@ -67,7 +67,7 @@ local function resetFunc() -- clear founds table
 end
 
 local function updateFunc() -- update broker
-	local obj = ns.LDB:GetDataObjectByName(ldbName)
+	local obj = module.obj
 	if counter.sum==nil then counter.sum = 0 end
 	if counter.sum>0 then
 		obj.text = ((counter[ITEM_LOOTABLE] and C("green",counter[ITEM_LOOTABLE])) or 0) .. "/" .. counter.sum
@@ -98,30 +98,20 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-end
 
-ns.modules[name].onevent = function(self,event,...)
+module.onevent = function(self,event,...)
 	for i,v in pairs(items) do ns.bagScan.RegisterId(name,i,foundFunc,resetFunc,updateFunc) end
 	ns.bagScan.Update(true)
 end
 
-ns.modules[name].onupdate = function(self)
+module.onupdate = function(self)
 	
 end
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
---[[ ns.modules[name].ontooltip = function(tt) end ]]
-
 
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self)
+module.onenter = function(self)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	tt = ns.LQT:Acquire(ttName, 3, "LEFT", "LEFT", "RIGHT")
@@ -129,11 +119,12 @@ ns.modules[name].onenter = function(self)
 	ns.createTooltip(self,tt)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,true); end
+module.onleave = function(self)
+	ns.hideTooltip(tt,ttName,true)
 end
 
---[[ ns.modules[name].onclick = function(self,button) end ]]
 
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

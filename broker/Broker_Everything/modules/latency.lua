@@ -10,7 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Latency" -- L["Latency"]
-local ldbName = name
 local tt = nil
 local GetNetStats = GetNetStats
 local suffix = "ms"
@@ -28,7 +27,7 @@ I[name] = {iconfile="Interface\\Addons\\"..addon.."\\media\\latency"}
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show your current latency. Can be configured to show both Home and/or World latency."],
 	events = {
 		"PLAYER_ENTERING_WORLD"
@@ -38,9 +37,8 @@ ns.modules[name] = {
 		showHome = true,
 		showWorld = true
 	},
-	config_allowed = {
-	},
-	config = 	{
+	config_allowed = nil,
+	config = {
 		height = 52,
 		elements = {
 			{
@@ -68,18 +66,15 @@ ns.modules[name] = {
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
+
+module.onevent = function(self,event,msg)
+	module.onupdate(self)
 end
 
-ns.modules[name].onevent = function(self,event,msg)
-	ns.modules[name].onupdate(self)
-end
-
-ns.modules[name].onupdate = function(self)
+module.onupdate = function(self)
 	local _, _, lHome, lWorld = GetNetStats()
 	local text = ""
-	local dataobj = self.obj or ns.LDB:GetDataObjectByName(ldbName)
+	local dataobj = self.obj
 	local suffix = C("suffix",suffix)
 
 	latency.Home = lHome
@@ -96,7 +91,7 @@ ns.modules[name].onupdate = function(self)
 		end		
 	end
 
-	local showHome, showWorld  = Broker_EverythingDB[name].showHome, Broker_EverythingDB[name].showWorld
+	local showHome, showWorld  = Broker_EverythingDB[name].showHome ~= false, Broker_EverythingDB[name].showWorld ~= false
 	if (showWorld and not showHome) or not (showWorld and showHome) then
 		text = string.format("%s%s", latency.World, suffix)
 	elseif showHome and not showWorld then
@@ -108,9 +103,7 @@ ns.modules[name].onupdate = function(self)
 	dataobj.text = text
 end
 
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
-ns.modules[name].ontooltip = function(tt)
+module.ontooltip = function(tt)
 	if (ns.tooltipChkOnShowModifier(false)) then tt:Hide(); return; end
 
 	ns.tooltipScaling(tt)
@@ -131,34 +124,30 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
---[[ ns.modules[name].onenter = function(self) end ]]
 
---[[ ns.modules[name].onleave = function(self) end ]]
-
-ns.modules[name].onclick = function(self,button)
+module.onclick = function(self,button)
 	if button == "RightButton" then
 		if IsControlKeyDown() then
-			if Broker_EverythingDB[name].showWorld then
+			if Broker_EverythingDB[name].showWorld ~= false then
 				Broker_EverythingDB[name].showWorld = false
 			else
-				Broker_EverythingDB[name].showWorld = true
+				Broker_EverythingDB[name].showWorld = nil
 			end
 		elseif IsAltKeyDown() then
-			if Broker_EverythingDB[name].showHome then
+			if Broker_EverythingDB[name].showHome ~= false then
 				Broker_EverythingDB[name].showHome = false
 			else
-				Broker_EverythingDB[name].showHome = true
+				Broker_EverythingDB[name].showHome = nil
 			end		
 		else
-			if Broker_EverythingDB.suffixColour then
-				Broker_EverythingDB.suffixColour = false
-			else
-				Broker_EverythingDB.suffixColour = true
-			end
+			Broker_EverythingDB.suffixColour = not Broker_EverythingDB.suffixColour  or nil
 		end
-		ns.modules[name].onupdate(self)
+		module.onupdate(self)
 	end
 end
 
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

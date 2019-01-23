@@ -10,7 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Dualspec" -- L["Dualspec"]
-local ldbName = name
 local tt = nil
 local unspent = 0
 local specs = {}
@@ -25,7 +24,7 @@ I[name] = {iconfile=GetItemIcon(7516),coords={0.05,0.95,0.05,0.95}}
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show and switch your character specializations"],
 	events = {
 		"PLAYER_LOGIN",
@@ -36,9 +35,9 @@ ns.modules[name] = {
 		"PLAYER_TALENT_UPDATE",
 	},
 	updateinterval = nil, -- 10
-	config_defaults = nil, -- {}
+	config_defaults = nil,
 	config_allowed = nil,
-	config = nil -- {}
+	config = nil,
 }
 
 
@@ -51,16 +50,13 @@ ns.modules[name] = {
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-end
 
-ns.modules[name].onevent = function(self,event,msg)
+module.onevent = function(self,event,msg)
 	local specName = L["No Spec!"]
 	local icon = I(name)
 	local spec = GetSpecialization()
 	local _ = nil
-	local dataobj = self.obj or ns.LDB:GetDataObjectByName(ldbName)
+	local dataobj = self.obj
 	unspent = GetNumUnspentTalents()
 
 	if spec ~= nil then
@@ -78,13 +74,7 @@ ns.modules[name].onevent = function(self,event,msg)
 
 end
 
---[[ ns.modules[name].onupdate = function(self) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
-ns.modules[name].ontooltip = function(tt)
+module.ontooltip = function(tt)
 	if (ns.tooltipChkOnShowModifier(false)) then tt:Hide(); return; end
 
 	ns.tooltipScaling(tt)
@@ -129,11 +119,8 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
---[[ ns.modules[name].onenter = function(self) end ]]
 
---[[ ns.modules[name].onleave = function(self) end ]]
-
-ns.modules[name].onclick = function(self,button)
+module.onclick = function(self,button)
 	if button == "RightButton" then
 		if not PlayerTalentFrame then UIParentLoadAddOn("Blizzard_TalentUI") end
 		securecall("ToggleTalentFrame")
@@ -144,7 +131,12 @@ ns.modules[name].onclick = function(self,button)
 	end
 end
 
-ns.modules[name].ondblclick = function(self,button)
+module.ondblclick = function(self,button)
 	securecall("SetActiveSpecGroup",abs(GetActiveSpecGroup()-3))
 end
+
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

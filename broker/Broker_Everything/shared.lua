@@ -152,29 +152,49 @@ ns.tooltipScaling = function(tooltip)
 	end
 end
 
-ns.hideTooltip = function(tooltip,ttName,ttForce,ttSetOnLeave)
-	local modifier=Broker_EverythingDB.ttModifierKey2;
-	ttForce = not not ttForce;
+
+local function hideOnLeave(tooltip)
+	if  tooltip.stayOpen  then  return false  end
+	local owner = tooltip.owner
+	if  owner and owner.IsMouseOver and owner:IsMouseOver()  then  return false  end
+	return ns.hideTooltip(tooltip, tooltip.key)
+end
+
+local function hideOnClick(tooltip)
+	if  tooltip.stayOpen  then  tooltip.stayOpen = nil ; return false  end
+	return ns.hideTooltip(tooltip, tooltip.key, true)
+end
+
+--[[
+ns.setHideOnLeave(tooltip)
+	tooltip:SetScript("OnLeave", hideOnLeave)
+end
+
+ns.setHideOnClick(tooltip)
+	tooltip:SetScript("OnClick", hideOnClick)
+end
+--]]
+
+ns.hideTooltip = function(tooltip,ttName,noFloat)
 	if (tooltip) then
-		if (not ttForce) and (modifier~="NONE") and (ns.tooltipChkOnShowModifier(modifier,false)) then
-			ttForce=true;
+		local modifier=Broker_EverythingDB.ttModifierKey2;
+		if (not noFloat) and (modifier~="NONE") and (ns.tooltipChkOnShowModifier(modifier,false)) then
+			noFloat=true;
 		end
-		if (not ttForce) then
-			if (tooltip.key) and (tooltip.key==ttName) and (MouseIsOver(tooltip)) then
-				if (ttSetOnLeave) then
-					tooltip:SetScript("OnLeave",function(self)
-						ns.hideTooltip(tooltip,ttName);
-					end);
-				end
-				return;
+		if  noFloat  and  tooltip.slider  and  tooltip.slider:IsShown()  then  noFloat = false ; setOnLeave = true  end
+		if  not noFloat  then
+			if  tooltip.key and tooltip.key==ttName  and  tooltip.stayOpen  then
+				return
+			end
+			if  tooltip.key and tooltip.key==ttName  and  tooltip:IsMouseOver()  then
+				-- if setOnLeave then  ns.setHideOnLeave(tooltip, setOnLeave)  end
+				tooltip:SetScript("OnLeave", hideOnLeave)
+				return
 			end
 			local f = GetMouseFocus()
 			if (f) and (not f:IsForbidden()) and (not f:IsProtected() and InCombatLockdown()) and (type(f.key)=="string") and (type(ttName)=="string") and (f.key==ttName) then
 				return; -- why that? tooltip can't be closed in combat with securebuttons as child elements. results in addon_action_blocked... 
 			end
-		elseif (tooltip.slider) and (tooltip.slider:IsShown()) then
-			ns.hideTooltip(tooltip,ttName,false,true);
-			return;
 		end
 		if type(tooltip.secureButtons)=="table" then
 			for i,v in ipairs(tooltip.secureButtons)do
@@ -182,32 +202,40 @@ ns.hideTooltip = function(tooltip,ttName,ttForce,ttSetOnLeave)
 			end
 			ns.secureButton(false);
 		end
-		tooltip:SetScript("OnUpdate",nil);
+		tooltip.stayOpen = nil
+		tooltip:SetScript("OnUpdate",nil)
+		tooltip:SetScript("OnLeave",nil)
+		tooltip:SetScript("OnMouseUp",nil)
 		ns.LQT:Release(tooltip)
-		return true;
+		return true
 	end
 end
 
-ns.createTooltip = function(frame, tooltip, SetOnLeave)
-	local eclipsed = 0;
+ns.createTooltip = function(frame, tooltip, setOnLeave, setOnClick)
+	-- local eclipsed = 0;
 	if (Broker_EverythingDB.tooltipScale==true) then
 		tooltip:SetScale(tonumber(GetCVar("uiScale")))
 	end
 	if (frame) then
 		SmartAnchorTo(tooltip,frame)
 	end
-	if (SetOnLeave) then
-		tooltip:SetScript("OnLeave", function(self)
-			ns.hideTooltip(self,self.key);
-		end)
-	end
-	tooltip:SetScript("OnUpdate", function(self,eclipse)
-		if (self.eclipsed==nil) then self.eclipsed=0; end
-		self.eclipsed = self.eclipsed + eclipse;
-		if (self.eclipsed>0.5) and (GetMouseFocus()==WorldFrame) then
-			ns.hideTooltip(self,self.key,true);
+	tooltip.owner = frame
+	if setOnLeave then  tooltip:SetScript("OnLeave", hideOnLeave)  end
+	if setOnClick then  tooltip:SetScript("OnMouseUp", hideOnClick)  end
+	--[[
+	tooltip:SetScript("OnUpdate", function(self,elapsed)
+		if  GetMouseFocus() ~= WorldFrame  then
+			self.mouseLeft = nil
+		elseif  not self.mouseLeft  then
+			self.mouseLeft = 0
+		else
+			self.mouseLeft = self.mouseLeft + elapsed
+			if  self.mouseLeft > 1.0  then
+				ns.hideTooltip(self,self.key,true)
+			end
 		end
-	end);
+	end)
+	--]]
 	tooltip:UpdateScrolling(WorldFrame:GetHeight() * Broker_EverythingDB.maxTooltipHeight)
 	tooltip:Show()
 end
@@ -240,29 +268,6 @@ ns.tooltipChkOnShowModifier = function(bool)
 		end
 	end
 	return false;
-end
-
--- -------------------------- --
--- icon colouring function    --
--- ~Hizuro                    --
--- -------------------------- --
-
-do
-	local objs = {}
-	ns.updateIconColor = function(name)
-		local f = function(n)
-			local obj = objs[n] or ns.LDB:GetDataObjectByName(n)
-			objs[n] = obj
-			if obj==nil then return false end
-			obj.iconR,obj.iconG,obj.iconB,obj.iconA = unpack(Broker_EverythingDB.iconcolor or ns.LC.color("white","colortable"))
-			return true
-		end
-		if name==true then
-			for i,v in pairs(ns.modules) do f(i) end
-		elseif ns.modules[name]~=nil then
-			f(name)
-		end
-	end
 end
 
 
@@ -320,7 +325,7 @@ do
 	})
 	ns.updateIcons = function()
 		for i,v in pairs(ns.modules) do
-			local obj = ns.LDB:GetDataObjectByName(i)
+			local obj = v.obj
 			if obj~=nil then 
 				local d = ns.I(i .. (v.icon_suffix or ""))
 				obj.iconCoords = d.coords or {0,1,0,1}
@@ -328,18 +333,21 @@ do
 			end
 		end
 	end
-	ns.updateIconColor = function(name)
-		local f = function(n)
-			local obj = objs[n] or ns.LDB:GetDataObjectByName(n)
-			objs[n] = obj
+	
+	-- -------------------------- --
+	-- icon colouring function    --
+	-- ~Hizuro                    --
+	-- -------------------------- --
+	ns.updateIconColor = function(module)
+		local f = function(obj)
 			if obj==nil then return false end
 			obj.iconR,obj.iconG,obj.iconB,obj.iconA = unpack(Broker_EverythingDB.iconcolor or ns.LC.color("white","colortable"))
 			return true
 		end
-		if name==true then
-			for i,v in pairs(ns.modules) do f(i) end
-		elseif ns.modules[name]~=nil then
-			f(name)
+		if module == true then
+			for n,module in pairs(ns.modules) do f(module.obj) end
+		else
+			f(module.obj)
 		end
 	end
 end
@@ -349,7 +357,10 @@ end
 -- Function to Sort a table by the keys               --
 -- Sort function fom http://www.lua.org/pil/19.3.html --
 -- -------------------------------------------------- --
-ns.pairsByKeys = function(t, f)
+-- Import from LibSimpleOptions
+ns.pairsByKeys = ns.LSO.pairsByKeys
+--[==[
+ns.pairsByKeys = ns.LSO.pairsByKeys  or  function(t, f)
 	local a = {}
 	for n in pairs(t) do
 		table.insert(a, n)
@@ -358,15 +369,21 @@ ns.pairsByKeys = function(t, f)
 	local i = 0      -- iterator variable
 	local iter = function ()   -- iterator function
 		i = i + 1
+		local key = a[i]
+		return key, t[key]
+		--[=[ t[nil] == nil always and safely
 		if a[i] == nil then
 			return nil
 		else
 			return a[i], t[a[i]]
 		end
+		--]=]
 	end
 	return iter
 end
+--]==]
 
+--[=[
 ns.reversePairsByKeys = function(t,f)
 	local a = {}
 	for n in ipairs(t) do
@@ -384,7 +401,7 @@ ns.reversePairsByKeys = function(t,f)
 	end
 	return iter
 end
-
+--]=]
 
 -- ---------------------------------------- --
 -- Function to append an element to a table --
@@ -651,7 +668,7 @@ do
 
 	-- --------------------------------------- --
 	-- GetRealFaction2PlayerStanding           --
-	-- retrun standingID of a faction          --
+	-- return standingID of a faction          --
 	-- if faction unknown or argument nil then --
 	-- returns this function the standingID 4  --
 	-- --------------------------------------- --

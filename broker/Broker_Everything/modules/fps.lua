@@ -10,7 +10,6 @@ graphicsSetsDB = {}
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "FPS" -- L["FPS"]
-local ldbName = name
 local tt,tt2,tt3 = nil,nil,nil
 local ttName, tt2Name, tt3Name = name.."TT", name.."TT2", name.."TT3"
 local GetFramerate = GetFramerate
@@ -212,7 +211,7 @@ I[name..'_green']  = {iconfile="Interface\\Addons\\"..addon.."\\media\\fps_green
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show your frames per second."],
 	icon_suffix = "_blue",
 	events = {},
@@ -273,7 +272,7 @@ local function fpsTooltip(tt)
 end
 
 local function graphicsSetManager(_self)
-	if (tt) and (tt:IsShown()) then ns.hideTooltip(tt,ttName,true); end
+	ns.hideTooltip(tt,ttName,true)
 
 	local l,c
 	tt2 = ns.LQT:Acquire(name.."TT2", 1, "LEFT")
@@ -355,7 +354,8 @@ local function graphicsMenuSelection(self,selName)
 end
 
 local function graphicsMenu(_self)
-	if (tt) and (tt:IsShown()) then ns.hideTooltip(tt,ttName,true); end
+	ns.hideTooltip(tt,ttName,true)
+
 	local l,c
 	tt2 = ns.LQT:Acquire(name.."TT2", 2, "LEFT", "RIGHT")
 	tt2:Clear()
@@ -398,16 +398,11 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-end
 
---[[ ns.modules[name].onevent = function(self,event,msg) end ]]
-
-ns.modules[name].onupdate = function(self)
+module.onupdate = function(self)
 	fps = floor(GetFramerate())
 	local c = fps_color(fps)
-	local d = self.obj or ns.LDB:GetDataObjectByName(ldbName)
+	local d = self.obj
 
 	minmax(fps)
 	--ns.tooltipGraphAddValue(name,fps,graph_maxValues)
@@ -423,16 +418,10 @@ ns.modules[name].onupdate = function(self)
 	end
 end
 
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
---[[ ns.modules[name].ontt = function(tt) end ]]
-
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self)
+module.onenter = function(self)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	if tt2~=nil and tt2.key==tt2Name and tt2:IsShown() then return end
@@ -442,11 +431,11 @@ ns.modules[name].onenter = function(self)
 	ns.createTooltip(self,tt)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,true); end
+module.onleave = function(self)
+	ns.hideTooltip(tt,ttName,true)
 end
 
-ns.modules[name].onclick = function(self,button)
+module.onclick = function(self,button)
 	if button == "LeftButton" then
 		--graphicsSetManager(self)
 	elseif button == "RightButton" then
@@ -454,5 +443,8 @@ ns.modules[name].onclick = function(self,button)
 	end
 end
 
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

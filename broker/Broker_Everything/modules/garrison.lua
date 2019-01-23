@@ -11,7 +11,6 @@
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 	local name = "Garrison" -- L["Garrison"]
-	local ldbName = name
 	local tt -- tooltips
 	local ttName = name.."TT"
 	local buildings,nBuildings,construct,nConstruct = {},0,{},0
@@ -30,7 +29,7 @@
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-	ns.modules[name] = {
+	local module = {
 		desc = L["Broker to show your different currencies."],
 		--icon_suffix = "_Neutral",
 		enabled = false,
@@ -47,9 +46,9 @@
 			--"GARRISON_BUILDING_ERROR",
 		},
 		updateinterval = 30, -- 10
-		config_defaults = {},
-		config_allowed = {},
-		config = nil
+		config_defaults = nil,
+		config_allowed = nil,
+		config = nil,
 	}
 
 --C_Garrison.RequestLandingPageShipmentInfo()
@@ -125,13 +124,13 @@
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-	--[[ ns.modules[name].init = function(self) end ]]
+
 	EXPOSE = {};
-	ns.modules[name].onevent = function(self,event,msg)
+	module.onevent = function(module,event,msg)
 		updater = true;
 		longer = false;
 		nBuildings = 0;
-		local obj = ns.LDB:GetDataObjectByName(ldbName)
+		local obj = module.obj
 		local bName, texture, shipmentCapacity, shipmentsReady, shipmentsTotal, creationTime, duration, timeleftString, shipmentsCurrent
 		local tmp = C_Garrison.GetBuildings() or {};
 
@@ -230,22 +229,16 @@
 		obj.text = ("%s/%s"):format(C("ltblue",ready),C("orange",progress))
 	end
 
-	ns.modules[name].onupdate = function(self)
+	module.onupdate = function(module)
 		if not updater then return end
 		C_Garrison.RequestLandingPageShipmentInfo() -- stupid event triggering to get new data
 	end
-
-	--[[ ns.modules[name].optionspanel = function(panel) end ]]
-
-	--[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
-	--[[ ns.modules[name].ontooltip = function(self) end ]]
 
 
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-	ns.modules[name].onenter = function(self)
+	module.onenter = function(self)
 		if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 		tt = ns.LQT:Acquire(name.."TT", 7, "LEFT","LEFT", "CENTER", "CENTER", "CENTER", "RIGHT","RIGHT")
@@ -253,11 +246,12 @@
 		ns.createTooltip(self, tt)
 	end
 
-	ns.modules[name].onleave = function(self)
-		if (tt) then ns.hideTooltip(tt,ttName,true); end
+	module.onleave = function(self)
+		ns.hideTooltip(tt,ttName,true)
 	end
 
-	--[[ ns.modules[name].onclick = function(self,button) end ]]
 
-	--[[ ns.modules[name].ondblclick = function(self,button) end ]]
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

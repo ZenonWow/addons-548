@@ -10,7 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Game Menu" -- L["Game Menu"]
-local ldbName = name
 local tt = nil
 local ttName = name.."TT"
 local last_click = 0
@@ -124,7 +123,7 @@ I["gm_gmticket_cancel"]   = {iconfile="Interface\\buttons\\ui-grouploot-pass-up"
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to allow you to do...Stuff! Switch to windowed mode, reload ui, logout and quit."], 
 	events = {
 		"UPDATE_WEB_TICKET"
@@ -202,13 +201,13 @@ StaticPopupDialogs["CONFIRM"] = {
 }
 
 local function updateGMTicket()
-	local obj = ns.LDB:GetDataObjectByName(ldbName)
+	local obj = module.obj
 	if Broker_EverythingDB[name].showGMTicket and gmticket.hasTicket and gmticket.ticketStatus~=LE_TICKET_STATUS_OPEN then
 		local icon = I("gm_gmticket")
 		obj.text = C("cyan",SecondsToTime(gmticket.waitTime*60)) .. link:format(icon.iconfile,(icon.coordsStr or iconCoords),"")
 	else
 		gmticket.hasTicket = false
-		ns.modules[name].onevent("BE_DUMMY_EVENT")
+		module.onevent("BE_DUMMY_EVENT")
 	end
 end
 
@@ -216,40 +215,28 @@ end
 -- module (BE internal) functions --
 ------------------------------------
 
-local function updateCustomTitle()
-	local dataobj = ns.LDB:GetDataObjectByName(ldbName)
+local function updateCustomTitle(dataobj)
 	local modDB = Broker_EverythingDB[name]
 	if  modDB.customTitle == ""  then  modDB.customTitle = nil  end
 	customTitle = modDB.customTitle
-	if  dataobj  then
-		dataobj.text = customTitle
-		dataobj.label =  not customTitle  and  L[name]
-	end
+	dataobj.text = customTitle
+	-- dataobj.label =  not customTitle  and  L[name]
 end
 
-ns.modules[name].init = function()
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-	updateCustomTitle()
-end
+module.initbroker = updateCustomTitle
 	
-ns.modules[name].onevent = function(self, ...)
+module.onevent = function(module, ...)
 	local event, _ = ...
 
 	if event == "UPDATE_WEB_TICKET" then
 		_, gmticket.hasTicket, gmticket.numTickets, gmticket.ticketStatus, gmticket.caseIndex, gmticket.waitTime, gmticket.waitMsg = ...
 		updateGMTicket()
 	elseif event == "BE_DUMMY_EVENT" then
-		updateCustomTitle()
+		updateCustomTitle(module.obj)
 	end
 end
 
---[[ ns.modules[name].onupdate = function(self) end ]]
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self, direction) end ]]
-
-ns.modules[name].ontooltip = function(tt)
+module.ontooltip = function(tt)
 	--if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
 
 	local line, column
@@ -391,27 +378,34 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self)
+module.onenter = function(button)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "LEFT")
-	ns.modules[name].ontooltip(tt)
-	ns.createTooltip(self, tt)
+	module.ontooltip(tt)
+	ns.createTooltip(button, tt, true, true)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,false,true); end
+module.onleave = function(button)
+	ns.hideTooltip(tt,ttName,false,true)
 end
 
-ns.modules[name].onclick = function(self, button)
+module.onclick = function(button, mouseButton)
+	if mouseButton == "LeftButton" then
+		tt.stayOpen = true
+		tt:SetAutoHideDelay(3, button)
+	elseif mouseButton == "RightButton" then
+		ns.commands.options.func()
+	end
+
 	if Broker_EverythingDB[name].disableOnClick then return end
-
+--[[
 	local shift = IsShiftKeyDown() or -1
 	local cv = 0
 
-	if button == "RightButton" then
+	if mouseButton == "RightButton" then
 		cv = 1 * shift
-	elseif button == "LeftButton" then
+	elseif mouseButton == "LeftButton" then
 		cv = 2 * shift
 	end
 
@@ -424,17 +418,21 @@ ns.modules[name].onclick = function(self, button)
 	last_click = 0
 
 	if shift > 0 then
-		if button == "LeftButton" then
+		if mouseButton == "LeftButton" then
 			securecall("ReloadUI")
 		end
 	else
-		if button == "LeftButton" then
+		if mouseButton == "LeftButton" then
 			securecall("Logout")
-		elseif button == "RightButton" then
+		elseif mouseButton == "RightButton" then
 			securecall("Quit")
 		end
 	end
+	--]]
 end
 
---[[ ns.modules[name].ondblclick = function(self, button) end ]]
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

@@ -10,7 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Equipment" -- L["Equipment"]
-local ldbName = name
 local ttName = name.."TT"
 local tt = nil
 local equipPending = nil
@@ -25,7 +24,7 @@ I[name] = {iconfile="Interface\\Addons\\"..addon.."\\media\\equip"}
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show, equip, delete, update and save equipment sets"],
 	events = {
 		"UNIT_INVENTORY_CHANGED",
@@ -48,7 +47,7 @@ ns.modules[name] = {
 ns.toggleEquipment = function(eName)
 	if InCombatLockdown() then 
 		equipPending = eName
-		ns.modules[name].onevent("BE_DUMMY_EVENT")
+		module.onevent("BE_DUMMY_EVENT")
 	else
 		securecall("UseEquipmentSet",eName);
 	end
@@ -59,11 +58,8 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-end
 
-ns.modules[name].onevent = function(self,event,...)
+module.onevent = function(self,event,...)
 	if event == "PLAYER_REGEN_ENABLED" then
 		if equipPending ~= nil then
 			UseEquipmentSet(equipPending)
@@ -76,7 +72,7 @@ ns.modules[name].onevent = function(self,event,...)
 		if unit ~= "player" then return end
 	end
 
-	local dataobj = self.obj or ns.LDB:GetDataObjectByName(ldbName)
+	local dataobj = self.obj
 
 	local numEquipSets = GetNumEquipmentSets()
 
@@ -99,13 +95,7 @@ ns.modules[name].onevent = function(self,event,...)
 	end
 end
 
---[[ ns.modules[name].onupdate = function(self) end ]]
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
-ns.modules[name].ontooltip = function(tt)
+module.ontooltip = function(tt)
 	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
 
 	local line, column
@@ -173,20 +163,20 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self)
+module.onenter = function(self)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "RIGHT")
-	ns.modules[name].ontooltip(tt)
+	module.ontooltip(tt)
 	ns.createTooltip(self,tt)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,false,true); end
+module.onleave = function(self)
+	ns.hideTooltip(tt,ttName,false,true)
 end
 
---[[ ns.modules[name].onclick = function(self,button) end ]]
 
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
-
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

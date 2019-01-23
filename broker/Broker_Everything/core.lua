@@ -8,9 +8,10 @@ local addon, ns = ...
 local C, L = ns.LC.color, ns.L
 
 local Broker_Everything = CreateFrame("Frame")
+Broker_Everything:Hide()
 
+--[[
 ns.debugging = true
-
 Broker_Everything:SetScript("OnUpdate",function(self,elapsed)
 	for name, data in pairs(ns.updateList) do
 		if data.interval~=nil then
@@ -39,8 +40,7 @@ end)
 
 function Broker_Everything.resetDefaults()
 	Broker_EverythingDB = {}
-	Broker_EverythingGlobalDB = {}
-	Broker_EverythingGlobalDB.global = false
+	Broker_EverythingGlobalDB = { global = true }
 
 	for name, v in ipairs(ns.modules) do
 		if name then
@@ -52,19 +52,22 @@ function Broker_Everything.resetDefaults()
 		end
 	end
 end
+--]]
 
 Broker_Everything:SetScript("OnEvent", function (self, event, addonName)
 	if event == "ADDON_LOADED" and addonName == addon then
+		if  Broker_EverythingGlobalDB.global  then  Broker_EverythingDB = Broker_EverythingGlobalDB
+		elseif  Broker_EverythingDB  then  Broker_EverythingCharDB = Broker_EverythingDB
+		else  Broker_EverythingDB = Broker_EverythingCharDB
+		end
 
+		--[[
 		if Broker_EverythingDB.reset == true then
 			self.resetDefaults()
 			Broker_EverythingDB["reset"] = false
 			ns.Print(L["Warning"], L["saved variables have been reset."])
 		end
-
-		if Broker_EverythingGlobalDB.global == true then
-			Broker_EverythingDB = Broker_EverythingGlobalDB
-		end
+		--]]
 
 		for i,v in pairs({
 			suffixColour = true,
@@ -89,7 +92,7 @@ Broker_Everything:SetScript("OnEvent", function (self, event, addonName)
 		Broker_EverythingDB.useBlizzStrings = false
 
 		-- modules
-		ns.moduleInit()
+		ns.modulesInit()
 
 		self:UnregisterEvent("ADDON_LOADED")
 	end
@@ -105,6 +108,11 @@ Broker_Everything:SetScript("OnEvent", function (self, event, addonName)
 
 		self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	end
+	if  event == "PLAYER_LOGOUT"  then
+		ns.modulesOnLogout()
+		-- Save only Broker_EverythingCharDB and Broker_EverythingGlobalDB
+		Broker_EverythingDB = nil
+	end
 	if event == "NEUTRAL_FACTION_SELECT_RESULT" then
 		ns.player.faction,ns.player.factionL  = UnitFactionGroup("player")
 		L[ns.player.faction] = ns.player.factionL
@@ -113,5 +121,6 @@ end)
 
 Broker_Everything:RegisterEvent("ADDON_LOADED")
 Broker_Everything:RegisterEvent("PLAYER_ENTERING_WORLD")
+Broker_Everything:RegisterEvent("PLAYER_LOGOUT")
 Broker_Everything:RegisterEvent("NEUTRAL_FACTION_SELECT_RESULT")
 

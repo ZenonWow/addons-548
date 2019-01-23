@@ -444,14 +444,21 @@ do
 		local i = 0      -- iterator variable
 		local iter = function ()   -- iterator function
 			i = i + 1
+			local key = a[i]
+			return key, t[key]
+			--[=[ t[nil] == nil always and reliably
 			if a[i] == nil then
 				return nil
 			else
 				return a[i], t[a[i]]
 			end
+			--]=]
 		end
 		return iter
 	end
+
+	-- Export
+	LibSimpleOptions.pairsByKeys = pairsByKeys
 
 	local function dropDown_menu(self)
 		for value, text in pairsByKeys(self.values) do

@@ -11,7 +11,6 @@ local _G = _G
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Volume" -- L["Volume"]
-local ldbName = name
 local tt = nil
 local ttName = name.."TT"
 local ttColumns = 2
@@ -52,7 +51,7 @@ I[name..'_100']  = {iconfile=icon.."100"}
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Change Volumes and toogle some audio options."],
 	icon_suffix = "_100",
 	events = {
@@ -64,8 +63,7 @@ ns.modules[name] = {
 		steps = 10,
 		listHardware = true
 	},
-	config_allowed = {
-	},
+	config_allowed = nil,
 	config = {
 		height = 62,
 		elements = {
@@ -96,13 +94,12 @@ ns.modules[name] = {
 	}
 }
 
-
 --------------------------
 -- some local functions --
 --------------------------
-local function updateBrokerButton(self)
+local function updateBrokerButton()
+	local obj = module.obj
 	volume.master = tonumber(GetCVar("Sound_MasterVolume"))
-	local obj = self.obj or ns.LDB:GetDataObjectByName(ldbName)
 	local suffix = "100"
 	if volume.master < .1 then
 		suffix = "0"
@@ -115,10 +112,11 @@ local function updateBrokerButton(self)
 	obj.iconCoords = icon.coords or {0,1,0,1}
 	obj.icon = icon.iconfile
 	obj.text = ceil(volume.master*100).."%"
+	module.ontooltip(tt)
 end
 
-local function volTooltip(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+function module.ontooltip(tt)
+	if  not tt  or  not tt.key  or  tt.key ~= ttName  then  return  end -- don't override other LibQTip tooltips...
 	local l,c
 	tt:Clear()
 	tt:AddHeader(C("dkyellow",L[name]))
@@ -129,8 +127,8 @@ local function volTooltip(tt)
 		local new = now + ((direction * Broker_EverythingDB[name].steps) / 100)
 		new = (new>1 and 1) or (new<0 and 0) or new
 		ns.SetCVar(cvar,new,cvar)
-		volTooltip(tt)
-		updateBrokerButton(self)
+		module.ontooltip(tt)
+		updateBrokerButton()
 	end
 
 	for i,v in ipairs(vol) do
@@ -154,7 +152,7 @@ local function volTooltip(tt)
 					disabled = v.now==1 and "white" or "gray"
 				end
 
-				tt:SetLineScript(l,"OnMouseUp",function(self, button) ns.SetCVar(v.toggle,tostring(v.inv),v.toggle) volTooltip(tt) end);
+				tt:SetLineScript(l,"OnMouseUp",function(self, button) ns.SetCVar(v.toggle,tostring(v.inv),v.toggle) module.ontooltip(tt) end);
 			else
 				if v.depend~=nil and ( (v.depend[1]~=nil and vol[v.depend[1]].now==0) or (v.depend[2]~=nil and vol[v.depend[2]].now==0) ) then
 					color = "gray";
@@ -163,7 +161,7 @@ local function volTooltip(tt)
 					color = "dkyellow"
 					disabled = "white";
 				end
-				tt:SetLineScript(l,"OnMouseUp",function(self, button) volTooltip(tt) end);
+				tt:SetLineScript(l,"OnMouseUp",function(self, button) module.ontooltip(tt) end);
 			end
 
 			tt:SetCell(l,1,strrep(" ",3 * v.inset)..C(color,_G[v.locale]));
@@ -208,7 +206,7 @@ local function volTooltip(tt)
 							ns.print("("..L[name]..")",L["Sorry, In combat lockdown."])
 						else
 							setSoundHardware(I)
-							volTooltip(tt)
+							module.ontooltip(tt)
 							AudioOptionsFrame_AudioRestart()
 						end
 					end)
@@ -267,22 +265,11 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(self)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-	if self then
-		updateBrokerButton(self)
-	end
-end
+module.initbroker = updateBrokerButton
 
---[[ ns.modules[name].onevent = function(self,event,msg) end ]]
+module.onevent = updateBrokerButton
 
-ns.modules[name].onupdate = function(self)
-	updateBrokerButton(self)
-end
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
-ns.modules[name].onmousewheel = function(self,direction)
+module.onmousewheel = function(self,direction)
 	if not Broker_EverythingDB[name].useWheel then return end
 	if (direction==-1 and volume.master == 0) or (direction==1 and volume.master == 1) then return end
 
@@ -295,44 +282,41 @@ ns.modules[name].onmousewheel = function(self,direction)
 	local cvar = "Sound_MasterVolume"
 	ns.SetCVar(cvar,volume.master,cvar)
 	--BlizzardOptionsPanel_SetCVarSafe("Sound_MasterVolume",volume.master)
-	updateBrokerButton(self)
+	updateBrokerButton()
 end
 
 
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self)
+module.onenter = function(self)
+	ns.RegisterMouseWheel(self, module.onmousewheel)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "RIGHT")
-	--ns.modules[name].ontooltip(tt)
-	volTooltip(tt)
+	module.ontooltip(tt)
 	ns.createTooltip(self,tt)
-	ns.RegisterMouseWheel(self,ns.modules[name].onmousewheel)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,false,true); end
+module.onleave = function(self)
+	ns.hideTooltip(tt,ttName,false,true)
 end
 
-ns.modules[name].onclick = function(self,button)
+module.onclick = function(self,button)
 	if button == "LeftButton" then
 		if volume.master == 1 then return end
 		volume.master = volume.master + (Broker_EverythingDB[name].steps / 100)
 		if volume.master > 1 then volume.master = 1 elseif volume.master < 0 then volume.master = 0 end
 		BlizzardOptionsPanel_SetCVarSafe("Sound_MasterVolume",volume.master)
-		updateBrokerButton(self)
+		updateBrokerButton()
 	elseif button == "RightButton" then
 		if volume.master == 0 then return end
 		volume.master = volume.master - (Broker_EverythingDB[name].steps / 100)
 		if volume.master > 1 then volume.master = 1 elseif volume.master < 0 then volume.master = 0 end
 		BlizzardOptionsPanel_SetCVarSafe("Sound_MasterVolume",volume.master)
-		updateBrokerButton(self)
+		updateBrokerButton()
 	end
 end
-
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
 
 --[[
 
@@ -351,10 +335,10 @@ do
 	end);
 end
 
+--]]
 
 
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 
-
-
-
-]]

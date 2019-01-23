@@ -10,7 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Quest Log" -- L["Quest Log"]
-local ldbName = name
 local ttName = name.."TT"
 L[name] = QUEST_LOG
 local tt = nil
@@ -61,7 +60,7 @@ I[name] = {iconfile="Interface\\TARGETINGFRAME\\PortraitQuestBadge",coords={0.05
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show count of quests in your questlog and quest titles in tooltip."],
 	events = {
 		"PLAYER_ENTERING_WORLD",
@@ -73,8 +72,7 @@ ns.modules[name] = {
 		showQuestItems = true,
 		questIdUrl = "WoWHead",
 	},
-	config_allowed = {
-	},
+	config_allowed = nil,
 	config = {
 		height = 59,
 		elements = {
@@ -115,10 +113,9 @@ ns.modules[name] = {
 -- some local functions --
 --------------------------
 local function updateBroker()
-	local obj = ns.LDB:GetDataObjectByName(ldbName)
 	local fail, active, complete = #quests["fail"], #quests["active"], #quests["complete"]
 	--local sum = fail + active + complete
-	obj.text = (fail>0 and C("red",fail).."/" or "")..(complete>0 and C("ltblue",complete).."/" or "")..sum.."/"..MAX_QUESTS
+	module.obj.text = (fail>0 and C("red",fail).."/" or "")..(complete>0 and C("ltblue",complete).."/" or "")..sum.."/"..MAX_QUESTS
 end
 
 local function questTooltip(tt)
@@ -136,17 +133,13 @@ local function questTooltip(tt)
 		tt:SetCell(l,cell,C(color,obj.title)) cell=cell+1
 		if obj.nolink~=true then
 			tt:SetLineScript(l,"OnMouseUp",function(self)
-				securecall("QuestMapFrame_OpenToQuestDetails",select(8, GetQuestLogTitle(obj.index)));
-				--[=[
 				SelectQuestLogEntry(obj.index)
-				securecall("ToggleFrame",WorldMapFrame)
-				if not WorldMapFrame:IsShown() then
-					securecall("ToggleFrame",WorldMapFrame)
+				ToggleFrame(QuestLogFrame)
+				if not QuestLogFrame:IsShown() then
+					ToggleFrame(QuestLogFrame)
 				end
-				]=]
 			end)
 		end
-
 		if Broker_EverythingDB[name].showQuestIds then
 			tt:SetCell(l,cell,obj.questId)
 			if obj.questId~=L["QuestId"] then
@@ -161,8 +154,8 @@ local function questTooltip(tt)
 		if obj.share and IsInGroup() then
 			tt:SetCell(l,cell,L["share"])
 			tt:SetCellScript(l,cell,"OnMouseUp",function(self,button)
-				--SelectQuestLogEntry()
-				QuestLogPushQuest(obj.index)
+				SelectQuestLogEntry(obj.index)
+				QuestLogPushQuest()
 			end)
 			cell=cell+1
 		end
@@ -210,11 +203,8 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-end
 
-ns.modules[name].onevent = function(self,event,msg)
+module.onevent = function(self,event,msg)
 	if event == "PLAYER_ENTERING_WORLD" or event == "QUEST_LOG_UPDATE" then
 		local shortTags = {[ELITE]="+",[LFG_TYPE_DUNGEON]="d",[PVP]="p",[RAID]="r",[GROUP]="g",[PLAYER_DIFFICULTY2]="++"}
 		local numEntries, numQuests = GetNumQuestLogEntries()
@@ -261,19 +251,10 @@ ns.modules[name].onevent = function(self,event,msg)
 	end
 end
 
---[[ ns.modules[name].onupdate = function(self) end ]]
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
---[[ ns.modules[name].ontooltip = function(tooltip) end ]]
-
-
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self)
+module.onenter = function(button)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	if Broker_EverythingDB[name].showQuestIds then
@@ -282,14 +263,15 @@ ns.modules[name].onenter = function(self)
 
 	tt = ns.LQT:Acquire(ttName, ttColumns,"LEFT","LEFT","RIGHT","RIGHT")
 	questTooltip(tt)
-	ns.createTooltip(self,tt);
+	ns.createTooltip(button,tt)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,false,true); end
+module.onleave = function(button)
+	ns.hideTooltip(tt,ttName,false,true)
 end
 
---[[ ns.modules[name].onclick = function(self,button) end ]]
 
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

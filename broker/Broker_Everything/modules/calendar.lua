@@ -10,7 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Calendar" -- L["Calendar"]
-local ldbName = name
 local tt = nil
 
 
@@ -24,7 +23,7 @@ I[name.."_pending"] = {iconfile="Interface\\Addons\\"..addon.."\\media\\calendar
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show invitations"],
 	events = {
 		"CALENDAR_UPDATE_PENDING_INVITES",
@@ -36,8 +35,7 @@ ns.modules[name] = {
 		hideMinimapCalendar = false,
 		shortBroker = false
 	},
-	config_allowed = {
-	},
+	config_allowed = nil,
 	config = {
 		height = 52,
 		elements = {
@@ -68,18 +66,14 @@ ns.modules[name] = {
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-	if not obj then
-		if Broker_EverythingDB[name].hideMinimapCalendar == true then
-			GameTimeFrame:Hide()
-			GameTimeFrame.Show = dummyFunc
-		end
+module.preinit = function()
+	if Broker_EverythingDB[name].hideMinimapCalendar then
+		GameTimeFrame:Hide()
+		GameTimeFrame.Show = dummyFunc
 	end
 end
 
-ns.modules[name].onevent = function(self,event,msg)
-	self.obj = self.obj or ns.LDB:GetDataObjectByName(ldbName)
+module.onevent = function(self,event,msg)
 	local num = CalendarGetNumPendingInvites()
 
 	local icon = I(name..(num~=0 and "_pending" or ""))
@@ -98,13 +92,7 @@ ns.modules[name].onevent = function(self,event,msg)
 	end
 end
 
---[[ ns.modules[name].onupdate = function(self) end ]]
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
-ns.modules[name].ontooltip = function(tt)
+module.ontooltip = function(tt)
 	if (ns.tooltipChkOnShowModifier(false)) then tt:Hide(); return; end
 
 	local x = CalendarGetNumPendingInvites()
@@ -126,13 +114,8 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
---[[ ns.modules[name].onenter = function(self) end ]]
 
---[[ ns.modules[name].onleave = function(self) end ]]
-
-ns.modules[name].onclick = function() securecall("ToggleCalendar") end
-
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
+module.onclick = function() securecall("ToggleCalendar") end
 
 --[=[
 note:
@@ -141,3 +124,9 @@ note:
 	tt can be extend with accepted today. (time, title) description are zoo much for tt.
 	can be display in second tt on mouseover
 ]=]
+
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
+

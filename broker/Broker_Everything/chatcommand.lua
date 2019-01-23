@@ -54,7 +54,7 @@ ns.commands = {
 	global      = {
 		desc = L["Switch between global and per character saved settings"],
 		func = function()
-			if not Broker_EverythingGlobalDB.global or Broker_EverythingGlobalDB.global == false then
+			if not Broker_EverythingGlobalDB.global then
 				if Broker_EverythingGlobalDB["Clock"] == nil then
 					Broker_EverythingGlobalDB = Broker_EverythingDB
 				end			
@@ -66,17 +66,14 @@ ns.commands = {
 		end,
 	},
 	list        = {
-		desc = L["List of available modules with his status"],
+		desc = L["List of available modules with its status"],
 		func = function()
 			ns.print(L["Cfg"], L["Data modules:"])
 			for k, v in pairs(Broker_EverythingDB) do
 				if ns.modules[k]~=nil and ns.modules[k].noBroker==true then
 					-- do nothing ^^
 				elseif not (v == true or v == false or v == 1 or v == 0) then
-					local stat = {"red","Off"}
-					if Broker_EverythingDB[k].enabled == true then
-						stat = {"green","On"}
-					end
+					local stat = Broker_EverythingDB[k].enabled == false  and  {"red","Off"}  or  {"green","On"}
 					ns.print(L["Cfg"], (k==L[k] and "%s | %s" or "%s | %s - ( %s )"):format(C(stat[1],stat[2]),C("ltyellow",k),L[k]))
 				end
 			end
@@ -153,19 +150,16 @@ SlashCmdList["BROKER_EVERYTHING"] = function(cmd)
 		ns.commands[cmd].func(arg)
 	end
 
-	cmd = cmd:gsub("^%l", string.upper)
-	for k, v in pairs(Broker_EverythingDB) do
-		if k == cmd then
-			local x = Broker_EverythingDB[cmd].enabled
-			print(tostring(x))
-			if x == true then
-				Broker_EverythingDB[cmd].enabled = false
-				print(tostring(Broker_EverythingDB[cmd].enabled))
-					ns.print(L["Cfg"], L["Disabling %s on next reload."]:format(cmd)) -- cmd
-				else
-					Broker_EverythingDB[cmd].enabled = true
-					ns.print(L["Cfg"], L["Enabling %s on next reload."]:format(cmd)) -- cmd
-			end
+	local modName = cmd:gsub("^%l", string.upper)
+	do
+		local enabled = ns.isEnabled(modName)
+		print( tostring(enabled) )
+		ns.enableModule(modName, not enabled)
+		if  enabled  then
+			print( tostring(Broker_EverythingDB[modName].enabled) )
+			ns.print(L["Cfg"], L["Disabling %s on next reload."]:format(modName))
+		else
+			ns.print(L["Cfg"], L["Enabling %s on next reload."]:format(modName))
 		end
 	end
 

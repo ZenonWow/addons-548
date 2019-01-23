@@ -4,13 +4,13 @@
 ----------------------------------
 local addon, ns = ...
 local C, L, I = ns.LC.color, ns.L, ns.I
+local MAX_CURRENCIES_IN_TITLE = 4
 
 
 -----------------------------------------------------------
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Currency"; -- L["Currency"]
-local ldbName = name;
 local tt,tt2 -- tooltip
 local ttName = name.."TT"
 local GetCurrencyInfo = GetCurrencyInfo
@@ -39,7 +39,7 @@ I[name..'_Alliance'] = {iconfile="Interface\\PVPFrame\\PVP-Currency-Alliance", c
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show your different currencies."],
 	icon_suffix = "_Neutral",
 	events = {
@@ -51,7 +51,7 @@ ns.modules[name] = {
 	config_defaults = {
 		shortTT = false,
 		subTTposition = "AUTO",
-		currenciesInTitle = {false,false,false,false},
+		currenciesInTitle = {},
 		favCurrencies = {},
 		favMode=false
 	},
@@ -163,17 +163,17 @@ local function collectData() -- collect currency data
 	UPDATE_LOCK = false;
 end
 
-local function updateTitle()
+local function updateTitle(obj)
 	local title = {}
-	for i, v in ipairs(Broker_EverythingDB[name].currenciesInTitle) do
-		if (v) and (currenciesName2Id[v]~=nil) and (currencies[currenciesName2Id[v]]~=nil) then
+	for i = 1,MAX_CURRENCIES_IN_TITLE do
+		local v = Broker_EverythingDB[name].currenciesInTitle[i]
+		if v and (currenciesName2Id[v]~=nil) and (currencies[currenciesName2Id[v]]~=nil) then
 			local d = currencies[currenciesName2Id[v]]
 			if (not d.isUnused) and (d.icon) then
 				table.insert(title, d.count .. "|T" .. d.icon .. ":0|t")
 			end
 		end
 	end
-	local obj = ns.LDB:GetDataObjectByName(ldbName)
 	if #title==0 then
 		obj.text = L[name]
 	else
@@ -183,18 +183,18 @@ end
 
 local function setInTitle(titlePlace, currencyName, parent)
 	if Broker_EverythingDB[name].currenciesInTitle[titlePlace] ~= currencyName then
-		for i, v in pairs(Broker_EverythingDB[name].currenciesInTitle) do
+		for i = 1,MAX_CURRENCIES_IN_TITLE do
 			if titlePlace~=i and Broker_EverythingDB[name].currenciesInTitle[i]==currencyName then return end
 		end
 		Broker_EverythingDB[name].currenciesInTitle[titlePlace] = currencyName
 	else
-		Broker_EverythingDB[name].currenciesInTitle[titlePlace] = false
+		Broker_EverythingDB[name].currenciesInTitle[titlePlace] = nil
 	end
-	updateTitle()
+	updateTitle(module.obj)
 end
 
 local function makeMenu(parent)
-	if (tt) then ns.hideTooltip(tt,ttName,true) end
+	ns.hideTooltip(tt,ttName,true)
 
 	local inTitle = setmetatable({},{__index=function() return false end})
 	collectData()
@@ -212,8 +212,9 @@ local function makeMenu(parent)
 	for place=1, (currencies_num>=4) and 4 or currencies_num do
 		local pList,d;
 		local missingCurrency = true;
-		if (Broker_EverythingDB[name].currenciesInTitle[place]) then
-			local id = currenciesName2Id[Broker_EverythingDB[name].currenciesInTitle[place]];
+		local currencyName = Broker_EverythingDB[name].currenciesInTitle[place]
+		if  currencyName  then
+			local id = currenciesName2Id[currencyName]
 			d = currencies[id];
 			if (d~=nil) then
 				pList = ns.EasyMenu.addEntry({
@@ -267,14 +268,9 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(self)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-	if self then
-		updateTitle()
-	end
-end
+module.initbroker = updateTitle
 
-ns.modules[name].onevent = function(self,event,msg)
+module.onevent = function(module,event,msg)
 	if currency==nil then
 		-- collect localized names and currencyID's
 		currency = {id={},name={},weekly={}, total={}}
@@ -295,41 +291,32 @@ ns.modules[name].onevent = function(self,event,msg)
 				end
 			end
 		end
+		--[[
 		-- convert old currencyInTitle entries to newer version
-		local tmp = {}
 		if type(Broker_EverythingDB[name].currenciesInTitle[1])=="string" then
-			for i,v in ipairs(Broker_EverythingDB[name].currenciesInTitle) do
-				if currency.id[v]~=nil then
-					tmp[i] = currency.id[v]
-				else
-					tmp[i] = false
-				end
+			for i = 1,MAX_CURRENCIES_IN_TITLE do
+				local currencyName = Broker_EverythingDB[name].currenciesInTitle[i]
+				Broker_EverythingDB[name].currenciesInTitle[i] = currency.id[currencyName]
 			end
-			--Broker_EverythingDB[name].currenciesInTitle = tmp
 		end
+		--]]
 	end
 
-	local obj = ns.LDB:GetDataObjectByName(ldbName)
+	local obj = module.obj
 	if UnitFactionGroup("player") ~= "Neutral" then
 		local i = I(name.."_"..UnitFactionGroup("player"))
 		obj.iconCoords = i.coords or {0,1,0,1}
 		obj.icon = i.iconfile
 	end
 	collectData()
-	updateTitle()
+	updateTitle(obj)
 
 	if (tt) and (tt.key) and (tt.key==ttName) and (tt:IsShown()) then
-		ns.modules[name].ontooltip(tt);
+		module.ontooltip(tt)
 	end
 end
 
---[[ ns.modules[name].onupdate = function(self) end ]]
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
-ns.modules[name].ontooltip = function(tt)
+module.ontooltip = function(tt)
 	if (not tt.key) or (tt.key~=ttName) then return; end -- don't override other LibQTip tooltips...
 	local l,c;
 	tt:Clear()
@@ -408,19 +395,19 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self)
+module.onenter = function(self)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "RIGHT")
-	ns.modules[name].ontooltip(tt)
+	module.ontooltip(tt)
 	ns.createTooltip(self,tt);
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,false,true); end
+module.onleave = function(self)
+	ns.hideTooltip(tt,ttName,false,true)
 end
 
-ns.modules[name].onclick = function(self,button)
+module.onclick = function(self,button)
 	if button == "LeftButton" then
 		securecall("ToggleCharacter","TokenFrame")
 	else
@@ -431,14 +418,11 @@ end
 do
 	local dummyEventFunc = function()
 		if (UPDATE_LOCK) then return; end
-		ns.modules[name].onevent(nil,"BE_DUMMY_EVENT");
+		module.onevent(nil,"BE_DUMMY_EVENT");
 	end;
 	_G["TokenFramePopupInactiveCheckBox"]:HookScript("OnClick",dummyEventFunc);
 	hooksecurefunc("ExpandCurrencyList",dummyEventFunc);
 end
-
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
-
 
 
 
@@ -447,4 +431,9 @@ IDEAS:
 * get max count and weekly max count of a currency for displaying caped counts in red.
 
 ]]
+
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

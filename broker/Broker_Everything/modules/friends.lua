@@ -10,7 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Friends" -- L["Friends"]
-local ldbName = name
 local tt, tt2
 local ttName,ttName2=name.."TT",name.."TT2"
 local totalOnline = 0
@@ -38,7 +37,7 @@ I[name] = {iconfile="Interface\\Addons\\"..addon.."\\media\\friends"}
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show you which friends are online."],
 	events = {
 		"BATTLETAG_INVITE_SHOW",
@@ -68,8 +67,7 @@ ns.modules[name] = {
 		disableGameIcons = false,
 		showGuild = false
 	},
-	config_allowed = {
-	},
+	config_allowed = nil,
 	config = {
 		height = 52,
 		elements = {
@@ -196,7 +194,7 @@ local function grabFriends(self)
 end
 
 local function _tt2(self,data)
-	if self~=false then
+	if self then
 		local blue = C("ltblue","colortable");
 		GameTooltip:SetOwner(self,"ANCHOR_NONE");
 		if (select(1,self:GetCenter()) > (select(1,UIParent:GetWidth()) / 2)) then
@@ -237,12 +235,9 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(self)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-end
 
-ns.modules[name].onevent = function(self,event,msg)
-	local dataobj = self.obj or ns.LDB:GetDataObjectByName(ldbName) 
+module.onevent = function(self,event,msg)
+	local dataobj = self.obj 
 	local numBNFriends, numOnlineBNFriends = BNGetNumFriends()
 	local numFriends, friendsOnline = GetNumFriends()
 	grabFriends()
@@ -257,17 +252,11 @@ ns.modules[name].onevent = function(self,event,msg)
 	end
 
 	if tt~=nil and tt.key~=nil and tt.key==name.."TT" and tt:IsShown() then
-		ns.modules[name].ontooltip(tt)
+		module.ontooltip(tt)
 	end
 end
 
---[[ ns.modules[name].onupdate = function(self) end ]]
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
-ns.modules[name].ontooltip = function(tt)
+module.ontooltip = function(tt)
 	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
 
 	grabFriends()
@@ -411,20 +400,24 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self)
+module.onenter = function(self)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	tt = ns.LQT:Acquire(ttName, 8 , "LEFT","CENTER", "LEFT", --[["LEFT",]] "CENTER", "LEFT", "LEFT", "LEFT", "LEFT" --[[, "LEFT"]] )
-	ns.modules[name].ontooltip(tt)
+	module.ontooltip(tt)
 	ns.createTooltip(self,tt)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,false,true); end
+module.onleave = function(self)
+	ns.hideTooltip(tt,ttName,false,true)
 end
 
-ns.modules[name].onclick = function(self,button)
+module.onclick = function(self,button)
 	securecall("ToggleFriendsFrame",1)
 end
 
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
+

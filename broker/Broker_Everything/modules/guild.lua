@@ -10,7 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Guild" -- L["Guild"]
-local ldbName = name
 local ttName = name.."TT"
 local tt, tt_parent = nil
 local tt2 = nil
@@ -54,7 +53,7 @@ I[name] = {iconfile=GetItemIcon(5976),coords={0.05,0.95,0.05,0.95}}
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show guild information. Guild members currently online, MOTD, guild xp etc."],
 	events = {
 		"PLAYER_LOGIN",
@@ -76,9 +75,8 @@ ns.modules[name] = {
 		showProfessions = true,
 		showApplicants = true
 	},
-	config_allowed = {
-	},
-	config = 	{
+	config_allowed = nil,
+	config = {
 		height = 102,
 		elements = {
 			{
@@ -155,7 +153,7 @@ ns.modules[name] = {
 -- some local functions --
 --------------------------
 local function makeMenu(self)
-	if (tt) and (tt:IsShown()) then ns.hideTooltip(tt,ttName,true); end
+	ns.hideTooltip(tt,ttName,true)
 	--[[
 	tt2 = ns.LQT:Acquire(name.."TT2", 1, "LEFT")
 	ns.createTooltip(_self,tt2)
@@ -169,7 +167,7 @@ local function makeMenu(self)
 		local l,c = tt2:AddLine(C(val and "green" or "red",L[v.locale]))
 		tt2:SetLineScript(l,"OnMouseUp",function(self)
 			Broker_EverythingDB[name][v.name] = not val makeMenu(_self)
-			if v.event then ns.modules[name].onevent(_self,"BE_DUMMY_EVENT") end
+			if v.event then module.onevent(_self,"BE_DUMMY_EVENT") end
 		end)
 	end
 	--]]
@@ -185,7 +183,7 @@ local function makeMenu(self)
 			checked = function() return Broker_EverythingDB[name][v.name]; end,
 			func  = function()
 				Broker_EverythingDB[name][v.name] = not Broker_EverythingDB[name][v.name];
-				if (v.event) then ns.modules[name].onevent(_self,"BE_DUMMY_EVENT") end
+				if (v.event) then module.onevent(_self,"BE_DUMMY_EVENT") end
 			end,
 			disabled = (false)
 		});
@@ -504,19 +502,16 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-end
 
-ns.modules[name].onevent = function(self,event,msg)
-	local dataobj = (self) and self.obj or ns.LDB:GetDataObjectByName(ldbName)
+module.onevent = function(self,event,msg)
+	local dataobj = self.obj
 	if not IsInGuild() then
 		dataobj.text = L["No Guild"]
 		return
 	end
 
 	if event == "PLAYER_LOGIN" or event == "PLAYER_ENTERING_WORLD" then
-		ns.modules[name].onupdate()
+		module.onupdate()
 	end
 
 	if event == "GUILD_ROSTER_UPDATE" or event == "GUILD_XP_UPDATE" or event == "LF_GUILD_RECRUITS_UPDATED" or event=="BE_DUMMY_EVENT" or (event == "CHAT_MSG_SYSTEM" and (msg:match(off) or msg:match(on))) then
@@ -559,7 +554,7 @@ ns.modules[name].onevent = function(self,event,msg)
 	end
 end
 
-ns.modules[name].onupdate = function(self)
+module.onupdate = function(self)
 	if IsInGuild() then 
 		RequestGuildApplicantsList()
 		GuildRoster()
@@ -570,15 +565,10 @@ ns.modules[name].onupdate = function(self)
 	end
 end
 
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
-
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self)
+module.onenter = function(self)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	displayOfficerNotes = CanViewOfficerNote()
@@ -592,11 +582,11 @@ ns.modules[name].onenter = function(self)
 	guildTooltip(self)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,false,true); end
+module.onleave = function(self)
+	ns.hideTooltip(tt,ttName,false,true)
 end
 
-ns.modules[name].onclick = function(self,button)
+module.onclick = function(self,button)
 	if button == "RightButton" then 
 		makeMenu(self)
 	elseif GUILockDown == nil then 
@@ -606,5 +596,8 @@ ns.modules[name].onclick = function(self,button)
 	end
 end
 
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

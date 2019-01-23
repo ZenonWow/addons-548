@@ -11,7 +11,6 @@ durabilityDB = {}
 -----------------------------------------------------------
 local _
 local name = "Durability" -- L["Durability"]
-local ldbName = name
 local ttName = name.."TT"
 local tt = nil
 local hiddenTooltip = nil
@@ -81,7 +80,7 @@ I[name] = {iconfile="Interface\\Minimap\\TRACKING\\Repair",coords={0.05,0.95,0.0
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show durability of your gear and estimated repair costs."],
 	events = {
 		"PLAYER_LOGIN",
@@ -211,8 +210,9 @@ ns.modules[name] = {
 	}
 }
 
+
 for i,v in pairs(colorSets) do
-	ns.modules[name].config_allowed.colorSet[i] = true
+	module.config_allowed.colorSet[i] = true
 end
 
 --------------------------
@@ -387,7 +387,7 @@ function durabilityTooltip(tt)
 end
 
 local function createMenu(self)
-	if (tt~=nil) and (tt:IsShown()) then ns.hideTooltip(tt,ttName,true); end
+	ns.hideTooltip(tt,ttName,true)
 
 	ns.EasyMenu.InitializeMenu();
 
@@ -425,9 +425,7 @@ end
 -- module (BE internal) functions --
 ------------------------------------
 
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-	if obj==nil then return end
+module.preinit = function()
 	hiddenTooltip = CreateFrame("GameTooltip", "BasicBrokerScanTip", nil, "GameTooltipTemplate")
 	hiddenTooltip:SetOwner(UIParent, "ANCHOR_NONE")
 
@@ -442,8 +440,8 @@ ns.modules[name].init = function(obj)
 	end
 end
 
-ns.modules[name].onevent = function(self,event,msg)
-	local dataobj = self.obj or ns.LDB:GetDataObjectByName(ldbName) 
+module.onevent = function(self,event,msg)
+	local dataobj = self.obj 
 	local discount = {[5]=0.95,[6]=0.9,[7]=0.85,[8]=0.8}
 	local repairCosts, equipment, bag, diff = getRepairCosts()
 
@@ -471,7 +469,7 @@ ns.modules[name].onevent = function(self,event,msg)
 					local _, _, _, diff = getRepairCosts()
 					if diff>0 then lastRepairs_add(diff,byGuild) end
 
-					ns.modules[name].onevent(self,"BE_DUMMY_EVENT")
+					module.onevent(self,"BE_DUMMY_EVENT")
 				end
 				currentCosts = nil
 				byGuild = nil
@@ -522,7 +520,7 @@ ns.modules[name].onevent = function(self,event,msg)
 	date_format = Broker_EverythingDB[name].dateFormat
 end
 
-ns.modules[name].onclick = function(self,button)
+module.onclick = function(self,button)
 	if button=="LeftButton" then
 		securecall("ToggleCharacter","PaperDollFrame")
 	else
@@ -532,24 +530,16 @@ end
 
 do
 	local percent = 0
-	ns.modules[name].onupdate = function(self)
+	module.onupdate = function(self)
 		if debugging then
-			ns.modules[name].onevent(self,"DEBUGGING",percent)
+			module.onevent(self,"DEBUGGING",percent)
 			percent = percent==100 and 0 or percent+1
 		end
 	end
 end
 
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
 
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].ontooltip = function(tt) end ]]
-
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
-
-
-ns.modules[name].onenter = function(self)
+module.onenter = function(self)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "RIGHT")
@@ -557,8 +547,8 @@ ns.modules[name].onenter = function(self)
 	ns.createTooltip(self,tt)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,true); end
+module.onleave = function(self)
+	ns.hideTooltip(tt,ttName,true)
 end
 
 --[[
@@ -579,3 +569,9 @@ _G['MerchantGuildBankRepairButton']:HookScript("OnClick",function(self,button)
 	manualRepairAll = true
 	byGuild = 1
 end)
+
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
+

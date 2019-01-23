@@ -13,7 +13,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Gold" -- L["Gold"]
-local ldbName = name
 local tt = nil
 local ttName = name.."TT"
 local login_money = nil
@@ -33,7 +32,7 @@ I[name] = {iconfile="Interface\\Minimap\\TRACKING\\Auctioneer",coords={0.05,0.95
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show gold information. Shows gold amounts for characters on the same ns.realm and faction and the amount made or lost for the session."],
 	events = {
 		"PLAYER_LOGIN",
@@ -47,8 +46,7 @@ ns.modules[name] = {
 	config_defaults = {
 		goldColor = false
 	},
-	config_allowed = {
-	},
+	config_allowed = nil,
 	config = {
 		height = 52,
 		elements = {
@@ -72,8 +70,7 @@ ns.modules[name] = {
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
+local function initDB()
 	if not goldDB[faction] then
 		goldDB[faction] = { [ns.realm]={ [ns.player.name] = {0,ns.player.class} } }
 	elseif not goldDB[faction][ns.realm] then
@@ -81,7 +78,9 @@ ns.modules[name].init = function(obj)
 	end
 end
 
-ns.modules[name].onevent = function(self,event,msg)
+module.preinit = initDB
+
+module.onevent = function(self,event,msg)
 	current_money = GetMoney()
 	goldDB[faction][ns.realm][ns.player.name] = {current_money,ns.player.class}
 
@@ -92,19 +91,13 @@ ns.modules[name].onevent = function(self,event,msg)
 
 	if event == "NEUTRAL_FACTION_SELECT_RESULT" then
 		faction = UnitFactionGroup("Player")
-		ns.modules[name].init(self)
+		initDB()
 		goldDB[faction][ns.realm][ns.player.name] = {current_money,ns.player.class}
 		goldDB["Neutral"][ns.realm][ns.player.name] = nil
 	end
 
-	(self.obj or ns.LDB:GetDataObjectByName(ldbName)).text = ns.GetCoinColorOrTextureString(name,current_money)
+	self.obj.text = ns.GetCoinColorOrTextureString(name,current_money)
 end
-
---[[ ns.modules[name].onupdate = function(self) end ]]
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
 
 local function addCharGoldInfo(tt,k,v)
 		if type(v)~="table" then v = {v,"white"} end
@@ -122,7 +115,7 @@ local function addFactionGoldInfo(tt,faction)
 			if button == "RightButton" and IsShiftKeyDown() then
 				goldDB[faction][ns.realm][k] = nil
 				tt:Clear()
-				ns.modules[name].ontooltip(tt)
+				module.ontooltip(tt)
 			end 
 		end)
 		totalGold = totalGold + v[1]
@@ -132,7 +125,7 @@ local function addFactionGoldInfo(tt,faction)
 	return totalGold
 end
 
-ns.modules[name].ontooltip = function(tt)
+module.ontooltip = function(tt)
 	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
 
 	local totalGold = 0
@@ -183,20 +176,24 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self)
+module.onenter = function(self)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "RIGHT")
-	ns.modules[name].ontooltip(tt)
+	module.ontooltip(tt)
 	ns.createTooltip(self,tt)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,false,true); end
+module.onleave = function(self)
+	ns.hideTooltip(tt,ttName,false,true)
 end
 
-ns.modules[name].onclick = function(self,button)
+module.onclick = function(self,button)
 	securecall("ToggleCharacter","TokenFrame")
 end
 
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
+

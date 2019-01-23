@@ -10,7 +10,6 @@ local NAMEPLATES = NAMEPLATES or "Nameplates"
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Nameplates" -- L["Nameplates"]
-local ldbName = name
 local tt = nil
 local ttName = name.."TT"
 local GetCVar,RegisterCVar = GetCVar,RegisterCVar
@@ -71,23 +70,22 @@ I[name] = {iconfile="Interface\\Addons\\"..addon.."\\media\\nameplates"}
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to allow you to toggle the various nameplates. Eg, friendly or hostile."],
 	events = {
 		"VARIABLES_LOADED",
 		"CVAR_UPDATE"
 	},
 	updateinterval = nil, -- 10
-	config_defaults = nil, -- {}
+	config_defaults = nil,
 	config_allowed = nil,
-	config = nil -- {}
+	config = nil,
 }
 
 
 --------------------------
 -- some local functions --
 --------------------------
-
 
 -- Function to get the Nameplate CVar status
 local function getCVarSettings(cVarName)
@@ -110,14 +108,9 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-	if not obj then return end
-	obj = obj.obj or ns.LDB:GetDataObjectByName(ldbName) 
-end
 
-ns.modules[name].onevent = function(self,event,msg,msg2)
-	local dataobj = ns.LDB:GetDataObjectByName(ldbName) 
+module.onevent = function(self,event,msg,msg2)
+	local dataobj = self.obj
 	local allFriends, friends = GetCVar("nameplateShowFriends"), GetCVar("UnitNameFriendlyPlayerName")
 	local allEnemies, enemy = GetCVar("nameplateShowEnemies"), GetCVar("UnitNameEnemyPlayerName")
 
@@ -132,13 +125,7 @@ ns.modules[name].onevent = function(self,event,msg,msg2)
 	end
 end
 
---[[ ns.modules[name].onupdate = function(self) end ]]
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
-ns.modules[name].ontooltip = function(tt)
+module.ontooltip = function(tt)
 	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
 
 	tt:Clear()
@@ -172,7 +159,7 @@ ns.modules[name].ontooltip = function(tt)
 			tt:SetCellScript(line, cell, "OnMouseUp", function(self)
 				ns.SetCVar(v[2], toggle, v[2])
 				tt:Clear()
-				ns.modules[name].ontooltip(tt)
+				module.ontooltip(tt)
 			end)
 			cell = cell + v[3]
 			if cell > ttColumns then
@@ -210,7 +197,7 @@ ns.modules[name].ontooltip = function(tt)
 				tt:SetCellScript(line, cell, "OnMouseUp", function(self)
 					ns.SetCVar(v[2], toggle, v[2])
 					tt:Clear()
-					ns.modules[name].ontooltip(tt)
+					module.ontooltip(tt)
 				end)
 				cell = cell + 1
 			end
@@ -230,19 +217,20 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self)
+module.onenter = function(self)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	tt = ns.LQT:Acquire(ttName, ttColumns, "LEFT", "LEFT","LEFT","LEFT","LEFT","LEFT")
 	ns.createTooltip(self,tt)
-	ns.modules[name].ontooltip(tt)
+	module.ontooltip(tt)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,false,true); end
+module.onleave = function(self)
+	ns.hideTooltip(tt,ttName,false,true)
 end
 
---[[ ns.modules[name].onclick = function(self,button) end ]]
 
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 

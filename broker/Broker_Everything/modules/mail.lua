@@ -10,7 +10,6 @@ mailDB = {}
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Mail" -- L["Mail"]
-local ldbName = name
 local ttName = name.."TT"
 local tooltip, tt, player_realm
 local icons = {}
@@ -28,7 +27,7 @@ I[name..'_stored'] = {iconfile="interface\\icons\\inv_letter_03",coords={0.05,0.
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to alert you if you have mail."],
 	events = {
 		"UPDATE_PENDING_MAIL",
@@ -44,8 +43,7 @@ ns.modules[name] = {
 		showDaysLeft = true,
 		hideMinimapMail = false
 	},
-	config_allowed = {
-	},
+	config_allowed = nil,
 	config = {
 		height = 52, --92,
 		elements = {
@@ -131,8 +129,7 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
+module.preinit = function()
 	if Broker_EverythingDB[name].hideMinimapMail then
 		ns.hideFrame("MiniMapMailFrame")
 	end
@@ -156,8 +153,8 @@ ns.modules[name].init = function(obj)
 	end
 end
 
-ns.modules[name].onevent = function(self,event,msg)
-	local dataobj = self.obj  or ns.LDB:GetDataObjectByName(ldbName)
+module.onevent = function(self,event,msg)
+	local dataobj = self.obj
 	local mailState = 0
 	
 	if event == "UPDATE_PENDING_MAIL" or event == "PLAYER_ENTERING_WORLD" or event =="PLAYER_LOGIN" then
@@ -241,13 +238,7 @@ ns.modules[name].onevent = function(self,event,msg)
 	dataobj.text = text
 end
 
---[[ ns.modules[name].onupdate = function(self) end ]]
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
-ns.modules[name].ontooltip = function(tooltip)
+module.ontooltip = function(tooltip)
 	local sender1, sender2, sender3 = GetLatestThreeSenders()
 	ns.tooltipScaling(tooltip)
 	tooltip:AddLine(L[name])
@@ -271,7 +262,7 @@ end
 -------------------------------------------
 
 --[=[
-ns.modules[name].onenter = function(self)
+module.onenter = function(self)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "RIGHT")
@@ -279,15 +270,10 @@ ns.modules[name].onenter = function(self)
 	ns.createTooltip(self,tt)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,true) end
+module.onleave = function(self)
+	ns.hideTooltip(tt,ttName,true)
 end
 ]=]
-
---[[ ns.modules[name].onclick = function(self,button) end ]]
-
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
-
 
 -- MinimapMailFrameUpdate
 
@@ -310,3 +296,9 @@ or realm independent? maybe...
 Broker_EverythingDB[name].showAllRealms :) let the use choose.
 
 ]]
+
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
+

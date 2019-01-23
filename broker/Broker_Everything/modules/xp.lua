@@ -10,7 +10,6 @@ xpDB = {}
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "XP" -- L["XP"]
-local ldbName = name
 local ttName,ttName2 = name.."TT", name.."TT2"
 local string = string
 local tt,tooltip,tt2
@@ -49,7 +48,7 @@ I[name] = {iconfile="interface\\icons\\ability_dualwield",coords={0.05,0.95,0.05
 ---------------------------------------
 -- module variables for registration --
 ---------------------------------------
-ns.modules[name] = {
+local module = {
 	desc = L["Broker to show your xp. Can be shown either as a percentage, or as values."],
 	events = {
 		"PLAYER_XP_UPDATE",
@@ -98,7 +97,6 @@ ns.modules[name] = {
 		}
 	}
 }
-
 
 --------------------------
 -- some local functions --
@@ -197,15 +195,12 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-ns.modules[name].init = function(obj)
-	ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-end
 
-ns.modules[name].onevent = function(self,event,msg)
+module.onevent = function(self,event,msg)
 
 	if event == "UNIT_INVENTORY_CHANGED" and msg~="player" then return end
 
-	local dataobj = self.obj or ns.LDB:GetDataObjectByName(ldbName)
+	local dataobj = self.obj
 
 	local xpBonus = 0
 	data.xpBonus = {}
@@ -267,13 +262,7 @@ ns.modules[name].onevent = function(self,event,msg)
 	end
 end
 
---[[ ns.modules[name].onupdate = function(self) end ]]
-
---[[ ns.modules[name].optionspanel = function(panel) end ]]
-
---[[ ns.modules[name].onmousewheel = function(self,direction) end ]]
-
-ns.modules[name].ontooltip = function(tooltip)
+module.ontooltip = function(tooltip)
 	ns.tooltipScaling(tooltip)
 
 	if IsXPUserDisabled() then
@@ -297,7 +286,7 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-ns.modules[name].onenter = function(self)
+module.onenter = function(self)
 	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
 	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "RIGHT")
@@ -305,11 +294,11 @@ ns.modules[name].onenter = function(self)
 	ns.createTooltip(self,tt)
 end
 
-ns.modules[name].onleave = function(self)
-	if (tt) then ns.hideTooltip(tt,ttName,false,true); end
+module.onleave = function(self)
+	ns.hideTooltip(tt,ttName,false,true)
 end
 
-ns.modules[name].onclick = function(self,button)
+module.onclick = function(self,button)
 	if button == "RightButton" then
 		if type(Broker_EverythingDB[name].display)=="boolean" then
 			Broker_EverythingDB[name].display = "1"
@@ -321,9 +310,12 @@ ns.modules[name].onclick = function(self,button)
 		elseif Broker_EverythingDB[name].display == "3" then
 			Broker_EverythingDB[name].display = "1"
 		end
-		ns.modules[name].onevent(self)
+		module.onevent(self)
 	end
 end
 
---[[ ns.modules[name].ondblclick = function(self,button) end ]]
+
+-- final module registration --
+-------------------------------
+ns.modules[name] = module
 
