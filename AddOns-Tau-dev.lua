@@ -4,7 +4,7 @@ local linkExpaAddOns = linkAddOns.A548
 local linkServerAddOns = linkAddOns.A548Tau
 
 
-linkExpaAddOns('_read/tek') [=[
+linkExpaAddOns('_test/tek') [=[
 Ampere: disabled
 addonaddoff: disabled
 linkenlog: disabled
@@ -16,8 +16,7 @@ tekPopbar: disabled
 tekticles: true
 ]=]
 
-linkExpaAddOns('_read') [=[
-ColorPickerPlus: disabled
+linkExpaAddOns('../dev/_read') [=[
 TinyInspect: disabled
 ]=]
 
@@ -57,6 +56,7 @@ toomanyaddons: disabled
 
 
 linkExpaAddOns('_test') [=[
+ColorPickerPlus: disabled
 MiniMapster: true
 
 FriendShare: true
@@ -99,6 +99,7 @@ TellMeWhen_Options: true
 
 
 linkExpaAddOns('base') [=[
+Ace3a: true
 Ace3: true
 
 AddonLoader: true
@@ -164,7 +165,7 @@ StatBlockCore: disabled
 
 Dominos: true
 Dominos_Auras: true
-Dominos_Bufftimes: true
+Dominos_BuffTimes: true
 Dominos_Cast: true
 Dominos_Config: true
 Dominos_Encounter: true
@@ -214,14 +215,15 @@ oUF_Adirelle_Config: true
 
 oUF_Freebgrid: disabled
 oUF_Freebgrid_Config: disabled
-oUF_Phanx: disabled
-oUF_Phanx_Config: disabled
+
+oUF_Phanx: true
+oUF_Phanx_Config: true
+
+oUF_Mlight: true
+oUF_Lanerra: true
 
 oUF: disabled
 oUF_MovableFrames: disabled
-oUF_Mlight: disabled
-oUF_Lanerra: disabled
-oUF_Phanx: disabled
 ]=]
 
 
@@ -251,7 +253,7 @@ Raven: true
 Raven_Options: true
 
 MikScrollingBattleText: true
-MSBTOptions: true
+MikScrollingBTOptions: true
 xCT+: disabled
 Doom_CooldownPulse: disabled
 
@@ -271,9 +273,8 @@ BasicChatMods: disabled
 PhanxChat: disabled
 Chatter: disabled
 
-Prat-3.0: true
-Prat-3.0_Libraries: disabled
-Prat-3.0_HighCPUUsageModules: true
+Prat: true
+Prat_HighCPUUsageModules: true
 Elephant: true
 ]=]
 

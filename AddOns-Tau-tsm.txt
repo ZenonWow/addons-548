@@ -1,157 +1,163 @@
-Squeenix: enabled
-Mappy: disabled
+!BugGrabber:enabled
+Ace3:enabled
+BugSack:enabled
+CombatMode:enabled
+ZenShortcuts:enabled
+ZenTestZone:enabled
+ZenTools:enabled
+Squeenix:enabled
+Postal:enabled
+Prat-3.0:enabled
+Prat-3.0_HighCPUUsageModules:enabled
+MogIt:enabled
+Leatrix_Plus:enabled
+BlizzMove:enabled
+Broker_Everything:enabled
+GnomishVendorShrinker:enabled
+ImprovedFrameStack:enabled
+oUF_Adirelle:disabled
+oUF_Adirelle_Arena:disabled
+oUF_Adirelle_Boss:disabled
+oUF_Adirelle_Config:disabled
+oUF_Adirelle_Raid:disabled
+oUF_Adirelle_Single:disabled
+oUF_Phanx: disabled
+oUF_Phanx_Config: enabled
+oUF_Mlight: enabled
+oUF_Lanerra: disabled
+CoolLine:enabled
+Quartz:enabled
+MikScrollingBattleText:enabled
+MikScrollingBTOptions:enabled
 
-tekChat: disabled
-tekplayermenu: disabled
-tekPopbar: disabled
-picoPriority: disabled
-TinyInspect: disabled
+idTip:enabled
+TipTop:enabled
+Examiner:enabled
+TidyPlates:enabled
+TidyPlates_Graphite:enabled
+TidyPlatesHub:enabled
+TidyPlatesWidgets:enabled
+TinyExtraBars:disabled
+TinyPad:enabled
+LiteMount:enabled
 
-Autopsy: enabled
-BindPad: enabled
-mapSearch: enabled
-MyFonts: enabled
-SpellSearch: disabled
+ViragDevTool:enabled
+Watcher:enabled
+Broker_CPU:enabled
+iCPU:enabled
+tekDebug:enabled
+
+Spy:disabled
+tekErr:disabled
+Bartender4:disabled
+
+AdiBags:enabled
+AdiBags_Config:enabled
+ChocolateBar:enabled
+ChocolateBar_Options:enabled
+Dominos:enabled
+Dominos_Auras:enabled
+Dominos_Bufftimes:enabled
+Dominos_Cast:enabled
+Dominos_Config:enabled
+Dominos_Encounter:enabled
+Dominos_Quest:enabled
+Dominos_Roll:enabled
+Dominos_XP:enabled
+
+SetTheory:disabled
+TradeSkillMaster:disabled
+TradeSkillMaster_Mailing:disabled
+TradeSkillMaster_Accounting:disabled
+TradeSkillMaster_Auctioning:disabled
+TradeSkillMaster_Crafting:disabled
+TradeSkillMaster_Destroying:disabled
+TradeSkillMaster_ItemTracker:disabled
+TradeSkillMaster_Shopping:disabled
+TradeSkillMaster_Warehousing:disabled
 
 
-Ovale: enabled
-Watcher: disabled
-NeedToKnow: disabled
-SpellFlash: disabled
-SpellFlashCore: disabled
-TellMeWhen: disabled
-TellMeWhen_Options: disabled
-Raven: disabled
-Ellipsis: enabled
-AdiButtonAuras: disabled
-AuraFrames: disabled
-Details: disabled
-Skada: disabled
+ACP:disabled
+ActionSwap2:disabled
+ActionSwap2-IconKeywords:disabled
+AddonLoader:disabled
+AddonUsage:disabled
+AdiButtonAuras:disabled
+AdiButtonAuras_Config:disabled
+AdvancedEventTrace:disabled
+AdvancedIconSelector:disabled
+AdvancedIconSelector-KeywordData:disabled
+Auctionator:disabled
+AuraFrames:disabled
+AuraFramesConfig:disabled
+Aurora:disabled
+Autopsy:disabled
+BagSync:disabled
+BankStack:disabled
+BarProfiler:disabled
+Bazooka:disabled
+Bazooka_Options:disabled
+Binder:disabled
+ButtonBin:disabled
+ButtonForge:disabled
+DockingStation:disabled
+DockingStation_Config:disabled
+Elephant:disabled
+Ellipsis:disabled
+Ellipsis_Options:disabled
+Explorer:disabled
+ExtraBar:disabled
+ExtraQuestButton:disabled
+FasterCamera:disabled
+FriendShare:disabled
+FriendsShare:disabled
+FriendsWithBenefits:disabled
+GnomishInboxShrinker:disabled
+HandyNotes:disabled
+HandyNotes_LostAndFound:disabled
+InboxMailBag:disabled
+IQ:disabled
+LFGStatusIcon:disabled
+LoseControlFix:disabled
+LUI:disabled
+MacroBank:disabled
+MacroToolkit:disabled
+mapSearch:disabled
+Mapster:disabled
+MiniMapster:disabled
+MozzFullWorldMap:disabled
+MyFonts:disabled
+NeedToKnow:disabled
+NPCScan:disabled
+NPCScan.Overlay:disabled
+Ovale:disabled
+RareSpawnOverlay:disabled
+Raven:disabled
+Raven_Options:disabled
+Reforgenator:disabled
+Routes:disabled
+SavedInstances:disabled
+ShowItemLevel:disabled
+SilverDragon:disabled
+SilverDragon_Data:disabled
+SpellFlash:disabled
+SpellFlashCore:disabled
+SpellSearch:disabled
+SyncFriends:disabled
+tekticles:disabled
+TellMeWhen:disabled
+TellMeWhen_Options:disabled
+TipTac:disabled
+TipTacItemRef:disabled
+TipTacOptions:disabled
+TipTacTalents:disabled
+TomTom:disabled
+TomTomLite:disabled
 
-
-Aurora: disabled
-AltzUI: disabled
-LUI: disabled
-
-!ClassColors: disabled
-oGlow: disabled
-oUF: disabled
-oUF_Mlight: disabled
-oUF_MovableFrames: disabled
-
-Immersion: disabled
-Storyline: disabled
-
-
-AddonLoader: enabled
-ACP: disabled
-Ampere: disabled
-addonaddoff: disabled
-
-AddonUsage: enabled
-iCPU: enabled
-MacroBank: disabled
-
-FriendShare: disabled
-FriendsShare: disabled
-FriendsWithBenefits: disabled
-SyncFriends: disabled
-
-ChocolateBar: enabled
-ButtonBin: disabled
-Bazooka: disabled
-DockingStation: disabled
-StatBlockCore: disabled
-
-BlizzMove: enabled
-Dominos: enabled
-Bartender4: disabled
-ExtraQuestButton: disabled
-TinyExtraBars: enabled
-ButtonForge: disabled
-ActionSwap2: disabled
-ButtonFacade: disabled
-Masque: disabled
-
-InspectEquip: disabled
-IQ: disabled
-ShowItemLevel: disabled
-!InspectFix: disabled
-Reforgenator: disabled
-Outfitter: disabled
-
-MikScrollingBattleText: enabled
-sct: disabled
-xCT+: disabled
-
-DevPad: enabled
-Hack: disabled
-LuaBrowser: enabled
-TinyPad: enabled
-ViragDevTool: enabled
-WowLua: enabled
-
-TomTom: enabled
-TomTomLite: disabled
-
-AdvancedIconSelector: enabled
-
-GnomishVendorShrinker: enabled
-GnomishAuctionShrinker: disabled
-Auctionator: enabled
-AuctionLite: disabled
-AuctionMaster: disabled
-
-AckisRecipeList: enabled
-Skillet: disabled
-Archy: disabled
-
-PetJournalEnhanced: disabled
-
-BankStack: enabled
-AdiBags: enabled
-BagSync: enabled
-Combuctor: disabled
-BagBrother: disabled
-ArkInventory: disabled
-ArkInventoryRules: disabled
-
-Butsu: disabled
-XLoot: enabled
-
-AllPlayed: disabled
-Broker_CPU: enabled
-Broker_Garbage: disabled
-EmoteLDB: disabled
-
-Spy: enabled
-Examiner: enabled
-LiteMount: enabled
-
-Explorer: enabled
-FlightMap: disabled
-MozzFullWorldMap: disabled
-HandyNotes_SummerFestival: disabled
-LorewalkersHelper: disabled
-
-LoseControl: disabled
-LoseControlFix: disabled
-NPCScan: disabled
-NPCScan.Overlay: disabled
-
-oUF_Adirelle: enabled
--oUF_Freebgrid: disabled
--oUF_Lanerra: disabled
--oUF_Mlight: disabled
--oUF_Phanx: disabled
-
-Kui_Nameplates: disabled
-TidyPlates: enabled
-
-TipTop: enabled
-TipTac: disabled
-TipTacItemRef: disabled
-TipTacTalents: disabled
-
-Leatrix_Plus: enabled
-Viewporter: disabled
+TransparentChatBubbles:disabled
+Viewporter:disabled
+XLoot:disabled
+XLoot_Frame:disabled
+XLoot_Group:disabled
+XLoot_Monitor:disabled
+XLoot_Options:disabled

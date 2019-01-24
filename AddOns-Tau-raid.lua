@@ -4,7 +4,7 @@ local linkExpaAddOns = linkAddOns.A548
 local linkServerAddOns = linkAddOns.A548Tau
 
 
-linkExpaAddOns('_read/tek') [=[
+linkExpaAddOns('_test/tek') [=[
 Ampere: disabled
 addonaddoff: disabled
 linkenlog: disabled
@@ -14,11 +14,6 @@ tekErr: true
 tekplayermenu: disabled
 tekPopbar: disabled
 tekticles: true
-]=]
-
-linkExpaAddOns('_read') [=[
-ColorPickerPlus: disabled
-TinyInspect: disabled
 ]=]
 
 linkExpaAddOns('ui') [=[
@@ -68,6 +63,7 @@ TellMeWhen_Options: true
 
 
 linkExpaAddOns('base') [=[
+Ace3a: true
 Ace3: true
 
 AddonLoader: true
@@ -126,7 +122,7 @@ Bazooka_Options: true
 
 Dominos: true
 Dominos_Auras: true
-Dominos_Bufftimes: true
+Dominos_BuffTimes: true
 Dominos_Cast: true
 Dominos_Config: true
 Dominos_Encounter: true
@@ -213,7 +209,7 @@ Raven: true
 Raven_Options: true
 
 MikScrollingBattleText: true
-MSBTOptions: true
+MikScrollingBTOptions: true
 xCT+: disabled
 Doom_CooldownPulse: disabled
 
@@ -233,9 +229,8 @@ BasicChatMods: disabled
 PhanxChat: disabled
 Chatter: disabled
 
-Prat-3.0: true
-Prat-3.0_Libraries: disabled
-Prat-3.0_HighCPUUsageModules: true
+Prat: true
+Prat_HighCPUUsageModules: disabled
 Elephant: true
 ]=]
 

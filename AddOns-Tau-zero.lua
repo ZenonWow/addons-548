@@ -5,6 +5,7 @@ local linkServerAddOns = linkAddOns.A548Tau
 
 
 linkExpaAddOns('base') [=[
+Ace3a: true
 Ace3: true
 
 AddonLoader: disabled
@@ -40,7 +41,7 @@ Bazooka_Options: disabled
 
 Dominos: true
 --Dominos_Auras: disabled
---Dominos_Bufftimes: disabled
+--Dominos_BuffTimes: disabled
 --Dominos_Cast: disabled
 --Dominos_Config: disabled
 --Dominos_Encounter: disabled
@@ -53,9 +54,8 @@ Dominos_XP: true
 
 linkExpaAddOns('chat') [=[
 
-Prat-3.0: true
-Prat-3.0_Libraries: disabled
-Prat-3.0_HighCPUUsageModules: disabled
+Prat: true
+Prat_HighCPUUsageModules: disabled
 Elephant: true
 ]=]
 

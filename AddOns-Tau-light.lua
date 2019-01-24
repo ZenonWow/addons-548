@@ -5,6 +5,7 @@ local linkServerAddOns = linkAddOns.A548Tau
 
 
 linkExpaAddOns('base') [=[
+Ace3a: true
 Ace3: true
 
 AddonLoader: disabled
@@ -40,7 +41,7 @@ Bazooka_Options: true
 
 Dominos: true
 Dominos_Auras: true
-Dominos_Bufftimes: true
+Dominos_BuffTimes: true
 Dominos_Cast: true
 Dominos_Config: true
 Dominos_Encounter: true
@@ -127,7 +128,7 @@ Raven: disabled
 Raven_Options: disabled
 
 MikScrollingBattleText: true
-MSBTOptions: true
+MikScrollingBTOptions: true
 xCT+: disabled
 Doom_CooldownPulse: disabled
 
@@ -143,9 +144,8 @@ Spy: true
 
 linkExpaAddOns('chat') [=[
 
-Prat-3.0: true
-Prat-3.0_Libraries: disabled
-Prat-3.0_HighCPUUsageModules: disabled
+Prat: true
+Prat_HighCPUUsageModules: disabled
 Elephant: true
 ]=]
 
