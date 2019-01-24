@@ -14,7 +14,11 @@
 /run Examiner:ClearAllPoints() Examiner:SetPoint('TOPLEFT', 20, -20)
 --]]
 
+UIPanelWindows.GameMenuFrame         = nil
 UIPanelWindows.InterfaceOptionsFrame = nil
+UIPanelWindows.ChatConfigFrame       = nil
+UIPanelWindows.WorldMapFrame         = nil
+--[[
 UIPanelWindows.CharacterFrame        = nil
 UIPanelWindows.SpellBookFrame        = nil
 UIPanelWindows.TaxiFrame             = nil
@@ -24,9 +28,6 @@ UIPanelWindows.MerchantFrame         = nil
 UIPanelWindows.MailFrame             = nil
 UIPanelWindows.DressUpFrame          = nil
 UIPanelWindows.FriendsFrame          = nil
-UIPanelWindows.WorldMapFrame         = nil
-UIPanelWindows.ChatConfigFrame       = nil
-UIPanelWindows.GameMenuFrame         = nil
 UISpecialFrames[#UISpecialFrames+1] = "CharacterFrame"
 UISpecialFrames[#UISpecialFrames+1] = "SpellBookFrame"
 -- UISpecialFrames[#UISpecialFrames+1] = "TaxiFrame"
@@ -36,9 +37,10 @@ UISpecialFrames[#UISpecialFrames+1] = "MerchantFrame"
 UISpecialFrames[#UISpecialFrames+1] = "MailFrame"
 UISpecialFrames[#UISpecialFrames+1] = "DressUpFrame"
 UISpecialFrames[#UISpecialFrames+1] = "FriendsFrame"
-UISpecialFrames[#UISpecialFrames+1] = "WorldMapFrame"
-UISpecialFrames[#UISpecialFrames+1] = "ChatConfigFrame"
+--]]
 UISpecialFrames[#UISpecialFrames+1] = "GameMenuFrame"
+UISpecialFrames[#UISpecialFrames+1] = "ChatConfigFrame"
+UISpecialFrames[#UISpecialFrames+1] = "WorldMapFrame"
 UISpecialFrames[#UISpecialFrames+1] = "ScriptErrorsFrame"    -- Later loaded from Blizzard_DebugTools
 CharacterFrame:SetPoint('TOPLEFT',10,-20)
 SpellBookFrame:SetPoint('TOPLEFT',10,-20)

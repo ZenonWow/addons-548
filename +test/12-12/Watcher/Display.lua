@@ -141,7 +141,7 @@ function Watcher:SetupPriorityFrame()
 
     -- if currently moving icon, enable the mouse
     if (self.db.char.unlocked) then
-		self.PriorityFrame:EnableMouse(1);
+        self.PriorityFrame:EnableMouse(1);
     else
         self.PriorityFrame:EnableMouse(0);
     end

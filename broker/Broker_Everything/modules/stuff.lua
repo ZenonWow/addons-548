@@ -178,7 +178,7 @@ module.onclick = function(self,button)
 	elseif  button == "RightButton"  then
 		if  IsControlKeyDown()  and  not IsAltKeyDown()  then  securecall("Logout")
 		elseif  IsControlKeyDown()  and  IsAltKeyDown()  then  securecall("Quit")
-		elseif  not IsShiftKeyDown()  and  not IsControlKeyDown()  and  not IsAltKeyDown()  then
+		elseif  not IsModifierKeyDown()  then
 			ns.commands.options.func()
 		end
 	end

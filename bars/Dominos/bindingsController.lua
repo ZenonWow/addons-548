@@ -209,11 +209,15 @@ function BindingsController:OnEvent(event, ...)
 	self[event](self, event, ...)
 end
 
+--[[
+BindingsController.UPDATE_BINDINGS = BindingsController.RequestUpdateBindings
 function BindingsController:UPDATE_BINDINGS(...)
 	print('BindingsController:UPDATE_BINDINGS(', ..., ')')
+	self:RequestUpdateBindings()
 	-- Why is this registered at all if removed on first event?
 	--self:UnregisterEvent(event)
 end
+--]]
 
 function BindingsController:PLAYER_REGEN_ENABLED()
 	if self.__NeedsBindingUpdate then

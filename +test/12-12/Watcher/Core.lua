@@ -130,7 +130,8 @@ Watcher.defaults = {
 function Watcher:OnInitialize()
     -- Setup database and register defaults
     self.db = LibStub("AceDB-3.0"):New("WatcherDB", Watcher.defaults, "char");
-	self.WatcherSerializer = LibStub("AceAddon-3.0"):NewAddon("WatcherSerializer", "AceSerializer-3.0");
+    -- self.WatcherSerializer = LibStub("AceAddon-3.0"):NewAddon("WatcherSerializer", "AceSerializer-3.0");
+    -- self.WatcherSerializer = self:NewModule("WatcherSerializer", "AceSerializer-3.0");
 
     -- Get versioning information
     self.version = GetAddOnMetadata("Watcher", "Version");

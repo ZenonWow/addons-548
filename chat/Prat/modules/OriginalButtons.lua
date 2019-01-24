@@ -24,7 +24,7 @@
 --
 -------------------------------------------------------------------------------
 
-
+local ADDON_NAME = ...
 
 
 
@@ -370,7 +370,7 @@ L:AddLocale("zhTW",
 )
 --@end-non-debug@
 
-local module = Prat:NewModule(PRAT_MODULE, "AceHook-3.0")
+local module = Prat:NewModule(PRAT_MODULE, "AceHook-3.0"):SetAddonEnv(ADDON_NAME)
 
 --module.moduleName = L["Buttons"]
 --module.moduleDesc = L["Chat window button options."]

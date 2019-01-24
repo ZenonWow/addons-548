@@ -57,6 +57,22 @@ local fields = {
 /run LuaTests.FieldTest()
 --]]
 
+--[[
+/run print("UnitExists('mouseover')="..tostring(UnitExists('mouseover'))) ; MouselookStart() ; print("MouselookStart(); UnitExists('mouseover')="..tostring(UnitExists('mouseover'))) ; MouselookStop()
+/run function trickyIter(t,i) print('is this a valid iteration?') ; return nil,(i==0 and 'YES') end ; for a,b in trickyIter,'YES',0 do print(a,b) end
+/run function trickyIter(t,i) print('is this a valid iteration?') ; return i==0 and 'YES' or nil end ; for a,b in trickyIter,'YES',0 do print(a,b) end
+/dump CanLootUnit, CanInteractUnit, CanLoot, HasLoot
+/dump CanLootUnit('target')
+/dump CanInteractUnit('target')
+--]]
+function LuaTests.MouselookTest()
+	print("UnitExists('mouseover')="..tostring(UnitExists('mouseover')))
+	MouselookStart()
+	print("MouselookStart(); UnitExists('mouseover')="..tostring(UnitExists('mouseover')))
+	MouselookStop()
+end
+
+
 function LuaTests.MetaTableTest()
 	obj = setmetatable({}, { __tostring = function() return nil end }) ; print( "tostring() returns type '"..type( tostring(obj) ).."' if __tostring returns nil." )
 	-- print(tostring( (function() end)() ))

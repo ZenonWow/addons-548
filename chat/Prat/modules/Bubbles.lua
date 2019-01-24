@@ -24,6 +24,8 @@
 --
 -------------------------------------------------------------------------------
 
+local ADDON_NAME = ...
+
 Prat:AddModuleToLoad(function()
 
   local PRAT_MODULE = Prat:RequestModuleName("Bubbles")
@@ -231,7 +233,7 @@ Prat:AddModuleToLoad(function()
   )
   --@end-non-debug@
 
-  local module = Prat:NewModule(PRAT_MODULE)
+  local module = Prat:NewModule(PRAT_MODULE):SetAddonEnv(ADDON_NAME)
 
   Prat:SetModuleDefaults(module.name, {
     profile = {

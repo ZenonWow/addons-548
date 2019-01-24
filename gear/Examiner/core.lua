@@ -214,7 +214,7 @@ end
 function ex:MODIFIER_STATE_CHANGED(event)
 	if (self.showingTooltip) then
 		local mFocus = GetMouseFocus();
-		if (GetMouseFocus and GetMouseFocus ~= UIParent) then
+		if (mFocus and mFocus ~= UIParent) then
 			local onEnterFunc = mFocus:GetScript("OnEnter");
 			if (onEnterFunc) then
 				onEnterFunc(mFocus);
