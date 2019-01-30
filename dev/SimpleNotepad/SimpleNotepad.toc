@@ -12,13 +12,18 @@
 ## X-Localizations: enUS (Any help with Locale would be appreciated)
 ## X-Embeds: LibStub, CallbackHandler-1.0, ChatThrottleLib, AceConfig-3.0, AceLocale-3.0, LibDataBroker-1.1, LibDBIcon-1.0,
 ## X-Category: Misc
+
 ## OptionalDeps: LibStub,CallbackHandler-1.0,ChatThrottleLib,LibDataBroker-1.1,LibDBIcon-1.0
 ## DefaultState: Enabled
+
 ## LoadOnDemand: 0
 ## SavedVariables: SimpleNotepad_Vars
 ## SavedVariablesPerCharacter: SimpleNotepad_Varsc
 
+
 # Load Libraries
-embeds.xml
+# embeds.xml
+libs\LibQTip-1.0\LibQTip_1.0.lua
+
 # Load addon
 SimpleNotepad.xml
