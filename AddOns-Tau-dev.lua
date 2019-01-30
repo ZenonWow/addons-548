@@ -1,7 +1,6 @@
 -- AddOns-Tau-dev-v548
-dofile('../mkAddOnsLinks.lua')
-local linkExpaAddOns = linkAddOns.A548
-local linkServerAddOns = linkAddOns.A548Tau
+dofile('../AddOns-Tau-common.lua')
+
 
 
 linkExpaAddOns('_test/tek') [=[
@@ -9,7 +8,7 @@ Ampere: disabled
 addonaddoff: disabled
 linkenlog: disabled
 picoPriority: disabled
-tekChat: disabled
+tekChat: true
 tekErr: true
 tekplayermenu: disabled
 tekPopbar: disabled
@@ -99,7 +98,6 @@ TellMeWhen_Options: true
 
 
 linkExpaAddOns('base') [=[
-Ace3a: true
 Ace3: true
 
 AddonLoader: true
@@ -261,6 +259,7 @@ LoseControlFix: true
 LoseControl: disabled
 GTFO: disabled
 
+GladiatorlosSA: true
 Spy: true
 ]=]
 
@@ -269,9 +268,9 @@ Spy: true
 
 linkExpaAddOns('chat') [=[
 Bubblicious: disabled
-BasicChatMods: disabled
-PhanxChat: disabled
-Chatter: disabled
+BasicChatMods: true
+PhanxChat: true
+Chatter: true
 
 Prat: true
 Prat_HighCPUUsageModules: true
@@ -531,57 +530,6 @@ DBM-WorldEvents: true
 ]=]
 --]]
 
-
-
-
-linkServerAddOns [=[
-
-Blizzard_AchievementUI: true
-Blizzard_ArchaeologyUI: true
-Blizzard_ArenaUI: true
-Blizzard_AuctionUI: true
-Blizzard_AuthChallengeUI: true
-Blizzard_BarbershopUI: true
-Blizzard_BattlefieldMinimap: true
-Blizzard_BindingUI: true
-Blizzard_BlackMarketUI: true
-Blizzard_Calendar: true
-Blizzard_ChallengesUI: true
-Blizzard_ClientSavedVariables: true
-Blizzard_CombatLog: true
-Blizzard_CombatText: true
-Blizzard_CompactRaidFrames: true
-Blizzard_CUFProfiles: true
-Blizzard_DebugTools: true
-Blizzard_EncounterJournal: true
-Blizzard_GlyphUI: true
-Blizzard_GMChatUI: true
-Blizzard_GMSurveyUI: true
-Blizzard_GuildBankUI: true
-Blizzard_GuildControlUI: true
-Blizzard_GuildUI: true
-Blizzard_InspectUI: true
-Blizzard_ItemAlterationUI: true
-Blizzard_ItemSocketingUI: true
-Blizzard_ItemUpgradeUI: true
-Blizzard_LookingForGuildUI: true
-Blizzard_MacroUI: true
-Blizzard_MovePad: true
-Blizzard_PetBattleUI: true
-Blizzard_PetJournal: true
-Blizzard_PVPUI: true
-Blizzard_QuestChoice: true
-Blizzard_RaidUI: true
-Blizzard_ReforgingUI: true
-Blizzard_StoreUI: true
-Blizzard_TalentUI: true
-Blizzard_TimeManager: true
-Blizzard_TokenUI: true
-Blizzard_TradeSkillUI: true
-Blizzard_TrainerUI: true
-Blizzard_VoidStorageUI: true
-
-]=]
 
 
 linkAddOns.commitLinks()
