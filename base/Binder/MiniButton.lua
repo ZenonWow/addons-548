@@ -56,9 +56,6 @@ function MiniButton:OnAddonLoad()
 end
 
 function MiniButton:Update(newSettings)
-	if  newSettings  then  for  k,v  in  pairs(newSettings)  do
-		BinderSettingsDB.minimap[k]= v
-	end end
 	LibDBIcon:Refresh(ADDON_NAME)
 end
 

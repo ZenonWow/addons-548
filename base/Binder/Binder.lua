@@ -4,6 +4,7 @@ local AddonLastUpdated = "02/14/2018"
 --[[ Global Variables
 removed:
 /run  Binder_Settings = nil
+/dump Binder_Options_Frame_MinimapButton_Show
 --]]
 -- minimap button savedVar: BinderSettingsDB.minimap
 --BinderSettingsDB = {}
@@ -97,6 +98,7 @@ function Binder_OnEvent(self, event, addonName)
 		--Binder_MinimapButton_OnLoad();
 		--Minimap_Options_WhenLoaded();
 		Binder_Frame.MiniButton:OnAddonLoad()
+		Binder_Options_Frame_MinimapButton_Show:SetChecked(not BinderSettingsDB.minimap.hide)
 	end		
 end
 
