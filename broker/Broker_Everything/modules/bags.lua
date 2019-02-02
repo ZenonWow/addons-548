@@ -12,8 +12,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Bags" -- L["Bags"]
-local ttName = name.."TT"
-local tt = nil
 local ContainerIDToInventoryID,GetInventoryItemLink = ContainerIDToInventoryID,GetInventoryItemLink
 local GetItemInfo,GetContainerNumSlots,GetContainerNumFreeSlots = GetItemInfo,GetContainerNumSlots,GetContainerNumFreeSlots
 local qualityModeValues = {
@@ -206,13 +204,16 @@ module.onevent = function(self,event,msg)
 	self.obj.text = C(c,txt)
 end
 
-module.ontooltip = function(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
-	local f, total = BagsFreeUsed()
-	local l, c, n
 
+module.onqtip = function(tt)
+	print("Broker_Everything.modules.bags.onqtip()")
+	tt:Clear()
+	tt:SetColumnLayout(3, "LEFT", "RIGHT", "RIGHT")
 	tt:AddHeader(C("dkyellow",L[name]))
 	tt:AddSeparator(1)
+
+	local f, total = BagsFreeUsed()
+	local l, c, n
 
 	l,c = tt:AddLine()
 	tt:SetCell(l,1,C("ltyellow",L["Free slots"] .. " :"))
@@ -259,17 +260,6 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(self)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
-
-	tt = ns.LQT:Acquire(ttName, 3, "LEFT", "RIGHT", "RIGHT")
-	module.ontooltip(tt)
-	ns.createTooltip(self,tt)
-end
-
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,true)
-end
 
 module.onclick = function(self,button)
 	if button == "RightButton" then
@@ -280,7 +270,7 @@ module.onclick = function(self,button)
 		end
 		module.onevent(self)
 	else
-		securecall("ToggleBackpack")
+		ToggleBackpack()
 	end
 end
 

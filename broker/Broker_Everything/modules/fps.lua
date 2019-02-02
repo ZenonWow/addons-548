@@ -10,8 +10,7 @@ graphicsSetsDB = {}
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "FPS" -- L["FPS"]
-local tt,tt2,tt3 = nil,nil,nil
-local ttName, tt2Name, tt3Name = name.."TT", name.."TT2", name.."TT3"
+local tt2,tt3 = nil,nil,nil
 local GetFramerate = GetFramerate
 local _, playerClass = UnitClass("player")
 local _minmax = {[1] = nil,[2] = nil}
@@ -238,11 +237,11 @@ local function fps_color(f)
 	return c
 end
 
-local function fpsTooltip(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+function module.onqtip(tt)
+	if  not tt  or  tt.key ~= module.name  then  return  end
 
-	local l, c, cell
 	tt:Clear()
+	tt:SetColumnLayout(2, "LEFT", "RIGHT")
 	tt:AddHeader(C("dkyellow",L[name]))
 	tt:AddSeparator()
 	tt:AddLine(L["Current"]..":",fps_color(fps)[3])
@@ -251,6 +250,7 @@ local function fpsTooltip(tt)
 	tt:AddLine(L["Max."]..":",fps_color(_minmax[2])[3])
 
 	--[[
+	local l, c, cell
 	tt:AddSeparator(3,0,0,0,0)
 	l,c = tt:AddLine()
 	tt:SetCell(l,1,"",nil,nil,2)
@@ -271,15 +271,13 @@ local function fpsTooltip(tt)
 	end
 end
 
-local function graphicsSetManager(_self)
-	ns.hideTooltip(tt,ttName,true)
+local function graphicsSetManager(display)
+	local tt2, reused = ns.LQT:Acquire(name.."TT2", 1, "LEFT")
+	ns.attachTooltip(module, tt2)
 
-	local l,c
-	tt2 = ns.LQT:Acquire(name.."TT2", 1, "LEFT")
-	ns.createTooltip(_self,tt2)
-	tt2:SetScript('OnEnter', function()
-	end)
 	tt2:Clear()
+	
+	-- tt2:SetScript('OnEnter', function() end)
 
 	tt2:AddHeader(C("ltblue","Graphics set manager"))
 	tt2:AddSeparator()
@@ -287,7 +285,7 @@ local function graphicsSetManager(_self)
 
 	if Broker_EverythingDB.showHints then
 		tt2:AddLine(" ")
-		line, column = tt:AddLine()
+		line, column = tt2:AddLine()
 		tt2:SetCell(line, 1,
 			C("ltblue",L["Click"]).." || "..C("green",L["Use a set"])
 			.."|n"..
@@ -295,8 +293,9 @@ local function graphicsSetManager(_self)
 			.."|n"..
 			C("ltblue",L["Ctrl+Click"]).." || "..C("green",L["Delete a set"])
 			, nil, nil, 1)
-		
 	end
+
+	ns.createTooltip(display,tt2,true)
 end
 
 local function checkSelection(selName)
@@ -324,19 +323,11 @@ end
 local function setSelection(selName,index)
 end
 
-local function graphicsMenuSelection(self,selName)
-	local l,c
-	if tt3==nil or (tt3~=nil and tt3.key~=tt3Name) then
-		tt3 = ns.LQT:Acquire(tt3Name,1,"LEFT")
-	end
-	tt3:SetScript('OnEnter', function()
-		tt3:SetScript('OnLeave', function()
-			ns.hideTooltip(tt2,ttName2,true);
-			ns.hideTooltip(tt3,ttName3,true);
-		end)
-	end)
+local function graphicsMenuSelection(lineFrame,selName)
+	tt3 = ns.LQT:Acquire(name.."TT3", 1, "LEFT")
 	tt3:Clear()
 
+	local l,c
 	for i,v in ipairs(options[selName]) do
 		if v.label~=nil then
 			l,c = tt3:AddLine(v.label)
@@ -346,20 +337,23 @@ local function graphicsMenuSelection(self,selName)
 		end
 	end
 
-	ns.createTooltip(self,tt3)
+	ns.createTooltip(lineFrame,tt3,true)
 	tt3:ClearAllPoints()
 	tt3:SetPoint("LEFT",tt2,"RIGHT",-15,0)
-	tt3:SetPoint("TOP",self,"TOP",0,5)
+	tt3:SetPoint("TOP",lineFrame,"TOP",0,5)
 	tt3:SetFrameLevel(tt2:GetFrameLevel()+3)
 end
 
-local function graphicsMenu(_self)
-	ns.hideTooltip(tt,ttName,true)
+local function graphicsMenu(display)
+	-- ns.hideTooltip(module.tooltip,nil,true)
 
-	local l,c
-	tt2 = ns.LQT:Acquire(name.."TT2", 2, "LEFT", "RIGHT")
+	local tt2, reused = ns.LQT:Acquire(name.."TT2", 2, "LEFT", "RIGHT")
+	ns.attachTooltip(module, tt2)
+	-- module.tooltip = tt2
+	-- tt2:SetScript('OnLeave', function() ns.hideTooltip(tt2, nil) end)
 	tt2:Clear()
 
+	local l,c
 	for i,v in ipairs(tt2_normal) do
 		if v.head~=nil then
 			tt2:AddLine(C("ltblue",v.head))
@@ -372,23 +366,26 @@ local function graphicsMenu(_self)
 			tt2:SetCell(l,1,C("ltyellow",v.label))
 			if v.boolean~=nil then
 				tt2:SetCell(l,2, GetCVar(v.boolean)=="1" and C("green",VIDEO_OPTIONS_ENABLED) or C("red",VIDEO_OPTIONS_DISABLED))
-				tt2:SetLineScript(l,"OnMouseUp",function(self,button) ns.SetCVar(v.boolean,GetCVar(v.boolean)=="1" and "0" or "1") graphicsMenu(_self) end)
+				tt2:SetLineScript(l,"OnMouseUp",function(lineFrame,button) ns.SetCVar(v.boolean,GetCVar(v.boolean)=="1" and "0" or "1") graphicsMenu(display) end)
 			elseif v.option~=nil then
 				tt2:SetCell(l,2,checkSelection(v.option))
-				tt2:SetLineScript(l,"OnEnter",function(__self)
-					graphicsMenuSelection(__self,v.option)
+				tt2:SetLineScript(l,"OnEnter",function(lineFrame)
+					graphicsMenuSelection(lineFrame,v.option)
+					-- Not pragmatic, but serves the purpose:
+					tt2:SetAutoHideDelay(0.001, tt3)
 				end)
-				tt2:SetLineScript(l,"OnLeave", function(__self)
-					ns.hideTooltip(tt3,ttName3);
+				--[[ tt3:SetAutoHideDelay(0.001, tooltip.owner) in ns.createTooltip(lineFrame,tt3,true)
+				tt2:SetLineScript(l,"OnLeave", function(lineFrame)
+					ns.hideTooltip(tt3, nil)
 				end)
+				--]]
 			else
 				tt2:SetCell(l,2,C("gray","?"))
 			end
 		end
 	end
 
-	ns.createTooltip(_self,tt2)
-	tt2:SetScript('OnLeave', function() ns.hideTooltip(tt2,ttName2) end)
+	ns.createTooltip(display,tt2,true)
 end
 
 local function getSettings()
@@ -399,47 +396,37 @@ end
 -- module (BE internal) functions --
 ------------------------------------
 
-module.onupdate = function(self)
+module.onupdate = function(module)
 	fps = floor(GetFramerate())
 	local c = fps_color(fps)
-	local d = self.obj
+	local obj = module.obj
 
 	minmax(fps)
 	--ns.tooltipGraphAddValue(name,fps,graph_maxValues)
 
 	local icon = I(name..c[1])
-	d.iconCoords = icon.coords or {0,1,0,1}
-	d.icon = icon.iconfile
-	d.text = c[3]
+	obj.iconCoords = icon.coords or {0,1,0,1}
+	obj.icon = icon.iconfile
+	obj.text = c[3]
 
-	--if tt then
-	if tt~=nil and tt.key~=nil and tt.key==ttName and tt:IsShown() then
-		fpsTooltip(tt)
-	end
+	module.onqtip(module.tooltip)
 end
 
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(self)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
-
-	if tt2~=nil and tt2.key==tt2Name and tt2:IsShown() then return end
-
-	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "RIGHT")
-	fpsTooltip(tt)
-	ns.createTooltip(self,tt)
+module.onenter = function(display)
+	if  tt2  and  tt2.key == tt2Name  and  tt2:IsShown()  then  return  end
+	ns.defaultOnEnter(module, display)
 end
 
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,true)
-end
+module.mouseOverTooltip = nil
 
-module.onclick = function(self,button)
+module.onclick = function(display,button)
 	if button == "LeftButton" then
-		--graphicsSetManager(self)
+		graphicsSetManager(display)
 	elseif button == "RightButton" then
-		--graphicsMenu(self)
+		graphicsMenu(display)
 	end
 end
 

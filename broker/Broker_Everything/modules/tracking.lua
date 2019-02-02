@@ -82,15 +82,12 @@ end
 -- module (BE internal) functions --
 ------------------------------------
 module.preinit = function()
-	if Broker_EverythingDB[name].hideMinimapButton then
-		ns.hideFrame("MiniMapTracking")
-	end
+	ns.hideFrame("MiniMapTracking", module.modDB.hideMinimapButton)
 end
 
 module.onevent = function(self,event,msg)
 	local numActive, trackActive = updateTracking()
 	local n = L[name]
-	local dataobj = self.obj
 
 	if Broker_EverythingDB[name].displaySelection then
 		if numActive == 0 then 
@@ -103,19 +100,13 @@ module.onevent = function(self,event,msg)
 	end
 
 	if event == "BE_HIDE_TRACKING" then -- custom event on config changed
-		if Broker_EverythingDB[name].hideMinimapButton then
-			ns.hideFrame("MiniMapTracking")
-		else
-			ns.unhideFrame("MiniMapTracking")
-		end
+		ns.hideFrame("MiniMapTracking", module.modDB.hideMinimapButton)
 	end
 
-	dataobj.text = n
+	module.obj.text = n
 end
 
 module.ontooltip = function(tt)
-	if (ns.tooltipChkOnShowModifier(false)) then tt:Hide(); return; end
-
 	local numActive, trackActive = updateTracking()
 	ns.tooltipScaling(tt)
 	tt:AddLine(L[name])
@@ -140,8 +131,18 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onclick = function(self,button)
-	ToggleDropDownMenu(1, nil, MiniMapTrackingDropDown, self, 0, 0)
+module.onclick = function(display, button)
+	ToggleDropDownMenu(1, nil, MiniMapTrackingDropDown, display, 0, 0)
+	if  not MiniMapTrackingDropDown:IsShown()  then
+		-- ns.defaultOnEnter(module, display)
+		local OnEnter = display:GetScript('OnEnter')
+		assert(OnEnter, "BE.modules.tracking.onclick():  Broker display did not set OnEnter script.")
+		OnEnter(display)
+	elseif module.tooltip then
+		-- ns.hideTooltip(module.tooltip, nil, true)
+		module.tooltip:Hide()
+		module.tooltip = nil
+	end
 end
 
 

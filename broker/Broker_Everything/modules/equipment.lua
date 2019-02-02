@@ -10,8 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Equipment" -- L["Equipment"]
-local ttName = name.."TT"
-local tt = nil
 local equipPending = nil
 
 
@@ -44,14 +42,13 @@ local module = {
 --------------------------
 -- some local functions --
 --------------------------
-ns.toggleEquipment = function(eName)
+function ns.toggleEquipment(eName)
 	if InCombatLockdown() then 
 		equipPending = eName
 		module.onevent("BE_DUMMY_EVENT")
 	else
-		securecall("UseEquipmentSet",eName);
+		UseEquipmentSet(eName);
 	end
-	ns.hideTooltip(tt,ttName,true);
 end
 
 
@@ -72,36 +69,56 @@ module.onevent = function(self,event,...)
 		if unit ~= "player" then return end
 	end
 
+	local equipSet
 	local dataobj = self.obj
 
 	local numEquipSets = GetNumEquipmentSets()
-
-	if numEquipSets >= 1 then 
-		for i = 1, GetNumEquipmentSets() do 
-			local equipName, iconFile, _, isEquipped, _, _, _, numMissing = GetEquipmentSetInfo(i)
-			local pending = (equipPending~=nil and C("orange",equipPending)) or false
-			if isEquipped then 
-				dataobj.iconCoords = {0.05,0.95,0.05,0.95}
-				dataobj.icon = iconFile
-				dataobj.text = pending~=false and pending or equipName
-				return
-			else 
-				dataobj.icon = I(name).iconfile
-				dataobj.text = pending~=false and pending or C("red",L["Unknown Set"])
-			end
+	for i = 1, numEquipSets do 
+		local equipName, iconFile, _, isEquipped, _, _, _, numMissing = GetEquipmentSetInfo(i)
+		if isEquipped then
+			equipSet = { equipName, iconFile }
+			module.modDB.lastEquipSet = equipSet
+			break
 		end
-	else
+	end
+
+	local lastEquipSet = module.modDB.lastEquipSet
+
+	if equipPending then
+		dataobj.text =  equipPending  and  L["Pending:"].." "..C("orange",equipPending)
+	elseif equipSet then
+		dataobj.text = equipSet[1]
+	elseif lastEquipSet then
+		dataobj.text = L["Was:"].." "..C("red",lastEquipSet[1])
+		dataobj.text = L["Changed:"].." "..C("red",lastEquipSet[1])
+		dataobj.text = C("red",lastEquipSet[1]).." "..L["(changed)"]
+
+	elseif 0 == numEquipSets then
 		dataobj.text = L["No sets found"]
+	else
+		dataobj.text = C("red",L["Unknown Set"])
+	end
+	
+	if lastEquipSet then
+		dataobj.iconCoords = {0.05,0.95,0.05,0.95}
+		dataobj.icon = lastEquipSet[2]
+	else
+		local icon = I(name)
+		dataobj.iconCoords = icon.coords or {0,1,0,1}
+		dataobj.icon = icon.iconfile
 	end
 end
 
-module.ontooltip = function(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+--[[ To test: before changing some gear
+/run Broker_EverythingDB.equipment.lastEquipSet = nil
+--]]
 
-	local line, column
+module.onqtip = function(tt)
 	tt:Clear()
+	tt:SetColumnLayout(2, "LEFT", "RIGHT")
 	tt:AddHeader(C("dkyellow",L[name]))
 	tt:AddSeparator()
+
 	if not CanUseEquipmentSets() then
 		tt:AddLine(L["Equipment manager is not enabled"])
 		tt:AddLine(L["Enable it from the character pane"])
@@ -110,10 +127,11 @@ module.ontooltip = function(tt)
 
 	local numEquipSets = GetNumEquipmentSets()
 
+	local line, column
 	if numEquipSets < 1 then
 		tt:AddLine(L["No equipment sets found"])
 		line, column = tt:AddLine(C("copper",L["Click"]).." || "..C("green",L["Open equipment manager"]))
-		tt:SetLineScript(line, "OnMouseUp", function(self) securecall("ToggleCharacter","PaperDollFrame") end)
+		tt:SetLineScript(line, "OnMouseUp", function(self) ToggleCharacter("PaperDollFrame") end)
 		tt:SetLineScript(line, "OnEnter", function(self) tt:SetLineColor(line, 1,192/255, 90/255, 0.3) end )
 		tt:SetLineScript(line, "OnLeave", function(self) tt:SetLineColor(line, 0,0,0,0) end)
 
@@ -138,6 +156,7 @@ module.ontooltip = function(tt)
 				dialog.data = eName				
 			else
 				ns.toggleEquipment(eName)
+				ns.hideTooltip(tt, nil, true)
 			end 
 		end)
 		tt:SetLineScript(line, "OnEnter", function(self) tt:SetLineColor(line, 1,192/255, 90/255, 0.3) end )
@@ -163,16 +182,24 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(self)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
-	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "RIGHT")
-	module.ontooltip(tt)
-	ns.createTooltip(self,tt)
+module.mouseOverTooltip = true
+
+
+function ns.OpenCharacterTab(tabNum)
+	-- idea from: Broker_Equipment addon
+	if  not PaperDollFrame:IsVisible()  then  return  end
+
+	if  not CharacterFrame.Expanded  then  CharacterFrame_Expand()  end
+	--_G['PaperDollSidebarTab'..tabNum]:Click()
+	PaperDollFrame_SetSidebar(_G['PaperDollSidebarTab'..tabNum], tabNum)
 end
 
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,false,true)
+module.onclick = function(self,button)
+	if button=="LeftButton" then
+		ToggleCharacter("PaperDollFrame")
+		ns.OpenCharacterTab(3)
+	end
 end
 
 

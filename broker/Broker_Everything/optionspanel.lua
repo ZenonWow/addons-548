@@ -59,15 +59,15 @@ ns.OP.createBrokerPanel = function(panel)
 	panel.title, panel.subText = panel:MakeTitleTextAndSubText(
 		"Broker_Everything - Broker", L["Select the listed broker to enable/disable. You must Reload UI for any changes to apply."])
 
-	local mods2Locale = {}
-	for k, v in pairs(ns.modules) do mods2Locale[L[k]] = k end
+	local modLabel2Name = {}
+	for modName, modData in pairs(ns.modules) do  modLabel2Name[ L[modName] ] = modName  end
 
-	-- for k, v in ns.pairsByKeys(ns.modules) do
-	for K, V in ns.pairsByKeys(mods2Locale) do
-		local k, v = V, ns.modules[V]
-		if not v.noBroker then
-			panel[k] = makeToggle(k, L[k], {L[k],ns.modules[k].desc})
-			table.insert(controls, panel[k])
+	-- for modName, modData in ns.pairsByKeys(ns.modules) do
+	for modLabel, modName in ns.pairsByKeys(modLabel2Name) do
+		local modData = ns.modules[modName]
+		if not modData.noBroker then
+			panel[modName] = makeToggle(modName, modLabel, {modLabel,modData.desc})
+			table.insert(controls, panel[modName])
 		end
 	end
 
@@ -81,8 +81,8 @@ ns.OP.createBrokerPanel = function(panel)
 		'name', L["Select none"],
 		'description', L["Remove all selections from modules"],
 		'func', function()
-			for i,v in pairs(ns.modules) do
-				Broker_EverythingDB[i].enabled = false
+			for modName,modData in pairs(ns.modules) do
+				Broker_EverythingDB[modName].enabled = false
 			end
 			InterfaceOptionsFrame_OpenToCategory(ns.OP.brokerPanel);
 		end
@@ -92,22 +92,27 @@ ns.OP.createBrokerPanel = function(panel)
 		'name', L["Select all"],
 		'description', L["Select all modules"],
 		'func', function()
-			for i,v in pairs(ns.modules) do
-				Broker_EverythingDB[i].enabled = true
+			for modName,modData in pairs(ns.modules) do
+				Broker_EverythingDB[modName].enabled = true
 			end
 			InterfaceOptionsFrame_OpenToCategory(ns.OP.brokerPanel);
 		end
 	)
 
-	local c,fromTop,pos,last = 1,-10,{0,200,400},0
-	
+	-- local c,fromTop,pos,last = 1,-10,{0,200,400},0
+	local c,r,fromLeft,fromTop,rows = 1,1,0,-10,math.floor( (#controls+2)/3 )
+	-- local r,fromTop,c,fromLeft,rows = 1,-10,1,0,math.floor( (#controls+2)/3 )
 	for i, frame in ipairs(controls) do
-		frame:SetPoint("TOPLEFT",panel.subText,"BOTTOMLEFT",pos[c],fromTop)
-		c, last = c+1, fromTop
-		if c==4 then c, fromTop = 1, fromTop - 25 end
+		frame:SetPoint("TOPLEFT",panel.subText,"BOTTOMLEFT",fromLeft,fromTop)
+		r, fromTop = r+1, fromTop-25
+		if  r > rows  then
+			r, fromTop, c, fromLeft = 1, -10, c+1, fromLeft+200
+		end
+		-- c, last = c+1, fromTop
+		-- if c==4 then c, fromTop = 1, fromTop - 25 end
 	end
 
-	last = last - 40
+	local last = -rows*25 - 40
 	panel.reload:SetPoint(    "TOPLEFT",panel.subText,"BOTTOMLEFT",0,last)
 	panel.selectall:SetPoint( "TOPLEFT",panel.subText,"BOTTOMLEFT",200,last)
 	panel.selectnone:SetPoint("TOPLEFT",panel.subText,"BOTTOMLEFT",400,last)
@@ -118,28 +123,33 @@ end
 -- ----------------------------------------------------- --
 -- Option panel 2 - general settings and module settings --
 -- ----------------------------------------------------- --
+local function sendEvent(objData, modName)
+	if objData.event == true then  objData.event = "BE_DUMMY_EVENT"  end
+	local modData = ns.modules[modName]
+	modData:onevent(objData.event,nil)
+end
 
 ns.OP.createConfigPanel = function(panel)
 	local controls = {}	
 	local backdrop = { edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", tile = false, tileSize = 0, edgeSize = 16, insets = { left = 0, right = 0, top = 0, bottom = 0 } };
 
-    local function makeCheck(name, desc, module, option)
+    local function makeCheck(name, desc, modData, option)
         return panel:MakeToggle(
             "name", name, 
             "description", desc,
             "default", false, 
             "getFunc", function() 
-				if module == "nil" or module == nil then
+				if modData == "nil" or modData == nil then
 					return Broker_EverythingDB[option]
 				else
-					return Broker_EverythingDB[module][option]
+					return Broker_EverythingDB[modData][option]
 				end
 			end, 
             "setFunc", function(value)
-				if module == "nil" or module == nil then
+				if modData == "nil" or modData == nil then
 					Broker_EverythingDB[option] = value
 				else
-					Broker_EverythingDB[module][option] = value
+					Broker_EverythingDB[modData][option] = value
 				end
 			end
         )
@@ -212,7 +222,7 @@ ns.OP.createConfigPanel = function(panel)
 	panel.reset = panel:MakeButton(
 		'name', L["Reset"],
 		'description', L["Resets the Broker_Everything Defaults and Reloads the UI."],
-		'func', function() Broker_EverythingDB.reset = true ReloadUI() end
+		'func', function()  Broker_EverythingDB = { global = Broker_EverythingDB.global } ; ReloadUI()  end
 	)
 	panel.reset:SetPoint(			"BOTTOMRIGHT", panel, "TOPRIGHT", 0, 3)
 
@@ -248,10 +258,14 @@ ns.OP.createConfigPanel = function(panel)
 			"default", false, 
 			"getFunc", function() return Broker_EverythingDB.global end, 
 			"setFunc", function(value) 
-				if value == true and Broker_EverythingGlobalDB["Clock"] == nil then
-					Broker_EverythingGlobalDB = Broker_EverythingDB
+				local prevDB = Broker_EverythingDB
+				Broker_EverythingDB = value and Broker_EverythingGlobalDB or Broker_EverythingCharDB
+				-- If the other db is empty then take the current.
+				if  Broker_EverythingDB["Clock"] == nil  then
+					-- No deep copy effort.
+					Broker_EverythingDB = prevDB
 				end
-				Broker_EverythingGlobalDB.global = value
+				Broker_EverythingDB.global = value
 			end
 		)
 
@@ -292,10 +306,7 @@ ns.OP.createConfigPanel = function(panel)
 		'default',		60,
 		'setFunc',		function(value)
 			Broker_EverythingDB.maxTooltipHeight = ceil(value/10)/10
-			--if objData.event then
-			--	if objData.event==true then objData.event = "BE_DUMMY_EVENT" end
-			--	ns.modules[modName].onevent({},objData.event,nil)
-			--end
+			-- if objData.event then  sendEvent(objData, modName)  end
 		end,
 		'getFunc',			function()
 			if (Broker_EverythingDB.maxTooltipHeight) then
@@ -316,23 +327,21 @@ ns.OP.createConfigPanel = function(panel)
 
 
 	-- tooltip options elements
-	local values = {NONE = L["Default (no modifier)"]};
-	for i,v in pairs(ns.tooltipModifiers) do values[i] = v.l; end
 	panel.ttModifierKey1 = panel:MakeDropDown(
 		'name',			"Show tooltip", --L["Show tooltip"],
 		'description',	L["Hold modifier key to display tooltip"],
-		'values',		values,
+		'values',		ns.tooltipModifierText,
 		'default',		"NONE",
 		'current',		Broker_EverythingDB.ttModifierKey1 or "NONE",
-		'setFunc',		function(value) Broker_EverythingDB.ttModifierKey1 = value end
+		'setFunc',		function(value)  Broker_EverythingDB.ttModifierKey1 = value  end
 	);
 	panel.ttModifierKey2 = panel:MakeDropDown(
 		'name',			"Allow mouseover", --L["Allow mouseover"],
 		'description',	L["Hold modifier key to use mouseover in tooltip"],
-		'values',		values,
+		'values',		ns.tooltipModifierText,
 		'default',		"NONE",
 		'current',		Broker_EverythingDB.ttModifierKey2 or "NONE",
-		'setFunc',		function(value) Broker_EverythingDB.ttModifierKey2 = value end
+		'setFunc',		function(value)  Broker_EverythingDB.ttModifierKey2 = value  end
 	);
 
 
@@ -388,7 +397,6 @@ ns.OP.createConfigPanel = function(panel)
 	local rowBackdrop = { bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], insets = { left = 0, right = 0, top = 0, bottom = 0 } }
 	local row = nil
 	local even = false
-	local mods2Locale = {}
 	local default_points = { edgeSelf = "TOPLEFT", edgeSibling = "TOPLEFT", x = 200, y = 0 }
 	local function makeDot(sibling,first_in_row)
 		local dot = CreateFrame("frame") dot:SetWidth(1) dot:SetHeight(1)
@@ -397,12 +405,11 @@ ns.OP.createConfigPanel = function(panel)
 		return dot, sibling, dot
 	end
 
-	for k, v in pairs(ns.modules) do mods2Locale[L[k]] = k end
+	local modLabel2Name = {}
+	for modName, modData in pairs(ns.modules) do  modLabel2Name[ L[modName] ] = modName  end
 
-	for K, V in ns.pairsByKeys(mods2Locale) do
-		local modName, modData = V, ns.modules[V]
-
-		-- for modName, modData in ns.pairsByKeys(ns.modules) do
+	for modLabel, modName in ns.pairsByKeys(modLabel2Name) do
+		local modData = ns.modules[modName]
 
 		if modData.config then
 			local name = "mod_"..modName.."Title"
@@ -449,10 +456,7 @@ ns.OP.createConfigPanel = function(panel)
 							'getFunc',		function() return Broker_EverythingDB[modName][objData.name] end,
 							'setFunc',		function(value)
 								Broker_EverythingDB[modName][objData.name] = value
-								if objData.event then
-									if objData.event==true then objData.event = "BE_DUMMY_EVENT" end
-									ns.modules[modName].onevent({},objData.event,nil)
-								end
+								if objData.event then  sendEvent(objData, modName)  end
 							end
 						)
 						obj:SetParent(row)
@@ -486,10 +490,7 @@ ns.OP.createConfigPanel = function(panel)
 							'default',			objData.default,
 							'setFunc',			function(value)
 								Broker_EverythingDB[modName][objData.name] = ("%.0f"):format(value)
-								if objData.event then
-									if objData.event==true then objData.event = "BE_DUMMY_EVENT" end
-									ns.modules[modName].onevent({},objData.event,nil)
-								end
+								if objData.event then  sendEvent(objData, modName)  end
 							end,
 							'getFunc',			function() return Broker_EverythingDB[modName][objData.name] or 0 end,
 							'currentTextFunc',	function(value) return ("%.0f"):format(value~=nil and tonumber(value) or 0) end
@@ -514,10 +515,7 @@ ns.OP.createConfigPanel = function(panel)
 						if not objData.setFunc then
 							objData.setFunc = function(value)
 								Broker_EverythingDB[modName][objData.name] = value
-								if objData.event then
-									if objData.event==true then objData.event = "BE_DUMMY_EVENT" end
-									ns.modules[modName].onevent({},objData.event,nil)
-								end
+								if objData.event then  sendEvent(objData, modName)  end
 							end
 						end
 						local obj = panel:MakeDropDown(
@@ -584,9 +582,7 @@ ns.OP.createConfigPanel = function(panel)
 							setFunc = objData.setFunc or function(value)
 								if objData.numeric==true then value = tonumber(value or 0) else value = tostring(value or "") end
 								Broker_EverythingDB[modName][objData.name] = value
-								if objData.event==true then
-									ns.modules[modName].onevent({},"BE_DUMMY_EVENT")
-								end
+								if objData.event then  sendEvent(objData, modName)  end
 							end,
 						})
 						obj:SetParent(row)

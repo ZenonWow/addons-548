@@ -10,14 +10,10 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Guild" -- L["Guild"]
-local ttName = name.."TT"
-local tt, tt_parent = nil
 local tt2 = nil
-local ttColumns = 5
-local ttColumns_preInit = ttColumns
+local ttColumns_preInit = 5
 local guildUpdateFreq = 300
 local displayProfessions = false
-local displayOfficerNotes = false
 local off, on = gsub(ERR_FRIEND_OFFLINE_S,"%%s",""), gsub(ERR_FRIEND_ONLINE_SS,"%|Hplayer:%%s%|h%[%%s%]%|h","")
 
 local menu = {
@@ -31,7 +27,7 @@ local menu = {
 	{name="showApplicants",		locale="Show applicants", event=true}
 }
 
-if ns.build>=60000000 then
+if ns.tocversion >= 60000 then
 	menu = {
 		{name="showMOTD",			locale="Show Guild MotD"},
 		--{name="showXP",			locale="Show Guild XP/Rep"},
@@ -134,7 +130,7 @@ local module = {
 				name = "showXP",
 				label = L["Show Guild XP"],
 				desc = L["Enable/Disable the display of Guild XP in the Guild data broker tooltip."],
-				disabled = (ns.build>=60000000)
+				disabled = (ns.tocversion >= 60000)
 			},
 			{
 				type = "check",
@@ -142,7 +138,7 @@ local module = {
 				label = L["Show guild lvl&xp in broker"],
 				desc = L["Display guild level and xp (percent) in broker button"],
 				event = true,
-				disabled = (ns.build>=60000000)
+				disabled = (ns.tocversion >= 60000)
 			},
 		}
 	}
@@ -153,10 +149,9 @@ local module = {
 -- some local functions --
 --------------------------
 local function makeMenu(self)
-	ns.hideTooltip(tt,ttName,true)
 	--[[
 	tt2 = ns.LQT:Acquire(name.."TT2", 1, "LEFT")
-	ns.createTooltip(_self,tt2)
+	ns.createTooltip(_self, tt2)
 	tt2:SetScript('OnLeave', ns.hideTooltip)
 	tt2:Clear()
 
@@ -204,9 +199,16 @@ local function GetGuildChallengesState()
 	return result
 end
 
-local function guildTooltip()
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+function module.onqtip(tt)
+	if not tt then  return  end
+
+	local displayOfficerNotes = CanViewOfficerNote()
+	local ttColumns = ttColumns_preInit
+	if displayOfficerNotes then ttColumns = ttColumns + 1 end
+	if Broker_EverythingDB[name].showProfessions then ttColumns = ttColumns + 2 end
+
 	tt:Clear()
+	tt:SetColumnLayout(ttColumns,"LEFT", "LEFT", "CENTER", "LEFT", "LEFT", "LEFT", "LEFT")
 
 	if not IsInGuild() then
 		tt:AddHeader(L[name])
@@ -218,7 +220,7 @@ local function guildTooltip()
 
 	local currentXP, nextLevelXP, dailyXP, maxDailyXP, unitWeeklyXP, unitTotalXP, maxXP, line, column, factionStandingtext, guildName, guildLevel, gMOTD
 	
-	if not (ns.build>=60000000) then
+	if not (ns.tocversion >= 60000) then
 		currentXP, nextLevelXP, dailyXP, maxDailyXP, unitWeeklyXP, unitTotalXP = UnitGetGuildXP("player");
 		maxXP = currentXP + nextLevelXP
 	end
@@ -231,7 +233,7 @@ local function guildTooltip()
 	gMOTD = GetGuildRosterMOTD()
 
 	line, column = tt:AddHeader()
-	if ns.build>=60000000 then
+	if ns.tocversion >= 60000 then
 		tt:SetCell(line,1,C("dkyellow",L[name]) .. "  " .. C("green",ns.scm(guildName)),nil,nil,ttColumns)
 	else
 		tt:SetCell(line,1,C("dkyellow",L[name]) .. "  " .. C("green",("%s / Lvl: %d / XP: %.2f%%"):format(ns.scm(guildName) or "?",guildLevel or "?",(currentXP / (maxXP / 100) ))),nil,nil,ttColumns)
@@ -249,7 +251,7 @@ local function guildTooltip()
 		tt:SetCell(line, 2, C("ltgreen",ns.scm(gMOTD,true)), nil, nil, ttColumns-1)
 	end
 
-	if not (ns.build>=60000000) and Broker_EverythingDB[name].showXP then
+	if not (ns.tocversion >= 60000) and Broker_EverythingDB[name].showXP then
 		line, column = tt:AddLine()
 		tt:SetCell(line, 1, ("%s: "):format(C("ltblue",L["XP"])))
 
@@ -520,7 +522,7 @@ module.onevent = function(self,event,msg)
 
 		local currentXP, nextLevelXP, dailyXP, maxDailyXP, unitWeeklyXP, unitTotalXP, maxXP, guildLevel
 
-		if not (ns.build>=60000000) then
+		if not (ns.tocversion >= 60000) then
 			currentXP, nextLevelXP, dailyXP, maxDailyXP, unitWeeklyXP, unitTotalXP = UnitGetGuildXP("player");
 			maxXP = currentXP + nextLevelXP
 			guildLevel = GetGuildLevel()
@@ -534,7 +536,7 @@ module.onevent = function(self,event,msg)
 
 		txt = txt .. C("green",membersOnline) .. "/" .. C("green",totalGuildMembers)
 
-		if not (ns.build>=60000000) and Broker_EverythingDB[name].showLvlXPbroker and guildLevel<25 then
+		if not (ns.tocversion >= 60000) and Broker_EverythingDB[name].showLvlXPbroker and guildLevel<25 then
 			txt = txt .. " " .. C("green",GetGuildLevel()) .. "/" .. C("green",("%.2f%%"):format( currentXP/(maxXP/100) ))
 		end
 		dataobj.text =  txt
@@ -549,16 +551,14 @@ module.onevent = function(self,event,msg)
 		--end
 	end
 
-	if tt~=nil and tt.key~=nil and tt.key==name.."TT" and tt:IsShown() then
-		guildTooltip()
-	end
+	module.onqtip(module.tooltip)
 end
 
 module.onupdate = function(self)
 	if IsInGuild() then 
 		RequestGuildApplicantsList()
 		GuildRoster()
-		if not (ns.build>=60000000) then
+		if not (ns.tocversion >= 60000) then
 			QueryGuildXP()
 		end
 		CheckWhoIs()
@@ -568,29 +568,19 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(self)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
-	displayOfficerNotes = CanViewOfficerNote()
-	ttColumns = ttColumns_preInit
-	if displayOfficerNotes then ttColumns = ttColumns + 1 end
-	if Broker_EverythingDB[name].showProfessions then ttColumns = ttColumns + 2 end
-
-	tt = ns.LQT:Acquire(ttName, ttColumns,"LEFT", "LEFT", "CENTER", "LEFT", "LEFT", "LEFT", "LEFT")
-	ns.createTooltip(self,tt)
-
-	guildTooltip(self)
-end
-
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,false,true)
-end
+module.mouseOverTooltip = true
 
 module.onclick = function(self,button)
 	if button == "RightButton" then 
-		makeMenu(self)
+		if ns.EasyMenu.HideMenu() then
+			ns.defaultOnEnter(module, display)
+		else
+			ns.hideTooltip(module.tooltip, nil, true)
+			makeMenu(self)
+		end
 	elseif GUILockDown == nil then 
-		securecall("ToggleGuildFrame")
+		ToggleGuildFrame()
 	elseif GUILockDown == 1 then 
 		return 
 	end

@@ -104,8 +104,6 @@ module.onupdate = function(self)
 end
 
 module.ontooltip = function(tt)
-	if (ns.tooltipChkOnShowModifier(false)) then tt:Hide(); return; end
-
 	ns.tooltipScaling(tt)
 	tt:AddLine(L[name])
 	tt:AddLine(" ")

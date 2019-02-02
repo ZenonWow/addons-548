@@ -16,12 +16,11 @@ local _
 -----------------------------------------------------------
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
--- local name0 = "GPS / Location / ZoneText" -- L["GPS / Location / ZoneText"]
-local name0 = "Location / Coordinates" -- L["GPS / Location / ZoneText"]
-local name1 = "Location - Zone"    -- L["Location"]
-local name2 = "Location - Coordinates" -- L["GPS"]
--- local name3 = "ZoneText" -- L["ZoneText"]
-local gpsTTname, teleportTTname = "LocationTT", "TeleportTT"
+local name0 = "Location/Coordinates" -- L["Location/Coordinates"]
+local name1 = "Location-Zone"        -- L["Location-Zone"]
+local name2 = "Location-Coordinates" -- L["Location-Coordinates"]
+local locationTTkey = "Location"
+local teleportTTkey = "Teleport"
 --[[
 local tt5positions = {
 	["LEFT"]   = {edgeSelf = "RIGHT",  edgeParent = "LEFT",   x = -2, y =  0},
@@ -330,17 +329,13 @@ end
 --------------------------------
 
 -- shared tooltip for modules Location, GPS and ZoneText
-local function locationTooltip(gpsTT, module)
-	local line, column
+function locationTooltip(tt, module)
+	tt:Clear()
+	tt:SetColumnLayout(3, "LEFT", "RIGHT", "RIGHT")
+	tt:AddHeader( C("dkyellow", module.label) )
+	tt:AddSeparator()
 
 	if buttonFrame then buttonFrame:ClearAllPoints() buttonFrame:Hide() end
-
-	gpsTT:Clear()
-
-	gpsTT:AddHeader( C("dkyellow", module.label) )
-
-	gpsTT:AddSeparator()
-
 	-- gpsLoc:refresh()
 
 	local lst = {
@@ -350,49 +345,59 @@ local function locationTooltip(gpsTT, module)
 		{C("ltyellow",L["Co-ordinates"] .. ":"),position() or C(gpsLoc.posColor,gpsLoc.pos)}
 	}
 
+	local line, column
 	for _, d in pairs(lst) do
-		line, column = gpsTT:AddLine()
-		gpsTT:SetCell(line,1,d[1],nil,nil,2)
-		gpsTT:SetCell(line,3,d[2],nil,nil,1)
+		line, column = tt:AddLine()
+		tt:SetCell(line,1,d[1],nil,nil,2)
+		tt:SetCell(line,3,d[2],nil,nil,1)
 	end
 
 	if gpsLoc.posColor then
-		line,column = gpsTT:AddLine()
-		gpsTT:SetCell(line,1,C(gpsLoc.posColor,gpsLoc.posInfo),nil,"CENTER",3)
+		line,column = tt:AddLine()
+		tt:SetCell(line,1,C(gpsLoc.posColor,gpsLoc.posInfo),nil,"CENTER",3)
 	end
 
-	gpsTT:AddSeparator()
+	tt:AddSeparator()
 
-	line, column = gpsTT:AddLine()
-	gpsTT:SetCell(line,1,C("ltyellow",L["Inn"]..":"),nil,nil,1)
-	gpsTT:SetCell(line,2,GetBindLocation(),nil,nil,2)
+	line, column = tt:AddLine()
+	tt:SetCell(line,1,C("ltyellow",L["Inn"]..":"),nil,nil,1)
+	tt:SetCell(line,2,GetBindLocation(),nil,nil,2)
 
 	--[=[
 	local item = chkInventory(item_replacements)
 	if type(item)=="string" then
-		gpsTT:SetLineScript(line,"OnEnter",function(self)
+		tt:SetLineScript(line,"OnEnter",function(self)
 			--buttonHandler(self,"item",item)
 			ns.secureButton(self,{ {typeName="type", typeValue="item", attrName="item", attrValue=item} }, name.."_Inn")
-			tinsert(gpsTT.secureButtons, name.."_Inn")
+			tinsert(tt.secureButtons, name.."_Inn")
 		end)
 	end
 	--]=]
 
 	if Broker_EverythingDB.showHints then
-		gpsTT:AddSeparator(3,0,0,0,0)
-		line, column = gpsTT:AddLine()
-		gpsTT:SetCell(line, 1, C("copper",L["Left-click"]).." || "..C("green",L["Open transport menu"]), nil, nil, 3)
-		line, column = gpsTT:AddLine()
-		gpsTT:SetCell(line, 1, C("copper",L["Right-click"]).." || "..C("green",L["Open World map"]), nil, nil, 3)
+		tt:AddSeparator(3,0,0,0,0)
+		line, column = tt:AddLine()
+		tt:SetCell(line, 1, C("copper",L["Left-click"]).." || "..C("green",L["Open transport menu"]), nil, nil, 3)
+		line, column = tt:AddLine()
+		tt:SetCell(line, 1, C("copper",L["Right-click"]).." || "..C("green",L["Open World map"]), nil, nil, 3)
 	end
 end
 
 
 local function teleportTooltip(teleTT)
+	local shortMenu = Broker_EverythingDB[name1].shortMenu
+	local ttColumns = shortMenu  and 4  or 1
+	teleTT:Clear()
+	teleTT:SetColumnLayout(ttColumns, "LEFT","LEFT","LEFT","LEFT")
+
+	-- title
+	if not shortMenu then
+		teleTT:AddHeader(C("dkyellow","Choose your transport"))
+	end
+
 	local pts,ipts,tls,itls = {},{},{},{}
 	local line, column,cellcount = nil,nil,5
 	local inv, inv_c = chkInventory()
-	local shortMenu = Broker_EverythingDB[name1].shortMenu
 	teleTT.secureButtons = {}
 
 	local function add_title(title)
@@ -423,13 +428,6 @@ local function teleportTooltip(teleTT)
 		else
 			add_line(v,t)
 		end
-	end
-
-	teleTT:Clear()
-
-	-- title
-	if not shortMenu then
-		teleTT:AddHeader(C("dkyellow","Choose your transport"))
 	end
 
 	local counter = 0
@@ -479,76 +477,139 @@ end
 
 
 
-local gpsTT, teleportTT
+-----------------------
+-- tooltip show/hide --
+-----------------------
 
-local function locationShow(button, module)
+local locationTT
+local teleportTT
+
+-- module1.mouseOverTooltip = nil
+-- module2.mouseOverTooltip = nil
+
+local function locationShow(module, display)
 	module:refresh()
-	if  ns.LQT:IsAcquired(teleportTTname)  then  return  end
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
-	gpsTT = ns.LQT:Acquire(gpsTTname, 3, "LEFT", "RIGHT", "RIGHT")
-	locationTooltip(gpsTT, module)
-	ns.createTooltip(button,gpsTT,true,true)
+	if  module.tooltip == teleportTT  then  return  end
+	-- ns.defaultOnEnter(module, display)
+	if  ns.tooltipChkOnShowModifier()  then  return  end
+	local tooltip, reused = ns.LQT:Acquire(locationTTkey)
+	ns.attachTooltip(module, tooltip)
+	locationTooltip(tooltip, module)
+	ns.createTooltip(display, tooltip, module.mouseOverTooltip)
+	locationTT = tooltip
 end
+local function locationHide(module)
+	if  module.tooltip ~= locationTT  then  return  end
 
-local function locationHide(onClick)
-	if  ns.LQT:IsAcquired(gpsTTname)  and  ns.hideTooltip(gpsTT,gpsTTname,onClick,not onClick)  then
-		gpsTT = nil
+	locationTT = nil
+	return ns.hideTooltip(module.tooltip, locationTTkey, true)
+end
+--[[
+local function locationShow(module, display)
+	if (ns.tooltipChkOnShowModifier()) then return; end
+	locationTT = ns.LQT:Acquire(locationTTkey, 3, "LEFT", "RIGHT", "RIGHT")
+	locationTooltip(locationTT, module)
+	ns.createTooltip(display, locationTT, true)
+end
+local function locationHide()
+	if  ns.hideTooltip(teleportTTns.LQT.activeTooltips[locationTTkey],nil,true)  then
+		locationTT = nil
 		return true
 	end
 end
+--]]
 
 
-local function teleportShow(button)
-	-- if (InCombatLockdown()) then return; end
-	if  Broker_EverythingDB[name1].shortMenu  then
-		teleportTT = ns.LQT:Acquire(teleportTTname, 4, "LEFT","LEFT","LEFT","LEFT")
-	else
-		teleportTT = ns.LQT:Acquire(teleportTTname, 1, "LEFT")
-	end
-	teleportTooltip(teleportTT)
-	teleportTT.stayOpen = true
-	teleportTT:SetAutoHideDelay(3, button)
-	ns.createTooltip(button,teleportTT,true,true)
+local function teleportShow(module, display)
+	-- if InCombatLockdown() then  return  end
+	local tooltip, reused = ns.LQT:Acquire(teleportTTkey)
+	ns.attachTooltip(module, tooltip)
+	teleportTooltip(tooltip)
+	ns.createTooltip(display, tooltip, true)
+	ns.setStayOpen(tooltip, true, 3)
+	teleportTT = tooltip
 end
 
-local function teleportHide()
-	if  ns.LQT:IsAcquired(teleportTTname)  and  ns.hideTooltip(teleportTT,teleportTTname,true)  then
-		teleportTT = nil
-		return true
-  end
+--[[
+local function teleportHide(module)
+	if  module.tooltip ~= teleportTT  then  return  end
+	teleportTT = nil
+	return ns.hideTooltip(module.tooltip, teleportTTkey, true)
 end
+--]]
 
-
-local function brokerOnClick(button, mouseButton, module)
+local function brokerOnClick(display, button, module)
 	module:refresh()
-	if mouseButton == "RightButton" then
+	if button == "LeftButton" then
+		local ttKey = module.tooltip  and  module.tooltip.key
+		-- ns.attachTooltip() now hides the previous tooltip.
+		-- ns.hideTooltip(module.tooltip, nil, true)
+		if  ttKey ~= teleportTTkey  then
+			teleportShow(module, display)
+		else
+			locationShow(module, display)
+		end
+
+	elseif button == "RightButton" then
 		-- ToggleFrame(WorldMapFrame)
 		-- Open settings.
 		ns.commands.options.func()
-	elseif mouseButton == "LeftButton" then
-		-- Enter -> locationShow
-		if  locationHide(true)  then
-			-- Click 1 -> teleportShow
-			teleportShow(button)
-		elseif  teleportHide()  then
-			-- Click 2 -> locationShow 
-			locationShow(button, module)
-		end
 	end
 end
+
+--[[
+local function brokerOnClick(display, button, module)
+	module:refresh()
+	if button == "LeftButton" then
+		if  teleportHide(module)  then
+			-- Click 2 -> locationShow 
+			locationShow(module, display)
+		else
+			-- Enter -> locationShow
+			locationHide(module)
+			-- Click 1 -> teleportShow
+			teleportShow(module, display)
+		end
+
+	elseif button == "RightButton" then
+		-- ToggleFrame(WorldMapFrame)
+		-- Open settings.
+		ns.commands.options.func()
+	end
+end
+
+local function brokerOnClick(display, button, module)
+	module:refresh()
+	if button == "LeftButton" then
+		-- Enter -> locationShow
+		if  locationHide(module)  then
+			-- Click 1 -> teleportShow
+			teleportShow(module, display)
+		elseif  teleportHide(module)  then
+			-- Click 2 -> locationShow 
+			locationShow(module, display)
+		end
+
+	elseif button == "RightButton" then
+		-- ToggleFrame(WorldMapFrame)
+		-- Open settings.
+		ns.commands.options.func()
+	end
+end
+--]]
 
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
 
-module1.onenter = function(button)  gpsLoc:refresh() ; return locationShow(button, module1)  end  
-module2.onenter = function(button)  return locationShow(button, module2)  end
+module1.onenter = function(display)  gpsLoc:refresh() ; return locationShow(module1, display)  end  
+module2.onenter = function(display)  return locationShow(module2, display)  end
 
-module1.onleave = function(button)  locationHide(true)  end
-module2.onleave = function(button)  locationHide(true)  end
+module1.onleave = function(display)  locationHide(module1)  end
+module2.onleave = function(display)  locationHide(module2)  end
 
-module1.onclick = function(button, mouseButton)  gpsLoc:refresh() ; brokerOnClick(button, mouseButton, module1)  end
-module2.onclick = function(button, mouseButton)  brokerOnClick(button, mouseButton, module2)  end
+module1.onclick = function(display, button)  gpsLoc:refresh() ; brokerOnClick(display, button, module1)  end
+module2.onclick = function(display, button)  brokerOnClick(display, button, module2)  end
 
 
 

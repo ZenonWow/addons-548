@@ -10,7 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Calendar" -- L["Calendar"]
-local tt = nil
 
 
 -- ------------------------------------- --
@@ -93,8 +92,6 @@ module.onevent = function(self,event,msg)
 end
 
 module.ontooltip = function(tt)
-	if (ns.tooltipChkOnShowModifier(false)) then tt:Hide(); return; end
-
 	local x = CalendarGetNumPendingInvites()
 	ns.tooltipScaling(tt)
 	tt:AddLine(L[name])
@@ -115,7 +112,7 @@ end
 -- module functions for LDB registration --
 -------------------------------------------
 
-module.onclick = function() securecall("ToggleCalendar") end
+module.onclick = function()  ToggleCalendar()  end
 
 --[=[
 note:

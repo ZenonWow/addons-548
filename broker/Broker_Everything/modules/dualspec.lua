@@ -10,8 +10,7 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Dualspec" -- L["Dualspec"]
-local tt = nil
-local unspent = 0
+local unspent = 0, 0
 local specs = {}
 
 
@@ -75,8 +74,6 @@ module.onevent = function(self,event,msg)
 end
 
 module.ontooltip = function(tt)
-	if (ns.tooltipChkOnShowModifier(false)) then tt:Hide(); return; end
-
 	ns.tooltipScaling(tt)
 	tt:AddLine(L["Talents"])
 
@@ -111,7 +108,10 @@ module.ontooltip = function(tt)
 	if Broker_EverythingDB.showHints then
 		tt:AddLine(" ")
 		tt:AddLine(C("copper",L["Double Click"]).." || "..C("green",L["Switch spec."]))
-		tt:AddLine(C("copper",L["Right-click"]).." || "..C("green",L["Open talents pane"]))
+		tt:AddLine(C("copper",L["Left-Click"]) .." || "..C("green",L["Open specializations pane"]))
+		tt:AddLine(C("copper",L["Shift + Left-Click"]) .." || "..C("green",L["Open default pane"]))
+		tt:AddLine(C("copper",L["Right-Click"]).." || "..C("green",L["Open talents pane"]))
+		tt:AddLine(C("copper",L["Alt + Right-Click"]) .." || "..C("green",L["Open glyphs pane"]))
 	end
 end
 
@@ -121,18 +121,40 @@ end
 -------------------------------------------
 
 module.onclick = function(self,button)
-	if button == "RightButton" then
-		if not PlayerTalentFrame then UIParentLoadAddOn("Blizzard_TalentUI") end
-		securecall("ToggleTalentFrame")
-		--[[
+	TalentFrame_LoadUI()
+	local open = PlayerTalentFrame:IsShown()
+	local opentab = PanelTemplates_GetSelectedTab(PlayerTalentFrame)    -- PlayerTalentFrame.selectedTab
+	local showtab
+	if button == "LeftButton" then
+		if  IsShiftKeyDown()  then
+			ToggleTalentFrame()  -- Open Blizz suggested tab
+			return
+		else
+			showtab = SPECIALIZATION_TAB
+		end
 	elseif button == "RightButton" then
-		securecall("SetActiveSpecGroup",abs(GetActiveSpecGroup()-3))
-		--]]
+		if  IsAltKeyDown()  then
+			GlyphFrame_LoadUI()
+			-- ToggleGlyphFrame()
+			-- PlayerTalentFrame_OpenGlyphFrame(GetActiveSpecGroup())
+			showtab = GLYPH_TAB
+		else
+			showtab = TALENTS_TAB
+		end
+	end
+
+	if  open  and  opentab == showtab  then
+		HideUIPanel(PlayerTalentFrame)
+	else
+		ShowUIPanel(PlayerTalentFrame)
+		PlayerTalentFrameTab_OnClick(_G["PlayerTalentFrameTab"..showtab])
+		-- PlayerSpecTab_OnClick(specTabs[index])
 	end
 end
 
 module.ondblclick = function(self,button)
-	securecall("SetActiveSpecGroup",abs(GetActiveSpecGroup()-3))
+	-- 1->2, 2->1
+	SetActiveSpecGroup(3 - GetActiveSpecGroup())
 end
 
 

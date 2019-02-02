@@ -10,8 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Stuff" -- L["Stuff"]
-local ttName = name.."TT"
-local tt = nil
 
 
 -- ------------------------------------- --
@@ -109,10 +107,9 @@ function ToggleFullscreen(goFullscreen, fullscreenIsExlusive)
 end
 
 
-module.ontooltip = function(tt)
-	--if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
-	
+module.onqtip = function(tt)
 	tt:Clear()
+	tt:SetColumnLayout(1, "LEFT")
 	tt:AddHeader(C("dkyellow",L[name])) 
 	tt:AddLine (" ")
 	
@@ -137,20 +134,20 @@ module.ontooltip = function(tt)
 	line, column = tt:AddLine(C("green",L["Reload UI"]) .."  ||  ".. C("copper",L["Ctrl-LeftClick"]))
 	ns.highlightOnMouseover(tt, line)
 	tt:SetLineScript(line, "OnMouseUp", function(self)
-		if  IsControlKeyDown()  and  not IsAltKeyDown()  then  securecall("ReloadUI")  end
+		if  IsControlKeyDown()  and  not IsAltKeyDown()  then  ReloadUI()  end
 		if  not IsControlKeyDown()  and  not IsAltKeyDown()  then  StaticPopup_Show("CONFIRM")  end  -- Use StaticPopup to avoid taint.
 	end )
 	
 	line, column = tt:AddLine(C("green",L["Logout"]) .."  ||  ".. C("copper",L["Control-RightClick"]))
 	ns.highlightOnMouseover(tt, line)
 	tt:SetLineScript(line, "OnMouseUp", function(self,button)
-		if  button == "RightButton"  and  IsControlKeyDown()  and  not IsAltKeyDown()  then  securecall("Logout")  end
+		if  button == "RightButton"  and  IsControlKeyDown()  and  not IsAltKeyDown()  then  Logout()  end
 	end)			
 	
 	line, column = tt:AddLine(C("green",L["Quit Game"]) .."  ||  ".. C("copper",L["Control+Alt-RightClick"]))
 	ns.highlightOnMouseover(tt, line)
 	tt:SetLineScript(line, "OnMouseUp", function(self,button)
-		if  button == "RightButton"  and  IsControlKeyDown()  and  IsAltKeyDown()  then  securecall("Quit")  end
+		if  button == "RightButton"  and  IsControlKeyDown()  and  IsAltKeyDown()  then  Quit()  end
 	end)			
 end
 
@@ -158,26 +155,17 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(self)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
-	tt = ns.LQT:Acquire(ttName, 1, "LEFT") 
-	module.ontooltip(tt)
-	ns.createTooltip(self,tt)
-end
-
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,false,true)
-end
+module.mouseOverTooltip = true
 
 module.onclick = function(self,button)
 	if  button == "LeftButton"  then
 		if  not IsControlKeyDown()  and  IsAltKeyDown()  then  ToggleFullscreen(nil, IsShiftKeyDown())
-		elseif  IsControlKeyDown()  and  not IsAltKeyDown()  then  securecall("ReloadUI")
+		elseif  IsControlKeyDown()  and  not IsAltKeyDown()  then  ReloadUI()
 		end
 	elseif  button == "RightButton"  then
-		if  IsControlKeyDown()  and  not IsAltKeyDown()  then  securecall("Logout")
-		elseif  IsControlKeyDown()  and  IsAltKeyDown()  then  securecall("Quit")
+		if  IsControlKeyDown()  and  not IsAltKeyDown()  then  Logout()
+		elseif  IsControlKeyDown()  and  IsAltKeyDown()  then  Quit()
 		elseif  not IsModifierKeyDown()  then
 			ns.commands.options.func()
 		end

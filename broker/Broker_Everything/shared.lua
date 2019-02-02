@@ -8,7 +8,8 @@ local GetPlayerMapPosition,GetRealZoneText,GetSubZoneText = GetPlayerMapPosition
 local GetZonePVPInfo,GetBindLocation = GetZonePVPInfo,GetBindLocation
 local L = ns.L
 local _
-ns.build = tonumber(gsub(({GetBuildInfo()})[1],"[|.]","")..({GetBuildInfo()})[2])
+ns.tocversion  = select(4, GetBuildInfo())
+-- ns.build = tonumber(gsub(({GetBuildInfo()})[1],"[|.]","")..({GetBuildInfo()})[2])
 
 ns.LDB = LibStub("LibDataBroker-1.1")
 ns.LQT = LibStub("LibQTip-1.0")
@@ -104,7 +105,8 @@ do
 	local blacklist = {alwaysShowActionBars = true, bloatnameplates = true, bloatTest = true, bloatthreat = true, consolidateBuffs = true, fullSizeFocusFrame = true, maxAlgoplates = true, nameplateMotion = true, nameplateOverlapH = true, nameplateOverlapV = true, nameplateShowEnemies = true, nameplateShowEnemyGuardians = true, nameplateShowEnemyPets = true, nameplateShowEnemyTotems = true, nameplateShowFriendlyGuardians = true, nameplateShowFriendlyPets = true, nameplateShowFriendlyTotems = true, nameplateShowFriends = true, repositionfrequency = true, showArenaEnemyFrames = true, showArenaEnemyPets = true, showPartyPets = true, showTargetOfTarget = true, targetOfTargetMode = true, uiScale = true, useCompactPartyFrames = true, useUiScale = true}
 	ns.SetCVar = function(...)
 		local cvar = ...
-		if ns.build>=54800000 and InCombatLockdown() and blacklist[cvar]==true then
+		if ns.tocversion >= 50408 and InCombatLockdown() and blacklist[cvar]==true then
+			-- Since v5.4.8
 			local msg
 			-- usefull blacklisted cvars..
 			if cvar=="uiScale" or cvar=="useUiScale" then
@@ -124,6 +126,56 @@ end
 -- ----------------------------------- --
 -- Helpful function for extra tooltips --
 -- ----------------------------------- --
+
+function ns.defaultOnEnter(module, display)
+	if  ns.tooltipChkOnShowModifier()  then  return  end
+	local tooltip, reused = ns.LQT:Acquire(module.name)
+	ns.attachTooltip(module, tooltip)
+	module.onqtip(tooltip, reused)
+	ns.createTooltip(display, tooltip, module.mouseOverTooltip)
+end
+
+function ns.defaultOnLeave(module, display)
+	ns.hideTooltip(module.tooltip, module.name, not module.mouseOverTooltip)
+	-- if  not module.mouseOverTooltip  then  module.tooltip = nil  end
+end
+
+
+function ns.defaultOnTooltipShow(module, tooltip)
+	module.ontooltip(tooltip)
+	ns.attachTooltip(module, tooltip)
+end
+
+
+function ns.attachTooltip(module, tooltip)
+	-- Release (and detach) previous tooltip.
+	if  module.tooltip  and  module.tooltip ~= tooltip  then
+		if  module.tooltip.Release  then
+			ns.LQT:Release(module.tooltip)
+			-- module.tooltip:Release()
+		else
+			module.tooltip:Hide()
+		end
+	end
+
+	-- Detach acquired tooltip, no release.
+	--[[
+	local prevOnHide = tooltip:GetScript('OnHide')
+	if  prevOnHide  then  prevOnHide(tooltip)  end
+	--]]
+	tooltip:Hide()
+	if  tooltip:GetScript('OnHide')  then  print("BE.attachTooltip('"..module.name.."', '"..(tooltip.key or tooltip:GetName() or "?").."'): OnHide script is expected to unregister itself.")  end
+
+	module.tooltip = tooltip
+
+	tooltip:SetScript('OnHide', function (tooltip)
+		-- print("modules['"..module.name.."'].tooltip:OnHide()")
+		tooltip:SetScript('OnHide', nil)
+		if  module.tooltip == tooltip  then  module.tooltip = nil  end
+	end)
+end
+
+
 ns.GetTipAnchor = function(frame, menu)
 	local x, y = frame:GetCenter()
 	if (not x) or (not y) then return "TOPLEFT", "BOTTOMLEFT"; end
@@ -153,49 +205,53 @@ ns.tooltipScaling = function(tooltip)
 end
 
 
-local function hideOnLeave(tooltip)
-	if  tooltip.stayOpen  then  return false  end
-	local owner = tooltip.owner
-	if  owner and owner.IsMouseOver and owner:IsMouseOver()  then  return false  end
-	return ns.hideTooltip(tooltip, tooltip.key)
-end
-
 local function hideOnClick(tooltip)
-	if  tooltip.stayOpen  then  tooltip.stayOpen = nil ; return false  end
-	return ns.hideTooltip(tooltip, tooltip.key, true)
+	-- First click disables tooltip.stayOpen
+	if  tooltip.stayOpen  then
+		tooltip.stayOpen = nil
+		tooltip:SetAutoHideDelay(0.001, tooltip.owner)
+		return false
+	end
+	ns.hideTooltip(tooltip, nil, true)
 end
 
---[[
-ns.setHideOnLeave(tooltip)
-	tooltip:SetScript("OnLeave", hideOnLeave)
+function ns.setStayOpen(tooltip, closeAfterClick, closeDelay)
+	-- closeAfterClick -> disable stayOpen if clicked
+	-- closeDelay == nil -> open forever, until closed explicitly
+	tooltip.stayOpen = true
+	if closeAfterClick then  tooltip:SetScript("OnMouseUp", hideOnClick)  end
+	tooltip:SetAutoHideDelay(closeDelay, tooltip.owner)
 end
 
-ns.setHideOnClick(tooltip)
-	tooltip:SetScript("OnClick", hideOnClick)
-end
---]]
+ns.hideTooltip = function(tooltip, checkTooltipKey, immediately)
+	if not tooltip then  return  end
 
-ns.hideTooltip = function(tooltip,ttName,noFloat)
-	if (tooltip) then
-		local modifier=Broker_EverythingDB.ttModifierKey2;
-		if (not noFloat) and (modifier~="NONE") and (ns.tooltipChkOnShowModifier(modifier,false)) then
-			noFloat=true;
-		end
-		if  noFloat  and  tooltip.slider  and  tooltip.slider:IsShown()  then  noFloat = false ; setOnLeave = true  end
-		if  not noFloat  then
-			if  tooltip.key and tooltip.key==ttName  and  tooltip.stayOpen  then
-				return
-			end
-			if  tooltip.key and tooltip.key==ttName  and  tooltip:IsMouseOver()  then
-				-- if setOnLeave then  ns.setHideOnLeave(tooltip, setOnLeave)  end
-				tooltip:SetScript("OnLeave", hideOnLeave)
-				return
-			end
-			local f = GetMouseFocus()
-			if (f) and (not f:IsForbidden()) and (not f:IsProtected() and InCombatLockdown()) and (type(f.key)=="string") and (type(ttName)=="string") and (f.key==ttName) then
+	-- Custom tooltip? To hide it pass checkTooltipKey == nil.
+	if checkTooltipKey and tooltip.key ~= checkTooltipKey then  return  end
+	-- Sticky tooltip can be closed only forcefully.
+	if  tooltip.stayOpen  and  not immediately  then  return  end
+
+	local allowMouseOverModifier = Broker_EverythingDB.ttModifierKey2;
+	local allowMouseOver =  not immediately  or  tooltip.slider  and  tooltip.slider:IsShown()
+	if  allowMouseOver  and  ns.tooltipChkOnShowModifier(allowMouseOverModifier)  then  allowMouseOver = false  end
+
+	if allowMouseOver and tooltip:IsMouseOver() then
+		-- tooltip:SetScript("OnLeave", hideOnLeave)
+		if  not tooltip.autoHideTimerFrame  then  tooltip:SetAutoHideDelay(0.001, tooltip.owner)  end
+		return
+	end
+
+	do
+		do
+			local f = allowMouseOver and GetMouseFocus()
+			-- if (f) and (not f:IsForbidden()) and (not f:IsProtected() and InCombatLockdown()) and (type(f.key)=="string") and (type(checkTooltipKey)=="string") and (f.key==checkTooltipKey) then
+			if (f) and (not f:IsForbidden()) and (not f:IsProtected() and InCombatLockdown()) and  (f.key==checkTooltipKey) then
+				-- (Unprotected) frame under the mouse focus (in combat) that is the tooltip, but the tooltip under the mouse already made this function return.
+				print("I think this never happens. f.key='"..f.key.."'")
 				return; -- why that? tooltip can't be closed in combat with securebuttons as child elements. results in addon_action_blocked... 
 			end
 		end
+
 		if type(tooltip.secureButtons)=="table" then
 			for i,v in ipairs(tooltip.secureButtons)do
 				ns.secureButton2Hide(v)
@@ -203,71 +259,64 @@ ns.hideTooltip = function(tooltip,ttName,noFloat)
 			ns.secureButton(false);
 		end
 		tooltip.stayOpen = nil
-		tooltip:SetScript("OnUpdate",nil)
-		tooltip:SetScript("OnLeave",nil)
+		-- tooltip:SetScript("OnUpdate",nil)
+		-- tooltip:SetScript("OnLeave",nil)
 		tooltip:SetScript("OnMouseUp",nil)
 		ns.LQT:Release(tooltip)
 		return true
 	end
 end
 
-ns.createTooltip = function(frame, tooltip, setOnLeave, setOnClick)
-	-- local eclipsed = 0;
-	if (Broker_EverythingDB.tooltipScale==true) then
+ns.createTooltip = function(owner, tooltip, allowMouseOverTooltip)
+	if Broker_EverythingDB.tooltipScale then
 		tooltip:SetScale(tonumber(GetCVar("uiScale")))
 	end
-	if (frame) then
-		SmartAnchorTo(tooltip,frame)
+	tooltip.owner = owner
+	if owner then  SmartAnchorTo(tooltip, owner)  end
+	if allowMouseOverTooltip then
+		tooltip:SetAutoHideDelay(0.001, owner)
+		tooltip:SetScript("OnMouseUp", hideOnClick)
 	end
-	tooltip.owner = frame
-	if setOnLeave then  tooltip:SetScript("OnLeave", hideOnLeave)  end
-	if setOnClick then  tooltip:SetScript("OnMouseUp", hideOnClick)  end
-	--[[
-	tooltip:SetScript("OnUpdate", function(self,elapsed)
-		if  GetMouseFocus() ~= WorldFrame  then
-			self.mouseLeft = nil
-		elseif  not self.mouseLeft  then
-			self.mouseLeft = 0
-		else
-			self.mouseLeft = self.mouseLeft + elapsed
-			if  self.mouseLeft > 1.0  then
-				ns.hideTooltip(self,self.key,true)
-			end
-		end
-	end)
-	--]]
 	tooltip:UpdateScrolling(WorldFrame:GetHeight() * Broker_EverythingDB.maxTooltipHeight)
 	tooltip:Show()
 end
 
-ns.RegisterMouseWheel = function(self,func)
+ns.RegisterMouseWheel = function(self, scriptFunc)
 	self:EnableMouseWheel(1) 
-	self:SetScript("OnMouseWheel", func)
+	self:SetScript("OnMouseWheel", scriptFunc)
 end
 
-ns.tooltipModifiers = {
-	SHIFT      = {l=L["Shift"],       f=IsShiftKeyDown},
-	LEFTSHIFT  = {l=L["Left shift"],  f=IsLeftShiftKeyDown},
-	RIGHTSHIFT = {l=L["Right shift"], f=IsRightShiftKeyDown},
-	ALT        = {l=L["Alt"],         f=IsAltKeyDown},
-	LEFTALT    = {l=L["Left alt"],    f=IsLeftAltKeyDown},
-	RIGHTALT   = {l=L["Right alt"],   f=IsRightAltKeyDown},
-	CTRL       = {l=L["Ctrl"],        f=IsControlKeyDown},
-	LEFTCTRL   = {l=L["Left ctrl"],   f=IsLeftControlKeyDown},
-	RIGHTCTRL  = {l=L["Right ctrl"],  f=IsRightControlKeyDown}
+ns.tooltipModifierText = {
+	NONE       = L["Default (no modifier)"],
+	SHIFT      = L["Shift"],      
+	LEFTSHIFT  = L["Left shift"], 
+	RIGHTSHIFT = L["Right shift"],
+	ALT        = L["Alt"],        
+	LEFTALT    = L["Left alt"],   
+	RIGHTALT   = L["Right alt"],  
+	CTRL       = L["Ctrl"],       
+	LEFTCTRL   = L["Left ctrl"],  
+	RIGHTCTRL  = L["Right ctrl"], 
+}
+ns.tooltipModifierFunc = {
+	NONE       = false,
+	-- NONE       = function()  return true  end,
+	SHIFT      = IsShiftKeyDown,
+	LEFTSHIFT  = IsLeftShiftKeyDown,
+	RIGHTSHIFT = IsRightShiftKeyDown,
+	ALT        = IsAltKeyDown,
+	LEFTALT    = IsLeftAltKeyDown,
+	RIGHTALT   = IsRightAltKeyDown,
+	CTRL       = IsControlKeyDown,
+	LEFTCTRL   = IsLeftControlKeyDown,
+	RIGHTCTRL  = IsRightControlKeyDown,
 }
 
-ns.tooltipChkOnShowModifier = function(bool)
-	local modifier = Broker_EverythingDB.ttModifierKey1;
-	if (modifier~="NONE") then
-		modifier = (ns.tooltipModifiers[modifier]) and ns.tooltipModifiers[modifier].f();
-		if (bool) then
-			return modifier;
-		else
-			return not modifier;
-		end
-	end
-	return false;
+ns.tooltipChkOnShowModifier = function (modifier)
+	local modifier = modifier or Broker_EverythingDB.ttModifierKey1
+	local modDownFunc = ns.tooltipModifierFunc[modifier]
+	-- Set, but not pressed? That's a nogo.
+	return IsKeyDown and not IsKeyDown()
 end
 
 
@@ -482,7 +531,7 @@ end
 -- ~Hizuro                                                        --
 -- -------------------------------------------------------------- --
 do
-	ns.bagScan = {items={},last=time(),interval=10,active=false,resets={},updates={}}
+	ns.bagScan = {items={},last=time(),interval=60,active=false,resets={},updates={}}
 
 	ns.bagScan.RegisterId = function(modName,itemId,foundFunc,resetFunc,updateFunc)
 		assert(type(modName)=="string" and ns.modules[modName],"argument #1 (modName) must be a string, got "..type(modName))
@@ -891,10 +940,11 @@ end
 -- ~Hizuro                  --
 -- ------------------------ --
 do
-	local hidden = CreateFrame("Frame",addon.."_HideFrames")
+	local hidden = CreateFrame("Frame",addon.."_FrameHider")
 	hidden.origParent = {}
 	hidden:Hide()
 
+	--[[
 	ns.hideFrame = function(frameName)
 		local pName = _G[frameName]:GetParent():GetName()
 		if pName==nil then
@@ -903,13 +953,23 @@ do
 		hidden.origParent[frameName] = pName
 		_G[frameName]:SetParent(hidden)
 	end
+	--]]
 
-	ns.unhideFrame = function(frameName)
-		if hidden.origParent[frameName]~=nil then
-			_G[frameName]:SetParent(hidden.origParent[frameName])
-			hidden.origParent[frameName] = nil
+	ns.hideFrame = function(frameName, hide)
+		local frame = _G[frameName]
+		local orig = hidden.origParent[frame]
+		if  hide  and  not orig  then
+			local parent = frame:GetParent()
+			assert(parent, "Broker_Everything: ns.hideFrame("..frameName..") does not support frames without parent.")
+			hidden.origParent[frame] = parent
+			frame:SetParent(hidden)
+		elseif  not hide  and  orig  then
+			frame:SetParent(orig)
+			hidden.origParent[frame] = nil
 		end
 	end
+
+	ns.unhideFrame = function(frameName)  return ns.hideFrame(frameName, false)  end
 end
 
 -- ---------------- --
@@ -1056,6 +1116,13 @@ do
 
 		UIDropDownMenu_Initialize(self.frame, EasyMenu_Initialize, displayMode, nil, self.menu);
 		ToggleDropDownMenu(1, nil, self.frame, anchor, x, y, self.menu, nil, nil);
+	end
+
+	self.HideMenu = function()
+		if  self.frame  and self.frame:IsShown()  then
+			ToggleDropDownMenu(1, nil, self.frame)
+			return true
+		end
 	end
 end
 

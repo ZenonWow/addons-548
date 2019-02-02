@@ -9,9 +9,8 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -----------------------------------------------------------
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
-local name = "Game Menu" -- L["Game Menu"]
+local name = "GameMenu" -- L["Game Menu"]
 local tt = nil
-local ttName = name.."TT"
 local last_click = 0
 local iconCoords = "16:16:0:-1:64:64:4:56:4:56" --"16:16:0:-1:64:64:3:58:3:58"
 local link = "|T%s:%s|t %s"
@@ -20,7 +19,7 @@ local gmticket = {}
 local customTitle = L[name]
 
 local menu = {
-	{name=CHARACTER_BUTTON, 	iconName="Character-{class}",	func=function() securecall("ToggleCharacter", "PaperDollFrame") end, }, 
+	{name=CHARACTER_BUTTON, 	iconName="Character-{class}",	func=function() ToggleCharacter( "PaperDollFrame") end, }, 
 	--{name=SPELLBOOK, 			iconName="Spellbook", 			click='SpellbookMicroButton', 		disabled=IsBlizzCon()}, 
 	--{name=TALENTS, 				iconName="Talents", 			click='TalentMicroButton', 			disabled=UnitLevel("player")<10}, 
 	--{name=ACHIEVEMENT_BUTTON, 	iconName="Achievments", 		click='AchievementMicroButton', 		}, 
@@ -38,21 +37,21 @@ local menu = {
 	setIcon=function()
 		--SetSmallGuildTabardTextures("player", 
 	end}, --]]
-	{name=SOCIAL_BUTTON, 		iconName="Friends", 		func=function() securecall("ToggleFriendsFrame", 1) end, 	disabled=IsTrialAccount()}, 
+	{name=SOCIAL_BUTTON, 		iconName="Friends", 		func=function() ToggleFriendsFrame( 1) end, 	disabled=IsTrialAccount()}, 
 	--{name=PLAYER_V_PLAYER, 		iconName="PvP-{faction}", 	click='PVPMicroButton', 									disabled=(UnitLevel("player")<SHOW_PVP_LEVEL or IsBlizzCon())}, 
-	{name=RAID_FINDER, 			iconName="Raidfinder", 		func=function() securecall("PVEFrame_ToggleFrame", 'GroupFinderFrame', RaidFinderFrame) end, 				disabled=(UnitLevel("player")<SHOW_LFD_LEVEL or IsBlizzCon())}, 
-	{name=DUNGEONS_BUTTON, 		iconName="LFDungeon", 		func=function() securecall("PVEFrame_ToggleFrame", 'GroupFinderFrame', LFDParentFrame) end, 				disabled=(UnitLevel("player")<SHOW_LFD_LEVEL or IsBlizzCon())}, 
-	--{name=MOUNTS, 				iconName="Mounts", 			func=function() if not PetJournalParent then securecall("PetJournal_LoadUI") end securecall("TogglePetJournal", 1) end, 	disabled=UnitLevel("player")<20}, 
-	--{name=PET_JOURNAL, 			iconName="Pets", 			func=function() if not PetJournalParent then securecall("PetJournal_LoadUI") end securecall("TogglePetJournal", 2) end, 	}, 
-	{name=ENCOUNTER_JOURNAL, 	iconName="EJ", 				func=function() securecall("ToggleEncounterJournal") end, 													iconCoords=""}, 
+	{name=RAID_FINDER, 			iconName="Raidfinder", 		func=function() PVEFrame_ToggleFrame( 'GroupFinderFrame', RaidFinderFrame) end, 				disabled=(UnitLevel("player")<SHOW_LFD_LEVEL or IsBlizzCon())}, 
+	{name=DUNGEONS_BUTTON, 		iconName="LFDungeon", 		func=function() PVEFrame_ToggleFrame( 'GroupFinderFrame', LFDParentFrame) end, 				disabled=(UnitLevel("player")<SHOW_LFD_LEVEL or IsBlizzCon())}, 
+	--{name=MOUNTS, 				iconName="Mounts", 			func=function() if not PetJournalParent then PetJournal_LoadUI() end TogglePetJournal( 1) end, 	disabled=UnitLevel("player")<20}, 
+	--{name=PET_JOURNAL, 			iconName="Pets", 			func=function() if not PetJournalParent then PetJournal_LoadUI() end TogglePetJournal( 2) end, 	}, 
+	{name=ENCOUNTER_JOURNAL, 	iconName="EJ", 				func=function() ToggleEncounterJournal() end, 													iconCoords=""}, 
 	--{name=BLIZZARD_STORE, 		iconName="Store", 			click='StoreMicroButton', 														disabled=IsTrialAccount()}, 
 	{sep=true}, 
-	{name=GAMEMENU_HELP, 		iconName="Help", 			func=function() securecall("ToggleHelpFrame") end, 	}, 
-	{name=SYSTEMOPTIONS_MENU, 	iconName="SysOpts", 		func=function() securecall("ShowUIPanel", VideoOptionsFrame) end, 	}, 
-	{name=KEY_BINDINGS, 		iconName="KeyBinds",	 	func=function() securecall("KeyBindingFrame_LoadUI") securecall("ShowUIPanel", KeyBindingFrame) end, 	}, 
-	{name=UIOPTIONS_MENU, 		iconName="UiOpts", 			func=function() securecall("ShowUIPanel", InterfaceOptionsFrame) end, 	}, 
-	{name=MACROS, 				iconName="Macros", 			func=function() securecall("ShowMacroFrame") end, 	}, 
-	{name=MAC_OPTIONS, 			iconName="MacOpts", 		func=function() securecall("ShowUIPanel", MacOptionsFrame) end, 	 view=IsMacClient()==true}, 
+	{name=GAMEMENU_HELP, 		iconName="Help", 			func=function() ToggleHelpFrame() end, 	}, 
+	{name=SYSTEMOPTIONS_MENU, 	iconName="SysOpts", 		func=function() ShowUIPanel( VideoOptionsFrame) end, 	}, 
+	{name=KEY_BINDINGS, 		iconName="KeyBinds",	 	func=function() KeyBindingFrame_LoadUI() ShowUIPanel( KeyBindingFrame) end, 	}, 
+	{name=UIOPTIONS_MENU, 		iconName="UiOpts", 			func=function() ShowUIPanel( InterfaceOptionsFrame) end, 	}, 
+	{name=MACROS, 				iconName="Macros", 			func=function() ShowMacroFrame() end, 	}, 
+	{name=MAC_OPTIONS, 			iconName="MacOpts", 		func=function() ShowUIPanel( MacOptionsFrame) end, 	 view=IsMacClient()==true}, 
 	{name=ADDONS, 				iconName="Addons", 			view=(IsAddOnLoaded("OptionHouse") or IsAddOnLoaded("ACP") or IsAddOnLoaded("Ampere") or IsAddOnLoaded("stAddonManager")), 
 	func=function()
 		if IsAddOnLoaded("OptionHouse") then
@@ -216,7 +215,7 @@ end
 ------------------------------------
 
 local function updateCustomTitle(dataobj)
-	local modDB = Broker_EverythingDB[name]
+	local modDB = module.modDB
 	if  modDB.customTitle == ""  then  modDB.customTitle = nil  end
 	customTitle = modDB.customTitle
 	dataobj.text = customTitle
@@ -236,8 +235,9 @@ module.onevent = function(module, ...)
 	end
 end
 
-module.ontooltip = function(tt)
-	--if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+module.onqtip = function(tt)
+	tt:Clear()
+	tt:SetColumnLayout(2, "LEFT", "LEFT")
 
 	local line, column
 	local section, secHide = 1, false
@@ -245,8 +245,6 @@ module.ontooltip = function(tt)
 	local cell = 1
 
 	tt.secureButtons = {}
-
-	tt:Clear()
 
 	if Broker_EverythingDB[name].customTooltipTitle then
 		tt:AddHeader(C("dkyellow", customTitle))
@@ -301,7 +299,7 @@ module.ontooltip = function(tt)
 						end
 					else
 						e, f = "OnMouseUp", function()
-							ns.hideTooltip(tt,ttName,true)
+							ns.hideTooltip(tt, nil, true)
 							v.func()
 						end
 					end
@@ -378,23 +376,13 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(button)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
-	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "LEFT")
-	module.ontooltip(tt)
-	ns.createTooltip(button, tt, true, true)
-end
+module.mouseOverTooltip = true
 
-module.onleave = function(button)
-	ns.hideTooltip(tt,ttName,false,true)
-end
-
-module.onclick = function(button, mouseButton)
-	if mouseButton == "LeftButton" then
-		tt.stayOpen = true
-		tt:SetAutoHideDelay(3, button)
-	elseif mouseButton == "RightButton" then
+module.onclick = function(display, button)
+	if button == "LeftButton" then
+		ns.setStayOpen(tt, true, 3)
+	elseif button == "RightButton" then
 		ns.commands.options.func()
 	end
 
@@ -403,9 +391,9 @@ module.onclick = function(button, mouseButton)
 	local shift = IsShiftKeyDown() or -1
 	local cv = 0
 
-	if mouseButton == "RightButton" then
+	if button == "RightButton" then
 		cv = 1 * shift
-	elseif mouseButton == "LeftButton" then
+	elseif button == "LeftButton" then
 		cv = 2 * shift
 	end
 
@@ -418,14 +406,14 @@ module.onclick = function(button, mouseButton)
 	last_click = 0
 
 	if shift > 0 then
-		if mouseButton == "LeftButton" then
-			securecall("ReloadUI")
+		if button == "LeftButton" then
+			ReloadUI()
 		end
 	else
-		if mouseButton == "LeftButton" then
-			securecall("Logout")
-		elseif mouseButton == "RightButton" then
-			securecall("Quit")
+		if button == "LeftButton" then
+			Logout()
+		elseif button == "RightButton" then
+			Quit()
 		end
 	end
 	--]]

@@ -11,8 +11,7 @@ local MAX_CURRENCIES_IN_TITLE = 4
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Currency"; -- L["Currency"]
-local tt,tt2 -- tooltip
-local ttName = name.."TT"
+local tt2 -- tooltip
 local GetCurrencyInfo = GetCurrencyInfo
 local currencies = {}
 local currencies_num = 0
@@ -193,9 +192,8 @@ local function setInTitle(titlePlace, currencyName, parent)
 	updateTitle(module.obj)
 end
 
-local function makeMenu(parent)
-	ns.hideTooltip(tt,ttName,true)
 
+local function makeMenu(parent)
 	local inTitle = setmetatable({},{__index=function() return false end})
 	collectData()
 	for place=1, 4 do
@@ -311,20 +309,21 @@ module.onevent = function(module,event,msg)
 	collectData()
 	updateTitle(obj)
 
-	if (tt) and (tt.key) and (tt.key==ttName) and (tt:IsShown()) then
-		module.ontooltip(tt)
-	end
+	module.onqtip(module.tooltip)
 end
 
-module.ontooltip = function(tt)
-	if (not tt.key) or (tt.key~=ttName) then return; end -- don't override other LibQTip tooltips...
-	local l,c;
+module.onqtip = function(tt)
+	if not tt then  return  end
+
 	tt:Clear()
+	tt:SetColumnLayout(2, "LEFT", "RIGHT")
+
 	tt:AddHeader(C("dkyellow",L[name]))
 	if Broker_EverythingDB[name].shortTT == true then
 		tt:AddSeparator()
 	end
 
+	local l,c;
 	for i,v in ipairs(currencies) do
 		if (not v.isUnused) then
 			if (v.isHeader) then
@@ -395,30 +394,26 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(self)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
-	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "RIGHT")
-	module.ontooltip(tt)
-	ns.createTooltip(self,tt);
-end
+module.mouseOverTooltip = true
 
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,false,true)
-end
-
-module.onclick = function(self,button)
+module.onclick = function(display, button)
 	if button == "LeftButton" then
-		securecall("ToggleCharacter","TokenFrame")
-	else
-		makeMenu(self)
+		ToggleCharacter("TokenFrame")
+	elseif button == "RightButton" then
+		if ns.EasyMenu.HideMenu() then
+			ns.defaultOnEnter(module, display)
+		else
+			ns.hideTooltip(module.tooltip, nil, true)
+			makeMenu(display)
+		end
 	end
 end
 
 do
 	local dummyEventFunc = function()
 		if (UPDATE_LOCK) then return; end
-		module.onevent(nil,"BE_DUMMY_EVENT");
+		module:onevent("BE_DUMMY_EVENT")
 	end;
 	_G["TokenFramePopupInactiveCheckBox"]:HookScript("OnClick",dummyEventFunc);
 	hooksecurefunc("ExpandCurrencyList",dummyEventFunc);

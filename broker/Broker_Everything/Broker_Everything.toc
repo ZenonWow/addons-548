@@ -25,8 +25,6 @@ shared.lua
 # ns.location function
 # and more...
 
-temp.lua
-
 modules\modules.xml
 # modules.lua
 # modules\<moduleName>.lua

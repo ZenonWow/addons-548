@@ -15,8 +15,8 @@ ns.modules = {}
 ns.updateTimers = {}
 
 ns.frame = CreateFrame('Frame')
-ns.animGroup = ns.frame:CreateAnimationGroup()
-ns.animGroup:SetLooping("REPEAT")
+-- ns.animGroup = ns.frame:CreateAnimationGroup()
+-- ns.animGroup:SetLooping("REPEAT")
 
 local function callOnUpdate(timer)
 	local now = GetTime()
@@ -26,10 +26,12 @@ local function callOnUpdate(timer)
 end
 
 local function createUpdater(name, modData)
-	local animGroup = ns.animGroup
+	local animGroup = ns.frame:CreateAnimationGroup()
+	animGroup:SetLooping('REPEAT')
 	local timer = animGroup:CreateAnimation()
 	timer:SetScript('OnFinished', callOnUpdate)
 	
+	timer.animGroup = animGroup
 	timer.modData = modData
 	timer.lastTime = GetTime()
 	
@@ -45,56 +47,29 @@ local function createUpdater(name, modData)
 	return timer
 end
 
-local function stopUpdater(name, modData)
+local function stopUpdater(name)
 	local timer = ns.updateTimers[name]
-	-- TODO: possible to remove anim from group while Play()-ing?
+	if not timer then  return  end
+
+	timer.animGroup:Stop()
+	timer.animGroup:SetParent(nil)
+	timer.animGroup:SetLooping('NONE')
+	timer.animGroup = nil
+	timer.modData = nil
+	timer.lastTime = nil
+	timer:SetScript('OnFinished', nil)
+	timer:SetParent(nil)
+	ns.updateTimers[name] = nil
 end
 
 
 -- Forward declaration
 local sendEvent    -- function sendEvent(modData, event)
 
--- pairs(nil or EMPTY) to not crash
-local EMPTY = {}
+-- pairs(nil or EMPTYTABLE) to not crash
+local EMPTYTABLE = setmetatable({}, { __newindex = function()  error("Can't add properties to the EMPTYTABLE.")  end, __metatable = "EMPTYTABLE is not to be modified." })
 
-		--[[
-		-- modData load on demand like
-		if modData.enabled==nil then
-			modData.enabled = true
-		end
-		--]]
-		-- check if savedvariables for modData present?
-		--[[
-		if Broker_EverythingDB[name] == nil then
-			Broker_EverythingDB[name] = {}
-		elseif type(Broker_EverythingDB[name].enabled)~="boolean" then
-			Broker_EverythingDB[name].enabled = modData.enabled
-		end
-		--]]
-		--[[ force enabled status of non Broker modules.
-		if modData.noBroker then
-			modData.enabled = true
-			Broker_EverythingDB[name].enabled = true
-		end
-		--]]
-			--[[
-			ns.updateList[name] = {
-				-- firstUpdate = false,
-				func = modData.onupdate,
-				interval = modData.updateinterval,
-				elapsed = 0
-			}
-			--]]
-		--[[
-		-- event handler registration
-		if modData.onevent then
-			modData.event = CreateFrame("frame")
-			for _, e in pairs(modData.events) do
-				modData.event:RegisterEvent(e)
-			end
-			modData.event:SetScript("OnEvent",modData.onevent)
-		end
-		--]]
+
 
 local function moduleInit(name, modData)
 		modData.name  = name
@@ -104,15 +79,16 @@ local function moduleInit(name, modData)
 
 
 		local modDB = Broker_EverythingDB[name]
+		modData.modDB = modDB
 		if  not modDB  then  modDB = {}  Broker_EverythingDB[name] = modDB  end
 
 		-- Reset disallowed values.
-		for  varname, allowed  in  pairs(modData.config_allowed or EMPTY)  do
+		for  varname,allowed  in  pairs(modData.config_allowed or EMPTYTABLE)  do
 			if  not allowed[ modDB[varname] ]  then  modDB[varname] = nil  end
 		end
 		if  not CONFIG_USE_META  and  modData.config_defaults  then
 			-- Copy missing default values.
-			for  varname, default  in  pairs(modData.config_defaults or EMPTY)  do
+			for  varname,default  in  pairs(modData.config_defaults or EMPTYTABLE)  do
 				if modDB[varname] == nil then  modDB[varname] = default  end
 			end
 		elseif  modData.config_defaults  then
@@ -147,22 +123,41 @@ local function moduleInit(name, modData)
 
 		-- pre LDB init
 		if modData.preinit then  modData.preinit()  end
-		modData.preinit = nil
+		-- modData.preinit = nil
 		if modData.init then
 			print("Broker_Everything.moduleInit("..name.."): module.init() deprecated, use .preinit() or .initbroker(dataobj) instead.")
 			modData.init()
 		end
 
 		if  not modData.noBroker  then
-			if (not modData.onenter) and modData.ontooltip then
-				modData.ontooltipshow = modData.ontooltip
+--[[
+	module.onqtip(module.tooltip)
+
+module.onqtip = function(tt)
+	if  not tt  or  tt.key ~= module.name  then  return  end
+	if  not tt  or  tt.key ~= module.name  or  not tt:IsShown()  then  return  end
+	tt:Clear()
+	tt:SetColumnLayout(2, "LEFT", "RIGHT")
+..end
+module.mouseOverTooltip = true
+module.onenter = function(display)
+	ns.defaultOnEnter(module, display)
+end
+--]]
+			if  modData.onqtip  then
+				-- Migration to onqtip:  move tt:SetColumnLayout(count, ...) from onenter() to ontooltip(), then rename to onqtip(), insert tt:Clear()
+				modData.onenter = modData.onenter  or  function (displayFrame)  ns.defaultOnEnter(modData, displayFrame)  end
+				modData.onleave = modData.onleave  or  function (displayFrame)  ns.defaultOnLeave(modData, displayFrame)  end
+				
+			elseif  modData.ontooltip  and  not modData.onenter  then
+				-- modData.ontooltipshow = modData.ontooltip
+				modData.ontooltipshow = function (tooltip)  ns.defaultOnTooltipShow(modData, tooltip)  end
 			end
 
-			local ldbName = (Broker_EverythingDB.usePrefix and "BE.." or "")..name
-			local icon = ns.I(name .. (modData.icon_suffix or ""))
+			local ldbName =  Broker_EverythingDB.usePrefix  and  "BE"..name  or  name
+			local icon = ns.I( name..(modData.icon_suffix or "") )
 			local iColor = Broker_EverythingDB.iconcolor
-			modData.obj = ns.LDB:NewDataObject(ldbName, {
-
+			local default = {
 				-- button data
 				type          = "data source",
 				name          = ldbName,
@@ -177,24 +172,33 @@ local function moduleInit(name, modData)
 				OnClick       = modData.onclick or nil,
 				OnDoubleClick = modData.ondblclick or nil,
 				OnTooltipShow = modData.ontooltipshow or nil
-			})
+			}
 
+			local obj = modData.obj
+			if  obj  then
+				for k,v in pairs(obj) do
+					if  obj[k] == nil  then  obj[k] = default[k]  end
+				end
+			end
+
+			modData.obj = ns.LDB:NewDataObject(ldbName, obj or default)
 			ns.updateIconColor(modData)
 
 			if Broker_EverythingDB.libdbicon then
 				if  not modDB.dbi  then  modDB.dbi = {}  end
-				modData.dbi = ns.LDBI:Register(ldbName,modData.obj,modDB.dbi)
+				ns.LDBI:Register(ldbName,modData.obj,modDB.dbi)
+				modData.dbi = true
 			end
 
 			-- post LDB init
 			if modData.initbroker then  modData.initbroker(modData.obj)  end
-			modData.initbroker = nil
+			-- modData.initbroker = nil
 
 		end  -- if  not modData.noBroker
 
 		-- post LDB init: deprecated .init(module)
 		if modData.init then  modData.init(modData)  end
-		modData.init = nil
+		-- modData.init = nil
 
 		-- panels for single modules
 		if modData.optionpanel then
@@ -220,36 +224,60 @@ local function moduleInit(name, modData)
 		end
 end
 
-local function tindexof(t, item)
+local function tindexOf(t, item)
 	for  i = 1,t and #t or 0  do  if  t[i] == item  then  return i  end end
 end
 
 --local
 function sendEvent(modData, event)
-	if  tindexof(modData.events, event)  then  modData.onevent(modData, event)  end
+	if  tindexOf(modData.events, event)  then  modData.onevent(modData, event)  end
 end
 
 
-local function moduleDisable(name, modData)
--- TODO
+local function moduleDisable(name, module)
+	stopUpdater(name)
+	AceEvent.UnregisterAllEvents(module)
+	AceTimer.CancelAllTimers(module)
+
+	if module.tooltip  then
+		ns.LQT:Release(module.tooltip)
+	end
+	if module.tooltip  then
+		module.tooltip:Hide()
+		module.tooltip = nil
+	end
+
+	if ns.LDB.RemoveDataObject then
+		ns.LDB:RemoveDataObject(module.obj)
+		-- module.obj = false  -- Keep it, might reenable.
+	end
+	if module.dbi then
+		ns.LDBI:Hide(ldbName)
+		if ns.LDBI.Unregister then
+			ns.LDBI:Unregister(ldbName, module.obj)
+			module.dbi = false
+		end
+	end
+
+	if module.ondisable then  module:ondisable()  end
 end
 
 
 
 function ns.modulesInit()
 	local i = 0
-	for name, modData in pairs(ns.modules) do
-		moduleInit(name, modData)
+	for name, module in pairs(ns.modules) do
+		moduleInit(name, module)
 		i = i+1
 	end
 end
 
 function ns.modulesOnLogout()
 	-- Remove defaults from SavedVariables, like AceDB does, except for tables, those aren't checked in depth.
-	for  name,modData  in  pairs(ns.modules)  do
+	for  name,module  in  pairs(ns.modules)  do
 		local modDB = Broker_EverythingDB[name]
 		-- Also check modDB ~= nil for safety.
-		for  varname,default  in pairs(modDB and modData.config_defaults or EMPTY)  do
+		for  varname,default  in pairs(modDB and module.config_defaults or EMPTYTABLE)  do
 			if  modDB[varname] == default  then  modDB[varname] = nil  end
 		end
 	end
@@ -280,9 +308,9 @@ function ns.enableModule(name, enable)
 	
 	if  enable == was  then  return false  end
 	
-	local modData = ns.modules[name]
-	if  enable  then  moduleInit(name, modData)
-	else  moduleDisable(name, modData)
+	local module = ns.modules[name]
+	if  enable  then  moduleInit(name, module)
+	else  moduleDisable(name, module)
 	end
 	return true
 end

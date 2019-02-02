@@ -10,9 +10,8 @@ xpDB = {}
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "XP" -- L["XP"]
-local ttName,ttName2 = name.."TT", name.."TT2"
 local string = string
-local tt,tooltip,tt2
+local tooltip,tt2
 local data = {}
 local slots = {  [1]=L["Head"], [3]=L["Shoulder"], [5]=L["Chest"], [7]=L["Legs"], [15]=L["Back"], [11]=L["Ring1"], [12]=L["Ring2"]}
 local items = { -- Heirlooms with {<percent>,<maxLevel>}
@@ -101,8 +100,8 @@ local module = {
 --------------------------
 -- some local functions --
 --------------------------
-local function getTooltip2(parentLine,data)
-	tt2 = ns.LQT:Acquire(ttName2, 2, "LEFT", "RIGHT")
+local function getTooltip2(parentTooltip, parentLine,data)
+	tt2 = ns.LQT:Acquire(name.."TT2", 2, "LEFT", "RIGHT")
 
 	tt2:Clear()
 
@@ -121,6 +120,7 @@ local function getTooltip2(parentLine,data)
 	tt2:ClearAllPoints()
 	tt2:SetPoint("TOP",parentLine,"TOP",0,0)
 
+	local tt = parentTooltip
 	local tL,tR,tT,tB = ns.getBorderPositions(tt)
 	local uW = UIParent:GetWidth()
 	if tR<(uW/2) then
@@ -130,15 +130,17 @@ local function getTooltip2(parentLine,data)
 	end
 end
 
-local function getTooltip(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+function module.onqtip(tt)
+	if not tt then  return  end
+
+	tt:Clear()
+	tt:SetColumnLayout(2, "LEFT", "RIGHT")
 
 	local l, c, _, x = nil,nil,function(...) local l,c = tt:AddLine() for i,v in ipairs({...}) do tt:SetCell(l,i,v) end return l,c end,function(str,align) local l,c = tt:AddLine() tt:SetCell(l,1,str,nil,align,2) return l,c end
 
 	local tc,tx = "dkyellow",L[name]
 	if IsXPUserDisabled() then tc,tx = "orange",L["XP gain disabled"] end
 
-	tt:Clear()
 	l,c = tt:AddLine()
 	tt:SetCell(l,1,C(tc,tx),tt:GetHeaderFont(),nil,2)
 	tt:AddSeparator(1)
@@ -167,10 +169,10 @@ local function getTooltip(tt)
 		for i,v in pairs(xpDB[ns.realm]) do
 			if v~=nil and i~=ns.player.name and not (Broker_EverythingDB[name].showNonMaxLevelOnly and v.level==MAX_PLAYER_LEVEL) then
 				l,c = _(("(%d) %s %s"):format(v.level,C(v.class,ns.scm(i)),v.faction and "|TInterface\\PVPFrame\\PVP-Currency-"..v.faction..":16:16:0:-1:16:16:0:16:0:16|t" or ""), ("%d/%d (%s)"):format(v.xp,v.xpMax,v.xpPercent))
-				tt:SetLineScript(l,"OnMouseUp",function(self,button) xpDB[ns.realm][i] = nil getTooltip(tt) end)
+				tt:SetLineScript(l,"OnMouseUp",function(self,button) xpDB[ns.realm][i] = nil module.onqtip(tt) end)
 				if #v.xpBonus>0 then
-					tt:SetLineScript(l,"OnEnter",function(self) getTooltip2(self,v) end)
-					tt:SetLineScript(l,"OnLeave",function(self) ns.hideTooltip(tt2,ttName2,true) end)
+					tt:SetLineScript(l,"OnEnter",function(self) getTooltip2(tt,self,v) end)
+					tt:SetLineScript(l,"OnLeave",function(self) ns.hideTooltip(tt2, nil, true) end)
 				end
 				count = count + 1
 			end
@@ -260,8 +262,12 @@ module.onevent = function(self,event,msg)
 	elseif Broker_EverythingDB[name].display == "3" then
 		dataobj.text = data.xpNeed
 	end
+
+	-- TODO: Update the tooltip?
+	module.onqtip(module.tooltip)
 end
 
+--[[ Replaced by .onqtip()
 module.ontooltip = function(tooltip)
 	ns.tooltipScaling(tooltip)
 
@@ -281,24 +287,19 @@ module.ontooltip = function(tooltip)
 		tooltip:AddLine(C("copper",L["Right-click"]).." || "..C("green",L["Switch mode"]))
 	end
 end
-
+--]]
 
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(self)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
-	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "RIGHT")
-	getTooltip(tt)
-	ns.createTooltip(self,tt)
-end
-
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,false,true)
-end
+module.mouseOverTooltip = true
 
 module.onclick = function(self,button)
+	if button == "LeftButton" then
+		ToggleCharacter("PaperDollFrame")
+		if  ns.OpenCharacterTab  then  ns.OpenCharacterTab(1)  end
+	end
 	if button == "RightButton" then
 		if type(Broker_EverythingDB[name].display)=="boolean" then
 			Broker_EverythingDB[name].display = "1"

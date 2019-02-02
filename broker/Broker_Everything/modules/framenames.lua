@@ -10,8 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Framenames" -- L["Framenames"]
-local tt = nil
-local ttName = name.."TT"
 local string = string
 
 
@@ -38,12 +36,15 @@ local module = {
 --------------------------
 -- some local functions --
 --------------------------
-local lastFrame = nil
-local function FrameInfoTooltip(tt,frame)
-	if lastFrame==frame then return end
+local lastFrame
+
+function module.onqtip(tt)
+	if not tt then  return  end
 
 	tt:Clear()
+	tt:SetColumnLayout(2, "LEFT", "RIGHT")
 
+	local frame = lastFrame
 	if frame:IsForbidden() or ( frame:IsProtected() and InCombatLockdown() ) then
 		tt:AddLine(L["Name"], (frame:IsForbidden() and "[Forbidden Frame]") or (frame:IsProtected() and "[Protected Frame]") or "[Unknown]")
 	else
@@ -58,10 +59,6 @@ local function FrameInfoTooltip(tt,frame)
 		end
 		tmp = frame:GetParent()
 		tt:AddLine("GetParent", (tmp~=nil and tmp:GetName()) or "nil <anonym?>")
-	end
-
-	if lastFrame~=frame then
-		lastFrame = frame
 	end
 end
 
@@ -92,23 +89,26 @@ module.initbroker = function(dataobj)
 end
 
 module.onupdate = function(self)
-	local dataobj = self.obj
-	local F = nil
+	if  IsShiftKeyDown()  then  return  end
+	
 	local f = GetMouseFocus()
-	if (not f) then
-		if dataobj.text~=L["Unknown"] then
-			dataobj.text = L["Unknown"]
-		end
+	if  lastFrame == f  then  return  end
+	lastFrame = f
+	
+	local dataobj = self.obj
+	if  not f  then
+		dataobj.text = L["No GetMouseFocus()"]
 	else
-		F = (f:IsForbidden() and "[Forbidden Frame]") or (f:IsProtected() and InCombatLockdown() and "[Protected Frame]") or f:GetName()
-		if F == nil and type(f.key)=="string" then -- LibQTip tooltips returns nil on GetName but f.key contains the current name
-			F = f.key
+		local frameName
+		frameName = (f:IsForbidden() and "[Forbidden Frame]") or (f:IsProtected() and InCombatLockdown() and "[Protected Frame]") or f:GetName()
+		if frameName == nil and type(f.key)=="string" then -- LibQTip tooltips returns nil on GetName but f.key contains the current name
+			frameName = "LibQTip('"..f.key.."')"
 		end
-		if F == nil then F = "nil" end
-		if dataobj.text ~= F then
-			dataobj.text = F
-		end
+		dataobj.text = frameName  or  tostring(f)
 	end
+
+	module.onqtip(module.tooltip)
+
 	--[[
 	if ( f ) and  IsControlKeyDown() and IsAltKeyDown() then
 		if tt==nil then
@@ -139,16 +139,25 @@ module.onupdate = function(self)
 	]]
 end
 
-module.ontooltip = function(tt)
-	--if (ns.tooltipChkOnShowModifier(false)) then tt:Hide(); return; end
-	tt:Hide();
-end
-
 
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(self) end -- prevent displaying tt
+
+module.ontooltip = function(tt)  tt:Hide()  end
+module.onenter = function(display) end -- prevent displaying tooltip
+module.onleave = function(display) end -- prevent hiding tooltip
+
+module.onclick = function(display, button)
+	if  module.tooltip  then
+		ns.defaultOnLeave(module, display)
+	else
+		ns.defaultOnEnter(module, display)
+		ns.setStayOpen(module.tooltip, true, nil)
+	end
+end
+
+module.mouseOverTooltip = nil
 
 
 -- final module registration --

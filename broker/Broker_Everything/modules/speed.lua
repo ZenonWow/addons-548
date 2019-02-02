@@ -17,7 +17,9 @@ local string,GetUnitSpeed,UnitInVehicle = string,GetUnitSpeed,UnitInVehicle
 -- ------------------------------------- --
 -- register icon names and default files --
 -- ------------------------------------- --
-I[name] = {iconfile="Interface\\Icons\\Ability_Rogue_Sprint",coords={0.05,0.95,0.05,0.95}}
+-- I[name] = {iconfile="Interface\\Icons\\Ability_Rogue_Sprint",coords={0.05,0.95,0.05,0.95}}
+-- Icon credits go to gmSpeed addon.
+I[name] = {iconfile=[[Interface\Addons\"..addon.."\media\speed]]}
 
 
 ---------------------------------------
@@ -61,11 +63,17 @@ local module = {
 
 module.onupdate = function(self)
 	local unit = "player"
-	if UnitInVehicle("player") then unit = "vehicle" end
+	if UnitInVehicle(unit) then unit = "vehicle" end
 
-	local speed = ("%."..Broker_EverythingDB[name].precision.."f"):format(GetUnitSpeed(unit) / 7 * 100 ) .. "%"
-
-	self.obj.text = speed
+	local speed = GetUnitSpeed(unit) / 7 * 100
+	local pitch = math.deg( GetUnitPitch(unit) )
+	
+	-- local speedFormat = "%."..module.modDB.precision.."f%% %.0f°"
+	local speedFormat = "%.0f%%  %.0f°"
+	self.obj.text = speedFormat:format(speed, pitch)
+	
+	-- local numFormat, degFormat = "%."..module.modDB.precision.."f%%", "%.0f°"
+	-- self.obj.text = numFormat:format(speed) .."% ".. degFormat:format(pitch) .."°"
 end
 
 
@@ -76,7 +84,7 @@ module.onenter = function(self) end -- tt prevention (currently not on all broke
 
 module.onclick = function(self,button)
 	--if not PetJournalParent then PetJournal_LoadUI() end 
-	--securecall("TogglePetJournal",1)
+	--TogglePetJournal(1)
 end
 
 

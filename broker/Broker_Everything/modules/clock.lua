@@ -10,8 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Clock" -- L["Clock"]
-local tt
-local ttName = name.."TT"
 local GetGameTime = GetGameTime
 local GetGameTime2
 local countries = {}
@@ -68,14 +66,17 @@ local module = {
 --------------------------
 -- some local functions --
 --------------------------
-local function generateTooltip(tt)
-	local h24 = Broker_EverythingDB[name].format24
-	local dSec = Broker_EverythingDB[name].showSeconds
-	local pT,pL,pS = ns.LT.GetPlayedTime()
+module.onqtip = function (tt)
+	if not tt then  return  end
 
 	tt:Clear()
+	tt:SetColumnLayout(2, "LEFT", "RIGHT")
 	tt:AddHeader(C("dkyellow",L[name]))
 	tt:AddSeparator()
+
+	local h24 = module.modDB.format24
+	local dSec = module.modDB.showSeconds
+	local pT,pL,pS = ns.LT.GetPlayedTime()
 
 	tt:AddLine(C("ltyellow",L["Local Time"]),	C("white",ns.LT.GetTimeString("GetLocalTime",h24,dSec)))
 	tt:AddLine(C("ltyellow",L["Server Time"]),	C("white",ns.LT.GetTimeString("GetGameTime",h24,dSec)))
@@ -97,52 +98,25 @@ local function generateTooltip(tt)
 		tt:AddLine(C("copper",L["Shift+Right-click"]).." ||",C("green",L["Open calendar"]))
 		tt:AddLine(C("copper",L["Shift+Left-click"]).." ||"	,C("green",L["12 / 24 hours mode"]))
 		--]]
-		tt:AddLine(C("copper",L["Left-click"]).." ||",C("green",L["Open calendar"]))
-		tt:AddLine(C("copper",L["Right-click"]).." ||"		,C("green",L["Open time manager"]))
+		tt:AddLine(C("copper",L["Left-click"]).." ||"		,C("green",L["Open time manager"]))
+		tt:AddLine(C("copper",L["Right-click"]).." ||",C("green",L["Open calendar"]))
 		tt:AddLine(C("copper",L["Shift+Left-click"]).." ||"	,C("green",L["12 / 24 hours mode"]))
 		tt:AddLine(C("copper",L["Shift+Right-click"]).." ||"		,C("green",L["Local or server time"]))
 	end
 
 end
 
-
-------------------------------------
--- module (BE internal) functions --
-------------------------------------
-module.onevent = function(self,event,...)
-	if event=="TIME_PLAYED_MSG" then
-		played = true
-	end
-end
-
-module.onupdate = function(self)
-	if not self then self = {} end
-
-	local h24 = Broker_EverythingDB[name].format24
-	local dSec = Broker_EverythingDB[name].showSeconds
-
-	self.obj.text = Broker_EverythingDB[name].timeLocal and ns.LT.GetTimeString("GetLocalTime",h24,dSec) or ns.LT.GetTimeString("GetGameTime",h24,dSec)
-
-	if tt~=nil and tt.key==name.."TT" and tt:IsShown() then
-		generateTooltip(tt)
-	end
-end
-
-module.ontimeout = function(self)
-	if played==false then
-		--RequestTimePlayed()
-	end
-end
-
+--[==[
 module.ontooltip = function(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+	error("Broker_Everything.modules.clock.ontooltip() replaced by .onqtip()")
 	ns.tooltipScaling(tt)
-	local h24 = Broker_EverythingDB[name].format24
-	local dSec = Broker_EverythingDB[name].showSeconds
-	tt:ClearLines()
+	-- tt:Clear()
 
 	tt:AddLine(L[name])
 	tt:AddLine(" ")
+
+	local h24 = module.modDB.format24
+	local dSec = module.modDB.showSeconds
 
 	tt:AddDoubleLine(C("white",L["Local Time"]), C("white",ns.LT.GetTimeString("GetLocalTime",h24,dSec)))
 	tt:AddDoubleLine(C("white",L["Server Time"]), C("white",ns.LT.GetTimeString("GetGameTime",h24,dSec)))
@@ -161,44 +135,49 @@ module.ontooltip = function(tt)
 		tt:AddLine(C("copper",L["Shift+Right-click"]).." ||"		,C("green",L["Local or server time"]))
 	end
 end
+--]==]
 
+------------------------------------
+-- module (BE internal) functions --
+------------------------------------
+module.onevent = function(self,event,...)
+	if event=="TIME_PLAYED_MSG" then
+		played = true
+	end
+end
+
+module.onupdate = function(module)
+	local h24 = module.modDB.format24
+	local dSec = module.modDB.showSeconds
+	module.obj.text = module.modDB.timeLocal and ns.LT.GetTimeString("GetLocalTime",h24,dSec) or ns.LT.GetTimeString("GetGameTime",h24,dSec)
+
+	module.onqtip(module.tooltip)
+end
+
+--[[
+module.ontimeout = function(self)
+	if played==false then
+		--RequestTimePlayed()
+	end
+end
+--]]
 
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(self)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
-	tt = ns.LQT:Acquire(ttName, 2 , "LEFT", "RIGHT" )
-	generateTooltip(tt)
-	ns.createTooltip(self,tt)
-end
-
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,true)
-	-- ns.hideTooltip(tt2,ttName2,true) --?
-end
-
-module.onclick = function(self,button)
+module.onclick = function(display,button)
 	local shift = IsShiftKeyDown()
-	if  shift  and  button == "RightButton"  then
-		if Broker_EverythingDB[name].timeLocal ~= false then
-			Broker_EverythingDB[name].timeLocal = false
-		else
-			Broker_EverythingDB[name].timeLocal = nil
-		end
-		module.onupdate(self)
-	elseif  not shift   and  button == "RightButton" then
-		securecall("ToggleTimeManager")
+	if  not shift  and  button == "LeftButton"  then 
+		ToggleTimeManager()
 	elseif  shift  and  button == "LeftButton"  then 
-		if Broker_EverythingDB[name].format24 ~= false then
-			Broker_EverythingDB[name].format24 = false
-		else
-			Broker_EverythingDB[name].format24 = nil
-		end
-		module.onupdate(self)
-	else
-		securecall("ToggleCalendar")
+		module.modDB.format24 = not module.modDB.format24
+		module.onupdate(display)
+	elseif  not shift   and  button == "RightButton" then
+		ToggleCalendar()
+	elseif  shift  and  button == "RightButton"  then
+		module.modDB.timeLocal = not module.modDB.timeLocal
+		module.onupdate(display)
 	end
 end
 

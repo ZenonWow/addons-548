@@ -10,7 +10,6 @@ mailDB = {}
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Mail" -- L["Mail"]
-local ttName = name.."TT"
 local tooltip, tt, player_realm
 local icons = {}
 do for i=1, 22 do local _ = ("inv_letter_%02d"):format(i) icons[_] = "|Tinterface\\icons\\".._..":16:16:0:0|t" end end
@@ -74,23 +73,24 @@ local module = {
 --------------------------
 -- some local functions --
 --------------------------
-local function getTooltip(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+function module.onqtip(tt)
+	if not tt then  return  end
 
-	local newMails = {GetLatestThreeSenders()}
-	local l,c
 	tt:Clear()
-
+	tt:SetColumnLayout(1, "LEFT", "RIGHT")
 	tt:AddHeader(C("dkyellow",L[name]))
 	tt:AddSeparator()
+
+	local newMails = {GetLatestThreeSenders()}
 	tt:AddLine(C("ltblue",L["Last 3 new mails"]),#newMails.." "..L["mails"])
+
 	if #newMails>0 then
 		for i,v in ipairs(newMails) do
 			tt:AddLine("   "..ns.scm(v))
 		end
 	end
 
-	if Broker_EverythingDB[name].showDaysLeft then
+	if module.modDB.showDaysLeft then
 
 		tt:AddSeparator(3,0,0,0,0)
 		tt:AddHeader(C("dkyellow",L["Leave in mailbox"]))
@@ -129,10 +129,9 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
+
 module.preinit = function()
-	if Broker_EverythingDB[name].hideMinimapMail then
-		ns.hideFrame("MiniMapMailFrame")
-	end
+	ns.hideFrame("MiniMapMailFrame", module.modDB.hideMinimapMail)
 
 	player_realm = ns.realm.."/"..ns.player.name
 
@@ -152,6 +151,7 @@ module.preinit = function()
 		}
 	end
 end
+
 
 module.onevent = function(self,event,msg)
 	local dataobj = self.obj
@@ -220,11 +220,7 @@ module.onevent = function(self,event,msg)
 	end
 
 	if event == "BE_HIDE_MINIMAPMAIL" then
-		if Broker_EverythingDB[name].hideMinimapMail then
-			ns.hideFrame("MiniMapMailFrame")
-		else
-			ns.unhideFrame("MiniMapMailFrame")
-		end
+		ns.hideFrame("MiniMapMailFrame", module.modDB.hideMinimapMail)
 	end
 
 	local icon, text = I(name), L["No Mail"]
@@ -236,7 +232,11 @@ module.onevent = function(self,event,msg)
 	dataobj.iconCoords = icon.coords or {0,1,0,1}
 	dataobj.icon = icon.iconfile
 	dataobj.text = text
+	
+	module.onqtip(module.tooltip)
 end
+
+
 
 module.ontooltip = function(tooltip)
 	local sender1, sender2, sender3 = GetLatestThreeSenders()
@@ -253,27 +253,12 @@ module.ontooltip = function(tooltip)
 	tooltip:AddLine(ns.scm(sender1))
 	if sender2 then tooltip:AddLine(ns.scm(sender2)) end
 	if sender3 then tooltip:AddLine(ns.scm(sender3)) end
-
 end
 
 
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-
---[=[
-module.onenter = function(self)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
-
-	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "RIGHT")
-	getTooltip(tt)
-	ns.createTooltip(self,tt)
-end
-
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,true)
-end
-]=]
 
 -- MinimapMailFrameUpdate
 

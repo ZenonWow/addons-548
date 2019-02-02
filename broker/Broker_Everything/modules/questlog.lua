@@ -9,8 +9,7 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -----------------------------------------------------------
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
-local name = "Quest Log" -- L["Quest Log"]
-local ttName = name.."TT"
+local name = "QuestLog" -- L["Quest Log"]
 L[name] = QUEST_LOG
 local tt = nil
 local ttColumns = 3
@@ -116,10 +115,15 @@ local function updateBroker()
 	local fail, active, complete = #quests["fail"], #quests["active"], #quests["complete"]
 	--local sum = fail + active + complete
 	module.obj.text = (fail>0 and C("red",fail).."/" or "")..(complete>0 and C("ltblue",complete).."/" or "")..sum.."/"..MAX_QUESTS
+
+	module.onqtip(module.tooltip)
 end
 
-local function questTooltip(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+function module.onqtip(tt)
+	if not tt then  return  end
+
+	ttColumns =  module.modDB.showQuestIds  and 4  or 3
+	tt:SetColumnLayout(ttColumns,"LEFT","LEFT","RIGHT","RIGHT")
 
 	local function addLine(obj)
 		local l,c = tt:AddLine()
@@ -211,7 +215,7 @@ module.onevent = function(self,event,msg)
 		quests = {["fail"]={},["complete"]={},["active"]={}}
 		sum = numQuests
 
-		if ns.build<60000000 then
+		if ns.tocversion < 60000 then
 			for index=1, numEntries do
 				local questTitle, level, questTag, suggestedGroup, isHeader, isCollapsed, isComplete, isDaily, questID = GetQuestLogTitle(index)
 				if not isHeader then
@@ -254,21 +258,6 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(button)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
-
-	if Broker_EverythingDB[name].showQuestIds then
-		ttColumns = 4
-	end
-
-	tt = ns.LQT:Acquire(ttName, ttColumns,"LEFT","LEFT","RIGHT","RIGHT")
-	questTooltip(tt)
-	ns.createTooltip(button,tt)
-end
-
-module.onleave = function(button)
-	ns.hideTooltip(tt,ttName,false,true)
-end
 
 
 -- final module registration --

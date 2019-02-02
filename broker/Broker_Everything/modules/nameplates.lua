@@ -10,8 +10,6 @@ local NAMEPLATES = NAMEPLATES or "Nameplates"
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Nameplates" -- L["Nameplates"]
-local tt = nil
-local ttName = name.."TT"
 local GetCVar,RegisterCVar = GetCVar,RegisterCVar
 local ttColumns = 5
 
@@ -125,10 +123,12 @@ module.onevent = function(self,event,msg,msg2)
 	end
 end
 
-module.ontooltip = function(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+module.onqtip = function(tt)
+	-- if not tt then  return  end
 
 	tt:Clear()
+	tt:SetColumnLayout(ttColumns, "LEFT", "LEFT","LEFT","LEFT","LEFT","LEFT")
+
 	local line, column = tt:AddHeader(C("dkyellow",L[name]))
 	tt:AddSeparator(1,0,0,0,0) -- transparent
 
@@ -158,8 +158,7 @@ module.ontooltip = function(tt)
 			tt:SetCellScript(line, cell, "OnLeave", function(self) tt:SetLineColor(line, 0,0,0,0) end)
 			tt:SetCellScript(line, cell, "OnMouseUp", function(self)
 				ns.SetCVar(v[2], toggle, v[2])
-				tt:Clear()
-				module.ontooltip(tt)
+				module.onqtip(tt)
 			end)
 			cell = cell + v[3]
 			if cell > ttColumns then
@@ -196,8 +195,7 @@ module.ontooltip = function(tt)
 				tt:SetCellScript(line, cell, "OnLeave", function(self) tt:SetLineColor(line, 0,0,0,0) end)
 				tt:SetCellScript(line, cell, "OnMouseUp", function(self)
 					ns.SetCVar(v[2], toggle, v[2])
-					tt:Clear()
-					module.ontooltip(tt)
+					module.onqtip(tt)
 				end)
 				cell = cell + 1
 			end
@@ -217,17 +215,8 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(self)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
-	tt = ns.LQT:Acquire(ttName, ttColumns, "LEFT", "LEFT","LEFT","LEFT","LEFT","LEFT")
-	ns.createTooltip(self,tt)
-	module.ontooltip(tt)
-end
-
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,false,true)
-end
+module.mouseOverTooltip = true
 
 
 -- final module registration --

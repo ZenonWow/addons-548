@@ -10,8 +10,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Surprise" -- L["Surprise"]
-local ttName = name.."TT"
-local tt = nil
 local ITEM_DURATION,ITEM_COOLDOWN,ITEM_LOOTABLE=1,2,3
 local founds,counter,items = {},{},{
 	-- 1 items with duration time
@@ -45,7 +43,7 @@ local module = {
 		"PLAYER_ENTERING_WORLD",
 		"BAG_UPDATE",
 	},
-	updateinterval = 10,
+	-- updateinterval = 10,
 	config_defaults = nil,
 	config_allowed = nil,
 	config = nil -- {}
@@ -76,8 +74,9 @@ local function updateFunc() -- update broker
 	end
 end
 
-local function getTooltip(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+function module.onqtip(tt)
+	tt:Clear()
+	tt:SetColumnLayout(3, "LEFT", "LEFT", "RIGHT")
 
 	local e,l,c = 0,nil,nil
 	tt:AddHeader(C("dkyellow",L[name]))
@@ -103,25 +102,17 @@ module.onevent = function(self,event,...)
 	for i,v in pairs(items) do ns.bagScan.RegisterId(name,i,foundFunc,resetFunc,updateFunc) end
 	ns.bagScan.Update(true)
 end
-
+--[[
 module.onupdate = function(self)
 	
 end
+--]]
 
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(self)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
-	tt = ns.LQT:Acquire(ttName, 3, "LEFT", "LEFT", "RIGHT")
-	getTooltip(tt)
-	ns.createTooltip(self,tt)
-end
-
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,true)
-end
+module.mouseOverTooltip = nil
 
 
 -- final module registration --

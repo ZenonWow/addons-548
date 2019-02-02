@@ -1,7 +1,8 @@
 local MAJOR = "LibQTip-1.0"
-local MINOR = 42 -- Should be manually increased
-assert(LibStub, MAJOR .. " requires LibStub")
+local MINOR = 42.1 -- Should be manually increased
+-- 42.1  added lib(key) == lib:GetAcquired(key),  modified SetAutoHideDelay() to accept 0 delay
 
+assert(LibStub, MAJOR .. " requires LibStub")
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No upgrade needed
 
@@ -97,10 +98,10 @@ function lib:Acquire(key, ...)
 	if key == nil then
 		error("attempt to use a nil key", 2)
 	end
-	local tooltip = activeTooltips[key]
+	local tooltip, reused = activeTooltips[key], true
 
 	if not tooltip then
-		tooltip = AcquireTooltip()
+		tooltip, reused = AcquireTooltip(), false
 		InitializeTooltip(tooltip, key)
 		activeTooltips[key] = tooltip
 	end
@@ -113,7 +114,7 @@ function lib:Acquire(key, ...)
 			error(msg, 2)
 		end
 	end
-	return tooltip
+	return tooltip, reused
 end
 
 function lib:Release(tooltip)
@@ -132,6 +133,15 @@ function lib:IsAcquired(key)
 	end
 	return not not activeTooltips[key]
 end
+
+function lib:GetAcquired(key)
+	if key == nil then
+		error("attempt to use a nil key", 2)
+	end
+	return activeTooltips[key]
+end
+
+setmetatable(lib, { __call = lib.GetAcquired })
 
 function lib:IterateTooltips()
 	return pairs(activeTooltips)
@@ -645,6 +655,10 @@ function tipPrototype:UpdateScrolling(maxheight)
 	local scale = self:GetScale()
 	local topside = self:GetTop()
 	local bottomside = self:GetBottom()
+	if  not topside  or  not bottomside  then
+		print("LibQTip["..self.key.."]:UpdateScrolling("..maxheight.."): topside="..tostring(topside).." bottomside="..tostring(bottomside))
+		return false
+	end
 	local screensize = UIParent:GetHeight() / scale
 	local tipsize = (topside - bottomside)
 
@@ -698,6 +712,7 @@ end
 -- Tooltip methods for changing its contents.
 ------------------------------------------------------------------------------
 function tipPrototype:Clear()
+	assert(self.lines, "LibQTip:Clear():  this tooltip has been Release() -d.")
 	for i, line in ipairs(self.lines) do
 		for j, cell in pairs(line.cells) do
 			if cell then
@@ -1227,15 +1242,15 @@ local scripts = {
 	end,
 }
 
-function SetFrameScript(frame, script, func, arg)
+function SetFrameScript(frame, script, scriptFunc, arg)
 	if not scripts[script] then
 		return
 	end
-	frame["_" .. script .. "_func"] = func
+	frame["_" .. script .. "_func"] = scriptFunc
 	frame["_" .. script .. "_arg"] = arg
 
 	if script == "OnMouseDown" or script == "OnMouseUp" or script == "OnReceiveDrag" then
-		if func then
+		if scriptFunc then
 			frame:SetScript(script, scripts[script])
 		else
 			frame:SetScript(script, nil)
@@ -1275,18 +1290,18 @@ function ClearFrameScripts(frame)
 	end
 end
 
-function tipPrototype:SetLineScript(lineNum, script, func, arg)
-	SetFrameScript(self.lines[lineNum], script, func, arg)
+function tipPrototype:SetLineScript(lineNum, script, scriptFunc, arg)
+	SetFrameScript(self.lines[lineNum], script, scriptFunc, arg)
 end
 
-function tipPrototype:SetColumnScript(colNum, script, func, arg)
-	SetFrameScript(self.columns[colNum], script, func, arg)
+function tipPrototype:SetColumnScript(colNum, script, scriptFunc, arg)
+	SetFrameScript(self.columns[colNum], script, scriptFunc, arg)
 end
 
-function tipPrototype:SetCellScript(lineNum, colNum, script, func, arg)
+function tipPrototype:SetCellScript(lineNum, colNum, script, scriptFunc, arg)
 	local cell = self.lines[lineNum].cells[colNum]
 	if cell then
-		SetFrameScript(cell, script, func, arg)
+		SetFrameScript(cell, script, scriptFunc, arg)
 	end
 end
 
@@ -1298,7 +1313,8 @@ end
 local function AutoHideTimerFrame_OnUpdate(self, elapsed)
 	self.checkElapsed = self.checkElapsed + elapsed
 	if self.checkElapsed > 0.1 then
-		if self.parent:IsMouseOver() or (self.alternateFrame and self.alternateFrame:IsMouseOver()) then
+		local owner = self.alternateFrame
+		if self.parent:IsMouseOver() or (owner and owner:IsMouseOver() and owner:IsVisible()) then
 			self.elapsed = 0
 		else
 			self.elapsed = self.elapsed + self.checkElapsed
@@ -1316,9 +1332,9 @@ end
 -- :SetAutoHideDelay() => disable auto-hiding (default)
 function tipPrototype:SetAutoHideDelay(delay, alternateFrame)
 	local timerFrame = self.autoHideTimerFrame
-	delay = tonumber(delay) or 0
+	delay = tonumber(delay)
 
-	if delay > 0 then
+	if  delay  and  0 <= delay  then
 		if not timerFrame then
 			timerFrame = AcquireFrame(self)
 			timerFrame:SetScript("OnUpdate", AutoHideTimerFrame_OnUpdate)
@@ -1336,6 +1352,31 @@ function tipPrototype:SetAutoHideDelay(delay, alternateFrame)
 		timerFrame:SetScript("OnUpdate", nil)
 		ReleaseFrame(timerFrame)
 	end
+	
+	--[[
+	if  delay  and  delay <= 0  then
+		if  self:GetScript('OnLeave')  then
+			print("Tooltip '"..self.key.." already has an OnLeave script, can't SetAutoHideDelay()")
+			return
+		end
+		tooltip.autoHideOnLeave = function (frame)
+			-- Blizzard calls OnLeave when in fact the mouse is over the frame but also entered an inner frame that gets GetMouseFocus().
+			-- This flat logic makes it necessary to hook all inner frames' OnLeave to tell for sure when the mouse leaves.
+			-- Or just check in every OnUpdate() if IsMouseOver(). Great for performance.
+			if  frame:IsMouseOver()  then  return  end
+			if  frame.alternateFrame  and  frame.alternateFrame:IsMouseOver()  then  return  end
+			frame:SetScript('OnLeave', nil)
+			lib:Release(frame)
+		end
+		self:SetScript('OnLeave', tooltip.autoHideOnLeave)
+		-- alternateFrame:HookScript('OnLeave', checkHide)  -- this would accumulate, adding one every time the tooltip is shown
+	elseif  self.autoHideOnLeave  then
+		if  self:GetScript('OnLeave') == self.autoHideOnLeave  then
+			self:SetScript('OnLeave', nil)
+		end
+		self.autoHideOnLeave = nil
+	end
+	--]]
 end
 
 ------------------------------------------------------------------------------

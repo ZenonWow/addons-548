@@ -10,8 +10,8 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Friends" -- L["Friends"]
-local tt, tt2
-local ttName,ttName2=name.."TT",name.."TT2"
+local tt2
+local ttName2=name.."TT",name.."TT2"
 local totalOnline = 0
 local totalFriends = 0
 local friends = {}
@@ -198,9 +198,9 @@ local function _tt2(self,data)
 		local blue = C("ltblue","colortable");
 		GameTooltip:SetOwner(self,"ANCHOR_NONE");
 		if (select(1,self:GetCenter()) > (select(1,UIParent:GetWidth()) / 2)) then
-			GameTooltip:SetPoint("RIGHT",tt,"LEFT",-2,0)
+			GameTooltip:SetPoint("RIGHT",module.tooltip,"LEFT",-2,0)
 		else
-			GameTooltip:SetPoint("LEFT",tt,"RIGHT",2,0)
+			GameTooltip:SetPoint("LEFT",module.tooltip,"RIGHT",2,0)
 		end
 		GameTooltip:ClearLines();
 		GameTooltip:AddLine(data.realID,blue[1],blue[2],blue[3])
@@ -213,8 +213,8 @@ local function _tt2(self,data)
 
 		tt2:ClearAllPoints()
 		tt2:SetPoint("TOP",self,"BOTTOM",0,-5)
-		tt2:SetPoint("LEFT",tt,"LEFT",6,0)
-		tt2:SetFrameLevel(tt:GetFrameLevel()+3)
+		tt2:SetPoint("LEFT",module.tooltip,"LEFT",6,0)
+		tt2:SetFrameLevel(module.tooltip:GetFrameLevel()+3)
 
 		tt2:Clear()
 
@@ -251,21 +251,21 @@ module.onevent = function(self,event,msg)
 		dataobj.text = totalOnline .. "/" .. totalFriends
 	end
 
-	if tt~=nil and tt.key~=nil and tt.key==name.."TT" and tt:IsShown() then
-		module.ontooltip(tt)
-	end
+	module.onqtip(module.tooltip)
 end
 
-module.ontooltip = function(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+module.onqtip = function(tt)
+	if not tt then  return  end
+
+	tt:Clear()
+	tt:SetColumnLayout(8 , "LEFT","CENTER", "LEFT", --[["LEFT",]] "CENTER", "LEFT", "LEFT", "LEFT", "LEFT" --[[, "LEFT"]] )
+	tt:AddHeader(C("dkyellow",L[name]))
 
 	grabFriends()
 	local myguild = ""
 	local line, column
 	local columns = 8
 	local split = Broker_EverythingDB[name].splitFriendsTT
-	tt:Clear()
-	tt:AddHeader(C("dkyellow",L[name]))
 
 	if IsInGuild() then
 		myguild = GetGuildInfo("player")
@@ -335,14 +335,14 @@ module.ontooltip = function(tt)
 			tt:SetCell(line,5,C("white",v.zone),nil,nil,3) -- 5 6 7
 			tt:SetCell(line,8,C("white",v.notes or " "))
 		end
-		tt:SetLineScript(line, "OnMouseUp", function(self) if IsAltKeyDown() then BNInviteFriend(v.toonID) else ChatFrame_SendSmartTell(v.presenceName) end end, n)
-		tt:SetLineScript(line, "OnEnter", function(self)
+		tt:SetLineScript(line, "OnMouseUp", function(lineFrame) if IsAltKeyDown() then BNInviteFriend(v.toonID) else ChatFrame_SendSmartTell(v.presenceName) end end, n)
+		tt:SetLineScript(line, "OnEnter", function(lineFrame)
 			tt:SetLineColor(line, 1,192/255, 90/255, 0.3)
 			if v.bcText~="" then
-				_tt2(self,v)
+				_tt2(lineFrame,v)
 			end
 		end)
-		tt:SetLineScript(line, "OnLeave", function(self)
+		tt:SetLineScript(line, "OnLeave", function(lineFrame)
 			tt:SetLineColor(line, 0,0,0,0)
 			_tt2(false)
 		end)
@@ -400,20 +400,11 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(self)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
-	tt = ns.LQT:Acquire(ttName, 8 , "LEFT","CENTER", "LEFT", --[["LEFT",]] "CENTER", "LEFT", "LEFT", "LEFT", "LEFT" --[[, "LEFT"]] )
-	module.ontooltip(tt)
-	ns.createTooltip(self,tt)
-end
-
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,false,true)
-end
+module.mouseOverTooltip = true
 
 module.onclick = function(self,button)
-	securecall("ToggleFriendsFrame",1)
+	ToggleFriendsFrame(1)
 end
 
 

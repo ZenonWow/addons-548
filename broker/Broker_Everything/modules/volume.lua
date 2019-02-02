@@ -11,24 +11,21 @@ local _G = _G
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Volume" -- L["Volume"]
-local tt = nil
-local ttName = name.."TT"
 local ttColumns = 2
 local icon = "Interface\\AddOns\\"..addon.."\\media\\volume_"
 local VIDEO_VOLUME_TITLE = L["Video Volume"];
 local getSoundHardware,setSoundHardware
-local volume = {}
 local vol = {
-	{inset=0,locale="MASTER_VOLUME",			toggle="Sound_EnableAllSound",								percent="Sound_MasterVolume"},
-	{inset=1,locale="ENABLE_SOUNDFX",			toggle="Sound_EnableSFX",					depend={1},		percent="Sound_SFXVolume"},
+	{inset=0,locale="MASTER_VOLUME",			toggle="Sound_EnableAllSound",								cvar="Sound_MasterVolume"},
+	{inset=1,locale="ENABLE_SOUNDFX",			toggle="Sound_EnableSFX",					depend={1},		cvar="Sound_SFXVolume"},
 	{inset=2,locale="ENABLE_ERROR_SPEECH",		toggle="Sound_EnableErrorSpeech",			depend={1,2}	},
 	{inset=2,locale="ENABLE_EMOTE_SOUNDS",		toggle="Sound_EnableEmoteSounds",			depend={1,2}	},
 	{inset=2,locale="ENABLE_PET_SOUNDS",		toggle="Sound_EnablePetSounds",				depend={1,2}	},
-	{inset=1,locale="MUSIC_VOLUME",				toggle="Sound_EnableMusic",					depend={1},		percent="Sound_MusicVolume"},
+	{inset=1,locale="MUSIC_VOLUME",				toggle="Sound_EnableMusic",					depend={1},		cvar="Sound_MusicVolume"},
 	{inset=2,locale="ENABLE_MUSIC_LOOPING",		toggle="Sound_ZoneMusicNoDelay",			depend={1,6}	},
 	{inset=2,locale="ENABLE_PET_BATTLE_MUSIC",	toggle="Sound_EnablePetBattleMusic",		depend={1,6}	},
-	{inset=1,locale="ENABLE_AMBIENCE",			toggle="Sound_EnableAmbience",				depend={1},		percent="Sound_AmbienceVolume"},
-	{inset=1,locale="DIALOG_VOLUME",			toggle="no-toggle",							depend={1},		percent="Sound_DialogVolume", hide=(select(4,GetBuildInfo())<60000)},
+	{inset=1,locale="ENABLE_AMBIENCE",			toggle="Sound_EnableAmbience",				depend={1},		cvar="Sound_AmbienceVolume"},
+	{inset=1,locale="DIALOG_VOLUME",			toggle="no-toggle",							depend={1},		cvar="Sound_DialogVolume", hide=(select(4,GetBuildInfo())<60000)},
 	{inset=1,locale="ENABLE_BGSOUND",			toggle="Sound_EnableSoundWhenGameIsInBG",	depend={1}		},
 	{inset=1,locale="ENABLE_SOUND_AT_CHARACTER",toggle="Sound_ListenerAtCharacter",			depend={1}		},
 	{inset=1,locale="ENABLE_REVERB",			toggle="Sound_EnableReverb",				depend={1}		},
@@ -59,7 +56,7 @@ local module = {
 	},
 	updateinterval = 5,
 	config_defaults = {
-		useWheel = false,
+		useWheel = true,
 		steps = 10,
 		listHardware = true
 	},
@@ -97,40 +94,45 @@ local module = {
 --------------------------
 -- some local functions --
 --------------------------
-local function updateBrokerButton()
-	local obj = module.obj
-	volume.master = tonumber(GetCVar("Sound_MasterVolume"))
+local function updateDisplay()
+	local volume = tonumber(GetCVar("Sound_MasterVolume"))
 	local suffix = "100"
-	if volume.master < .1 then
+	if volume < .1 then
 		suffix = "0"
-	elseif volume.master < .3 then
+	elseif volume < .3 then
 		suffix = "33"
-	elseif volume.master < .6 then
+	elseif volume < .6 then
 		suffix = "66"
 	end
 	local icon = I(name.."_"..(suffix or "100"))
+	local obj = module.obj
 	obj.iconCoords = icon.coords or {0,1,0,1}
 	obj.icon = icon.iconfile
-	obj.text = ceil(volume.master*100).."%"
-	module.ontooltip(tt)
+	obj.text = ceil(volume*100).."%"
+
+	module.onqtip(module.tooltip)
 end
 
-function module.ontooltip(tt)
-	if  not tt  or  not tt.key  or  tt.key ~= ttName  then  return  end -- don't override other LibQTip tooltips...
-	local l,c
+local function changeVolume(frame,cvar,direction)
+	now = tonumber( GetCVar(cvar) )
+	local new = now + ((direction * Broker_EverythingDB[name].steps) / 100)
+	new = (new<0 and 0) or (new>1 and 1) or new
+	SetCVar(cvar,new)
+	-- ns.SetCVar(cvar,new,cvar)
+	--BlizzardOptionsPanel_SetCVarSafe(cvar,new)
+	updateDisplay()
+end
+
+
+function module.onqtip(tt)
+	if not tt then  return  end
+
 	tt:Clear()
+	tt:SetColumnLayout(2, "LEFT", "RIGHT")
 	tt:AddHeader(C("dkyellow",L[name]))
 	tt:AddSeparator()
 
-	local function percent(self,cvar,now,direction)
-		if (direction==-1 and now==0) or (direction==1 and now==1) then return end
-		local new = now + ((direction * Broker_EverythingDB[name].steps) / 100)
-		new = (new>1 and 1) or (new<0 and 0) or new
-		ns.SetCVar(cvar,new,cvar)
-		module.ontooltip(tt)
-		updateBrokerButton()
-	end
-
+	local l,c
 	for i,v in ipairs(vol) do
 		local color,disabled
 
@@ -152,7 +154,7 @@ function module.ontooltip(tt)
 					disabled = v.now==1 and "white" or "gray"
 				end
 
-				tt:SetLineScript(l,"OnMouseUp",function(self, button) ns.SetCVar(v.toggle,tostring(v.inv),v.toggle) module.ontooltip(tt) end);
+				tt:SetLineScript(l,"OnMouseUp",function(self, button) ns.SetCVar(v.toggle,tostring(v.inv),v.toggle) module.onqtip(tt) end);
 			else
 				if v.depend~=nil and ( (v.depend[1]~=nil and vol[v.depend[1]].now==0) or (v.depend[2]~=nil and vol[v.depend[2]].now==0) ) then
 					color = "gray";
@@ -161,24 +163,24 @@ function module.ontooltip(tt)
 					color = "dkyellow"
 					disabled = "white";
 				end
-				tt:SetLineScript(l,"OnMouseUp",function(self, button) module.ontooltip(tt) end);
+				tt:SetLineScript(l,"OnMouseUp",function(self, button) module.onqtip(tt) end);
 			end
 
 			tt:SetCell(l,1,strrep(" ",3 * v.inset)..C(color,_G[v.locale]));
 
-			if v.percent~=nil then
-				v.pnow = tonumber(GetCVar(v.percent))
+			if v.cvar then
+				local pnow = tonumber(GetCVar(v.cvar))
 
 				tt.lines[l]:EnableMouseWheel(1)
 				tt.lines[l]:SetScript("OnMouseWheel",function(self,direction)
-					percent(self,v.percent,v.pnow,direction)
+					changeVolume(self,v.cvar,direction)
 				end)
 
-				tt:SetCell(l,ttColumns,C(disabled,ceil(v.pnow*100).."%"))
+				tt:SetCell(l,ttColumns,C(disabled,ceil(pnow*100).."%"))
 				tt:SetCellScript(l,ttColumns,"OnMouseUp",function(self,button) end)
 				tt.lines[l].cells[ttColumns]:SetScript("OnMouseUp",function(self,button)
 					local direction = button=="RightButton" and -1 or 1
-					percent(self,v.percent,v.pnow,direction)
+					changeVolume(self,v.cvar,direction)
 				end)
 			else
 				tt:SetCell(l,ttColumns,"           ")
@@ -206,7 +208,7 @@ function module.ontooltip(tt)
 							ns.print("("..L[name]..")",L["Sorry, In combat lockdown."])
 						else
 							setSoundHardware(I)
-							module.ontooltip(tt)
+							module.onqtip(tt)
 							AudioOptionsFrame_AudioRestart()
 						end
 					end)
@@ -265,57 +267,30 @@ end
 ------------------------------------
 -- module (BE internal) functions --
 ------------------------------------
-module.initbroker = updateBrokerButton
+module.initbroker = updateDisplay
 
-module.onevent = updateBrokerButton
-
-module.onmousewheel = function(self,direction)
-	if not Broker_EverythingDB[name].useWheel then return end
-	if (direction==-1 and volume.master == 0) or (direction==1 and volume.master == 1) then return end
-
-	volume.master = volume.master + (direction * Broker_EverythingDB[name].steps / 100)
-	if volume.master > 1 then
-		volume.master = 1
-	elseif volume.master < 0 then
-		volume.master = 0
-	end
-	local cvar = "Sound_MasterVolume"
-	ns.SetCVar(cvar,volume.master,cvar)
-	--BlizzardOptionsPanel_SetCVarSafe("Sound_MasterVolume",volume.master)
-	updateBrokerButton()
-end
-
+module.onevent = updateDisplay
 
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(self)
-	ns.RegisterMouseWheel(self, module.onmousewheel)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
-	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "RIGHT")
-	module.ontooltip(tt)
-	ns.createTooltip(self,tt)
+module.mouseOverTooltip = true
+
+module.onenter = function(display)
+	ns.RegisterMouseWheel(display, module.onmousewheel)
+	ns.defaultOnEnter(module, display)
 end
 
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,false,true)
+module.onclick = function(display,button)
+	local direction =  button == "LeftButton" and 1  or  button == "RightButton" and -1
+	if not direction then  return  end
+	changeVolume(display,'Sound_MasterVolume',direction)
 end
 
-module.onclick = function(self,button)
-	if button == "LeftButton" then
-		if volume.master == 1 then return end
-		volume.master = volume.master + (Broker_EverythingDB[name].steps / 100)
-		if volume.master > 1 then volume.master = 1 elseif volume.master < 0 then volume.master = 0 end
-		BlizzardOptionsPanel_SetCVarSafe("Sound_MasterVolume",volume.master)
-		updateBrokerButton()
-	elseif button == "RightButton" then
-		if volume.master == 0 then return end
-		volume.master = volume.master - (Broker_EverythingDB[name].steps / 100)
-		if volume.master > 1 then volume.master = 1 elseif volume.master < 0 then volume.master = 0 end
-		BlizzardOptionsPanel_SetCVarSafe("Sound_MasterVolume",volume.master)
-		updateBrokerButton()
-	end
+module.onmousewheel = function(display,direction)
+	if not Broker_EverythingDB[name].useWheel then return end
+	changeVolume(display,'Sound_MasterVolume',direction)
 end
 
 --[[

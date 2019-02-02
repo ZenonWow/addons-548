@@ -14,7 +14,6 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -----------------------------------------------------------
 local name = "Gold" -- L["Gold"]
 local tt = nil
-local ttName = name.."TT"
 local login_money = nil
 local next_try = false
 local current_money = 0
@@ -114,8 +113,7 @@ local function addFactionGoldInfo(tt,faction)
 		tt:SetLineScript(line, "OnMouseUp", function(self,button)
 			if button == "RightButton" and IsShiftKeyDown() then
 				goldDB[faction][ns.realm][k] = nil
-				tt:Clear()
-				module.ontooltip(tt)
+				module.onqtip(tt)
 			end 
 		end)
 		totalGold = totalGold + v[1]
@@ -125,8 +123,9 @@ local function addFactionGoldInfo(tt,faction)
 	return totalGold
 end
 
-module.ontooltip = function(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+module.onqtip = function(tt)
+	tt:Clear()
+	tt:SetColumnLayout(2, "LEFT", "RIGHT")
 
 	local totalGold = 0
 	local diff_money
@@ -135,7 +134,6 @@ module.ontooltip = function(tt)
 	local playerMoney = {current_money,ns.player.class}
 	goldDB[faction][ns.realm][ns.player.name] = playerMoney
 
-	tt:Clear()
 	--tt:AddHeader(C("dkyellow",L["Gold information"])
 	--tt:AddSeparator()
 	tt:AddHeader(C("ltgreen", faction))
@@ -176,20 +174,11 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(self)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
-	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "RIGHT")
-	module.ontooltip(tt)
-	ns.createTooltip(self,tt)
-end
-
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,false,true)
-end
+module.mouseOverTooltip = true
 
 module.onclick = function(self,button)
-	securecall("ToggleCharacter","TokenFrame")
+	ToggleCharacter("TokenFrame")
 end
 
 

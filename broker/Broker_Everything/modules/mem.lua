@@ -10,14 +10,12 @@ local C, L, I = ns.LC.color, ns.L, ns.I
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Memory" -- L["Memory"]
-local tt
-local ttName = name.."TT"
 local GetNumAddOns,GetAddOnMemoryUsage,GetAddOnInfo = GetNumAddOns,GetAddOnMemoryUsage,GetAddOnInfo
 local ttColumns = 3
 
 
 local addonpanels = {}
-if ns.build>=60000000 then
+if ns.tocversion >= 60000 then
 	addonpanels["Blizzard's Addons Panel"] = function() end
 end
 addonpanels["ACP"] = function() ACP:ToggleUI() end
@@ -124,14 +122,13 @@ module.onupdate = function(self)
 	obj.text = string.format ("%.2f", total) .. C("suffix",unit)
 end
 
-module.ontooltip = function(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+module.onqtip = function(tt)
+	tt:Clear()
+	tt:SetColumnLayout(3, "LEFT", "RIGHT", "RIGHT")
 
 	local unit
 	local total, all = updateMemoryData(false)
 	local cnt = tonumber(Broker_EverythingDB[name].mem_max_addons)
-
-	tt:Clear()
 
 	if cnt > 0 then
 		tt:AddHeader(string.format("%s ( %s %d )", C("dkyellow",L[name]), "Top", Broker_EverythingDB[name].mem_max_addons))
@@ -203,17 +200,8 @@ end
 -------------------------------------------
 -- module functions for LDB registration --
 -------------------------------------------
-module.onenter = function(self)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
 
-	tt = ns.LQT:Acquire(ttName, 3, "LEFT","RIGHT", "RIGHT")
-	module.ontooltip(tt)
-	ns.createTooltip(self,tt)
-end
-
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,false,true)
-end
+module.mouseOverTooltip = true
 
 module.onclick = function(self,button)
 	local shift = IsShiftKeyDown()

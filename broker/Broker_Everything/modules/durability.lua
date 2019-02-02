@@ -11,7 +11,6 @@ durabilityDB = {}
 -----------------------------------------------------------
 local _
 local name = "Durability" -- L["Durability"]
-local ttName = name.."TT"
 local tt = nil
 local hiddenTooltip = nil
 local atMerchant = nil
@@ -284,27 +283,28 @@ local function byGuildBank()
 	return 1
 end
 
-local durabilityTooltip
-local function lastRepairs_reset(tt)
+local function lastRepairs_reset()
 	last_repairs = {}
 	durabilityDB = {}
-	if (tt) then durabilityTooltip(tt) end
+	module.onqtip(module.tooltip)
 end
 
-local function toggleAutoRepair(tt)
+local function toggleAutoRepair()
 	Broker_EverythingDB[name].autorepair = not Broker_EverythingDB[name].autorepair
-	durabilityTooltip(tt)
+	module.onqtip(module.tooltip)
 end
 
 local function toggleByGuild(tt)
 	Broker_EverythingDB[name].autorepairbyguild = not Broker_EverythingDB[name].autorepairbyguild
-	durabilityTooltip(tt)
+	module.onqtip(module.tooltip)
 end
 
-function durabilityTooltip(tt)
-	if (not tt.key) or tt.key~=ttName then return end -- don't override other LibQTip tooltips...
+function module.onqtip(tt)
+	if  not tt  or  tt.key ~= module.name  then  return  end
 
 	tt:Clear()
+	tt:SetColumnLayout(2, "LEFT", "RIGHT")
+
 	local repairCost, equipCost, bagCost, _ = getRepairCosts()
 	local repairCost2 = repDiscounts(repairCost,"remove")
 	local durabilityL, durabilityA, durabilityLslot = durabilityPercent()
@@ -386,9 +386,9 @@ function durabilityTooltip(tt)
 	if true then return end
 end
 
-local function createMenu(self)
-	ns.hideTooltip(tt,ttName,true)
 
+
+local function createMenu(self)
 	ns.EasyMenu.InitializeMenu();
 
 	ns.EasyMenu.addEntry({ label = L["Options"], title = true });
@@ -440,8 +440,8 @@ module.preinit = function()
 	end
 end
 
-module.onevent = function(self,event,msg)
-	local dataobj = self.obj 
+module.onevent = function(module,event,msg)
+	local dataobj = module.obj 
 	local discount = {[5]=0.95,[6]=0.9,[7]=0.85,[8]=0.8}
 	local repairCosts, equipment, bag, diff = getRepairCosts()
 
@@ -469,7 +469,7 @@ module.onevent = function(self,event,msg)
 					local _, _, _, diff = getRepairCosts()
 					if diff>0 then lastRepairs_add(diff,byGuild) end
 
-					module.onevent(self,"BE_DUMMY_EVENT")
+					module:onevent("BE_DUMMY_EVENT")
 				end
 				currentCosts = nil
 				byGuild = nil
@@ -520,36 +520,31 @@ module.onevent = function(self,event,msg)
 	date_format = Broker_EverythingDB[name].dateFormat
 end
 
-module.onclick = function(self,button)
-	if button=="LeftButton" then
-		securecall("ToggleCharacter","PaperDollFrame")
-	else
-		createMenu(self);
+module.onclick = function(display, button)
+	if  button == "LeftButton"  then
+		ToggleCharacter("PaperDollFrame")
+		if  ns.OpenCharacterTab  then  ns.OpenCharacterTab(3)  end
+	elseif  button == "RightButton"  then
+		if ns.EasyMenu.HideMenu() then
+			ns.defaultOnEnter(module, display)
+		else
+			ns.hideTooltip(module.tooltip, nil, true)
+			createMenu(display)
+		end
 	end
 end
 
 do
 	local percent = 0
-	module.onupdate = function(self)
+	module.onupdate = function(module)
 		if debugging then
-			module.onevent(self,"DEBUGGING",percent)
+			module.onevent(module,"DEBUGGING",percent)
 			percent = percent==100 and 0 or percent+1
 		end
 	end
 end
 
-
-module.onenter = function(self)
-	if (ns.tooltipChkOnShowModifier(false)) then return; end
-
-	tt = ns.LQT:Acquire(ttName, 2, "LEFT", "RIGHT")
-	durabilityTooltip(tt)
-	ns.createTooltip(self,tt)
-end
-
-module.onleave = function(self)
-	ns.hideTooltip(tt,ttName,true)
-end
+module.mouseOverTooltip = nil
 
 --[[
 
