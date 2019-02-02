@@ -13,10 +13,15 @@ local CallbackList = {}
 function HubData.RegisterCallback(func) CallbackList[func] = true end
 function HubData.UnRegisterCallback(func) CallbackList[func] = nil end
 
+local CurrentProfileName = nil
+
 local InCombatLockdown = InCombatLockdown
 
 local WidgetLib = TidyPlatesWidgets
 local valueToString = TidyPlatesUtility.abbrevNumber
+
+local MergeProfileValues = TidyPlatesHubHelpers.MergeProfileValues
+
 local EnableTankWatch = TidyPlatesWidgets.EnableTankWatch
 local DisableTankWatch = TidyPlatesWidgets.DisableTankWatch
 local EnableAggroWatch = TidyPlatesWidgets.EnableAggroWatch
@@ -223,14 +228,24 @@ local function UseTankVariables()
 end
 --]]
 
-local function UseVariables(suffix)
+local function UseVariables(profileName)
+
+	local suffix = profileName or "Damage"
 	if suffix then
-		local objectName = "HubPanelSettings"..suffix
+
+		if CurrentProfileName ~= suffix then 	-- Stop repeat loading
+
+			local objectName = "HubPanelSettings"..suffix
+
 			LocalVars = TidyPlatesHubSettings[objectName] or CreateVariableSet(objectName)
 
-			CallbackUpdate()
+			MergeProfileValues(LocalVars, TidyPlatesHubDefaults)		-- If the value doesn't exist in the settings, create it.
 
-			--EnableWatchers()
+			CurrentProfileName = suffix
+
+			CallbackUpdate()
+		end
+
 			return LocalVars
 	end
 end

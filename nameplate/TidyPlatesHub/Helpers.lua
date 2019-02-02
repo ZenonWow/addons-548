@@ -30,11 +30,12 @@ local function SetPanelValues(panel, sourceTable)
 	end
 end
 
-local function GetSavedVariables(targetTable, cloneTable)
+
+local function MergeProfileValues(target, defaults)
 	local i, v
-	for i, v in pairs(targetTable) do
-		if cloneTable[i] ~= nil then
-			targetTable[i] = cloneTable[i]
+	for i, v in pairs(defaults) do
+		if target[i] == nil then
+			target[i] = v
 		end
 	end
 end

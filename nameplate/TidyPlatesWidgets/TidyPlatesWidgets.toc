@@ -2,6 +2,6 @@
 ## Title: Tidy Plates Widgets
 ## Notes: Library of Widgets
 ## Dependencies: TidyPlates
-## SavedVariables: TidyPlatesWidgetData
+##-- SavedVariables: TidyPlatesWidgetData
 
 Widgets.xml

@@ -4,7 +4,7 @@
 ## Notes: Yes!
 ## Author: Binbwen and Friends
 
-## SavedVariablesPerCharacter: TidyPlatesOptions
+## SavedVariables: TidyPlatesOptions
 
 ##- LoadManagers: AddonLoader
 ## X-LoadOn-Login:  UserInterface
