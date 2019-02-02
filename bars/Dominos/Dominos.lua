@@ -107,11 +107,14 @@ function Dominos:OnInitialize()
 	local kb = LibStub('LibKeyBound-1.0')
 	kb.RegisterCallback(self, 'LIBKEYBOUND_ENABLED')
 	kb.RegisterCallback(self, 'LIBKEYBOUND_DISABLED')
+
+	self:CreateDataBrokerPlugin()
+	
+	self:ReplaceBlizzard()
 end
 
-function Dominos:OnEnable()
+function Dominos:ReplaceBlizzard()
 	self:HideBlizzard()
-	self:CreateDataBrokerPlugin()
 	self:Load()
 	self.MultiActionBarGridFixer:SetShowGrid(self:ShowGrid())
 end

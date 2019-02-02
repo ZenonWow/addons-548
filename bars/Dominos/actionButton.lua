@@ -13,62 +13,9 @@ ActionButton.unused = {}
 ActionButton.active = {}
 
 
-
-------------------------
---[[
-/run reportActionButtons()
-https://wow.gamepedia.com/Action_slot
---]]
-
-function reportActionButtons()
-        local lActionSlot = 0;
-        for lActionSlot = 1, 120 do
-                local lActionText = GetActionText(lActionSlot);
-                local lActionTexture = GetActionTexture(lActionSlot);
-                if lActionTexture then
-                        local lMessage = "Slot " .. lActionSlot .. ": [" .. lActionTexture .. "]";
-                        if lActionText then
-                                lMessage = lMessage .. " \"" .. lActionText .. "\"";
-                        end
-                        DEFAULT_CHAT_FRAME:AddMessage(lMessage);
-                end
-        end
-end
-
-
-------------------------
-
-local function ActionButtonPreClick(self, button)
-	print('ActionButtonPreClick(): '.. tostring(link) )
-	local actionType, id, subType = GetActionInfo(self.action)
-
-	local link
-	if  actionType == 'spell'  then  link = GetSpellLink(id)
-	elseif  actionType == 'item'  then  link = select(2, GetItemInfo(id))
-	elseif  actionType == "companion" and subType == "MOUNT"  then  link = GetSpellLink(id)
-	else  print('ActionButtonChatLink: type='..tostring(actionType)..' id='..tostring(id)..' subType='..tostring(subType) )
-	end
-
-	if  link  then  print('ActionButtonChatLink: '.. link)  end
-end
-
-local function ActionButtonChatLinkHandlerPre(self, unit, button, actionType)
-	print('ActionButtonChatLinkHandlerPre('..(self:GetID() or self:GetName() or '<noIDorName>')..')')
-end
-local function ActionButtonChatLinkHandlerHook(self, unit, button, actionType)
-	print('ActionButtonChatLinkHandlerHook('..(self:GetID() or self:GetName() or '<noIDorName>')..')')
-end
-local function ActionButtonChatLinkHandler(self, unit, button, actionType)
-	self:CallMethod('SendLink')
-end
-ActionButtonChatLinkHandlerCode = [===[
-	self:CallMethod('SendLink')
-]===]
-
-function ActionButton_SendLink(self)
-	local actionID = self:GetID()
-	print('ActionButton_SendLink(actionID='.. tostring(actionID) ..')')
-	--local action = ActionButton_CalculateAction(self, button)
+function ActionButton_LinkClick(self)
+	-- local bindingid = self:GetAttribute('bindingid')
+	-- local action = ActionButton_CalculateAction(self, button)
 	local actionType, id, subType = GetActionInfo(self.action)
 
 	local link
@@ -77,31 +24,12 @@ function ActionButton_SendLink(self)
 	elseif  actionType == 'companion' and subType == 'MOUNT'  then  link = GetSpellLink(id)
 	end
 
-	if  link  then  print('ActionButton_SendLink(): '.. link)
-	else  print('ActionButton_SendLink(): type='..tostring(actionType)..' id='..tostring(id)..' subType='..tostring(subType) )
-  end
+	local msg = link or 'type='..tostring(actionType)..' id='..tostring(id)..' subType='..tostring(subType)
+	print('ActionButton_LinkClick(self.action='..math.floor(self.action/12+1)..'.'..tostring(self.action) ..'): '.. msg)
 	
 	if  link  then  HandleModifiedItemClick(link)  end
-	--if  link  then  ChatEdit_InsertLink(link)  end
+	-- if  link  then  ChatEdit_InsertLink(link)  end
 end
-
-local SendLinkHandler = CreateFrame('Frame', nil, nil, 'SecureHandlerClickTemplate')
-
--- Secure wrapper  function  ActionButton_PreOnClick(self, button, down)
-local ActionButton_PreOnClick = [===[
-	print("ActionButton_PreOnClick(".. self:GetName() ..",".. button ..",".. tostring(down) ..")")
-	if  button == 'LeftButton'  and  IsModifiedClick('CHATLINK')  then
-		if  not down  then
-			self:CallMethod('SendLink')
-			return false
-		end
-	end
-]===]
-
-
-
------------------
-
 
 
 --constructor
@@ -109,6 +37,10 @@ function ActionButton:New(id)
 	local b = self:Restore(id) or self:Create(id)
 
 	if b then
+		-- Handle Shift-Click as chatlink.
+		b:SetAttribute("shift-type*", "chatlink")
+		b:SetAttribute("_chatlink", ActionButton_LinkClick)
+
 		b:SetAttribute('showgrid', 0)
 		b:SetAttribute('action--base', id)
 		b:SetAttribute('_childupdate-action', [[
@@ -128,22 +60,6 @@ function ActionButton:New(id)
 			end
 		]])
 
-		--print('ActionButton:New('..id..'): name='..tostring(b:GetName()) )
-		--[[
-		self:SetAttribute("shift-type*", "chatlink")
-		self:SetAttribute("_chatlink", ActionButtonChatLinkHandlerCode)
-		self:SetAttribute("_chatlink-action", ActionButtonChatLinkHandlerCode)
-		self:SetAttribute("shift-_chatlink*", ActionButtonChatLinkHandlerCode)
-		self:SetAttribute("shift-chatlink*", ActionButtonChatLinkHandlerCode)
-
-		self:SetScript("PreClick", ActionButtonChatLinkHandlerPre)
-		self:HookScript("OnClick", ActionButtonChatLinkHandlerHook)
-		--]]
-
-		self.SendLink = ActionButton_SendLink
-		SendLinkHandler:WrapScript(self, 'OnClick', ActionButton_PreOnClick, nil)
-
-
 		Dominos.BindingsController:Register(b, b:GetName():match('DominosActionButton%d'))
 
 		--hack #1billion, get rid of range indicator text
@@ -161,6 +77,32 @@ function ActionButton:New(id)
 	return b	
 end
 
+
+
+-- Global
+function GetActionButtonNameLinear(id)
+	if id <= 12 then  return 'ActionButton' .. id
+	elseif id <= 24 then  return 'MultiBarBottomLeftButton' .. (id-12)
+	elseif id <= 36 then  return 'MultiBarBottomRightButton' .. (id-24)
+	elseif id <= 48 then  return 'MultiBarLeftButton' .. (id-36)
+	elseif id <= 60 then  return 'MultiBarRightButton' .. (id-48)
+	--elseif id <= 72 then  return 'DominosActionButton' .. (id-60)
+	else  return 'DominosActionButton' .. (id-60)
+	-- else  return 'DominosActionButton' .. id
+	end
+end
+
+local function Create(id)
+	local name = GetActionButtonNameLinear(id)
+	if id <= 60 then
+		local b = _G[name]
+		if id <= 12 then  b.buttonType = 'ACTIONBUTTON'  end
+		return b
+	end
+	return CreateFrame('CheckButton', name, nil, 'ActionBarButtonTemplate')
+end
+
+--[[ original Create() that exchanges bars 2<->6, 3<->5 : DominosActionButton[1]<->MultiBarBottomLeftButton, MultiBarRightButton<->MultiBarBottomRightButton
 local function Create(id)
 	if id <= 12 then
 		local b = _G['ActionButton' .. id]
@@ -179,6 +121,7 @@ local function Create(id)
 	end
 	return CreateFrame('CheckButton', 'DominosActionButton' .. (id-60), nil, 'ActionBarButtonTemplate')
 end
+--]]
 
 function ActionButton:Create(id)
 	local b = Create(id)
