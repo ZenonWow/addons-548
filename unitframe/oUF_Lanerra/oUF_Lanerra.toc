@@ -10,10 +10,10 @@
 ## Author: Lanerra
 ## X-Copyright: Copyright © 2014 Lanerra.
 ## X-License: See LICENSE file for license terms.
-## RequiredDeps: oUF
+## --RequiredDeps: oUF
 ## OptionalDeps: oUF_DebuffHighlight, oUF_RuneBar, oUF_MovableFrames
 
-## LoadManagers: AddonLoader
+##- LoadManagers: AddonLoader
 ## X-Load-OnlyOne:  UnitFrame
 
 

@@ -24,7 +24,7 @@
 ## SavedVariables: oUFPhanxConfig, oUFPhanxUnitConfig
 ## SavedVariablesPerCharacter: oUFPhanxAuraConfig
 
-## LoadManagers: AddonLoader
+##- LoadManagers: AddonLoader
 ## X-Load-OnlyOne:  UnitFrame
 
 

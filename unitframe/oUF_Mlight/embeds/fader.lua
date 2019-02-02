@@ -1,5 +1,6 @@
 local addon, ns = ...
 
+--[==[ Duplicate from FrameXML/UIParent.xml
 local frameFadeManager = CreateFrame("FRAME")
 
 -- Generic fade function
@@ -47,6 +48,7 @@ local function UIFrameFadeOut(frame, timeToFade, startAlpha, endAlpha)
 	fadeInfo.endAlpha = endAlpha;
 	UIFrameFade(frame, fadeInfo);
 end
+--]==]
 
 local function Update(self)
 	if not oUF_MlightDB.enablefade then return end
