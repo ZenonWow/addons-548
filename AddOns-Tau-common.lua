@@ -34,9 +34,9 @@ AceSerializer-3.0: true
 AceTab-3.0: true
 AceTimer-3.0: true
 CallbackHandler-1.0: true
+LibCommon: true
 LibDataBroker-1.1: true
-LibDBIcon-1.0: true
-LibEnv: true
+LibDataBrokerIcon-1.0: true
 LibSharedMedia-3.0: true
 LibStub: true
 ]=]
