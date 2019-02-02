@@ -202,7 +202,7 @@ do
 	end
 end
  HandyNotes:RegisterPluginDB("TimelessIsleChest", self, options)
- self:RegisterBucketEvent({ "LOOT_CLOSED" }, 2, "Refresh")
+ self:RegisterBucketEvent("LOOT_CLOSED", 2, "Refresh")
  self:Refresh()
 end
  

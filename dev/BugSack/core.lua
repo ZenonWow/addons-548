@@ -32,8 +32,19 @@ function addon:InitLSM()
 	if  LSM  then  return  end
 	LSM = _G.LibStub("LibSharedMedia-3.0", true)
 	if  not LSM  then  return  end
-	LSM:Register("sound", "TMW - Ding 1",  [[Interface\Addons\BugSack\Media\Ding1.ogg]])
-	LSM:Register("sound", "BugSack: Fatality", [[Interface\AddOns\BugSack\Media\error.ogg]])
+	LSM:Register("sound", "TMW - Ding 1",       [[Interface\Addons\BugSack\Media\Ding1.ogg]])
+	LSM:Register("sound", "BugSack: Fatality",  [[Interface\AddOns\BugSack\Media\error.ogg]])
+	LSM:Register("sound", "Water Medium",       [[Sound\Effects\DeathImpacts\InWater\mDeathImpactMediumWaterA.ogg]])
+	LSM:Register("sound", "Water Small",        [[Sound\Effects\DeathImpacts\InWater\mDeathImpactSmallWaterA.ogg]])
+	LSM:Register("sound", "Baby Murloc",        [[Sound\creature\BabyMurloc\BabyMurlocC.ogg]])
+	LSM:Register("sound", "Cat Miao",           [[Sound\creature\Cat\CatStepA.ogg]])
+	LSM:Register("sound", "Flying Reindeer",    [[Sound\creature\FlyingReindeer\FyingReindeerJump.ogg]])
+	LSM:Register("sound", "Wolpertinger 2",     [[Sound\creature\Wolpertinger\WolpertingerClickable2.ogg]])
+	LSM:Register("sound", "Wolpertinger 3",     [[Sound\creature\Wolpertinger\WolpertingerClickable3.ogg]])
+	LSM:Register("sound", "Wolpertinger 4",     [[Sound\creature\Wolpertinger\WolpertingerClickable4.ogg]])
+	LSM:Register("sound", "Wisp",               [[Sound\Event Sounds\Wisp\WispYes2.ogg]])
+	LSM:Register("sound", "Map Ping",           [[Sound\INTERFACE\MapPing.ogg]])
+	LSM:Register("sound", "Magic Click",        [[Sound\INTERFACE\MagicClick.ogg]])
 end
 
 
@@ -84,16 +95,19 @@ do
 		-- No more errors if errorObject == nil - BugGrabber:Reset() happened.
 		if  not errorObject  then  return  end
 		
+		if  self.window:IsShown()  then  return  end
+		
 		-- Throttle the notifications to one per 10 seconds.
-		if  now - lastNotify < 10  then  return  end
+		if  now - lastNotify < 30  then  return  end
 		lastNotify = now
+		
 		if not self.db.mute then
 			local sound = LSM and LSM:Fetch("sound", self.db.soundMedia)
 			PlaySoundFile(sound)
 		end
 		if  self.db.chatframe then
-			if  BugGrabber.PrintErrorLink  then  BugGrabber.PrintErrorLink(errorObject)
-			else  print(L["There's a bug in your soup!"])
+			if  false and BugGrabber.PrintErrorLink  then  BugGrabber.PrintErrorLink(errorObject)
+			else  print(L["There's a bug in your soup!"].."  "..BugGrabber:GetChatLink(errorObject))
 			end
 		end
 		if  self.db.auto  and  not InCombatLockdown()  then

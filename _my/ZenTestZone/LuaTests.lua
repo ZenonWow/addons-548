@@ -57,6 +57,78 @@ local fields = {
 /run LuaTests.FieldTest()
 --]]
 
+
+function LuaTests.TableNil()
+	local t = {} ; print("pcall(next,t,1)=", pcall(next,t,1)) ; t[1] = nil ; print( "t[1] = nil ; pcall(next,t)=", pcall(next,t)) ; print("pcall(next,t,1)=", pcall(next,t,1))
+end
+
+function LuaTests.TableItemNil()
+	-- lol rotf wtf is going on
+	local t
+	t	= {1,2,3,nil,nil,6,7,8,9} ; print("#{1,2,3,nil,nil,6,7,8,9}=", #t) ; t[3]=nil ; print("t[3]=nil ; #t=", #t) ; t[8]=nil ; print("t[8]=nil ; #t=", #t) ; t[9]=nil ; print("t[9]=nil ; #t=", #t) ; t[8]=8 ; print("t[8]=8 ; #t=", #t)
+	t = {1,2,3,nil,nil,6,7,8,9} ; print("#{1,2,3,nil,nil,6,7,8,9}=", #t) ; t[3]=nil ; print("t[3]=nil ; #t=", #t) ; t[4]=4 ; print("t[4]=4 ; #t=", #t) ; t[8]=nil ; print("t[8]=nil ; #t=", #t) ; t[9]=nil ; print("t[9]=nil ; #t=", #t) ; t[8]=8 ; print("t[8]=8 ; #t=", #t)
+	t = {1,nil} ; print("#{1,nil}=", #t) ; t[3]=3 ; print("t[3]=3 ; #t=", #t) ; 
+	t = {nil,2} ; print("#{nil,2}=", #t) ; t[3]=3 ; print("t[3]=3 ; #t=", #t) ; 
+	t = {1,2,nil,4} ; print("#{1,2,nil,4}=", #t) ; t[5]=5 ; print("t[5]=5 ; #t=", #t) ; 
+	t = {1,2,nil,nil,5} ; print("#{1,2,nil,nil,5}=", #t) ; t[6]=6 ; print("t[6]=6 ; #t=", #t) ; 
+	t = {1,nil,3,nil,5} ; print("#{1,nil,3,nil,5}=", #t) ; t[5]=5 ; print("t[5]=5 ; #t=", #t) ; t[6]=6 ; print("t[6]=6 ; #t=", #t)
+	t = {1,nil,3,nil,5} ; print("#{1,nil,3,nil,5}=", #t) ; t[4]=4 ; print("t[4]=4 ; #t=", #t) ; t[6]=6 ; print("t[6]=6 ; #t=", #t)
+	t = {nil,nil,3,nil,5} ; print("#{nil,nil,3,nil,5}=", #t) ; t[5]=5 ; print("t[5]=5 ; #t=", #t) ; t[4]=4 ; print("t[4]=4 ; #t=", #t) ; t[6]=6 ; print("t[6]=6 ; #t=", #t) ; 
+	t = {nil,nil,nil,nil,nil} ; print("#{nil,nil,nil,nil,nil}=", #t) ; t[2]=2 ; print("t[2]=2 ; #t=", #t) ; t[4]=4 ; print("t[4]=4 ; #t=", #t) ; t[6]=6 ; print("t[6]=6 ; #t=", #t) ; 
+	t = {nil,nil,nil,nil,5,nil,nil,nil,nil} ; print("#{nil,nil,nil,nil,5,nil,nil,nil,nil}=", #t) ; t[2]=2 ; print("t[2]=2 ; #t=", #t) ; t[4]=4 ; print("t[4]=4 ; #t=", #t) ; t[9]=9 ; print("t[9]=9 ; #t=", #t) ; t[10]=10 ; print("t[10]=10 ; #t=", #t)
+	t = {nil,nil,nil,nil,5,nil,nil,nil,nil,nil} ; print("#{nil,nil,nil,nil,5,nil,nil,nil,nil,nil}=", #t) ; t[2]=2 ; print("t[2]=2 ; #t=", #t) ; t[4]=4 ; print("t[4]=4 ; #t=", #t) ; t[9]=9 ; print("t[9]=9 ; #t=", #t) ; t[11]=11 ; print("t[11]=11 ; #t=", #t)
+	t = {nil,nil,nil,nil,nil,nil,nil,nil,nil,10} ; print("#{nil,nil,nil,nil,nil,nil,nil,nil,nil,10}=", #t) ; t[2]=2 ; print("t[2]=2 ; #t=", #t) ; t[4]=4 ; print("t[4]=4 ; #t=", #t) ; t[9]=9 ; print("t[9]=9 ; #t=", #t) ; t[11]=11 ; print("t[11]=11 ; #t=", #t)
+end
+
+
+function LuaTests.SelectItemNil()
+	local function n(...) print("last=", select(select('#',...),...), "select(#)=", select('#',...), "#{...}=", #{...}) end
+	n(nil); n(nil,nil); n(nil,nil,nil); 
+	n(nil,2); n(nil,nil,3); n(nil,nil,nil,4); 
+	n(1); n(1,nil); n(nil,2,nil); n(nil,nil,3,nil);
+	n(1); n(1,nil); n(1,2,nil); n(1,nil,3,nil); n(1,nil,nil,4,nil); n(1,nil,nil,nil,5,nil); 
+end
+
+function LuaTests.TableNilMT()
+	local t = setmetatable({},{ __newindex = function(t,key,v) print("__newindex(t,"..tostring(key)..","..tostring(v).."): pcall(next,t,key)=", pcall(next,t,key) ) end })
+	print("pcall(next,t,1)=", pcall(next,t,1) )
+	print("t[1] = 1") ; t[1] = 1 ; print("pcall(next,t,1)=", pcall(next,t,1) )
+	print("t[1] = 1.5") ; t[1] = 1.5 ; print("pcall(next,t,1)=", pcall(next,t,1) )
+	print("t[2] = 2") ; t[2] = 2
+end
+
+function LuaTests.MetaTableProtection()
+	local m
+	m={};m.__metatable=m;t=setmetatable({},m);print( pcall(getmetatable,t) );print( pcall(setmetatable,t,m) );getmetatable(t).__metatable=nil;print( pcall(setmetatable,t,m) )
+	m={};m.__metatable=function()return m end;t=setmetatable({},m);print( pcall(getmetatable,t) );print( pcall(setmetatable,t,m) );getmetatable(t)().__metatable=nil;print( pcall(setmetatable,t,m) )
+end
+
+function LuaTests.MetaTableTest()
+	local obj
+	obj = setmetatable({}, { __call = false }) ; print( "__call = false:", pcall(obj) )
+	obj = setmetatable({}, { __call = true  }) ; print( "__call = true:", pcall(obj) )
+	obj = setmetatable({}, { __call = 1     }) ; print( "__call = 1:", pcall(obj) )
+	obj = setmetatable({}, { __call = "call?" }) ; print( "__call = 'call?':", pcall(obj) )
+	obj = setmetatable({}, { __call = {} }) ; print( "__call = {}:", pcall(obj) )
+	obj = setmetatable({}, { __call = function() return "callobj" end }) ; print( "__call = func:", pcall(obj) )
+	obj = setmetatable({}, { __call = obj }) ; print( "__call = last:", pcall(obj) )
+	obj = setmetatable(obj, { __call = obj }) ; print( "__call = self:" ) ; print( pcall(obj) )
+	
+	
+	obj = setmetatable({}, { __tostring = function() return nil end }) ; print( "tostring() returns type '"..type( tostring(obj) ).."' if __tostring returns nil." )
+	-- print(tostring( (function() end)() ))
+	print(tostring(1,2))
+	obj = setmetatable({}, { __index = "Hello! Nothin 'ere." }) ; print(obj.something)
+	obj = setmetatable({}, { __index = false }) ; print(obj.something)
+	obj = setmetatable({}, { __index = function(self,key) return 1,2,key end }) ; print(m['nomultireturn'])
+end
+
+
+function LuaTests.WeakStringGC()
+	local s,t0,t = "String to forget", {}, setmetatable({}, { __mode = "k" }) ; t0[s] = 1 ; t[s] = 1 ; print("next(t)=", next(t)) ; t[s] = nil ; collectgarbage() ; print("next(t)=", next(t), "next(t0)=", next(t0))
+end
+
+
 --[[
 /run print("UnitExists('mouseover')="..tostring(UnitExists('mouseover'))) ; MouselookStart() ; print("MouselookStart(); UnitExists('mouseover')="..tostring(UnitExists('mouseover'))) ; MouselookStop()
 /run function trickyIter(t,i) print('is this a valid iteration?') ; return nil,(i==0 and 'YES') end ; for a,b in trickyIter,'YES',0 do print(a,b) end
@@ -70,15 +142,6 @@ function LuaTests.MouselookTest()
 	MouselookStart()
 	print("MouselookStart(); UnitExists('mouseover')="..tostring(UnitExists('mouseover')))
 	MouselookStop()
-end
-
-
-function LuaTests.MetaTableTest()
-	obj = setmetatable({}, { __tostring = function() return nil end }) ; print( "tostring() returns type '"..type( tostring(obj) ).."' if __tostring returns nil." )
-	-- print(tostring( (function() end)() ))
-	print(tostring(1,2))
-	obj = setmetatable({}, { __index = "Hello! Nothin 'ere." }) ; print(obj.something)
-	obj = setmetatable({}, { __index = false }) ; print(obj.something)
 end
 
 
@@ -241,9 +304,12 @@ function LuaTests.pcall()
 	peh = select(2,pcall(geterrorhandler))
 	print("pcall errorhandler  = "..tostring(peh))
 	xpeh = select(2,xpcall(geterrorhandler, geterrorhandler()))
-	print("xpcall errorhandler  = "..tostring(xpeh))
+	print("xpcall errorhandler  = "..tostring(  ))
+	local t; t = setmetatable({}, { __call = function(self, ...)  print(t==self and "t" or self, ...) ; return ...  end }) ; print("t=", t) ; print("pcall(t,1,2)=", pcall(t,1,2) )
+	local t; t = setmetatable({}, { __call = function(self, ...)  print(t==self and "t" or self, ...) ; return ...  end }) ; print("t=", t) ; print("xpcall(t,print,1,2)=", xpcall(t,print,1,2) )
 end
 --[[
+/run print( xpcall(xpcall,xpcall) )
 [15:26:57] errorhandler        = function: 28E0E710
 [15:26:57] pcall errorhandler  = function: 28E0E710
 [15:26:57] xpcall errorhandler  = function: 28E0E710
@@ -263,7 +329,7 @@ function afterEE(self)   print('afterEE: +'..getElapsed()..'ms') ; updFrame:Hide
 function LuaTests.AceTimer()
 	lastMs = debugprofilestop()
 	print("AceTimer:ScheduleTimer(after0, 0)")
-	local AceTimer = _G.LibStub.AceTimer3
+	local AceTimer = _G.LibStubs.AceTimer30
 	updFrame:Show()
 	AceTimer:ScheduleTimer(after00, 0, 0)
 	AceTimer:ScheduleTimer(after00, 0.01, 0.01)

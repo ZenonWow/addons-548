@@ -75,10 +75,10 @@ function TSMAPI:CreateTimeDelay(...)
 			timerID = TSM:ScheduleTimer(callback, duration)
 		end
 	else
-		if  duration ~= repeatDelay  then
-			-- Core/Mover.lua gives smaller duration than repeatDelay.
-			-- AceTimer does not support this out-of-the-box and an extra callback round would be overshoot, therefore the initial delay is also the repeatDelay.
-		end
+		-- if  duration ~= repeatDelay  then
+		-- Core/Mover.lua gives smaller duration than repeatDelay.
+		-- AceTimer does not support this out-of-the-box, therefore the initial delay is also repeatDelay.
+		-- This results in automated moves to bank/guildbank to start ca. 0.3 seconds later. No big deal.
 		timerID = TSM:ScheduleRepeatingTimer(callback, repeatDelay)
 	end
 	

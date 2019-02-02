@@ -219,6 +219,26 @@ local highBackdrop = {
 	insets = { left = 0, right = 0, top = 0, bottom = 0 }
 }
 
+
+local function CreateHighlighter()
+	local highlighter = CreateFrame('Frame', "HighlighterFrame")
+	--  https://wow.gamepedia.com/API_Frame_SetBackdrop
+	--  https://wow.gamepedia.com/API_Frame_SetBackdropColor
+	highlighter:SetBackdrop(highBackdrop)
+	highlighter:SetBackdropColor(0.3,0.6,0.3,0.75)
+	highlighter:SetBackdropBorderColor(0.5,1,0.5,0.75)
+
+	local animGroup = highlighter:CreateAnimationGroup()
+	animGroup:SetLooping('BOUNCE')
+	local anim = animGroup:CreateAnimation('Alpha')
+	anim:SetDuration(4)
+	anim:SetFromAlpha(1)
+	anim:SetToAlpha(0)
+	animGroup:Play()
+	
+	return highlighter
+end
+
 local function HighlightFrame(newFrame)
 	if  newFrame == WorldFrame  then  newFrame = nil  end
 	if  newFrame == mouseOverFrame  then  return  end
@@ -226,20 +246,18 @@ local function HighlightFrame(newFrame)
 	
 	if  not highlighter  then
 		if  not newFrame  then  return  end
-		highlighter = CreateFrame('Frame', "HighlighterFrame")
-		--  https://wow.gamepedia.com/API_Frame_SetBackdrop
-		--  https://wow.gamepedia.com/API_Frame_SetBackdropColor
-		highlighter:SetBackdrop(highBackdrop)
-		highlighter:SetBackdropColor(0.3,0.3,0.3,0.5)
-		highlighter:SetBackdropBorderColor(0.5,1,0.5,0.75)
+		highlighter = CreateHighlighter()
 	end
 	
-	--highlighter:SetParent(newFrame)
-	local ran, res = pcall(highlighter.SetParent, highlighter, newFrame)
-	if  not ran  then  print("Frame "..(not newFrame and 'nil' or newFrame.GetName and newFrame:GetName() or "?")..": ".. res) ; highlighter:SetParent(nil) ; newFrame = nil  end
+	--[[highlighter:SetParent(newFrame)
+	if  newFrame.GetChildren  then
+		local ran, res = pcall(highlighter.SetParent, highlighter, newFrame)
+		if  not ran  then  print("Frame "..(not newFrame and 'nil' or newFrame.GetName and newFrame:GetName() or "?")..": ".. res) ; highlighter:SetParent(nil) ; newFrame = nil  end
+	end
+	--]]
 	
 	if  newFrame  then
-		highlighter:SetAllPoints()
+		highlighter:SetAllPoints(newFrame)
 		highlighter:Show()
 	else
 		highlighter:Hide()
@@ -250,6 +268,7 @@ end
 
 
 local function FrameStackTooltip_OnHide(self)
+	if  not highlighter  then  return  end
 	highlighter:Hide()
 	highlighter:SetParent(nil)
 	highlighter = nil

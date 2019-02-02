@@ -188,13 +188,14 @@ function window:Init()
 	window:SetScript('OnHide', window.OnHide)
 
 	-- To be in the center of attention it closed UIGameMenu on auto-popup. A problem, if you wanted to get to interace options to disable auto-popup.
-	--UIPanelWindows.BugSackFrame = { area = "center", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
-	--UIPanelWindows.BugSackFrame = { area = "right", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
-	--HideUIPanel(window)
+	-- UIPanelWindows.BugSackFrame = { area = "center", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
+	UIPanelWindows.BugSackFrame = { area = "right", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
+	UIPanelWindows.ScriptErrorsFrame = { area = "right", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
 	-- Or disable auto-layout altogether, but still close when pressing Esc.
-	UISpecialFrames[#UISpecialFrames+1] = 'ScriptErrorsFrame'    -- Builtin annoyance is persistent even after Esc
-	UISpecialFrames[#UISpecialFrames+1] = window:GetName()
+	-- UISpecialFrames[#UISpecialFrames+1] = 'ScriptErrorsFrame'    -- Builtin annoyance is persistent even after Esc
+	-- UISpecialFrames[#UISpecialFrames+1] = window:GetName()
 
+	-- HideUIPanel(window)
 	window:SetFrameStrata("HIGH")
 	-- window:SetFrameStrata("FULLSCREEN_DIALOG")
 	-- window:SetWidth(500)

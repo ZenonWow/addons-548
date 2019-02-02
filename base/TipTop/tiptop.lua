@@ -387,7 +387,7 @@ local function PetQualityBorder(tip, quality)	--colors tip border by item qualit
 end
 
 local function CalcHealth(unit, hp)	--sets health text on status bar
-	if db.healthText then
+	if  db.healthText  and  unit  then
 		local per, hpmult, hpdiv, maxhpmult, maxhpdiv, hpformat, maxhpformat	--upvalues
 		local maxhp = UnitHealthMax(unit)
 		if maxhp == 0 then maxhp = 1 end

@@ -96,41 +96,7 @@ MainMenuBarBackpackButton:SetScript('OnEnter',nil)
 MainMenuBarBackpackButton:SetScript('OnLeave',nil)
 MainMenuBarBackpackButton:SetScript('OnEvent',nil)
 
-/dump tkeys(LibStub.short)
 --]]
-
-
-function tkeys(t)	local ks = {}	for k in next,t do ks[#ks+1] = k end	return ks end
-
-function tkeys(t)
-	local ks = {}
-	for k in pairs(t) do ks[#ks+1] = k end
-	return ks
- end
-
-function tvalues(t)
-	local ks = {}
-	for k,v in pairs(t) do ks[#ks+1] = v end
-	return ks
-end
-
-
-
-
--- Secure wrapper  function  WorldMapFrame_PreClick(self, button, down)
-local preBody = [===[
-if  button == 'LeftButton'  then
-	if  down  then
-		self:SetBinding(true, 'BUTTON2', 'AUTORUN')
-	else
-		self:ClearBinding('BUTTON2')
-	end
-end
-]===]
-local postBody = nil
-
---WorldMapFrame:WrapScript(frame, 'OnClick', preBody, postBody)
---SecureHandlerWrapScript(WorldMapFrame, 'OnClick', preBody, postBody)
 
 
 

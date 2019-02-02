@@ -196,7 +196,7 @@ local defaults = {
 }
 local SOUND
 function addon:OnInitialize()
-  if _G.IsAddOnLoaded("Prat") then
+  if  ADDON_NAME ~= "Prat"  and  _G.IsAddOnLoaded("Prat")  then
     Prat:Print(("Prat 2.0 was detected, and disabled. Please %s your UI."):format(GetReloadUILink()))
   end
   

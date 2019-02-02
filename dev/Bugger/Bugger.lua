@@ -136,6 +136,10 @@ end)
 
 ------------------------------------------------------------------------
 
+local function tindexof(arr, item)
+	for i = 1,#arr  do  if  arr[i] == item  then  return i  end end
+end
+
 function Bugger:GetErrors(session)
 	local newApi, errors = true
 	if  (not session  or session == 'current') and BugGrabber.GetSessionErrors  then
@@ -184,7 +188,8 @@ end
 		counter = 1,
 	}
 ]]
-function Bugger:BugGrabber_BugGrabbed(event, err, newErrors)
+
+function Bugger:BugGrabber_BugGrabbed(event, errorObject, newErrors)
 	self.dataObject.text = self:GetNumErrors()
 	self.dataObject.icon = ICON_RED
 	
@@ -198,16 +203,21 @@ function Bugger:BugGrabber_BugGrabbed(event, err, newErrors)
 	end
 	
 	local open = self.frame and self.frame:IsShown()
-	if  not err  then
+	if  not errorObject  then
 		if open then  self:ShowError(self.error)  end
 		return
+	end
+	
+	if not self.error then
+		local errors = self:GetErrors(self.session)
+		self.error = tindexof(errors, errorObject)
 	end
 
 	local now = time()
 	if  MIN_INTERVAL < now - (self.lastError or 0)  then
 		self.lastError = now
 		if self.db.chat then
-			self:Print(L["An error has been captured!"])
+			self:Print(L["An error has been captured!"].."  "..BugGrabber:GetChatLink(errorObject))
 		end
 		--[[
 		if self.db.sound then
@@ -217,7 +227,7 @@ function Bugger:BugGrabber_BugGrabbed(event, err, newErrors)
 		--]]
 		-- Update frame
 		if open then  self:ShowError(self.error)
-		elseif  self.db.autoshow  then  self:ShowError()
+		elseif  self.db.autoshow  then  self:DisplayError(errorObject)
 		end
 	end
 end
@@ -286,10 +296,6 @@ end
 
 ------------------------------------------------------------------------
 
-local function tindexof(arr, item)
-	for i = 1,#arr  do  if  arr[i] == item  then  return i  end end
-end
-
 function Bugger:DisplayError(errorObject)
 	local current =  errorObject.session == BugGrabber:GetSessionId()
 	local session =  current  and  'current'  or  'previous'
@@ -305,7 +311,8 @@ function Bugger:ShowError(index)
 		self:SetupFrame()
 	end
 
-	self.frame:Show()
+	-- self.frame:Show()
+	ShowUIPanel(self.frame)
 
 	local errors, first, last = self:GetErrors(self.session)
 	local total = last - first + 1
@@ -330,6 +337,8 @@ function Bugger:ShowError(index)
 	end
 
 	-- local last = first + total - 1
+	-- Show last shown error.
+	index = index  or self.error
 	local err = index and index >= first and index <= last and errors[index]
 	if not err then
 		index = last
@@ -378,6 +387,8 @@ function Bugger:ShowSession(session, index)
 		end
 	end
 
+	-- Show last if changing session.
+	if self.session ~= session then  index = index or -1  end
 	self.session = session
 	self:ShowError(index)
 end
@@ -386,7 +397,8 @@ end
 
 function Bugger:ToggleFrame()
 	if self.frame and self.frame:IsShown() then
-		self.frame:Hide()
+		-- self.frame:Hide()
+		HideUIPanel(self.frame)
 	else
 		self:ShowSession()
 	end
@@ -401,6 +413,11 @@ function Bugger:SetupFrame()
 
 	ScriptErrorsFrame_OnError = function() end
 	ScriptErrorsFrame_Update  = function() end
+	UIPanelWindows.ScriptErrorsFrame = { area = "right", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
+	-- Note: builtin CloseSpecialWindows()  :Hide()s frames in UISpecialFrames.
+	-- CloseAllWindows() bugs if a UIPanelWindow is not hidden with HideUIPanel().
+	-- Result: Game Menu is not showing when you press ESC.
+	-- UISpecialFrames[#UISpecialFrames+1] = "ScriptErrorsFrame"    -- Later loaded from Blizzard_DebugTools
 
 	self.frame       = ScriptErrorsFrame
 	self.scrollFrame = ScriptErrorsFrameScrollFrame

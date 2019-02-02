@@ -18,13 +18,17 @@ UIPanelWindows.GameMenuFrame         = nil
 UIPanelWindows.InterfaceOptionsFrame = nil
 UIPanelWindows.ChatConfigFrame       = nil
 UIPanelWindows.WorldMapFrame         = nil
+UISpecialFrames[#UISpecialFrames+1] = "GameMenuFrame"
+UISpecialFrames[#UISpecialFrames+1] = "ChatConfigFrame"
+UISpecialFrames[#UISpecialFrames+1] = "WorldMapFrame"
+-- UISpecialFrames[#UISpecialFrames+1] = "ScriptErrorsFrame"    -- Later loaded from Blizzard_DebugTools
+
 --[[
 UIPanelWindows.CharacterFrame        = nil
 UIPanelWindows.SpellBookFrame        = nil
 UIPanelWindows.TaxiFrame             = nil
 UIPanelWindows.TradeFrame            = nil
 UIPanelWindows.LootFrame             = nil
-UIPanelWindows.MerchantFrame         = nil
 UIPanelWindows.MailFrame             = nil
 UIPanelWindows.DressUpFrame          = nil
 UIPanelWindows.FriendsFrame          = nil
@@ -33,20 +37,19 @@ UISpecialFrames[#UISpecialFrames+1] = "SpellBookFrame"
 -- UISpecialFrames[#UISpecialFrames+1] = "TaxiFrame"
 UISpecialFrames[#UISpecialFrames+1] = "TradeFrame"
 -- UISpecialFrames[#UISpecialFrames+1] = "LootFrame"
-UISpecialFrames[#UISpecialFrames+1] = "MerchantFrame"
 UISpecialFrames[#UISpecialFrames+1] = "MailFrame"
 UISpecialFrames[#UISpecialFrames+1] = "DressUpFrame"
 UISpecialFrames[#UISpecialFrames+1] = "FriendsFrame"
 --]]
-UISpecialFrames[#UISpecialFrames+1] = "GameMenuFrame"
-UISpecialFrames[#UISpecialFrames+1] = "ChatConfigFrame"
-UISpecialFrames[#UISpecialFrames+1] = "WorldMapFrame"
-UISpecialFrames[#UISpecialFrames+1] = "ScriptErrorsFrame"    -- Later loaded from Blizzard_DebugTools
 CharacterFrame:SetPoint('TOPLEFT',10,-20)
 SpellBookFrame:SetPoint('TOPLEFT',10,-20)
 -- TaxiFrame:SetPoint('TOPLEFT',10,-20)
 -- TradeFrame:SetPoint('TOPLEFT',10,-20)
+
+UIPanelWindows.MerchantFrame         = nil
+UISpecialFrames[#UISpecialFrames+1] = "MerchantFrame"
 MerchantFrame:SetPoint('TOPLEFT',10,-20)
+
 MailFrame:SetPoint('TOPLEFT',10,-20)
 --DressUpFrame:SetPoint('TOPRIGHT',-10,-20)
 FriendsFrame:SetPoint('TOPRIGHT',-10,-20)

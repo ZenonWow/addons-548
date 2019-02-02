@@ -132,7 +132,7 @@ end
 --]]
 
 
-
+--[[
 function MacroClicks.InitMacroUI()
 	if  MacroClicks.buttons  then  return  end
 	MacroClicks.buttons = MacroClicks.MacroButtonContainer_ReLoad(MacroButtonContainer)
@@ -140,7 +140,7 @@ function MacroClicks.InitMacroUI()
 	MacroFrameSelectedMacroButton:SetPoint("TOPLEFT", "MacroFrameSelectedMacroBackground", 14, -14)
 	-- <Anchor point="TOPLEFT" relativeTo="MacroFrameSelectedMacroBackground" x="14" y="-14"/>
 end
-
+--]]
 
 
 
@@ -247,12 +247,12 @@ MacroClicks:RawHook('MacroButton_OnClick')
 
 
 
-
+--[[
 if  IsAddOnLoaded('Blizzard_MacroUI')  then
 	MacroClicks.InitMacroUI()
 else
 	hooksecurefunc('MacroFrame_LoadUI', MacroClicks.InitMacroUI)
 end
-
+--]]
 
 
