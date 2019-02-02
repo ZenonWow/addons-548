@@ -1,0 +1,831 @@
+
+<!DOCTYPE html>
+<!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->
+<!--[if IE 7 ]>    <html lang="en" class="no-js ie7"> <![endif]-->
+<!--[if IE 8 ]>    <html lang="en" class="no-js ie8"> <![endif]-->
+<!--[if IE 9 ]>    <html lang="en" class="no-js ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html lang="en-us" class="no-js">
+<!--<![endif]-->
+
+<head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+    <meta charset="UTF-8">
+    <title>API Documentation - Pages - LibSharedMedia-3.0 - Addons - Projects - WowAce </title>
+    <meta name="description" content="" />
+    <meta name="theme-color" content="#121212" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Responsive Meta Tag -->
+    
+
+    
+        <link rel="shortcut icon" href="https://media.forgecdn.net/avatars/97/683/636293447935662430.png" />
+    
+
+    <!-- Links -->
+    
+    
+
+    <!-- Meta Properties -->
+    
+    
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/Content/2-0-6969-50/Skins/Blocks/css/compiled.css"/>
+<link rel="stylesheet" href="/Content/2-0-6969-50/Skins/WowAce/css/compiled.css"/>
+<link rel="stylesheet" type="text/css" href="/api/custom-css" />
+    
+
+    <script type="text/javascript">
+        var onloadCallback = function () {
+            Cobalt.runOnHtmlInsert(Cobalt.Forms.handlegReCaptchaRender);
+        };
+    </script>
+
+    <script src='https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit' async defer></script>
+    <script src="https://apis.google.com/js/platform.js"></script>
+
+    <!-- JavaScript -->
+    <script src="/js/jquery?v=zhy3poSy6kGmZe4hNBKDvIn1MM84Smb43pQ4p677GA81"></script>
+
+    <script src="/js/cobalt?v=jsX_SlJQMjvXXXx9yYwR0KxW4c7mDUf5qDn4cvZ6ods1"></script>
+
+    <script src="/js/Elerium?v=eOmp0l7g2GpwxLMh2e-KG66v-DiizK4GjjgguEANGzQ1"></script>
+
+    
+    
+    
+    
+
+
+ 
+<script> window.cookieconsent_options = { message: "Our website uses cookies to give you the best user experience on our website and to help us deliver our services. By using our services, you agree to our use of cookies. <a href='http://www.curse.com/privacy-uk'>More info</a>", dismiss: "Got It!"}</script> <script type="text/javascript" src="/Content/2-0-6969-50/js/cobalt/cookieconsent.js"></script>
+</head>
+<body class="site  site-curseforge site-wowace body-project body-project-pagedetails disable-ads user-anonymous lang-en site-lang-en template-none skin-light-on-dark responsive-disabled" data-user-lang="1">
+
+    
+    <!-- No Script -->
+    <noscript class="b-noscript">
+        <p><i class="b-noscript-icon"></i> This site works best with JavaScript enabled. Please enable JavaScript to get the best experience from this site.</p>
+    </noscript>
+    <!-- Layout Start -->
+    
+    
+    <div id="site" class="fixed single-column">
+        <div id="site-main">
+            <!-- Above Header, ex: Netbar -->
+            
+<div class="page-region">
+
+
+<div class="netbar">
+    <span class="netbar-logo netbar-left"><a href="/">CurseForge</a></span>
+    
+        <a href="/register?returnUrl=%2fprojects%2flibsharedmedia-3-0%2fpages%2fapi-documentation" id="register-link" class="netbar-signin netbar-right">Register</a>
+        <a href="/login?returnUrl=%2fprojects%2flibsharedmedia-3-0%2fpages%2fapi-documentation" id="login-link" class="netbar-signin netbar-right">Sign In</a>
+    
+</div>
+
+</div>
+
+            <!-- Header, ex: Logo, search, etc. -->
+            <header class="main" role="banner">
+                
+
+<div class="e-generic-header">
+    <div class="logo-container">
+        <a href="/">
+            <h1>WowAce</h1>
+        </a>
+    </div>
+</div>
+
+
+<div class="primary-header-wrapper">
+    <div class="page-region p-header p-header-a">
+
+        <nav class="main p-nav p-nav-a" role="navigation">
+            <ul class="b-list b-list-a b-list_float">
+
+                
+    <li id="nav-projects" class="  selected b-list-item p-nav-item">
+        
+            <a href="/projects"  class="">
+                <span class="b-list-label">
+                   Projects
+    
+                </span>
+            </a>
+        
+    </li>
+
+    <li id="nav-forums" class="  b-list-item p-nav-item">
+        
+            <a href="https://www.curseforge.com/forums"  class="">
+                <span class="b-list-label">
+                   Forums
+    
+                </span>
+            </a>
+        
+    </li>
+
+    <li id="nav-dashboard" class="  b-list-item p-nav-item">
+        
+            <a href="/dashboard"  class="">
+                <span class="b-list-label">
+                   Dashboard
+    
+                </span>
+            </a>
+        
+    </li>
+
+    <li id="nav-paste" class="  b-list-item p-nav-item">
+        
+            <a href="/paste"  class="">
+                <span class="b-list-label">
+                   Paste
+    
+                </span>
+            </a>
+        
+    </li>
+
+    <li id="nav-knowledge-base" class="  b-list-item p-nav-item">
+        
+            <a href="https://www.curseforge.com/knowledge-base"  class="">
+                <span class="b-list-label">
+                   Knowledge Base
+    
+                </span>
+            </a>
+        
+    </li>
+
+    <li id="nav-reward-store" class="  b-list-item p-nav-item">
+        
+            <a href="https://www.curseforge.com/store"  class="">
+                <span class="b-list-label">
+                   Reward Store
+    
+                </span>
+            </a>
+        
+    </li>
+
+    <li id="nav-feedback" class="  b-list-item p-nav-item">
+        
+            <a href="https://twitch.uservoice.com/forums/915910-game-mods-curseforge" target='_blank' rel='noopener' class="">
+                <span class="b-list-label">
+                   Feedback
+    
+                </span>
+            </a>
+        
+    </li>
+
+
+            </ul>
+            <a data-ga-click-event-tracking-category="Desktop View" id="responsive-topnav-button" class="rs-link rs-link-to-desktop">Desktop View</a>
+            
+        </nav>
+
+        <div class="searchform">
+            <form class="primary-search b-search b-search-a" action="/search" method="get" novalidate="novalidate">
+                <label for="search" class="icon-search"></label>
+                <input class="b-search-input" type="search"  placeholder="Search..." name="search" />
+            </form>
+        </div>
+
+    </div>
+</div>
+
+            </header>
+            <!-- Below Header (Ad container), ex: Leaderboard and Badge unit -->
+            <section class="ad-container">
+                <div class="ad-bin">
+                    
+                </div>
+            </section>
+            <!-- Above Content, Ex: Breadcrumbs -->
+            <section class="atf" role="complementary">
+    <div class="p-header-b">
+        <div class="container">
+            
+            <div class="project-details-container">
+                <div class="project-user">
+                    <div class="avatar-wrapper">
+                        
+                            <div class="e-avatar64 e-avatar-placeholder"></div>
+                        
+                    </div>
+                    <h1 class="project-title  ">
+                        <a href="/projects/libsharedmedia-3-0">
+                            <span class="overflow-tip">LibSharedMedia-3.0</span></a>
+                    </h1>
+                    
+                        <h2 class="RootGameCategory">
+                            <a href="/addons">Addons</a>
+                        </h2>
+                    
+                </div>
+            </div>
+
+            <div class="project-controls-container">
+                <div class="categories-container">
+                    <nav class="el-projectdetails-buttonwrapper">
+                        <ul class="el-btn-group">
+                            
+                                        <li>
+                                            <a class="button alt fa-icon-download" href="/projects/libsharedmedia-3-0/files/latest">
+                                                <span class="download-project">
+                                                    Download Latest File
+                                                </span>
+                                            </a>
+                                        </li>
+                                    
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <nav class="e-header-nav" data-target="e-header-nav">
+        <div class="e-wrapper">
+            <h3 class="e-mobile-heading" data-action="toggle-header-nav"></h3>
+            <ul class="e-menu">
+
+                
+                    <li class="">
+                        <a href="/projects/libsharedmedia-3-0" >
+                            Overview
+                        </a>
+                        
+                    </li>
+                    
+                    <li class="">
+                        <a href="/projects/libsharedmedia-3-0/files" >
+                            File
+                        </a>
+                        
+                    </li>
+                    
+                    <li class="">
+                        <a href="/projects/libsharedmedia-3-0/issues" >
+                            Issues
+                        </a>
+                        
+                    </li>
+                    
+                    <li class="">
+                        <a href="/projects/libsharedmedia-3-0/source" >
+                            Source
+                        </a>
+                        
+                    </li>
+                    
+                    <li class=" e-selected ">
+                        <a href="/projects/libsharedmedia-3-0/pages" >
+                            Pages
+                        </a>
+                        
+                    </li>
+                    
+                    <li class=" e-hasSubmenu ">
+                        <a href="/projects/libsharedmedia-3-0/relations/dependencies" >
+                            Relations
+                        </a>
+                        
+                           <ul class="e-drop-menu">
+                            
+                                <li class="">
+                                   <a href="/projects/libsharedmedia-3-0/relations/dependencies">
+                                       Dependencies
+                                   </a>
+                                </li>
+                            
+                                <li class="">
+                                   <a href="/projects/libsharedmedia-3-0/relations/dependents">
+                                       Dependents
+                                   </a>
+                                </li>
+                            
+                           </ul>
+                        
+                    </li>
+                    
+            </ul>
+
+            <div class="e-actions btn-group">
+                
+                        <a class="button icon-follow unfollow j-tooltip" href="/login?returnUrl=%252fprojects%252flibsharedmedia-3-0%252fpages%252fapi-documentation" title="You must log in to follow a project.">
+                            <span>Follow</span>
+                        </a>
+                    
+            </div>
+        </div>
+    </nav>
+</section>
+            <div class="container">
+                <div id="content" class="main content-container">
+                    <section class="primary-content" role="main">
+                        
+    <div class="e-project-pages-container">
+        
+
+<div class="sidebar-column">
+    
+
+    <div class="project-sidebar-header">
+        <h3> Pages </h3>
+    </div> 
+
+
+    <ul class="project-sidebar-listing e-bar-menu">
+        
+            <li class="selected  tier-pages indent-0">
+                <div class="e-bar-item">
+                    
+                    <a class="overflow-tip" href="/projects/libsharedmedia-3-0/pages/api-documentation">API Documentation</a>
+
+                </div>
+
+                
+                
+            </li>
+        
+    </ul>
+</div> 
+        <div class="project-pages main-column page-details">
+            <div class="stickyLimit">
+                <div class="project-page-header sticky">
+                    
+
+                    <h3>API Documentation</h3>
+                    <ul class="revision-info">
+                        <li data-toc-link style="display: none;"><a href="#" onclick="$('.project-page-content-holder').toggle(); return false;">Table of Contents</a></li>
+                        
+                    </ul>
+                    <div class="project-page-content-holder" style="display: none;">
+                        <div class="project-page-content-table e-bar-menu" data-content-table>
+                            <a href="" class="project-page-content-close tip" onclick="$('.project-page-content-holder').hide(); return false;" title="Close Table of Contents">X</a>
+                            <h2>Table of Contents</h2>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="e-user-content" data-user-content>
+                    <h1>API Documentation</h1>
+<h2>:Register(mediatype, key, data [, langmask])</h2>
+<p>Registers a new handle of given type.</p>
+<h3>Args</h3>
+<dl><dt>mediatype</dt>
+<dd>string - the type of the data, eg. font or statusbar</dd>
+<dt>key</dt>
+<dd>string - the handle to get the data from the lib</dd>
+<dt>data</dt>
+<dd>string - the data to associate with the handle; normaly a filename</dd>
+<dt>[langmask]</dt>
+<dd>bitmask - only for mediatype 'font'; bits should be set if the font supports that locale (see below)</dd>
+</dl>
+<h3>Returns</h3>
+<p>'''boolean''' - false if data for the given mediatype-key pair already existes, true else</p>
+<h2>:Fetch(mediatype, key [, noDefault])</h2>
+<p>Fetches the data for the given handle and type.</p>
+<h3>Args</h3>
+<dl><dt>mediatype</dt>
+<dd>string - the type of the data, eg. font or statusbar</dd>
+<dt>key</dt>
+<dd>string - the handle to get the data from the lib</dd>
+<dt>[noDefault]</dt>
+<dd>boolean - if true '''nil''' will be returned instead of the default handle's data</dd>
+</dl>
+<h3>Returns</h3>
+<p>'''string''' or '''nil''' - the current overrite handle's data, the requested handle's data, the default handle's data or nil</p>
+<h2>:IsValid(mediatype [, key])</h2>
+<p>Checks if the given type (and handle) is valid.</p>
+<h3>Args</h3>
+<dl><dt>mediatype</dt>
+<dd>string - the type of the data, eg. font or statusbar</dd>
+<dt>[key]</dt>
+<dd>string - the handle of the data</dd>
+</dl>
+<h3>Returns</h3>
+<p>'''boolean''' - true if the type (and handle) is valid</p>
+<h2>:HashTable(mediatype)</h2>
+<p>Gets a hash table {data -&gt; handle} to eg. iterate over.</p>
+<h3>Args</h3>
+<dl><dt>mediatype</dt>
+<dd>string - the type of the data, eg. font or statusbar</dd>
+</dl>
+<h3>Returns</h3>
+<p>'''table''' - hash table for the given type</p>
+<h2>:List(mediatype)</h2>
+<p>Gets a sorted list of handles.</p>
+<h3>Args</h3>
+<dl><dt>mediatype</dt>
+<dd>string - the type of the data, eg. font or statusbar</dd>
+</dl>
+<h3>Returns</h3>
+<p>'''table''' - list of handles for the given type</p>
+<h2>:GetGlobal(mediatype)</h2>
+<p>Returns the prior set overrite handle.</p>
+<h3>Args</h3>
+<dl><dt>mediatype</dt>
+<dd>string - the type of the data, eg. font or statusbar</dd>
+</dl>
+<h3>Returns</h3>
+<p>'''string''' or '''nil''' - the current overrite handle for the given type</p>
+<h2>:SetGlobal(mediatype [, key])</h2>
+<p>Sets or clears a handle that will be returned on fetch instead of the requested handle</p>
+<h3>Args</h3>
+<dl><dt>mediatype</dt>
+<dd>string - the type of the data, eg. font or statusbar</dd>
+<dt>[key]</dt>
+<dd>string - the handle of the data</dd>
+</dl>
+<h3>Returns</h3>
+<p>''none''</p>
+<h2>:GetDefault(mediatype)</h2>
+<p>Returns the default return value for nonexistant handles.</p>
+<h3>Args</h3>
+<dl><dt>mediatype</dt>
+<dd>string - the type of the data, eg. font or statusbar</dd>
+</dl>
+<h3>Returns</h3>
+<p>'''string''' or '''nil''' - default return value for nonexistant handles for the given type</p>
+<h2>:SetDefault(type, handle)</h2>
+<p>Sets a default return value for nonexistant handles. Won't replace an already set default.</p>
+<h3>Args</h3>
+<dl><dt>type</dt>
+<dd>string - the type of the data, eg. font or statusbar</dd>
+<dt>handle</dt>
+<dd>string - the handle of the data</dd>
+</dl>
+<h3>Returns</h3>
+<p>''none''</p>
+<h1>Callback API</h1>
+<p><em>TODO</em></p>
+<h1>Callbacks fired</h1>
+<h2>LibSharedMedia_Registered</h2>
+<p>fires when a new handle was successfully registered</p>
+<h3>Args</h3>
+<dl><dt>name</dt>
+<dd>"LibSharedMedia_Registered"</dd>
+<dt>mediatype</dt>
+<dd>the type of the new handle</dd>
+<dt>key</dt>
+<dd>the name of the handle</dd>
+</dl>
+<h2>LibSharedMedia_SetGlobal</h2>
+<p>fires when a overrite handle was set/cleared</p>
+<h3>Args</h3>
+<dl><dt>name</dt>
+<dd>LibSharedMedia_SetGlobal</dd>
+<dt>mediatype</dt>
+<dd>the type of the new handle</dd>
+<dt>key</dt>
+<dd>the name of the handle; nil if the overrite handle was cleared</dd>
+</dl>
+<h1>MediaType constants</h1>
+<p>The library has some build-in constants for media types that can be used in an addon. These are only some official suggestions on types. Feel free to suggest more.</p>
+<div><div><pre><span>constant</span>                      <span>value</span>                    <span>used</span> <span>for</span>
+<span>&lt;</span><span>lib</span><span>&gt;</span><span>.</span><span>MediaType.BACKGROUND</span>    <span>background</span>               <span>background</span> <span>textures</span>
+<span>&lt;</span><span>lib</span><span>&gt;</span><span>.</span><span>MediaType.BORDER</span>        <span>border</span>                   <span>border</span> <span>textures</span>
+<span>&lt;</span><span>lib</span><span>&gt;</span><span>.</span><span>MediaType.FONT</span>          <span>font</span>                     <span>fonts</span>
+<span>&lt;</span><span>lib</span><span>&gt;</span><span>.</span><span>MediaType.STATUSBAR</span>     <span>statusbar</span>                <span>statusbar</span> <span>textures</span>
+<span>&lt;</span><span>lib</span><span>&gt;</span><span>.</span><span>MediaType.SOUND</span>         <span>sound</span>                    <span>sound</span> <span>files</span>
+</pre></div>
+</div><h1>Language Mask constants</h1>
+<p>These constants should be used to indicate if a font supports the charset of a specific locale. If none is passed to :Register(...) Western is assumed by default. To use multiple of them simply add them together.</p>
+<div><div><pre><span>&lt;lib&gt;</span>.LOCALE_BIT_koKR
+<span>&lt;lib&gt;</span>.LOCALE_BIT_zhCN
+<span>&lt;lib&gt;</span>.LOCALE_BIT_zhTW
+<span>&lt;lib&gt;</span>.LOCALE_BIT_western
+</pre></div>
+</div><h1>Predefined data</h1>
+<p>The following data is predefined inside the library. There is no need to define it again yourself. (default handle)</p>
+<h2>MediaType BACKGROUND</h2>
+<div><div><pre><span>Blizzard</span> <span>Dialog</span> <span>Background</span>        <span>Interface</span><span>\</span><span>DialogFrame</span><span>\</span><span>UI</span><span>-</span><span>DialogBox</span><span>-</span><span>Background</span>
+<span>Blizzard</span> <span>Dialog</span> <span>Background</span> <span>Dark</span>   <span>Interface</span><span>\</span><span>DialogFrame</span><span>\</span><span>UI</span><span>-</span><span>DialogBox</span><span>-</span><span>Background</span><span>-</span><span>Dark</span>
+<span>Blizzard</span> <span>Dialog</span> <span>Background</span> <span>Gold</span>   <span>Interface</span><span>\</span><span>DialogFrame</span><span>\</span><span>UI</span><span>-</span><span>DialogBox</span><span>-</span><span>Gold</span><span>-</span><span>Background</span>
+<span>Blizzard</span> <span>Low</span> <span>Health</span>               <span>Interface</span><span>\</span><span>FullScreenTextures</span><span>\</span><span>LowHealth</span>
+<span>Blizzard</span> <span>Marble</span>                   <span>Interface</span><span>\</span><span>FrameGeneral</span><span>\</span><span>UI</span><span>-</span><span>Background</span><span>-</span><span>Marble</span>
+<span>Blizzard</span> <span>Out</span> <span>of</span> <span>Control</span>           <span>Interface</span><span>\</span><span>FullScreenTextures</span><span>\</span><span>OutOfControl</span>
+<span>Blizzard</span> <span>Parchment</span>                <span>Interface</span><span>\</span><span>AchievementFrame</span><span>\</span><span>UI</span><span>-</span><span>Achievement</span><span>-</span><span>Parchment</span><span>-</span><span>Horizontal</span>
+<span>Blizzard</span> <span>Parchment</span> <span>2</span>              <span>Interface</span><span>\</span><span>AchievementFrame</span><span>\</span><span>UI</span><span>-</span><span>GuildAchievement</span><span>-</span><span>Parchment</span><span>-</span><span>Horizontal</span>
+<span>Blizzard</span> <span>Rock</span>                     <span>Interface</span><span>\</span><span>FrameGeneral</span><span>\</span><span>UI</span><span>-</span><span>Background</span><span>-</span><span>Rock</span>
+<span>Blizzard</span> <span>Tabard</span> <span>Background</span>        <span>Interface</span><span>\</span><span>TabardFrame</span><span>\</span><span>TabardFrameBackground</span>
+<span>Blizzard</span> <span>Tooltip</span>                  <span>Interface</span><span>\</span><span>Tooltips</span><span>\</span><span>UI</span><span>-</span><span>Tooltip</span><span>-</span><span>Background</span>
+<span>Solid</span>                             <span>Interface</span><span>\</span><span>Buttons</span><span>\</span><span>WHITE8X8</span>
+</pre></div>
+</div><h2>MediaType BORDER</h2>
+<div><div><pre><span>None</span>                              <span>Interface</span><span>\</span><span>None</span>
+<span>Blizzard</span> <span>Achievement</span> <span>Wood</span>         <span>Interface</span><span>\</span><span>AchievementFrame</span><span>\</span><span>UI</span><span>-</span><span>Achievement</span><span>-</span><span>WoodBorder</span>
+<span>Blizzard</span> <span>Chat</span> <span>Bubble</span>              <span>Interface</span><span>\</span><span>Tooltips</span><span>\</span><span>ChatBubble</span><span>-</span><span>Backdrop</span>
+<span>Blizzard</span> <span>Dialog</span>                   <span>Interface</span><span>\</span><span>DialogFrame</span><span>\</span><span>UI</span><span>-</span><span>DialogBox</span><span>-</span><span>Border</span>
+<span>Blizzard</span> <span>Dialog</span> <span>Gold</span>              <span>Interface</span><span>\</span><span>DialogFrame</span><span>\</span><span>UI</span><span>-</span><span>DialogBox</span><span>-</span><span>Gold</span><span>-</span><span>Border</span>
+<span>Blizzard</span> <span>Party</span>                    <span>Interface</span><span>\</span><span>CHARACTERFRAME</span><span>\</span><span>UI</span><span>-</span><span>Party</span><span>-</span><span>Border</span>
+<span>Blizzard</span> <span>Tooltip</span>                  <span>Interface</span><span>\</span><span>Tooltips</span><span>\</span><span>UI</span><span>-</span><span>Tooltip</span><span>-</span><span>Border</span>
+</pre></div>
+</div><h2>MediaType FONT</h2>
+<div><div><pre><span>Arial</span> <span>Narrow</span>                      <span>Fonts</span><span>\\</span><span>ARIALN</span><span>.</span><span>TTF</span>
+<span>Friz</span> <span>Quadrata</span> <span>TT</span>                  <span>Fonts</span><span>\\</span><span>FRIZQT__</span><span>.</span><span>TTF</span>
+<span>Morpheus</span>                          <span>Fonts</span><span>\\</span><span>MORPHEUS</span><span>.</span><span>TTF</span>
+<span>Skurri</span>                            <span>Fonts</span><span>\\</span><span>SKURRI</span><span>.</span><span>TTF</span>
+</pre></div>
+</div><h2>MediaType STATUSBAR</h2>
+<div><div><pre><span>Blizzard</span>                          <span>Interface</span><span>\\</span><span>TargetingFrame</span><span>\\</span><span>UI</span><span>-</span><span>StatusBar</span>
+<span>Blizzard</span> <span>Character</span> <span>Skills</span> <span>Bar</span>     <span>Interface</span><span>\</span><span>PaperDollInfoFrame</span><span>\</span><span>UI</span><span>-</span><span>Character</span><span>-</span><span>Skills</span><span>-</span><span>Bar</span>
+</pre></div>
+</div><h2>MediaType SOUND</h2>
+<div><div><pre><span>None</span>                              <span>Interface</span><span>\</span><span>Quiet</span><span>.</span><span>ogg</span>
+</pre></div>
+</div><h1>Naming Conventions</h1>
+<h2>General</h2>
+<ul><li>Don't create subnamespaces by prefixing names.
+</li><li>Try to give descriptive handle names. Example: "Alert" wouldn't be a good name for a sound even if you intend it for alerting the user.
+</li></ul>
+<h2>MediaType FONT</h2>
+<p>Fonts should be added with the exact name defined in the ttf as handle.</p>
+<h1>AceGUI-3.0 widgets</h1>
+<p><a href="http://www.wowace.com/addons/ace-gui-3-0-shared-media-widgets/" rel="nofollow">AceGUI-3.0-SharedMediaWidgets</a> provides AceGUI-3.0 widgets for the 5 basic types in LibSharedMedia-3.0</p>
+  
+                    
+                </div>
+            </div>
+            
+                <hr/>
+                
+
+<!-- Comment Form Top -->            
+
+
+<!-- Comment Listing -->
+
+
+<section class="p-comments" id="comments" itemscope itemtype="http://schema.org/UserComments">
+    <!--- Comment Listing -->
+    
+
+<!-- Outside Caption -->
+
+<header class="h2  no-sub no-nav">
+    
+    <!-- Navigation -->
+    
+    
+    <!-- Main Title -->
+    
+    <H2 >Comments</H2>  
+    
+           
+    <!-- Sub title -->
+    
+    
+</header>
+          
+<!-- Inside Caption -->
+<div class="listing-container listing-container-ul"><div class="listing-body">
+<ul class="listing listing-comments p-comments j-comment-listing" data-sort-method="date-created" data-sort-order="ascending" 
+    data-ajax-set-window-state="true" 
+     data-ajax-url="/comments/947665668-20328/ajax-list"  id="comments" 
+    data-row-selector="&gt;li"
+    data-page-inline="False"
+    data-scroll-inline="False"
+    >
+
+     
+    <li class="alert no-results">To post a comment, please <a href="/login?returnUrl=%2fprojects%2flibsharedmedia-3-0%2fpages%2fapi-documentation" class="j-login-link">login</a> or <a href="/register?returnUrl=%2fprojects%2flibsharedmedia-3-0%2fpages%2fapi-documentation">register</a> a new account.</li>
+
+
+</ul>
+</div></div>
+</section>
+
+<!-- Bulk Moderation Form -->
+
+
+    <div class="j-bulk-moderation comment-bulk-moderation toggle" data-bulk-moderation-cookie="commentBulkModeration" style="display: none;">
+        <ul class="j-bulk-moderation-errors hide field-errors">
+        </ul>
+        <form action="/comments/bulk-moderation" method="post">
+            <div>
+                <select name="actionName">                                
+                    <option value="delete">Delete</option>
+                    <option value="undelete">Undelete</option>  
+                    <option value="spam">Spam</option>
+                    <option value="notspam">Not Spam</option>
+                    <option value="merge">Merge</option>
+                    
+                </select>     
+            </div>
+            <div>
+                <button type="submit" class="btn j-apply-selection">Apply To Selected</button>
+            </div>
+            <div>
+                <a href="#" class="j-clear-selection">Clear Selected</a>
+            </div>
+        </form>
+    </div>
+
+
+<!-- MultiQuote -->
+
+
+<div class="multi-quote-container j-multi-quote-container hide">
+    <div class="multi-quote-title">
+        <span class="quote-text">Posts Quoted: </span><span class="quote-number j-quote-number"></span>
+    </div>
+    <div class="quote-reply">
+        <span class="button j-multi-quote-reply">Reply</span>
+    </div>
+    <div class="quote-clear">
+        <span class="button j-multi-quote-clear">Clear All Quotes</span>
+    </div>
+</div>
+
+
+
+<!-- Comment Form Bottom -->            
+
+        </div>
+    </div>
+
+                        
+                    </section>
+                </div>
+            </div>
+            
+            <!-- Above Footer -->
+            <section class="ad-container ad-container-footer">
+                <div class="ad-bin">
+                    
+                </div>
+            </section>
+            <div id="footer-push"></div>
+        </div>
+        <footer id="footer">
+            
+
+<footer class="curseforge-footer">
+    <nav class="curseforge-footer__container">
+		<section class="curseforge-footer__section curseforge-footer__section--logo">
+			<a href="https://twitch.tv" target="_blank" title="Twitch">
+				<figure class="curseforge-footer__logo-container">
+					<svg width="94px" height="32px" viewBox="0 0 94 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+						<title>Twitch</title>
+						<defs></defs>
+						<g id="logos/LogoTwitch" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+							<path class="curseforge-footer__logo" d="M88.5,5 L82.5,5 L82.5,0 L73.5,0 L67.5,5 L62,5 L59.5,7.5 L59.5,5 L54.5,5 L54.5,0 L36.5,0 L36.5,5 L16.5,5 L11.5,0 L0.5,0 L0.5,22 L5.5,27.25 L14.5,32 L20.5,32 L20.5,30.5 L23.5,32 L35.5,32 L37.5,29 L38.5,32 L45.5,32 L45.5,29 L48.5,32 L56.5,32 L57,29 L59.5,32 L69.5,32 L72.5,29 L72.5,32 L76.5,32 L79.5,29 L79.5,32 L86.5,32 L93.5,26 L93.5,10 L88.5,5 Z M13.5,13 L8.5,13 L8.5,19 L13.5,19 L13.5,25 L6.5,25 L2.5,21 L2.5,2 L8.5,2 L8.5,7 L13.5,7 L13.5,13 Z M36.5,21.5 L33,25 L15.5,25 L15.5,7 L21.5,7 L21.5,19 L23.5,19 L23.5,7 L29.5,7 L29.5,19 L31.5,19 L31.5,7 L36.5,7 L36.5,21.5 Z M44.5,25 L38.5,25 L38.5,7 L44.5,7 L44.5,25 Z M44.5,5 L38.5,5 L38.5,2 L44.5,2 L44.5,5 Z M57.5,13 L52.5,13 L52.5,19 L57.5,19 L57.5,25 L50.5,25 L46.5,21 L46.5,2 L52.5,2 L52.5,7 L57.5,7 L57.5,13 Z M72.5,13 L65.5,13 L65.5,19 L72.5,19 L72.5,25 L63.5,25 L59.5,21 L59.5,11 L63.5,7 L72.5,7 L72.5,13 Z M91.5,25 L85.5,25 L85.5,13 L80.5,13 L80.5,25 L74.5,25 L74.5,2 L80.5,2 L80.5,7 L87.5,7 L91.5,11 L91.5,25 Z" id="LogoTwitch" fill="#000000" fill-rule="nonzero"></path>
+						</g>
+					</svg>
+				</figure>
+			</a>
+			<span class="curseforge-footer__copyright">© 2019 Twitch Interactive, Inc</span>
+		</section>
+		<section class="curseforge-footer__section">
+			<a href="https://twitch.tv/p/about/" target="_blank" class="curseforge-footer__item">About</a>
+			<a href="https://twitch.tv/jobs/" target="_blank" class="curseforge-footer__item">Careers</a>
+			<a href="https://twitch.tv/blog/" target="_blank" class="curseforge-footer__item">Blog</a>
+			<a href="https://twitch.tv/p/about/press-releases/" target="_blank" class="curseforge-footer__item">Press</a>
+		</section>
+		<section class="curseforge-footer__section">
+			<a href=https://twitch.tv/p/brand/"" target="_blank" class="curseforge-footer__item">Brand</a>
+			<a href="https://music.twitch.tv/" target="_blank" class="curseforge-footer__item">Music</a>
+			<a href="https://twitchadvertising.tv/" target="_blank" class="curseforge-footer__item">Advertise</a>
+			<a href="https://twitch.tv/legal/ad-choices/" target="_blank" class="curseforge-footer__item">Ad Choices</a>
+		</section>
+		<section class="curseforge-footer__section">
+			<a href="https://www.twitch.tv/prime/" target="_blank" class="curseforge-footer__item">Prime</a>
+			<a href="https://twitch.tv/p/partners/" target="_blank" class="curseforge-footer__item">Partners</a>
+			<a href="https://affiliate.twitch.tv/" target="_blank" class="curseforge-footer__item">Affiliates</a>
+		</section>
+		<section class="curseforge-footer__section">
+			<a href="https://dev.twitch.tv/" target="_blank" class="curseforge-footer__item">Developers</a>
+			<a href="https://support.curseforge.com/hc/en-us" target="_blank" class="curseforge-footer__item">Help</a>
+			<a href="https://twitch.uservoice.com/forums/915910-game-mods-curseforge" target="_blank" class="curseforge-footer__item">Feedback</a>
+		</section>
+		<section class="curseforge-footer__section">
+			<a href="https://twitch.tv/legal/terms-of-service/" target="_blank" class="curseforge-footer__item">Terms of Service</a>
+			<a href="https://twitch.tv/legal/privacy-policy/" target="_blank" class="curseforge-footer__item">Privacy Policy</a>
+			<a href="https://twitch.tv/legal/cookie-policy/" target="_blank" class="curseforge-footer__item">Cookie Policy</a>
+		</section>
+    </nav>
+	<div class="curseforge-footer__copyright-container">
+		<span class="curseforge-footer__copyright">© 2019 Twitch Interactive, Inc</span>
+	</div>
+</footer>
+
+        </footer>
+        
+    </div>
+
+    <!-- Layout End -->
+    <div id="analytics">
+        <!-- Google Analytics -->
+<script type="text/javascript">
+var _gaq = _gaq || [];
+_gaq.push(
+        ['_setAccount', 'UA-389142-3'],
+        ['_setDomainName', 'wowace.com'],
+        ['_addIgnoredRef', 'wowace.com'],
+        ['_trackPageview'],
+        ['b._setAccount', 'UA-389142-1'],
+        ['b._setDomainName', 'wowace.com'],
+        ['b._addIgnoredRef', 'wowace.com'],
+        ['b._trackPageview']
+);
+(function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+</script>
+<!-- End Google Analytics -->
+<!-- Lotame -->
+<script src="http://tags.crwdcntrl.net/c/3613/cc.js?ns=_cc3613" id="LOTCC_3613"></script>
+<script>
+_cc3613.bcp();
+</script>
+<!-- End Lotame -->
+    </div>
+
+    
+    
+
+<script type="text/javascript">
+    Cobalt.Device.initialize();
+    Cobalt.Burger.initializeEarly();
+
+    Cobalt.Constants.initialize({"StaticURL":"/Content/2-0-6969-50","SkinPath":"/Content/2-0-6969-50/Skins/WowAce","MediaURL":"https://media.forgecdn.net/","AvatarURL":"https://media.forgecdn.net/avatars","AttachmentURL":"https://media.forgecdn.net/attachments","ActiveConfiguration":"production","PrivacyPolicyLastUpdated":"0"});
+    
+    Cobalt.Constants.BuildVersion = "2-0-6969-50";
+    Cobalt.Constants.IsDevelopment = false;
+    Cobalt.Constants.IgnoredUserIDs = [];
+    Cobalt.Constants.ServerTimestamp = 1549066620168.38
+    Cobalt.Constants.FacebookAppID = "";
+    Cobalt.Constants.QuoteCssClasses = "";
+    Cobalt.User.EnabledLanguageIDs = [1,2,3,4,7,8,9,15,16];
+    Cobalt.User.MaxQuoteDepth = 5;
+    Cobalt.User.AuthToken = "";
+    Cobalt.TinyMCE.extraPlugins = "";
+    Cobalt.TinyMCE.extraButtons = "";
+    Cobalt.TinyMCE.extraCustomPlugins = "";     
+
+    // NOTE: if you need to debug into tinymce, then change the following line to tinymce.js
+    Cobalt.TinyMCE.url = Cobalt.Constants.StaticURL + "/js/tinymce/tiny_mce/tinymce.min.js";
+    Cobalt.TinyMCE.customPluginUrl = Cobalt.Constants.StaticURL + "/js/tinymce/custom_plugins";
+    Cobalt.TinyMCE.skin_url = Cobalt.Constants.StaticURL + "/js/tinymce/custom_skin";
+    
+   
+    
+    Cobalt.Constants.SiteID = 11;
+    Cobalt.Constants.SiteName = "WowAce";
+    Cobalt.TinyMCE.fontColorEnabled = true;
+    Cobalt.TinyMCE.fontSizeEnabled = true;
+    Cobalt.TinyMCE.fontFamilyEnabled = true;
+    Cobalt.TinyMCE.textAlignmentEnabled = true;
+    Cobalt.TinyMCE.smiliesEnabled = false;
+    Cobalt.TinyMCE.forceSimpleBBCodeEditor = false;  
+    Cobalt.Constants.NestedQuotePreference  = 1;
+    
+    $.ajaxSetup({
+        data: {},
+        timeout: 30000
+    });
+    
+    
+
+    //bbcode entries
+    
+    Cobalt.Markup.customBBcodeButtons = [];    
+    
+    
+    
+    Cobalt.CMS.CobaltCss = ["/Content/2-0-6969-50/Skins/Global-TinyMCE/css/compiled.css"];    
+    Cobalt.CMS.ProjectCss = ["/Content/2-0-6969-50/Skins/WowAce/css/compiled.css"];
+
+    // set the tracking id for google analytics on this site
+    Cobalt.Analytics.trackingId = 'UA-389142-1';
+
+</script>
+
+
+
+<script>
+    hljs.initHighlighting();
+</script>
+<script type="text/javascript">
+
+    Cobalt.runOnLoad(function () {
+        Cobalt.initialize([{dependency:Elerium.ProjectPageDetails, priority:99, name:'Elerium.ProjectPageDetails'},{dependency:Cobalt.TinyMCE, priority:99, name:'Cobalt.TinyMCE'},{dependency:Elerium.ProjectMobileSubMenu, priority:99, name:'Elerium.ProjectMobileSubMenu'},{dependency:Elerium.ProjectAnalytics, priority:99, name:'Elerium.ProjectAnalytics'},{dependency:Elerium.Favorite, priority:99, name:'Elerium.Favorite'},{dependency:Cobalt.Listing, priority:99, name:'Cobalt.Listing'},{dependency:Cobalt.Tabs, priority:99, name:'Cobalt.Tabs'},{dependency:Cobalt.NiceDates, priority:99, name:'Cobalt.NiceDates'},{dependency:Cobalt.Core, priority:99, name:'Cobalt.Core'},{dependency:Cobalt.Forms, priority:99, name:'Cobalt.Forms'},{dependency:Cobalt.UI, priority:99, name:'Cobalt.UI'},{dependency:Cobalt.Auth, priority:99, name:'Cobalt.Auth'},{dependency:Cobalt.Notifications, priority:99, name:'Cobalt.Notifications'},{dependency:Cobalt.Feedback, priority:99, name:'Cobalt.Feedback'},{dependency:Cobalt.WarningNotification, priority:99, name:'Cobalt.WarningNotification'},{dependency:Cobalt.Footer, priority:99, name:'Cobalt.Footer'},{dependency:Cobalt.Tidbit, priority:99, name:'Cobalt.Tidbit'},{dependency:Cobalt.BunnyEars, priority:99, name:'Cobalt.BunnyEars'},{dependency:Elerium.OverflowTip, priority:99, name:'Elerium.OverflowTip'},{dependency:Elerium.PostAction, priority:99, name:'Elerium.PostAction'},{dependency:Elerium.Analytics, priority:99, name:'Elerium.Analytics'},{dependency:Elerium.TwitchNurture, priority:99, name:'Elerium.TwitchNurture'}]);
+    });
+
+</script>
+</body>
+</html>

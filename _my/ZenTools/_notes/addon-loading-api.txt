@@ -1,0 +1,201 @@
+https://wow.gamepedia.com/API_GetAddOnEnableState
+--
+Patch changes
+Warlords of Draenor Patch 6.0.2 (2014-10-14): Removed GetAddOnInfo() 'enabled' return. The enabled state of an addon can now be queried with GetAddOnEnableState. 
+
+Get the enabled state of an addon for a character
+
+enabledState = GetAddOnEnableState(["character"], addonIndex or "AddOnName")
+Arguments
+character
+String - The name of the character to check against or nil.
+addonIndex 
+Number - The index of the AddOn in the user's AddOn list, from 1 to GetNumAddOns().
+AddOnName 
+String - The name of the AddOn to be queried. You can access Blizzard-provided AddOns through this mechanism.
+Returns
+enabledState 
+Number - The enabled state of the addon.
+0 - disabled
+1 - enabled for some
+2 - enabled
+Notes
+This is primarily used by the default UI to set the checkbox state in the AddOnList
+A return of 1 is only possible if character is nil
+
+
+
+https://wow.gamepedia.com/API_GetAddOnInfo
+--
+name, title, notes, loadable, reason, security, newVersion = GetAddOnInfo(index or "name")
+Arguments
+index 
+Integer - The index of the AddOn in the user's AddOn list. Note that you cannot access Blizzard-provided AddOns through this mechanism.
+name 
+String - The name of the AddOn to be queried. You can access Blizzard-provided AddOns through this mechanism.
+Returns
+name 
+String - The name of the AddOn (the folder name).
+title 
+String - The title of the AddOn as listed in the .toc file (presumably this is the appropriate localized one).
+notes 
+String - The notes about the AddOn from its .toc file (presumably this is the appropriate localized one).
+loadable 
+Boolean - Indicates if the AddOn is loaded or eligible to be loaded, true if it is, false if it is not.
+reason 
+String - The reason why the AddOn cannot be loaded. This is nil if the addon is loadable, otherwise it contains a string token indicating the reason that can be localized by prepending "ADDON_". ("BANNED", "CORRUPT", "DEMAND_LOADED", "DISABLED", "INCOMPATIBLE", "INTERFACE_VERSION", "MISSING")
+security 
+String - Indicates the security status of the AddOn. This is currently "INSECURE" for all user provided addons and "SECURE" for Blizzard_* AddOns.
+newVersion 
+Boolean - Not currently used.
+Notes
+If the function is passed a string, name will always be the value passed, so check if reason equals "MISSING" to find out if an addon exists.
+index or "name" is not case sensitive, at least not on Windows.
+If the function is passed a number that is out of range, you will get an error message, specifically [<file name>]:<line number> AddOn index must be in the range of 1 to <GetNumAddOns()>
+Patch changes
+Warlords of Draenor Patch 6.0.2 (2014-10-14): Removed 'enabled' return. 'loadable' return was changed from a flag to a boolean. Added 'newVersion' return. The enabled state of an addon can now be queried with GetAddOnEnableState. 
+
+
+
+https://wow.gamepedia.com/API_DisableAddOn
+--
+Disable an AddOn for subsequent sessions.
+
+DisableAddOn(index or "name"[, "character"])
+Arguments
+index 
+Integer - The index of the AddOn to disable in the user's AddOn list, from 1 to GetNumAddOns().
+OR
+
+name 
+String - The filename (not title) of the AddOn to be disabled.
+character 
+String - The name of the character (without realm) for whom to disable the addon. Defaults to the current character.
+Notes
+Takes effect only after reloading the UI - ReloadUI().
+Passing true as the second argument will disable the addon for all characters on the realm.
+
+
+
+https://wow.gamepedia.com/API_EnableAddOn
+--
+Enable an AddOn for subsequent sessions.
+
+EnableAddOn(index or "name")
+Parameters
+Arguments
+(index or "name")
+index 
+Integer - The index of the AddOn to enable in the user's AddOn list.
+name 
+String - The filename (not title) of the AddOn to be enabled.
+Returns
+nil
+Notes
+Takes effect only after reloading the UI - ReloadUI().
+
+
+
+https://wow.gamepedia.com/Global_functions
+--
+GetAddOnCPUUsage
+GetAddOnDependencies
+GetAddOnEnableState
+GetAddOnInfo
+GetAddOnMemoryUsage
+GetAddOnMetadata
+GetAddOnOptionalDependencies
+GetNumAddOns
+IsAddOnLoadOnDemand
+IsAddOnLoaded
+IsAddonVersionCheckEnabled
+ResetAddOns
+ResetDisabledAddOns
+SaveAddOns
+SetAddonVersionCheck
+UpdateAddOnCPUUsage
+UpdateAddOnMemoryUsage
+UIParentLoadAddOn
+
+
+
+https://wow.gamepedia.com/API_IsAddOnLoadOnDemand
+--
+Determine if an AddOn is loaded on demand (via .toc file dependencies or LoadAddOn) rather than at startup
+
+loadDemand = IsAddOnLoadOnDemand(index or "name")
+Parameters
+Arguments
+(index or "name")
+index 
+Integer - The index of the AddOn in the user's AddOn list. You cannot access Blizzard-provided AddOns through this mechanism.
+name 
+String - The name of the AddOn to be queried. You can access Blizzard-provided AddOns through this mechanism.
+Returns
+loadDemand
+loadDemand 
+Flag - Indicates if the AddOn is loaded on demand, 1 if it is, nil if it is loaded on startup
+Example
+Load every LoD addon.
+for i = 1, GetNumAddOns() do
+    if (IsAddOnLoadOnDemand(i)) then
+        LoadAddOn(i)
+    end
+end
+
+
+
+https://wow.gamepedia.com/API_IsAddOnLoaded
+--
+Returns whether an addon has been loaded.
+
+loaded, finished = IsAddOnLoaded(index or "name")
+Arguments
+index 
+Integer - The index of the addon in the user's addon list. You cannot query Blizzard-provided AddOns using this parameter.
+or
+
+name 
+String - The name of the addon to be queried. You can query Blizzard-provided addon using this parameter.
+Returns
+loaded 
+Flag - 1 if the addon has been, or is being loaded, nil otherwise.
+finished 
+Flag - 1 if the addon has finished loading (the ADDON_LOADED has already been fired for this addon), nil otherwise.
+
+
+
+https://wow.gamepedia.com/API_UIParentLoadAddOn
+--
+This function is implemented by FrameXML in FrameXML/UIParent.lua.
+Load or reload an addon.
+
+loaded = UIParentLoadAddOn( index or "addonName" );
+
+Parameters
+Arguments
+(index or "addonName")
+index
+Integer - The index of the AddOn in the user's AddOn list. Note that you cannot access Blizzard-provided AddOns through this mechanism.
+addonName
+String - The name of the addon you want to load or reload.
+Returns
+loaded
+Flag - Indicates if the AddOn was loaded, 1 if it is, nil if it is not.
+An error message is issued if the addon failed to load.
+Example
+local loaded = UIParentLoadAddOn( "MyFunkyAddon" );
+Result
+loaded = 1 or nil
+Details
+If the addon fails to load, it is added to a list of failed addons. If you try to load the addon again without reloading the UI, you will not be notified of failure unless you use LoadAddOn and write your own edge case.
+As of patch 1.8, you can only use this for addons that are marked on demand in their .toc files (## LoadOnDemand: 1).
+Functionally similar to this:
+
+local loaded, reason = LoadAddOn(name);
+if ( not loaded ) then
+    message(format(ADDON_LOAD_FAILED, name, getglobal("ADDON_"..reason)));
+end
+
+
+

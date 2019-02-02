@@ -1,0 +1,50 @@
+Fixedwidth fonts:
+--
+Hack
+Lucida Console
+Inconsolata
+Courier New
+NSimSun
+Rod
+Simplified Arabic Fixed
+
+
+Missing lua syntax sugar:
+--
+object.["methodCall"]()
+object:["functionPropertyCall"]()
+object.methodCall()
+object.methodPredicate
+object.:externalMethodCall()
+object.:other:externalMethodCall()
+object.:externalMethodPredicate
+object:functionPropertyCall()
+object.:otherObject:externalMethodCall()
+functionCall()
+
+
+
+ACR:RegisterOptionsTable("FasterCamera", options)
+ACD:AddToBlizOptions("FasterCamera", NAME)
+InterfaceOptions_AddCategory(optionPanel)
+
+
+
+/run oUF_PetBattleFrameHider:SetWidth(0,0)
+Bartender: ControlFadeOut
+Bazooka: Bar:fadeOut(delay, fadeAlpha)
+ouf_mlight: 
+UIFrameFadeOut(self, self.FadeOutSmooth, self:GetAlpha(), self.FadeMinAlpha or 0.3)
+
+
+UIWindows[]
+LibUIFade.brokers.in: MouseOver,KeyBind,  Bags, Bank,VoidBank,GuildBank, Mail,Vendor,Auction,Bmah,Trade, Reforge,Transmog,ItemUpgrader, Quest
+LibUIFade.brokers.out: Moving,KeyBind
+LibUIFade.map.in: MouseOver, Moving
+
+-- 
+
+
+/run LibStub.LibQTip('XPTT'):Hide()
+
+
