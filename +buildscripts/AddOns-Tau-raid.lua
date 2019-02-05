@@ -1,5 +1,5 @@
--- AddOns-Tau-raid-v548
-dofile('../AddOns-Tau-common.lua')
+-- AddOns-548-raid.lua
+dofile('../AddOns-server.lua')
 
 
 
@@ -90,15 +90,6 @@ AdvancedIconSelector: disabled
 AdvancedIconSelector-KeywordData: disabled
 
 ]=]
-
-
-linkExpaAddOns('_my') [=[
-ZenShortcuts: true
-ZenTestZone: true
-ZenTools: true
-]=]
-
-
 
 
 linkExpaAddOns('bars') [=[

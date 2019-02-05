@@ -1,4 +1,4 @@
--- AddOns-Tau-common-v548
+-- AddOns-server-548-Tau.lua
 --[[ Make symbolic link to enabled AddOns.txt  as Administrator:
 In AddOns folder:
 cmd /c mklink ..\..\WTF\AddOns.txt ..\Interface\AddOns\AddOns.txt 
@@ -9,9 +9,15 @@ cmd /c mklink AddOns.txt ..\..\AddOns.txt
 --]]
 
 dofile('../AddOnz-makelinks.lua')
-_G.linkExpaAddOns = linkAddOns.A548
-_G.linkServerAddOns = linkAddOns.A548Tau
+_G.linkExpaAddOns = linkAddOns.addons(548)
+_G.linkServerAddOns = linkAddOns.server(548, 'Tauri')
 
+
+linkExpaAddOns('+my') [=[
+ZenShortcuts: true
+ZenTestZone: true
+ZenTools: true
+]=]
 
 
 linkExpaAddOns('base/Ace3') [=[

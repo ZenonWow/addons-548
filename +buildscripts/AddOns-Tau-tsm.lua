@@ -1,5 +1,5 @@
--- AddOns-Tau-tsm-v548
-dofile('../AddOns-Tau-common.lua')
+-- AddOns-548-tsm.lua
+dofile('../AddOns-server.lua')
 
 
 
@@ -122,15 +122,6 @@ AdvancedIconSelector: true
 AdvancedIconSelector-KeywordData: true
 
 ]=]
-
-
-linkExpaAddOns('_my') [=[
-ZenShortcuts: true
-ZenTestZone: true
-ZenTools: true
-]=]
-
-
 
 
 linkExpaAddOns('bars') [=[
@@ -402,7 +393,6 @@ AckisRecipeList_Inscription: true
 AckisRecipeList_Jewelcrafting: true
 AckisRecipeList_Leatherworking: true
 AckisRecipeList_QuickScan: true
-AckisRecipeList_Tailoring: true
 AckisRecipeList_Tailoring: true
 
 Archy: true

@@ -1,5 +1,5 @@
--- AddOns-Tau-light-v548.txt
-dofile('../AddOns-Tau-common.lua')
+-- AddOns-548-light.lua
+dofile('../AddOns-server.lua')
 
 
 
@@ -22,15 +22,6 @@ idTip: true
 TipTop: true
 
 ]=]
-
-
-linkExpaAddOns('_my') [=[
-ZenShortcuts: true
-ZenTestZone: true
-ZenTools: true
-]=]
-
-
 
 
 linkExpaAddOns('bars') [=[

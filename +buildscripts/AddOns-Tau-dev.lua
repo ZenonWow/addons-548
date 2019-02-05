@@ -1,5 +1,5 @@
--- AddOns-Tau-dev-v548
-dofile('../AddOns-Tau-common.lua')
+-- AddOns-548-dev.lua
+dofile('../AddOns-server.lua')
 
 
 
@@ -126,15 +126,6 @@ AdvancedIconSelector: true
 AdvancedIconSelector-KeywordData: true
 
 ]=]
-
-
-linkExpaAddOns('_my') [=[
-ZenShortcuts: true
-ZenTestZone: true
-ZenTools: true
-]=]
-
-
 
 
 linkExpaAddOns('bars') [=[

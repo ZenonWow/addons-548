@@ -1,5 +1,5 @@
--- AddOns-Tau-zero-v548
-dofile('../AddOns-Tau-common.lua')
+-- AddOns-548-Tau-zero.lua
+dofile('../AddOns-server.lua')
 
 
 
@@ -22,15 +22,6 @@ idTip: disabled
 TipTop: disabled
 
 ]=]
-
-
-linkExpaAddOns('_my') [=[
-ZenShortcuts: true
-ZenTestZone: true
-ZenTools: true
-]=]
-
-
 
 
 linkExpaAddOns('bars') [=[
