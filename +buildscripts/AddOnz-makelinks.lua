@@ -6,33 +6,38 @@
 
 
 local logFile = "AddOns.log"
+local linksMap, linksList = {}, {}
 
-Adev = [[d:/Games/WowSync/dev/]]
-A548 = [[d:/Games/WowSync/548/addons/]]
-A548Tau = [[d:/Games/WowSync/548/Iface/AddOns-Tau-orig/]]
-A548Fs = [[d:/Games/WowSync/548/Iface/AddOns-Fs-orig/]]
-A623 = [[d:/Games/WowSync/623/Iface/AddOns/]]
-A623Fs = [[d:/Games/WowSync/623/Iface/AddOns-Fs-orig/]]
-A715 = [[d:/Games/WowSync/715/Iface/AddOns/]]
-A715Fs = [[d:/Games/WowSync/715/Iface/AddOns-Fs-orig/]]
-A735 = [[d:/Games/WowSync/735/addons/]]
-A735Fs = [[d:/Games/WowSync/735/Iface/AddOns-Fs-orig/]]
+AddonsRoot = [[d:\WowStore\addons\]]
+AddDev = [[d:\WowStore\addons\dev\]]
+ServerRoot = [[d:\WowStore\addons\server\]]
 
 local linkAddOns = {}
 _G.linkAddOns = linkAddOns
+function linkAddOns.addons(ver)  return  function(categ)  return linkAddOns.acateg(ver, categ)  end  end
+function linkAddOns.server(ver, server)  return  function(list) linkAddOns.list(ServerRoot ..ver.."-"..server.."/", list) end  end
+function linkAddOns.acateg(ver, categ)   return  function(list) linkAddOns.list(AddonsRoot ..ver.."/"..(categ and categ~="" and categ.."/" or ""), list) end  end
+
+
+
+A548Tau = ServerRoot .. [[548\AddOns-Tau-orig-548\]]
+A548Fs  = ServerRoot .. [[548\AddOns-Fs-orig-548\]]
+A623    = AddonsRoot .. [[623/AddOns/]]
+A623Fs  = ServerRoot .. [[623/AddOns-Fs-orig/]]
+A715    = AddonsRoot .. [[715/]]
+A715Fs  = ServerRoot .. [[server/715-Fstorm/]]
+A735Fs  = ServerRoot .. [[server/735-Fstorm/]]
+
+function linkAddOns.Adev(list)  linkAddOns.list(Adev, list)  end
 function linkAddOns.A548(categ)  return  function(list) linkAddOns.list(A548 .. categ .."/", list) end  end
 function linkAddOns.A735(categ)  return  function(list) linkAddOns.list(A735 .. categ .."/", list) end  end
-function linkAddOns.Adev(list)  linkAddOns.list(Adev, list)  end
 function linkAddOns.A548Tau(list)  linkAddOns.list(A548Tau, list)  end
 function linkAddOns.A548Fs(list)  linkAddOns.list(A548Fs, list)  end
 function linkAddOns.A623(list)  linkAddOns.list(A623, list)  end
 function linkAddOns.A623Fs(list)  linkAddOns.list(A623Fs, list)  end
 function linkAddOns.A715(list)  linkAddOns.list(A715, list)  end
 function linkAddOns.A715Fs(list)  linkAddOns.list(A715Fs, list)  end
---function linkAddOns.A735(list)  linkAddOns.list(A735, list)  end
 function linkAddOns.A735Fs(list)  linkAddOns.list(A735Fs, list)  end
-
-local linksMap, linksList = {}, {}
 
 
 
@@ -50,7 +55,7 @@ local function printCount(...)
 end
 
 local function printPause()
-	if  count < 20  then  return  end
+	if  count < 40  then  return  end
 	count = 0
 	pause()
 end
