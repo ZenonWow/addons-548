@@ -7,6 +7,8 @@ _G.linkServerAddOns = linkAddOns.server(548, 'Tauri')
 
 
 linkExpaAddOns('+my') [=[
+!DevTools
+!EarlyLoad
 ZenShortcuts
 ZenTestZone
 ZenTools

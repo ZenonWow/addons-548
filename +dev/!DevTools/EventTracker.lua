@@ -4,6 +4,13 @@
 
 PlaySound([[Interface\Addons\TellMeWhen\Sounds\Ding3.ogg]])
 
+for i = 1, NUM_CHAT_WINDOWS, 1 do
+	local frame = _G["ChatFrame" .. i]
+	if  frame:GetMaxLines() < 1000  then
+		frame:SetMaxLines(1000)
+	end
+end
+
 local  EventTracker = CreateFrame('Frame', 'EventTracker', UIParent)
 EventTracker:RegisterEvent('ADDON_LOADED')
 EventTracker:RegisterEvent('SAVED_VARIABLES_TOO_LARGE')

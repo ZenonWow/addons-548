@@ -33,8 +33,6 @@ oGlow: true
 linkExpaAddOns('_test/12-12') [=[
 AdiButtonAuras: true
 AdiButtonAuras_Config: true
-AuraFrames: true
-AuraFramesConfig: true
 Autopsy: true
 BindPad: true
 Butsu: true
@@ -228,6 +226,8 @@ Ellipsis: true
 Ellipsis_Options: true
 Raven: true
 Raven_Options: true
+AuraFrames: true
+AuraFramesConfig: true
 
 MikScrollingBattleText: true
 MikScrollingBTOptions: true
@@ -329,6 +329,8 @@ Broker_Garbage-Config: true
 Broker_Garbage-LootManager: true
 EmoteLDB: true
 LiteMount: true
+MakeRocketGoNow
+SpeedyGonzales
 ]=]
 
 

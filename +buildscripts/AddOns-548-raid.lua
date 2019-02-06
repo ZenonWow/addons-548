@@ -33,8 +33,6 @@ oGlow: true
 linkExpaAddOns('_test/12-12') [=[
 AdiButtonAuras: true
 AdiButtonAuras_Config: true
-AuraFrames: true
-AuraFramesConfig: true
 Autopsy: true
 BindPad: disabled
 Butsu: disabled
@@ -196,6 +194,8 @@ Ellipsis: true
 Ellipsis_Options: true
 Raven: true
 Raven_Options: true
+AuraFrames: true
+AuraFramesConfig: true
 
 MikScrollingBattleText: true
 MikScrollingBTOptions: true

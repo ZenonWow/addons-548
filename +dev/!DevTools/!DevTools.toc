@@ -1,0 +1,17 @@
+## Interface: 50400
+## Title: DevTools
+## Author: Mongusius
+## Notes: Installs debugging hooks early to monitor addon loading process.
+
+## X-License: GPL v2 or later.
+## X-Category: Development Tools
+## X-Curse-Project-Name: !DevTools
+## X-Curse-Project-ID: dev-tools
+## X-Curse-Repository-ID: wow/dev-tools/mainline
+
+## SavedVariables: DevToolsDB
+
+
+DebugChatFrame.lua
+EventTracker.lua
+
