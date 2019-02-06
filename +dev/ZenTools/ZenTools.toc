@@ -7,7 +7,7 @@
 ## SavedVariables: BlackMarketTrackerAuctionData, BlackMarketTrackerArchive, NoLoginMusicDB, UnitAurasDB
 
 NoLoginMusic.lua
-Media.lua
+# Media.lua
 
 DominosSwap.lua
 # ActionBarChatLink.lua
@@ -21,12 +21,12 @@ UIPanelWindows.lua
 BlackMarketTracker.lua
 BlackMarketTracker.xml
 PrintUnitAuras.lua
-TargetWatcherMop.lua
+# TargetWatcherMop.lua
 WhoMonitor.lua
-DebugTools.lua
+# DebugTools.lua
 
-MacroClicks.lua
-MouseWheelHandlers.lua
+# MacroClicks.lua
+# MouseWheelHandlers.lua
 
 # taints logout in 7.3.5?
 #LinkClicks.lua
@@ -36,5 +36,5 @@ MouseWheelHandlers.lua
 # TargetWatcher.lua
 # ResizeViewport.lua
 # ChatMod.lua
-ScrathPad.lua
+# ScrathPad.lua
 

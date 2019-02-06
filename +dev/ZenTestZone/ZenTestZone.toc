@@ -16,8 +16,8 @@
 ## X-Dupli: 3
 
 
-FindGlobals.lua
-LuaTests.lua
-Scratchy.lua
+# FindGlobals.lua
+# LuaTests.lua
+# Scratchy.lua
 
 

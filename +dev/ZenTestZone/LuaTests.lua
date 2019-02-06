@@ -97,6 +97,13 @@ function LuaTests.TableNilMT()
 	print("t[2] = 2") ; t[2] = 2
 end
 
+function LuaTests.MetaTableCallAsMethod()
+	local TT=setmetatable({},{__call=function(...) print(...) end,__tostring=function() return "TT" end})
+	local root=setmetatable({TT=TT},{__tostring=function() return "root" end})
+	print("root.TT()");root.TT()    -- TT
+	print("root:TT()");root:TT()    -- TT      root
+end
+
 function LuaTests.MetaTableProtection()
 	local m
 	m={};m.__metatable=m;t=setmetatable({},m);print( pcall(getmetatable,t) );print( pcall(setmetatable,t,m) );getmetatable(t).__metatable=nil;print( pcall(setmetatable,t,m) )
@@ -110,7 +117,7 @@ function LuaTests.MetaTableTest()
 	obj = setmetatable({}, { __call = 1     }) ; print( "__call = 1:", pcall(obj) )
 	obj = setmetatable({}, { __call = "call?" }) ; print( "__call = 'call?':", pcall(obj) )
 	obj = setmetatable({}, { __call = {} }) ; print( "__call = {}:", pcall(obj) )
-	obj = setmetatable({}, { __call = function() return "callobj" end }) ; print( "__call = func:", pcall(obj) )
+	obj = setmetatable({}, { __call = function() return "callobj" end }) ; print( "__call = function:", pcall(obj) )
 	obj = setmetatable({}, { __call = obj }) ; print( "__call = last:", pcall(obj) )
 	obj = setmetatable(obj, { __call = obj }) ; print( "__call = self:" ) ; print( pcall(obj) )
 	
@@ -121,6 +128,17 @@ function LuaTests.MetaTableTest()
 	obj = setmetatable({}, { __index = "Hello! Nothin 'ere." }) ; print(obj.something)
 	obj = setmetatable({}, { __index = false }) ; print(obj.something)
 	obj = setmetatable({}, { __index = function(self,key) return 1,2,key end }) ; print(m['nomultireturn'])
+end
+
+function formattable(t)  local s={}; for k,v in pairs(t) do s[#s+1]= tostring(k).." = "..tostring(v) end  end
+function dumptable(t)  print("{") ; for k,v in pairs(t) do print(k,"=",v) end ; print("}")  end
+function dump(v)  if type(v)=='table' then  dumptable(t)  else  print(v)  end
+
+function LuaTests.TableIDuniquenessWhenGCd()
+	print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); print({});collectgarbage(); 
+	local a={};
+	
+	local ids={} ; for i=1,1000 do local id=tostring({}); ids[id]=(ids[id] or 0)+1; collectgarbage() end ; dumptable(ids)
 end
 
 

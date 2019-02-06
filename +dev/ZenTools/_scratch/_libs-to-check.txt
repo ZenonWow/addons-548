@@ -1,5 +1,10 @@
+
 ConfigLib.lua
+MC2DebugLib.lua -> Mappy
 DebugLib.lua
+LibLogger-1.0 -> ButtonBin
+LibOptionsAssist -> DockingStation -> INTERFACEOPTIONS_ADDONCATEGORIES
+LibDualSpec-1.0", 12
 
 ExLib.lua
 Lib.lua
