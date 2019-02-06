@@ -1,0 +1,25 @@
+5.0.1.7-Release
+    Tagging release version
+
+5.0.1.6-Beta
+    More menuminibuttons, time to make it wider
+    Add support for AddonLoader's LoadOn-InterfaceOptions thingy
+
+3.0.1.5-Beta
+    Update for wrath build 8962 config panel breakage
+    Embed update
+
+3.0.1.4-Beta
+    Embed update
+    Add OnTooltipShow (patch from Funky)
+    Murr... forgot to register for all clicks
+
+3.0.1.3-Beta
+    Tweak up to 10 buttons wide
+
+2.4.3.2-Beta
+    Set dataobj.type... me forgetty.
+
+2.4.2.1-Beta
+    And so it begins...
+
