@@ -14,7 +14,7 @@ local dataObj, plugins, safecall, QueueMethod = addon.dataObj, addon.plugins, ad
 Helpers
 -------------------------------------------------------------------------------]]
 local components = { ['data source'] = { 'icon', 'label', 'text', 'value', 'suffix' }, ['launcher'] = { 'icon', 'label' } }
-local scriptHandlers = { OnClick = { }, OnEnter = { }, OnLeave = { }, OnMouseWheel = { }, OnReceiveDrag = { } }
+local scriptHandlers = { OnClick = { }, OnDoubleClick = { }, OnEnter = { }, OnLeave = { }, OnMouseWheel = { }, OnReceiveDrag = { } }
 local recycled = { }
 
 local PHI = 2 / (sqrt(5) + 1)
@@ -432,6 +432,13 @@ local function OnClick(self, button, down, ...)
 	local handler = scriptHandlers.OnClick[self] or dataObj[self.name].OnClick
 	if type(handler) == 'function' then
 		safecall(handler, self, button, down, ...)
+	end
+end
+
+local function OnDoubleClick(self, ...)
+	local handler = scriptHandlers.OnDoubleClick[self] or dataObj[self.name].OnDoubleClick
+	if type(handler) == 'function' then
+		safecall(handler, self, ...)
 	end
 end
 

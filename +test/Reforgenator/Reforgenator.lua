@@ -306,7 +306,7 @@ function Reforgenator:OnInitialize()
     AC:RegisterOptionsTable('Reforgenator built-in models', builtInModelOptions)
     ACD:AddToBlizOptions('Reforgenator built-in models', 'Built-in models', 'Reforgenator')
 
-    local broker = LibStub:GetLibrary("LibDataBroker-1.1", true)
+    local broker = LibStub:GetLibrary("LibDataBroker-1.1")
     local ldbButton = broker:NewDataObject("Reforgenator", --This goes From here************
 	{
         type = "launcher",

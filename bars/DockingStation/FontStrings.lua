@@ -21,9 +21,9 @@ local recycled = { }
 
 local function CleanString(value)
 	if value then
-		value = safecall(strtrim, value)
-		if value and value ~= "" then
-			return value
+		local ok, result = safecall(strtrim, value)
+		if ok and result ~= "" then
+			return result
 		end
 	end
 end

@@ -328,8 +328,13 @@ end
 
 --on update script, handles throttled buff and debuff updating as well as range updating
 Updater:SetScript('OnUpdate', function(self, elapsed)
-	if self.shouldUpdateBuffs then
-		self.shouldUpdateBuffs = nil
+	self:Hide()
+	local now = GetTime()
+	-- if self.shouldUpdateBuffs then
+	if now < self.nextUpdate then  return
+	else
+		self.nextUpdate = now + self.delay
+		-- self.shouldUpdateBuffs = nil
 
 		for _,b in pairs(self.buttons) do
 		
@@ -342,7 +347,7 @@ Updater:SetScript('OnUpdate', function(self, elapsed)
 		end
 	end
 end)
-Updater.nextUpdate = 1
+Updater.nextUpdate = GetTime()
 Updater.delay = 0.025
 
 
@@ -377,7 +382,8 @@ function Updater:UpdatePlayerBuffs()
 
 	--something changed, trigger update buffs
 	if changed then
-		self.shouldUpdateBuffs = true
+		-- self.shouldUpdateBuffs = true
+		self:Show()
 	end
 end
 
@@ -400,7 +406,8 @@ function Updater:UpdateTargetBuffs(unit, forceRefresh)
 
 	--if change, mark for updating
 	if changed or forceRefresh then
-		self.shouldUpdateBuffs = true
+		-- self.shouldUpdateBuffs = true
+		self:Show()
 	end
 end
 
@@ -749,7 +756,8 @@ Updater:SetScript('OnEvent', function(self, event, unit)
 		self:UpdateTargetBuffs('focus')
 		self:UpdatePlayerBuffs()
 	elseif event == 'ACTIONBAR_UPDATE_COOLDOWN' or event == 'ACTIONBAR_UPDATE_STATE' then
-		self.shouldUpdateBuffs = true
+		-- self.shouldUpdateBuffs = true
+		self:Show()
 	elseif event == 'ADDON_LOADED' then
 		local registerFunc = RegisterAddon[unit]
 		if  registerFunc  then

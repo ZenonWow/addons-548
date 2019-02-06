@@ -53,13 +53,18 @@ addon.mt_subtables = {
 }
 
 function addon.safecall(...)
-	local ok, result = pcall(...)
+	local showErrors = not addon.settings.hideErrors
+	local safecall =  showErrors  and  _G.safecall  or  pcall
+	local ok, result = safecall(...)
 	if ok then
-		return result
-	elseif not addon.settings.hideErrors then
-		geterrorhandler()(result)
+		return ok, result
+	elseif  showErrors  and  safecall == pcall  then
+		_G.geterrorhandler()(result)
 	end
 end
+
+-- Just use global safecall, don't hide errors.
+-- if  _G.safecall  then  addon.safecall = _G.safecall  end
 
 function addon.tremove_byVal(table, value)
 	for index = 1, #table do

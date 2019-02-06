@@ -323,7 +323,7 @@ NEEDTOKNOW.LENGTHENINGS= {
 -- SharedMedia Support
 -- -------------------
 
-    NeedToKnow.LSM = LibStub("LibSharedMedia-3.0", true)
+    NeedToKnow.LSM = LibStub("LibSharedMedia-3.0")
     
     if not NeedToKnow.LSM:Fetch("statusbar", "Aluminum", true) then NeedToKnow.LSM:Register("statusbar", "Aluminum",           [[Interface\Addons\NeedToKnow\Textures\Aluminum.tga]]) end
     if not NeedToKnow.LSM:Fetch("statusbar", "Armory", true) then NeedToKnow.LSM:Register("statusbar", "Armory",             [[Interface\Addons\NeedToKnow\Textures\Armory.tga]]) end

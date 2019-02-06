@@ -11,7 +11,7 @@
 ## SavedVariables: TradeSkillMaster_AuctioningDB
 
 ## Dependency: TradeSkillMaster
-## LoadManagers: AddonLoader
+##- LoadManagers: AddonLoader
 ## X-LoadOn-Slash: /tsma, /tsmauc
 
 ##- X-LoadOn-AuctionHouse: if  IsAddOnLoaded('TradeSkillMaster')

@@ -1365,6 +1365,7 @@ Plugin.OnClick = function(frame, ...)
     end
 end
 
+--[[
 Plugin.OnDoubleClick = function(frame, ...)
     local self = frame.bzkPlugin
     if self.dataobj.OnDoubleClick then
@@ -1373,6 +1374,7 @@ Plugin.OnDoubleClick = function(frame, ...)
         self.dataobj.OnClick(frame, ...)
     end
 end
+--]]
 
 Plugin.OnUpdate = function(frame)
     local x, y = getScaledCursorPosition()
@@ -1744,14 +1746,15 @@ function Plugin:enable()
         self.frame:SetScript("OnEnter", Plugin.OnEnter)
         self.frame:SetScript("OnLeave", Plugin.OnLeave)
         self.frame:SetScript("OnClick", Plugin.OnClick)
-        self.frame:SetScript("OnDoubleClick", Plugin.OnDoubleClick)
+        -- self.frame:SetScript("OnDoubleClick", Plugin.OnDoubleClick)
+        self.frame:SetScript("OnDoubleClick", self.dataobj.OnDoubleClick)
         self.frame:SetScript("OnMouseDown", Plugin.OnMouseDown)
         self.frame:SetScript("OnDragStart", Plugin.OnDragStart)
         self.frame:SetScript("OnDragStop", Plugin.OnDragStop)
         self.frame:SetScript("OnMouseWheel", Plugin.OnMouseWheel)
-        if self.dataobj.OnReceiveDrag then
-            self.frame:SetScript("OnReceiveDrag", self.dataobj.OnReceiveDrag)
-        end
+        -- if self.dataobj.OnReceiveDrag then
+        self.frame:SetScript("OnReceiveDrag", self.dataobj.OnReceiveDrag)
+        -- end
         self.frame:EnableMouse(true)
         self.frame:EnableMouseWheel(true)
     end
@@ -1787,6 +1790,8 @@ function Plugin:updateLDBCallbacks()
     self:updateLDBCallback("text", "setText", self.db.showText)
     self:updateLDBCallback("value", "setText", self.db.showValue)
     self:updateLDBCallback("suffix", "setText", self.db.showSuffix)
+
+    -- Note: Bazooka does not support updating event handler scripts on dataobj. Reasonable.
 end
 
 function Plugin:applySettings()

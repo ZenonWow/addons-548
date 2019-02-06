@@ -22,16 +22,11 @@
 
 --[[ library stuff ]]--
 
-local VERSION = 2
-if FlyPaper and tonumber(FlyPaper.version) and tonumber(FlyPaper.version) >= VERSION then 
-	return 
-end
-
-if not FlyPaper then
-	FlyPaper = {version = VERSION}
-else
-	FlyPaper.version = VERSION
-end
+local LIBNAME, VERSION = "FlyPaper", 2
+assert(LibStub, LIBNAME.." requires LibStub")
+local FlyPaper = LibStub:NewLibrary(LIBNAME, VERSION)
+if not FlyPaper then  return  end -- No upgrade needed
+FlyPaper.version = VERSION
 
 
 --returns true if <frame>, or one of the frames that <frame> is dependent on, is anchored to <otherFrame>.  Returns nil otherwise.
