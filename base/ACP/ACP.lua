@@ -357,9 +357,7 @@ local function acquire()
 end
 
 local function reclaim(t)
-    for k in pairs(t) do
-        t[k] = nil
-    end
+    wipe(t)
     cache[t] = true
 end
 
@@ -370,6 +368,7 @@ local ACP_SET_SIZE = 25
 local ACP_MAXADDONS = 20
 local ACP_DefaultSet = {}
 local ACP_DEFAULT_SET = 0
+--[[
 local ACP_BLIZZARD_ADDONS = {
     "Blizzard_AchievementUI",
     "Blizzard_ArenaUI",
@@ -394,6 +393,53 @@ local ACP_BLIZZARD_ADDONS = {
     "Blizzard_TokenUI",
     "Blizzard_TradeSkillUI",
     "Blizzard_TrainerUI",
+}
+--]]
+local ACP_BLIZZARD_ADDONS = {
+"Blizzard_AchievementUI",
+"Blizzard_ArchaeologyUI",
+"Blizzard_ArenaUI",
+"Blizzard_AuctionUI",
+"Blizzard_AuthChallengeUI",
+"Blizzard_BarbershopUI",
+"Blizzard_BattlefieldMinimap",
+"Blizzard_BindingUI",
+"Blizzard_BlackMarketUI",
+"Blizzard_Calendar",
+"Blizzard_ChallengesUI",
+"Blizzard_ClientSavedVariables",
+"Blizzard_CombatLog",
+"Blizzard_CombatText",
+"Blizzard_CompactRaidFrames",
+"Blizzard_CUFProfiles",
+"Blizzard_DebugTools",
+"Blizzard_EncounterJournal",
+"Blizzard_GlyphUI",
+"Blizzard_GMChatUI",
+"Blizzard_GMSurveyUI",
+"Blizzard_GuildBankUI",
+"Blizzard_GuildControlUI",
+"Blizzard_GuildUI",
+"Blizzard_InspectUI",
+"Blizzard_ItemAlterationUI",
+"Blizzard_ItemSocketingUI",
+"Blizzard_ItemUpgradeUI",
+"Blizzard_LookingForGuildUI",
+"Blizzard_MacroUI",
+"Blizzard_MovePad",
+"Blizzard_PetBattleUI",
+"Blizzard_PetJournal",
+"Blizzard_PVPUI",
+"Blizzard_QuestChoice",
+"Blizzard_RaidUI",
+"Blizzard_ReforgingUI",
+"Blizzard_StoreUI",
+"Blizzard_TalentUI",
+"Blizzard_TimeManager",
+"Blizzard_TokenUI",
+"Blizzard_TradeSkillUI",
+"Blizzard_TrainerUI",
+"Blizzard_VoidStorageUI",
 }
 local NUM_BLIZZARD_ADDONS = #ACP_BLIZZARD_ADDONS
 ACP.ACP_BLIZZARD_ADDONS = ACP_BLIZZARD_ADDONS
@@ -829,9 +875,7 @@ addonListBuilders[DEFAULT] = function()
 end
 
 addonListBuilders[TITLES] = function()
-    for k in pairs(masterAddonList) do
-        masterAddonList[k] = nil
-    end
+        wipe(masterAddonList)
 
     local numAddons = GetNumAddOns()
     for i=1,numAddons do
@@ -1223,9 +1267,7 @@ function ACP:EnableAddon(addon, shift, ctrl)
 end
 
 function ACP:ReadDependencies(t, ...)
-    for k in pairs(t) do
-        t[k] = nil
-    end
+    wipe(t)
     for i=1,select('#', ...) do
         local name = select(i, ...)
         if name then
@@ -1603,7 +1645,11 @@ function ACP:AddonList_Enable(addonIndex, enabled, shift, ctrl, category)
 end
 
 function ACP:AddonList_LoadNow(index)
+    local _, _, _, wasEnabled = GetAddOnInfo(index)
+    _G.EnableAddOn(index)
+    -- local loaded, reason = _G.LoadAddOn(OPTIONS_NAME)
     UIParentLoadAddOn(index)
+    if  not wasEnabled  then  _G.DisableAddOn(index)  end
     ACP:AddonList_OnShow()
 end
 
