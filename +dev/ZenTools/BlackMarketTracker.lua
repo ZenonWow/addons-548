@@ -5,7 +5,7 @@
 /dump BlackMarketFrame:GetRect()
 /run BlackMarketFrame.BidButton:Enable()
 /run BMT.Uninstall()
-/run BMT.Disable()
+/run BMT:Disable()
 /run BMT.Install()
 /dump C_BlackMarket.GetNumItems_()
 /vdt BlackMarketTrackerAuctionData
@@ -82,7 +82,7 @@ BMT.lastUpdate = 0
 -- BMT.filteredItems = nil
 -- BMT.newestItem
 
--- Initialized in BMT.OnShow()
+-- Initialized in BMT:Enable()
 local BlackMarketTrackerAuctionData
 
 
@@ -91,9 +91,9 @@ function  ToggleBlackMarket()
 	-- Called by TOGGLEBLACKMARKET binding
 	if  not BlackMarketFrame  then  BlackMarket_LoadUI()  end
 	if  not BlackMarketFrame  then  return false  end
-	BMT.Enable()
+	BMT:Enable()
 	-- If not interacting with the bmah npc (offline) then C_BlackMarket.GetNumItems_() returns nil
-	if  not BlackMarketFrame:IsShown()  then  BMT.online = not not C_BlackMarket.GetNumItems_()  end
+	if  not BMT.atNpc  and  C_BlackMarket.GetNumItems_()  then  BMT.atNpc = true  end
 	ToggleFrame(BlackMarketFrame)  -- Uses secure code if necessary.
 	--BlackMarketFrame_Show()
 end
@@ -436,6 +436,55 @@ BMT.colors = {
 
 
 
+function BMT:BLACK_MARKET_OPEN()
+	-- Called when interacting with BM npc
+	if  IsAltKeyDown()  then  self:Disable()  else  self:Enable()  end
+	
+	-- Save BM npc name for InteractUnit() hook
+	self.atNpc = UnitName('npc') or true
+	self.lastUpdate = self.lastUpdate  or  0
+	self.RequestItems()
+	--BlackMarketFrame:SetScript('OnUpdate', self.OnUpdate)
+	self:Show()    -- enable BMT:OnUpdate()
+	ShowUIPanel(BlackMarketFrame)
+	--if  not BlackMarketFrame:IsShown()  then  C_BlackMarket.Close()  end
+	--PlaySound("AuctionWindowOpen")
+end
+
+function BMT:BLACK_MARKET_CLOSE()
+	-- Called when BM npc is left
+	self.atNpc = false
+	-- Sound the bell if it was scanning in the background
+	if  not BlackMarketFrame:IsShown()  then  PlaySound("AuctionWindowClose")  end
+	HideUIPanel(BlackMarketFrame)
+	--BlackMarketFrame:SetScript('OnUpdate', nil)
+	self:Hide()    -- disable BMT:OnUpdate()
+end
+
+function BMT:OnEvent(event, ...)
+	if  self[event]  then  return self[event](self, event, ...)  end
+end
+	
+function BMT:OnUpdate(elapsed)
+	local nowSecondsFloat = GetTime()
+	if  2 <= nowSecondsFloat - (BMT.lastRequest or 0)  then
+		if  not BMT.atNpc  then
+			-- Should have hidden the frame. No update if not interacting with npc.
+			print('BMT.OnUpdate() when not at npc')
+			self:Hide()
+		end
+		BMT.RequestItems()
+	elseif  BMT.incompleteQuery == true  and  0.5 <= nowSecondsFloat - (BMT.lastUpdate or 0)  then
+		-- BMT.incompleteQuery == 'closed' <-> if C_BlackMarket.GetNumItems_() == nil <-> not BMT.atNpc
+		BMT.lastUpdate = nowSecondsFloat
+		-- Let's see if some unloaded data has arrived
+		BMT.ScrollFrame_Update()
+	end
+end
+
+
+
+
 -- Patched update function
 local lastNumItems = 0
 
@@ -551,8 +600,7 @@ end
 
 
 
-
-function BMT.BlackMarketFrame_Resize(self)
+function BMT.BlackMarketFrame_Resize()
 	BlackMarketFrame:SetSize(660,600)
 	BlackMarketFrame.Inset:SetPoint('TOPLEFT',BlackMarketFrame,26,-70)
 	BlackMarketFrame.Inset:SetPoint('BOTTOMRIGHT',BlackMarketFrame,-26,22)
@@ -569,43 +617,14 @@ function BMT.BlackMarketFrame_Resize(self)
 end
 
 
-function BMT.BlackMarketFrame_Show()
-	-- Called on BLACK_MARKET_OPEN event when NPC is interacted with
-	BMT.Enable()
-	BMT.online = true
-	BMT.lastUpdate = BMT.lastUpdate  or  0
-	BMT.RequestItems()
-	--BlackMarketFrame:SetScript('OnUpdate', BMT.OnUpdate)
-	BMT:Show()    -- enable BMT:OnUpdate()
-	ShowUIPanel(BlackMarketFrame)
-	--if  not BlackMarketFrame:IsShown()  then  C_BlackMarket.Close()  end
-	--PlaySound("AuctionWindowOpen")
-end
-
-function BMT.BlackMarketFrame_Hide()
-	-- Called on BLACK_MARKET_CLOSE event when NPC is left
-	BMT.online = false
-	-- Sound the bell if it was scanning in the background
-	if  not BlackMarketFrame:IsShown()  then  PlaySound("AuctionWindowClose")  end
-	HideUIPanel(BlackMarketFrame)
-	--BlackMarketFrame:SetScript('OnUpdate', nil)
-	BMT:Hide()    -- disable BMT:OnUpdate()
-end
-
-
-
-function BMT.OnShow(self)
-	_G.BlackMarketTrackerAuctionData = _G.BlackMarketTrackerAuctionData or {}
-	BlackMarketTrackerAuctionData = _G.BlackMarketTrackerAuctionData
-	BlackMarketTrackerAuctionData.showCompletedForMinutes = BlackMarketTrackerAuctionData.showCompletedForMinutes or 10
-
+function BMT.BlackMarketFrame_OnShow(BlackMarketFrame)
 	HybridScrollFrame_CreateButtons(BlackMarketScrollFrame, "BlackMarketItemTemplate", 5, -5)
-	self.HotDeal:Hide()
+	BlackMarketFrame.HotDeal:Hide()
 	MoneyInputFrame_SetCopper(BlackMarketBidPrice, 0)
 	BlackMarketFrame.BidButton:Disable()
 	--PlaySound("AuctionWindowOpen")
 	
-	if  not BMT.online  then
+	if  not BMT.atNpc  then
 		-- When offline the list is only updated this once.
 		BMT.ScrollFrame_Update()
 	else
@@ -615,44 +634,29 @@ function BMT.OnShow(self)
 	end
 end
 
-function BMT.OnHide(self)
+function BMT.BlackMarketFrame_OnHide(BlackMarketFrame)
 	-- OnUpdate unregistered by BlackMarketFrame_Hide. This is just an extra in case the state gets corrupted.
-	--if  not BMT.online  then  BlackMarketFrame:SetScript('OnUpdate', nil)  end
+	--if  not BMT.atNpc  then  BlackMarketFrame:SetScript('OnUpdate', nil)  end
 	-- Don't close BlackMarket. Continue scanning.
 	--C_BlackMarket.Close();
 	--PlaySound("AuctionWindowClose");
 end
 
 
-function BMT.OnUpdate(self, elapsed)
-	local nowSecondsFloat = GetTime()
-	if  not BMT.online  then
-		-- Should have hidden the frame. No update if not interacting with npc.
-		-- print('BMT.OnUpdate() when offline')
-	elseif  2 <= nowSecondsFloat - (BMT.lastRequest or 0)  then
-		BMT.RequestItems()
-	elseif  BMT.incompleteQuery == true  and  0.5 <= nowSecondsFloat - (BMT.lastUpdate or 0)  then
-		-- BMT.incompleteQuery == 'closed' <-> if C_BlackMarket.GetNumItems_() == nil <-> not BMT.online
-		BMT.lastUpdate = nowSecondsFloat
-		-- Let's see if some unloaded data has arrived
-		BMT.ScrollFrame_Update()
-	end
-end
-
-function BMT.OnEvent(self, event, ...)
+function BMT.BlackMarketFrame_OnEvent(BlackMarketFrame, event, ...)
 	if ( event == "BLACK_MARKET_ITEM_UPDATE" ) then
 		-- This function scrolls up (resets the scrollframe), very annoying every 2 seconds
 		--HybridScrollFrame_CreateButtons(BlackMarketScrollFrame, "BlackMarketItemTemplate", 5, -5);
 		BMT.ScrollFrame_Update()
 	elseif ( event == "BLACK_MARKET_BID_RESULT" or event == "BLACK_MARKET_OUTBID" ) then
-		if (self:IsShown()) then
+		if (BlackMarketFrame:IsShown()) then
 			BMT.RequestItems()
 		end
 	end
-
+	
 	-- do this on any event
 	local numItems = C_BlackMarket.GetNumItems()
-	self.Inset.NoItems:SetShown(numItems  and  numItems <= 0)
+	BlackMarketFrame.Inset.NoItems:SetShown(numItems  and  numItems <= 0)
 	if  BlackMarketFrame.HotDeal:IsVisible()  then   BlackMarketFrame_UpdateHotItem(self)  end
 end
 
@@ -660,6 +664,13 @@ end
 
 
 
+
+function BMT.InteractUnit(unit)
+	if  UnitName(unit) == BMT.atNpc  then
+		-- Show the BlackMarketFrame when interacting _again_ with the BM npc
+		ShowUIPanel(BlackMarketFrame)
+	end
+end
 
 function BMT.RequestItems()
 	--print("BMT.RequestItems() start")
@@ -697,8 +708,10 @@ end
 
 function BMT.Save()
 	local hooks = BMT.hooks or {}  ;  BMT.hooks = hooks
-	if  not hooks.BlackMarketFrame_Show        then  hooks.BlackMarketFrame_Show       = BlackMarketFrame_Show             end
-	if  not hooks.BlackMarketFrame_Hide        then  hooks.BlackMarketFrame_Hide       = BlackMarketFrame_Hide             end
+	--[[
+	if  not hooks.BlackMarketFrame_Show        then  hooks.BlackMarketFrame_Show       = _G.BlackMarketFrame_Show          end
+	if  not hooks.BlackMarketFrame_Hide        then  hooks.BlackMarketFrame_Hide       = _G.BlackMarketFrame_Hide          end
+	--]]
 	if  not C_BlackMarket.RequestItems_        then  C_BlackMarket.RequestItems_       = C_BlackMarket.RequestItems        end
 	if  not C_BlackMarket.GetNumItems_         then  C_BlackMarket.GetNumItems_        = C_BlackMarket.GetNumItems         end
 	if  not C_BlackMarket.GetItemInfoByIndex_  then  C_BlackMarket.GetItemInfoByIndex_ = C_BlackMarket.GetItemInfoByIndex  end
@@ -706,15 +719,25 @@ function BMT.Save()
 end
 
 function BMT.Install()
+	if  BMT.isInstalled  then  return  end
+	
+	if  BMT.isInstalled == nil  then
+		-- hook only once, BMT.isInstalled == false after BMT.Uninstall()
+		-- BMT.isInteractUnitHooked = true
+		hooksecurefunc('InteractUnit', BMT.InteractUnit)
+	end
+	
+	BMT.isInstalled = true
 	Debug('BMT.Install()')
 	BMT.Save()
 	BMT:SetScript('OnUpdate', BMT.OnUpdate)
-	-- Enable tracking if online (interacting with npc)
-	BMT:SetShown(not not C_BlackMarket.GetNumItems_())
+	-- Enable tracking if online (interacting with npc, but atNpc is not initialized yet)
+	BMT:SetShown(nil ~= C_BlackMarket.GetNumItems_())
 	
-	-- Don't want no restore for these
+	--[[ Registering for the BLACK_MARKET_OPEN and BLACK_MARKET_CLOSE events directly
 	_G.BlackMarketFrame_Show = BMT.BlackMarketFrame_Show
 	_G.BlackMarketFrame_Hide = BMT.BlackMarketFrame_Hide
+	--]]
 	
 	-- Do not auto-position or auto-close this frame
 	UIPanelWindows.BlackMarketFrame = nil
@@ -722,46 +745,61 @@ function BMT.Install()
 	BlackMarketFrame:SetPoint('TOPLEFT',50,-50)
 end
 
+--[[
+Can only be called explicitly:
+/run BMT.Uninstall()
+--]]
 function BMT.Uninstall()
 	print('BMT.Uninstall()')
 	BMT:SetScript('OnUpdate', nil)
 	BMT:Hide()
 	
+	--[[ Registering for the BLACK_MARKET_OPEN and BLACK_MARKET_CLOSE events directly
 	local hooks = BMT.hooks or {}
-	if  hooks.BlackMarketFrame_Show        then  BlackMarketFrame_Show            = hooks.BlackMarketFrame_Show        end
-	if  hooks.BlackMarketFrame_Hide        then  BlackMarketFrame_Hide            = hooks.BlackMarketFrame_Hide        end
+	if  hooks.BlackMarketFrame_Show        then  _G.BlackMarketFrame_Show            = hooks.BlackMarketFrame_Show        end
+	if  hooks.BlackMarketFrame_Hide        then  _G.BlackMarketFrame_Hide            = hooks.BlackMarketFrame_Hide        end
+	--]]
+	
+	BMT.isInstalled = false
 end
 
 
 
-function BMT.Enable()
-	if  IsAltKeyDown()  then  return BMT.Disable()  end
-	
-	if  C_BlackMarket.RequestItems_        then  C_BlackMarket.RequestItems = BMT.RequestItems  end
-	if  C_BlackMarket.GetNumItems_         then  C_BlackMarket.GetNumItems = BMT.GetNumItems  end
-	if  C_BlackMarket.GetItemInfoByIndex_  then  C_BlackMarket.GetItemInfoByIndex = BMT.GetItemInfoByIndex  end
-	if  C_BlackMarket.GetHotItem_          then  C_BlackMarket.GetHotItem = BMT.GetHotItem  end
+function BMT:Enable()
+	BlackMarketTrackerAuctionData = _G.BlackMarketTrackerAuctionData or {}
+	_G.BlackMarketTrackerAuctionData = BlackMarketTrackerAuctionData
+	BlackMarketTrackerAuctionData.showCompletedForMinutes = BlackMarketTrackerAuctionData.showCompletedForMinutes or 10
+
+	if  C_BlackMarket.RequestItems_        then  C_BlackMarket.RequestItems = self.RequestItems  end
+	if  C_BlackMarket.GetNumItems_         then  C_BlackMarket.GetNumItems = self.GetNumItems  end
+	if  C_BlackMarket.GetItemInfoByIndex_  then  C_BlackMarket.GetItemInfoByIndex = self.GetItemInfoByIndex  end
+	if  C_BlackMarket.GetHotItem_          then  C_BlackMarket.GetHotItem = self.GetHotItem  end
 
 	if  not BlackMarketScrollFrame  then  return  end
 	if  not BlackMarketScrollFrame.update_     then  BlackMarketScrollFrame.update_    = BlackMarketScrollFrame.update     end
 	if  BlackMarketScrollFrame.update_  then
-		BlackMarketScrollFrame_Update = BMT.ScrollFrame_Update
-		BlackMarketScrollFrame.update = BMT.ScrollFrame_Update
+		BlackMarketScrollFrame_Update = self.ScrollFrame_Update
+		BlackMarketScrollFrame.update = self.ScrollFrame_Update
 	end
 
 	if  not BlackMarketFrame  then  return  end
-	--if  not BMT.eventsRegistered  then
+	--if  not self.eventsRegistered  then
 	do
-		BlackMarketFrame:SetScript('OnShow', BMT.OnShow)
-		BlackMarketFrame:SetScript('OnHide', BMT.OnHide)
-		BlackMarketFrame:SetScript('OnEvent', BMT.OnEvent)
-		BMT.eventsRegistered = true
+		BlackMarketFrame:SetScript('OnShow', BMT.BlackMarketFrame_OnShow)
+		BlackMarketFrame:SetScript('OnHide', BMT.BlackMarketFrame_OnHide)
+		BlackMarketFrame:SetScript('OnEvent', BMT.BlackMarketFrame_OnEvent)
+		UIParent:UnregisterEvent('BLACK_MARKET_OPEN')
+		UIParent:UnregisterEvent('BLACK_MARKET_CLOSE')
+		self:SetScript('OnEvent', self.OnEvent)
+		self:RegisterEvent('BLACK_MARKET_OPEN')
+		self:RegisterEvent('BLACK_MARKET_CLOSE')
+		self.eventsRegistered = true
 	end
 	
-	BMT.BlackMarketFrame_Resize(self)
+	self.BlackMarketFrame_Resize()
 end
 
-function BMT.Disable()
+function BMT:Disable()
 	if  C_BlackMarket.RequestItems_        then  C_BlackMarket.RequestItems       = C_BlackMarket.RequestItems_        end
 	if  C_BlackMarket.GetNumItems_         then  C_BlackMarket.GetNumItems        = C_BlackMarket.GetNumItems_         end
 	if  C_BlackMarket.GetItemInfoByIndex_  then  C_BlackMarket.GetItemInfoByIndex = C_BlackMarket.GetItemInfoByIndex_  end
@@ -774,11 +812,16 @@ function BMT.Disable()
 	end
 
 	if  not BlackMarketFrame  then  return  end
-	if  BMT.eventsRegistered  then
-		BlackMarketFrame:SetScript('OnShow', BlackMarketFrame_OnShow)
-		BlackMarketFrame:SetScript('OnHide', BlackMarketFrame_OnHide)
-		BlackMarketFrame:SetScript('OnEvent', BlackMarketFrame_OnEvent)
-		BMT.eventsRegistered = false
+	if  self.eventsRegistered  then
+		BlackMarketFrame:SetScript('OnShow', _G.BlackMarketFrame_OnShow)
+		BlackMarketFrame:SetScript('OnHide', _G.BlackMarketFrame_OnHide)
+		BlackMarketFrame:SetScript('OnEvent', _G.BlackMarketFrame_OnEvent)
+		UIParent:RegisterEvent('BLACK_MARKET_OPEN')
+		UIParent:RegisterEvent('BLACK_MARKET_CLOSE')
+		self:SetScript('OnEvent', nil)
+		self:UnregisterEvent('BLACK_MARKET_OPEN')
+		self:UnregisterEvent('BLACK_MARKET_CLOSE')
+		self.eventsRegistered = false
 	end
 end
 
@@ -791,4 +834,5 @@ if  IsAddOnLoaded('Blizzard_BlackMarketUI')  then
 else
 	hooksecurefunc('BlackMarket_LoadUI', BMT.Install)
 end
+
 
