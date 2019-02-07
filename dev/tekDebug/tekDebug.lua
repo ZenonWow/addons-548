@@ -22,17 +22,28 @@ if tekDebug then MyAddon:EnableDebug(1, tekDebug:GetFrame("MyAddon")) end
 ]]
 
 
-local panel = LibStub("SlimPanel").new("DebugPanel", "tekDebug", true)
 local tekDebug = {}
 _G.tekDebug = tekDebug
 
-local logBar = CreateFrame('Frame', nil, panel)
+local DebugPanel = LibStub('SlimPanel').new('DebugPanel', 'tekDebug', true)
+local navBar = CreateFrame('Frame', 'DebugPanelNav', DebugPanel)
+DebugPanel.navBar = navBar
+--navBar:SetPoint('TOPLEFT', 23, -105)
+navBar:SetPoint('TOPLEFT', DebugPanel.TitleRegion, 'BOTTOMLEFT')
+navBar:SetPoint('BOTTOMLEFT')
+navBar:SetWidth(158)
+--[[
+/run DebugPanel.logBar:SetPoint('TOPLEFT')
+/run DebugPanel.frames.AddonLoader:SetAllPoints()
+--]]
+local logBar = CreateFrame('Frame', 'DebugPanelLogs', DebugPanel)
+DebugPanel.logBar = logBar
 logBar:SetPoint('TOPLEFT', navBar, 'TOPRIGHT')
 --logBar:SetPoint('TOPRIGHT', self.TitleRegion, 'BOTTOMRIGHT')
 logBar:SetPoint('BOTTOMRIGHT')
 
 local frames, names = {}, {}
-local navBar
+DebugPanel.frames = frames
 local buttons, offset = {}, 0
 
 local function refresh()
@@ -57,11 +68,12 @@ local function Nav_OnClick(self)
 		frame:Hide()
 		self:UnlockHighlight()
 	else
+		print("Nav_OnClick("..self.logName..")")
 		for _,f in pairs(frames) do f:Hide() end
 		for _,f in pairs(buttons) do f:UnlockHighlight() end
 
 		--[[
-		frame:SetParent(panel)
+		frame:SetParent(DebugPanel)
 		frame:ClearAllPoints()
 		frame:SetPoint("TOPLEFT", 190, -103)
 		frame:SetWidth(630) frame:SetHeight(305)
@@ -69,6 +81,7 @@ local function Nav_OnClick(self)
 		--]]
 		frame:Show()
 		self:LockHighlight()
+		logBar.messageFrame = frame
 	end
 end
 
@@ -83,14 +96,9 @@ local function Nav_OnMouseWheel(self, v)
 end
 
 
-panel:SetScript('OnShow', function(self)
-	navBar = CreateFrame('Frame', nil, panel)
-	--navBar:SetPoint('TOPLEFT', 23, -105)
-	navBar:SetPoint('TOPLEFT', self.TitleRegion, 'BOTTOMLEFT')
-	navBar:SetPoint('BOTTOMLEFT')
-	navBar:SetWidth(158)
+DebugPanel:SetScript('OnShow', function(self)
 	for  i = 1,15  do
-		local button = CreateFrame('Button', nil, navBar)
+		local button = CreateFrame('Button', "DebugPanelNav"..i, navBar)
 		button:SetHeight(20)
 		if i == 1 then  button:SetPoint('TOPLEFT') ; button:SetPoint('TOPRIGHT')
 		else
@@ -159,44 +167,49 @@ local function Log_AddMessage(self, txt, ...)
 	return self:AddMessageRaw(timestamp, txt, ...)
 end
 
-
+--[[
+/vdt DebugPanelLogs_EventTracker
+--]]
 --local MAXLINES = 1000
 function tekDebug:GetFrame(logName)
 	if frames[logName] then return frames[logName] end
 
-	local f = CreateFrame('ScrollingMessageFrame', nil, logBar)
-	--f:SetMaxLines(0)
-	f:SetFontObject(ChatFontSmall)
-	f:SetJustifyH('LEFT')
-	f:SetFading(false)
-	f:SetAllPoints()
+	local frame = CreateFrame('ScrollingMessageFrame', "DebugPanelLogs_"..logName, logBar)
+	frame:SetMaxLines(5000)
+	frame:SetFontObject(ChatFontSmall)
+	frame:SetJustifyH('LEFT')
+	frame:SetFading(false)
+
+	frame:SetPoint("TOPLEFT")
+	frame:SetWidth(logBar:GetWidth()) frame:SetHeight(logBar:GetHeight())
+	-- frame:SetAllPoints()
 	
-	f:EnableMouse(true)
-	f:EnableMouseWheel(true)
-	f:SetHyperlinksEnabled(true)
-	f:SetScript('OnMouseWheel', Log_OnMouseWheel)
-	f:SetScript('OnHide', f.ScrollToBottom)
-	f:SetScript('OnHyperlinkClick', Log_OnHyperlinkClick)
-	f:Hide()
+	frame:EnableMouse(true)
+	frame:EnableMouseWheel(true)
+	frame:SetHyperlinksEnabled(true)
+	frame:SetScript('OnMouseWheel', Log_OnMouseWheel)
+	frame:SetScript('OnHide', frame.ScrollToBottom)
+	frame:SetScript('OnHyperlinkClick', Log_OnHyperlinkClick)
+	frame:Hide()
 	
 	-- Public API
-	f.logName = logName
-	f.AddMessageRaw = f.AddMessage
-	f.AddMessage = Log_AddMessage
+	frame.logName = logName
+	frame.AddMessageRaw = frame.AddMessage
+	frame.AddMessage = Log_AddMessage
 	
-	frames[logName] = f
+	frames[logName] = frame
 	table.insert(names, logName)
 	table.sort(names)
 	refresh()
 
-	return f
+	return frame
 end
 
 
 function tekDebug:GetFrame2(logName)
 	if frames[logName] then return frames[logName] end
 
-	local editbox = CreateFrame('EditBox', nil, logBar)
+	local editbox = CreateFrame('EditBox', "DebugPanelLogs_"..logName, logBar)
 	--f:SetFontObject(ChatFontSmall)
 	--f:SetJustifyH('LEFT')
 	-- No limit
@@ -242,7 +255,7 @@ SLASH_TEKDEBUG2 = "/td"
 SLASH_TEKDEBUG3 = "/tek"
 SLASH_TEKDEBUG4 = "/tekdebug"
 function SlashCmdList.TEKDEBUG(arg)
-	if  arg == "" then  return  ToggleFrame(panel)  end
+	if  arg == "" then  return  ToggleFrame(DebugPanel)  end
 	if  arg:find("|")  then  arg = arg.."  ->  "..arg:gsub("|","||")  end
 	print("/d: "..arg)
 end
@@ -257,6 +270,6 @@ if ldb then
 	ldb:NewDataObject("tekDebug", {
 		type = "launcher",
 		icon = [[Interface\Icons\Spell_Shadow_CarrionSwarm]],
-		OnClick = SlashCmdList.TEKDEBUG,
+		OnClick = function()  ToggleFrame(DebugPanel)  end,
 	})
 end
