@@ -25,6 +25,12 @@
 		ToggleFrameStack()
 	</Binding>
 	
+	<Binding name="COPYFRAMESTACK"
+		>
+		-- description="Copy the name of the frame under the mouse or the framestack if visible."
+		CopyFrameStack()
+	</Binding>
+	
 	<Binding name="TOGGLEEVENTTRACE"
 		>
 		-- description="Show/hide event trace"
@@ -42,7 +48,8 @@
 	<!-- Default: TOGGLECHARACTER0 -->
 	<Binding name="TOGGLECHARACTEREQUIPMENT">
 		-- description="Go directly to Equipment Manager in Character Frame"
-		ToggleCharacterEquipment()
+		ToggleCharacter('PaperDollFrame')
+		OpenCharacterEquipmentTab()
 	</Binding>
 	
 	<!-- Default: TOGGLETALENTS -->

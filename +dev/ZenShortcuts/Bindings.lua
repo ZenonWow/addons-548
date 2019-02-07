@@ -30,8 +30,8 @@ _G["BINDING_NAME_CLICK ClearTargetButton:LeftButton"] = "Clear Target (unselect)
 local ADDON_NAME, _ADDON = ...
 local _G = _G
 -- setfenv(1, setmetatable(_ADDON, {__index = _G}) )  -- Lookup variable references in global namespace if not found in local-private
-local ZenShortcuts = _G[ADDON_NAME] or {}
-_G[ADDON_NAME] = ZenShortcuts
+local ZenShortcuts = _G.ZenShortcuts or {}
+_G.ZenShortcuts = ZenShortcuts
 
 
 
@@ -42,65 +42,31 @@ ClearTargetButton:SetAttribute('macrotext', '/cleartarget')
 
 
 
---[[
-local  ToggleTalentFrame = _G.ToggleTalentFrame	-- infinite recursion safeguard
-ToggleTalentFrameOrig    = ToggleTalentFrame
 
--- Override ToggleTalentFrame(nil)  to open TALENTS_TAB, not SPECIALIZATION_TAB
-function  ToggleTalentTab(tab)
-	--print('ToggleTalentTab(' .. (tab or 'nil') .. ')')
-	if  tab == nil  then  tab= TALENTS_TAB  end
-	ToggleTalentFrameOrig(tab)
+function  ZenShortcuts.OpenCharacterEquipmentTab()
+	-- idea from: Broker_Equipment addon
+	if  not PaperDollFrame:IsVisible()  then  return  end
+
+	if  not CharacterFrame.Expanded  then  CharacterFrame_Expand()  end
+	--PaperDollSidebarTab3:Click()
+	PaperDollFrame_SetSidebar(PaperDollSidebarTab3, 3)
 end
 
-_G.ToggleTalentFrame= ToggleTalentTab
---]]
-
-
-
-
-local function  OpenCharacterEquipmentTab()
-	-- copied from: Broker_Equipment addon
-	if  not PaperDollFrame:IsVisible()
-	then  return  end
-
-	if  not CharacterFrame.Expanded  then
-		SetCVar('characterFrameCollapsed', '0')
-		CharacterFrame_Expand()
-	end
-
-	--PaperDollSidebarTab2:Click()
-	if  not _G[PAPERDOLL_SIDEBARS[3].frame]:IsShown()  then
-		PaperDollFrame_SetSidebar(nil, 3)
-	end
-end
-
---[[
--- Toggle the character frame and open the equipment manager.
-function  ToggleCharacterEquipment()
-		ToggleCharacter('PaperDollFrame')
-		OpenCharacterEquipmentTab()
-end
---]]
-
-
-function  ZenShortcuts.ToggleCharacter(tab)
-	if  tab == 'PaperDollFrame'
-	then  OpenCharacterEquipmentTab()  end
-end
-hooksecurefunc('ToggleCharacter', ZenShortcuts.ToggleCharacter)
+hooksecurefunc('ToggleCharacter', ZenShortcuts.OpenCharacterEquipmentTab)
 
 
 
 -- Open the game menu without deselecting the target or closing frames like the map.
 local  silent= true
 function  ToggleGameMenuOnly()
-	if ( GameMenuFrame:IsShown() ) then
+	if  GameMenuFrame:IsShown()  then
 		if not silent then  PlaySound("igMainMenuQuit")  end
-		HideUIPanel(GameMenuFrame);
+		print("HideUIPanel(GameMenuFrame)")
+		HideUIPanel(GameMenuFrame)
 	else
 		if not silent then  PlaySound("igMainMenuOpen")  end
-		ShowUIPanel(GameMenuFrame);
+		print("ShowUIPanel(GameMenuFrame)")
+		ShowUIPanel(GameMenuFrame)
 	end
 end
 
@@ -112,15 +78,33 @@ function  ToggleMacroFrame()
 	--]]
 	if  not MacroFrame  then  MacroFrame_LoadUI()  end
 	ToggleFrame(MacroFrame)  -- Uses secure code if necessary.
-	--[[
-	if  not MacroFrame:IsShown()  then  ShowUIPanel(MacroFrame)
-	else  HideUIPanel(MacroFrame)  end
-	--]]
-	--[[
-	if  not MacroFrame  or  not MacroFrame:IsShown()  then  ShowMacroFrame()
-	else  HideUIPanel(MacroFrame)  end
-	--]]
 end
+
+
+
+local function printFrames(...)
+	for i = 1, select("#", ...) do
+		local region = select(i, ...)
+		if region:GetObjectType() == "FontString" then
+			local text = region:GetText()
+			print(text)
+		end
+	end
+end
+
+function  CopyFrameStack()
+	local f, name = GetMouseFocus()
+	_G.MF = f
+	print("MF = GetMouseFocus() ; see it with /dump MF")
+	if  f and f.GetName  then
+		name = f:GetName()
+		print("GetMouseFocus():GetName() == '"..name.."'")
+	end
+	if  FrameStackTooltip and FrameStackTooltip:IsShown()  then
+		printFrames(FrameStackTooltip:GetRegions())
+	end
+end
+
 
 
 function  ToggleFrameStack()
@@ -148,14 +132,6 @@ end
 -- Many or all vehicles are perceived by the user as mounts with extras,
 -- therefore the user would expect to be able to Dismount them.
 -- This hook does that in a securehook, to prevent any creeping tainting that might come up.
---[[
-function  ZenShortcuts.Dismount()
-	--print( 'ZenShortcuts.Dismount():  IsMounted()= ' .. tostring(IsMounted()) .. '  UnitInVehicle()= ' .. tostring(UnitInVehicle('player')) )
-	--securecall('VehicleExit')
-	VehicleExit()
-end
-hooksecurefunc('Dismount', ZenShortcuts.Dismount)
---]]
 hooksecurefunc('Dismount', VehicleExit)
 
 
@@ -173,7 +149,7 @@ function  ZenShortcuts.DeleteItemOrEjectPassengers()
 		if  StaticPopup1:IsVisible()  then  StaticPopup1Button1:Click()  end
 	elseif  CanExitVehicle()  then
 		print('Exit Vehicle')
-		securecall('VehicleExit')
+		VehicleExit()
 	else
 		local seatIdx
 		for  i = 1, UnitVehicleSeatCount('player')  do
