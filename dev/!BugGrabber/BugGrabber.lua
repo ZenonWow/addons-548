@@ -113,8 +113,8 @@ MAX_BUGGRABBER_ERRORS = 1000
 -- BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE = 10
 BugGrabber.throttle = {
 	perSec = 1,
-	maxBurst = 10,
-	allowed = 10,
+	maxBurst = 30,
+	allowed = 30,
 	updatedTime = GetTime(),
 }
 
@@ -126,46 +126,51 @@ BugGrabber.DisplayAddons = {}
 -----------------------------------------------------------------------
 -- Localization
 --
-local L = {
-	ADDON_CALL_PROTECTED = "[%s] AddOn '%s' tried to call the protected function '%s'.",
-	ADDON_CALL_PROTECTED_MATCH = "^%[(.*)%] (AddOn '.*' tried to call the protected function '.*'.)$",
-	ADDON_DISABLED = "|cffffff00!BugGrabber and %s cannot coexist; %s has been forcefully disabled. If you want to, you may log out, disable !BugGrabber, and enable %s.|r",
-	-- BUGGRABBER_STOPPED = "There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.",
-	SPAM_THROTTLING = "Too many new errors generated continuously, only one per second is saved.",
-	SPAM_FINISHED = "Error spam has finished.",
-	ERROR_DETECTED = "%s |cffffff00captured, click the link for more information.|r",
-	ERROR_UNABLE = "|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r",
-	NO_DISPLAY_1 = "|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r",
-	NO_DISPLAY_2 = "|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r",
-	NO_DISPLAY_STOP = "|cffffff00If you don't want to be reminded about this again, run /stopnag.|r",
-	STOP_NAG = "|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r",
-	USAGE = "|cffffff00Usage: /bug <1-%d>.|r",
-}
 
 -- from FrameXML/Constants.lua:
 --[[
-local NORMAL_FONT_COLOR_CODE		  = NORMAL_FONT_COLOR_CODE		  or "|cffffd200";
-local HIGHLIGHT_FONT_COLOR_CODE	  = HIGHLIGHT_FONT_COLOR_CODE	  or "|cffffffff";
-local RED_FONT_COLOR_CODE			    = RED_FONT_COLOR_CODE			    or "|cffff2020";
-local GREEN_FONT_COLOR_CODE		    = GREEN_FONT_COLOR_CODE		    or "|cff20ff20";
-local GRAY_FONT_COLOR_CODE		    = GRAY_FONT_COLOR_CODE		    or "|cff808080";
-local YELLOW_FONT_COLOR_CODE		  = YELLOW_FONT_COLOR_CODE		  or "|cffffff00";
-local LIGHTYELLOW_FONT_COLOR_CODE	= LIGHTYELLOW_FONT_COLOR_CODE	or "|cffffff9a";
-local ORANGE_FONT_COLOR_CODE		  = ORANGE_FONT_COLOR_CODE		  or "|cffff7f3f";
-local ACHIEVEMENT_COLOR_CODE		  = ACHIEVEMENT_COLOR_CODE		  or "|cffffff00";
-local BATTLENET_FONT_COLOR_CODE	  = BATTLENET_FONT_COLOR_CODE	  or "|cff82c5ff";
+local NORMAL_FONT_COLOR_CODE		  = NORMAL_FONT_COLOR_CODE		  or "|cffffd200"
+local HIGHLIGHT_FONT_COLOR_CODE	  = HIGHLIGHT_FONT_COLOR_CODE	  or "|cffffffff"
+local RED_FONT_COLOR_CODE			    = RED_FONT_COLOR_CODE			    or "|cffff2020"
+local GREEN_FONT_COLOR_CODE		    = GREEN_FONT_COLOR_CODE		    or "|cff20ff20"
+local GRAY_FONT_COLOR_CODE		    = GRAY_FONT_COLOR_CODE		    or "|cff808080"
+local YELLOW_FONT_COLOR_CODE		  = YELLOW_FONT_COLOR_CODE		  or "|cffffff00"
+local LIGHTYELLOW_FONT_COLOR_CODE	= LIGHTYELLOW_FONT_COLOR_CODE	or "|cffffff9a"
+local ORANGE_FONT_COLOR_CODE		  = ORANGE_FONT_COLOR_CODE		  or "|cffff7f3f"
+local ACHIEVEMENT_COLOR_CODE		  = ACHIEVEMENT_COLOR_CODE		  or "|cffffff00"
+local BATTLENET_FONT_COLOR_CODE	  = BATTLENET_FONT_COLOR_CODE	  or "|cff82c5ff"
 --]]
-local FUNCTION_COLOR = ORANGE_FONT_COLOR_CODE				or "|cffff7f3f";
-local MESSAGE_COLOR  = LIGHTYELLOW_FONT_COLOR_CODE	or "|cffffff9a";
+local FUNCTION_COLOR = GREEN_FONT_COLOR_CODE				or "|cff20ff20"
+local MESSAGE_COLOR  = LIGHTYELLOW_FONT_COLOR_CODE	or "|cffffff9a"
+local ORANGE_COLOR   =                                 "|cffa0ff9a"
+
+local L = {
+	ADDON_CALL_PROTECTED = "[%s] AddOn '%s' tried to call the protected function '%s'.",
+	ADDON_CALL_PROTECTED_MATCH = "^%[(.*)%] (AddOn '.*' tried to call the protected function '.*'.)$",
+	ADDON_DISABLED = "!BugGrabber and %s cannot coexist; %s has been forcefully disabled. If you want to, you may log out, disable !BugGrabber, and enable %s",
+	-- BUGGRABBER_STOPPED = "There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.",
+	SPAM_THROTTLING = "Too many new errors generated continuously, only one per second is saved.",
+	SPAM_FINISHED = "Error spam has finished.",
+	ERROR_DETECTED = "  captured, click the link for more information.",
+	ERROR_UNABLE = "!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality",
+	NO_DISPLAY_1 = "You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way",
+	NO_DISPLAY_2 = "The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber",
+	NO_DISPLAY_STOP = "If you don't want to be reminded about this again, run /stopnag",
+	STOP_NAG = "!BugGrabber will not nag about missing a display addon again until next patch",
+	USAGE = "Usage: /bug <1-%d>",
+}
 
 -----------------------------------------------------------------------
 -- Locals
 --
 
+--[[
 -- Reverse search in array
-local function tindexOfRev(arr, item)
-	for i = #arr,1,-1  do  if  arr[i] == item  then  return i  end end
+local function tlastIndexOf(t, item)
+	for i = #t,1,-1  do  if  t[i] == item  then  return i  end  return nil  end
 end
+table.lastIndexOf = table.lastIndexOf or tlastIndexOf
+--]]
 
 -- Shorthand to the saved previousDB[#previousDB].
 -- Available from the start, even before loading SavedVariables.
@@ -187,7 +192,7 @@ frame:Hide()
 
 -- Error links
 local playerName = UnitName("player")
-local chatLinkFormat = "|Hbuggrabber:%s:%s|h|cffff0000[Error: "..LIGHTYELLOW_FONT_COLOR_CODE.."%s|r]|r|h"
+local chatLinkFormat = "|Hbuggrabber:%s:%s|h"..MESSAGE_COLOR.."[Error: "..ORANGE_COLOR.."%s"..MESSAGE_COLOR.."]|r|h"
 
 
 -----------------------------------------------------------------------
@@ -458,8 +463,10 @@ do
 					if v or r then
 						found = tostring(v) .. "." .. tostring(r)
 					end
+					--[[ This matches translations most the time.
 				elseif o then
 					found = o
+					--]]
 				end
 			end
 			if not found then
@@ -657,7 +664,7 @@ function BugGrabber:GetErrorID(errorObject) return tostring(errorObject):sub(8) 
 
 function BugGrabber:GetErrorByPlayerAndID(player, id)
 	if player == playerName then return self:GetErrorByID(id) end
-	print(L.ERROR_UNABLE)
+	print(MESSAGE_COLOR..L.ERROR_UNABLE.."|r")
 end
 
 function BugGrabber:GetErrorByID(errorId)
@@ -708,7 +715,7 @@ function BugGrabber.PrintErrorLink(errorObject)
 	if  not lastTime  then
 		-- print only once every error
 		lastPrintTime[errorObject] = now
-		print(L.ERROR_DETECTED:format(BugGrabber:GetChatLink(errorObject)))
+		print(MESSAGE_COLOR..BugGrabber:GetChatLink(errorObject)..MESSAGE_COLOR..L.ERROR_DETECTED)
 	end
 end
 
@@ -817,10 +824,16 @@ function BugGrabber:CheckDisplayAddon()
 		local _, _, _, currentInterface = GetBuildInfo()
 		if type(currentInterface) ~= "number" then currentInterface = 0 end
 		if not sv.stopnag or sv.stopnag < currentInterface then
+			--[[
+			print(MESSAGE_COLOR..L.NO_DISPLAY_1.."|r")
+			print(MESSAGE_COLOR..L.NO_DISPLAY_2.."|r")
+			print(MESSAGE_COLOR..L.NO_DISPLAY_STOP.."|r")
+			--]]
 			print(L.NO_DISPLAY_1)
 			print(L.NO_DISPLAY_2)
 			print(L.NO_DISPLAY_STOP)
 			_G.SlashCmdList.BugGrabberStopNag = function()
+				-- print(MESSAGE_COLOR..L.STOP_NAG.."|r")
 				print(L.STOP_NAG)
 				sv.stopnag = currentInterface
 			end
@@ -855,7 +868,7 @@ local function createSwatter()
 end
 
 local function disableSwatter()
-	print(L.ADDON_DISABLED:format("Swatter", "Swatter", "Swatter"))
+	print(MESSAGE_COLOR..L.ADDON_DISABLED:format("Swatter", "Swatter", "Swatter").."|r")
 	DisableAddOn("!Swatter")
 	SlashCmdList.SWATTER = nil
 	SLASH_SWATTER1, SLASH_SWATTER2 = nil, nil
@@ -950,7 +963,7 @@ local function slashHandler(indexStr)
 	local index =  indexStr  and  tonumber(indexStr)  or  #sessionDB
 	local err = type(index) == "number" and sessionDB[index]
 	if  not err  then
-		print(L.USAGE:format(#sessionDB))
+		print(MESSAGE_COLOR..L.USAGE:format(#sessionDB).."|r")
 		return
 	end
 	BugGrabber.PrintErrorObject(err)
