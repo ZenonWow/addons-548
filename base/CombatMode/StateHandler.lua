@@ -1,15 +1,15 @@
 -- Methods for event handling, state update of CombatMode, Mouselook, SmartTargeting
-local AddonName, Addon = ...
+local ADDON_NAME, _ADDON = ...
 
 --[[ Analyzing key press state:
 -- commands can get stuck in pressed state if the binding is changed and the "up" event goes to a different command
-/dump CombatMode.enableAllways, CombatMode.holdKeyState
+/dump CombatMode.enabledPermanent, CombatMode.holdKeyState
 /dump CombatMode.commands.state, CombatMode.commands.groups
 /run CombatMode:ResetState()
 -- Cause of CombatMode:
-/dump CombatMode.db.profile.enableWhileMoving
-/dump CombatMode.enableWhileMoving
-/dump CombatMode:EnableWhileMoving()
+/dump CombatMode.db.profile.enabledWhileMoving
+/dump CombatMode.enabledWhileMoving
+/dump CombatMode:IsEnabledWhileMoving()
 /dump CombatMode:ExpectedMouselook()
 /dump CombatMode.FramesOnScreen
 -- Overridden bindings:
@@ -63,54 +63,9 @@ CombatMode.logging.Event= {
 	QUEST_FINISHED= true,
 }
 
---[[ Change colors used in logging
-/run CombatMode.colors['nil']= CombatMode.colors.blue
-/run CombatMode.colors[false]= CombatMode.colors.blue
-/run CombatMode.colors[true]= CombatMode.colors.green
-/run CombatMode.colors.holdKeyState = CombatMode.colors.purple
-/run CombatMode.colors.enableAllways = CombatMode.colors.orange
---]]
-local colors = {
-		black			= "|cFF000000",
-		white			= "|cFFffffff",
-		gray			= "|cFFbeb9b5",
-		blue			= "|cFF00b4ff",
-		lightblue	= "|cFF96c0ff",
-		purple		= "|cFFcc00ff",
-		green			= "|cFF00ff00",
-		green2		= "|cFF66ff00",
-		lightgreen= "|cFF98fb98",
-		darkred		= "|cFFc25b56",
-		red				= "|cFFff0000",
-		orange		= "|cFFff9900",
-		yellow		= "|cFFffff00",
-		parent		= "|cFFbeb9b5",
-		error			= "|cFFff0000",
-		ok				= "|cFF00ff00",
-		restore		= "|r",
-}
-CombatMode.colors = colors
-colors['nil']			= colors.lightblue
-colors[false]			= colors.lightblue
-colors[true]			= colors.green
-colors.missedup		= colors.orange
-colors.up					= colors.orange
-colors.down				= colors.green		--colors.purple
-colors.show				= colors.green
-colors.hide				= colors.lightblue
-colors.event			= colors.lightgreen
-colors.holdKeyState			= colors.event
-colors.enableAllways	= colors.orange
-colors.Mouselook					= colors.yellow
-colors.CursorActionActive	= colors.yellow
 
-
-function Addon.colorBoolStr(value, withColor)
-	local boolStr=  value == true and 'ON'  or  value == false and 'OFF'  or  tostring(value)
-	if  withColor == true  then  withColor= colors[value == nil  and  'nil'  or  value]  end
-	return  withColor  and  withColor .. boolStr .. colors.restore  or  boolStr
-end
-local colorBoolStr = Addon.colorBoolStr
+local colorBoolStr = CombatMode.colorBoolStr
+local colors = CombatMode.colors
 
 
 
@@ -154,6 +109,7 @@ end
 
 
 function CombatMode:SetEnableState(enable)
+	--[[
 	-- To reset if some key state is stuck click ToggleKey / EnableKey while pressing HoldKey
 	if  self.holdKeyState  then
 		print('CombatMode:SetEnableState():  '.. colors.holdKeyState .. self.holdKeyState .. '|r stuck or pressed -> RESETing all keypress state')
@@ -161,29 +117,29 @@ function CombatMode:SetEnableState(enable)
 		self.holdKeyState= nil
 		self:ResetState()
 	end
-	
+	--]]
 	-- Ignore request to enable when frames or cursor action is disabling combat mode
 	if  enable  and  self:CheckForDisableState()  then  return  end
 	
 	local stateStr
 	if  0 == #self.commands.groups.MoveKeys  then
-		-- if toggled while NOT moving then turn on/off enableAllways
-    stateStr=  self.enableAllways and 'enableAllways'
-    self:SetEnableAllways(enable)
+		-- if toggled while NOT moving then turn on/off enabledPermanent
+    stateStr=  self.enabledPermanent and 'enabledPermanent'
+    self:SetEnabledPermanent(enable)
 	elseif  not enable  then
-		-- if toggled OFF while MOVING then turn off both enableWhileMoving and enableAllways
-		stateStr=  self.enableAllways and self.enableWhileMoving and 'enableAllways,enableWhileMoving'
-			or  self.enableAllways and 'enableAllways'  or  self.enableWhileMoving and 'enableWhileMoving'
+		-- if toggled OFF while MOVING then turn off both enabledWhileMoving and enabledPermanent
+		stateStr=  self.enabledPermanent and self.enabledWhileMoving and 'enabledPermanent,enabledWhileMoving'
+			or  self.enabledPermanent and 'enabledPermanent'  or  self.enabledWhileMoving and 'enabledWhileMoving'
 		
-		self:SetEnableAllways(enable)
-		self:SetEnableWhileMoving(enable)
+		self:SetEnabledPermanent(enable)
+		self:SetEnabledWhileMoving(enable)
 	else
-		-- if toggled ON while MOVING then turn on enableWhileMoving
-		stateStr=  self.enableWhileMoving ~= enable  and  'enableWhileMoving'
-		self:SetEnableWhileMoving(enable)
+		-- if toggled ON while MOVING then turn on enabledWhileMoving
+		stateStr=  self.enabledWhileMoving ~= enable  and  'enabledWhileMoving'
+		self:SetEnabledWhileMoving(enable)
 	end
 	
-	if  stateStr  then  self:LogState('  CM:SetEnableState():  '.. colors.enableAllways .. stateStr ..'|r='.. colorBoolStr(enable) ..'|r')  end
+	if  stateStr  then  self:LogState('  CM:SetEnableState():  '.. colors.enabledPermanent .. stateStr ..'|r='.. colorBoolStr(enable) ..'|r')  end
 	--self:ScheduleUpdateBindingsState()
 end
 
@@ -191,13 +147,14 @@ end
 
 function CombatMode:ToggleKey()
 	local inverseState= not IsMouselooking()
-	--local enable= not self.enableAllways
+	--local enable= not self.enabledPermanent
 	
 	self:SetEnableState(inverseState)
 	self:UpdateMouselook(inverseState, 'ToggleKey')
 end	
 
 
+--[=[ Use BUTTON2 = TurnOrAction
 function CombatMode:HoldKey(keystate)
 	local start= keystate == 'down'
 	local possibleState= nil
@@ -226,7 +183,7 @@ function CombatMode:HoldKey(keystate)
 	
 	if  not start  then  self.holdKeyState= nil  end
 end
-
+--]=]
 
 function CombatMode:EnableKey(keystate)
 	local pressedFor= self.enableKeyPressTime  and  GetTime() - self.enableKeyPressTime
@@ -246,7 +203,7 @@ function CombatMode:EnableKey(keystate)
 		-- Key pressed: Invert the state temporarily while button is pressed
 		self.enableKeyPressTime= GetTime()
 		
-		-- Invert the current Mouselook state visible to the user.  enableAllways
+		-- Invert the current Mouselook state visible to the user.  enabledPermanent
 		local enable= not IsMouselooking()
 		possibleState= enable  or  nil
 		
@@ -290,7 +247,7 @@ function CombatMode:EnableKey(keystate)
 		if  0.01 < pressedFor  and  pressedFor < 0.3  then		-- GetTime() returns seconds (with 3 decimals, millisecond precision)
 			-- if clicked (pressed for < 0.3 sec) then invert/toggle the state permanently
 			self:SetEnableState(newEnableState)		-- the state when the button was pressed, inversed
-			possibleState= self.enableAllways		-- SetEnableState() updated it, and checked for visible frames
+			possibleState= self.enabledPermanent		-- SetEnableState() updated it, and checked for visible frames
 		else
 			-- if hold (pressed for longer) then restore state before pressed
 		end
@@ -304,51 +261,41 @@ function CombatMode:EnableKey(keystate)
 end
 
 
-
-
-function CombatMode_OnUpdate(self, elapsed)
-	if SmartTargetingEnabled then
-		-- periodic update (every frame / 20ms) to check distance of target
-		if  not IsInCombat()  then  CombatMode:UpdateSmartTarget()  end
-	end
+function CombatMode:MODIFIER_STATE_CHANGED(event)
+	self:UpdateMouselook(nil, 'Modifier')
 end
+
+
+
 
 CombatMode.lastUpdateCursorAction= false
 
-function CombatMode_OnEvent(event, ...)
-	local self= CombatMode
-  local  cursorAction = CursorHasItem()  or  SpellIsTargeting()
-	if  event == "PLAYER_TARGET_CHANGED"  and  SmartTargetingEnabled  then
-		if  IsInCombat()  then
-			self:LogState("PLAYER_TARGET_CHANGED ignored: Can't update bindings when IsInCombat()==true")
-		else
-			self:LogEvent(event)
-			self:UpdateSmartTarget()
-		end
-	
-	elseif  event == "CURSOR_UPDATE"  then
-		--[[ CURSOR_UPDATE sent when
-		1. cursor is shown (as hand) after being hidden for CameraOrSelectOrMove, TurnOrAction, MoveAndSteer, Mouselook
-		2. cursor changes over actionable object:  bubble (gossip) / sword (enemy) / dragon (flightmaster) / mail (mailbox) / satchel (vendor,bank,auction) / hearthstone (innkeeper) / what else?
-		----event is not sent twice when moving over an actionable object:  hidden -> show hand cursor -> action cursor
-		event is NOT sent when hiding cursor
-		--]]
-		self:LogEvent(event, '  -> cursorAction=' .. colorBoolStr(cursorAction, false))
-		--if  cursorAction  then  self:CursorAction(cursorAction, event)  end
-		self:CursorAction(cursorAction, event)
-		--[[
-		-- this happens anytime the mouse moves over objects, or away from objects
-		-- only checking if there is a frame (irrelevant) or spell or item on the cursor
-		-- it is not an indicator of a busy cursor that should not be hidden
-		--]]
-		
-		if  self.lastUpdateCursorAction ~= cursorAction  then
-			self:UpdateMouselook(not cursorAction, 'CURSOR_UPDATE')
-			self.lastUpdateCursorAction = cursorAction
-		end
-
+function CombatMode:CURSOR_UPDATE(event, ...)
+	--[[ CURSOR_UPDATE sent when
+	1. cursor is shown (as hand) after being hidden for CameraOrSelectOrMove, TurnOrAction, MoveAndSteer, Mouselook
+	2. cursor changes over actionable object:  bubble (gossip) / sword (enemy) / dragon (flightmaster) / mail (mailbox) / satchel (vendor,bank,auction) / hearthstone (innkeeper) / what else?
+	----event is not sent twice when moving over an actionable object:  hidden -> show hand cursor -> action cursor
+	event is NOT sent when hiding cursor
+	--]]
+	local cursorAction =  CursorHasItem()  or  SpellIsTargeting()
+	self:LogEvent(event, '  -> cursorAction=' .. colorBoolStr(cursorAction, false))
+	--if  cursorAction  then  self:CursorAction(cursorAction, event)  end
+	self:CursorAction(cursorAction, event)
 	--[[
-	elseif  event == "CURRENT_SPELL_CAST_CHANGED"  then		-- ranged spell targeting starts/ends
+	-- this happens anytime the mouse moves over objects, or away from objects
+	-- only checking if there is a frame (irrelevant) or spell or item on the cursor
+	-- it is not an indicator of a busy cursor that should not be hidden
+	--]]
+	
+	if  self.lastUpdateCursorAction ~= cursorAction  then
+		self:UpdateMouselook(not cursorAction, 'CURSOR_UPDATE')
+		self.lastUpdateCursorAction = cursorAction
+	end
+end
+
+--[[
+-- ranged spell targeting starts/ends
+function CombatMode:CURRENT_SPELL_CAST_CHANGED()
 	-- start:
 	--CURSOR_UPDATE
 	--CURRENT_SPELL_CAST_CHANGED
@@ -368,41 +315,50 @@ function CombatMode_OnEvent(event, ...)
 	--PLAYER_STARTED_MOVING
 	--PLAYER_STOPPED_MOVING
 	--MODIFIER_STATE_CHANGED
-	--]]
-
-  --[[ No need for these to my best knowledge. CURSOR_UPDATE handles it.
-	elseif  event == "PET_BAR_UPDATE"  and  self.CursorActionActive  then
-		self:LogEvent(event, '  -> ResetCursor(), cursorAction=' .. colorBoolStr(cursorAction, false))
-		self:CursorAction(cursorAction, event)
-		ResetCursor()
-		-- triggers CURSOR_UPDATE, that will do self:UpdateMouselook(not cursorAction, event)
-
-	elseif  event == "ACTIONBAR_UPDATE_STATE"  and  self.CursorActionActive  then
-		self:LogEvent(event, '  -> ResetCursor(), cursorAction=' .. colorBoolStr(cursorAction, false))
-		self:CursorAction(cursorAction, event)
-		ResetCursor()
-		-- triggers CURSOR_UPDATE, that will do self:UpdateMouselook(not cursorAction, event)
-  --]]
-
-	elseif  event == "QUEST_PROGRESS"  then
-    -- Event QUEST_PROGRESS received as the quest frame is shown when talking to an npc
-		self:LogEvent(colors.show .. event .. colors.restore)
-		self.FramesOnScreen:setInsertLast('QUEST_PROGRESS')
-		self:CursorAction(cursorAction, event)
-		self:UpdateMouselook(false, event)
-	
-	elseif  event == "QUEST_FINISHED"  then
-    -- Event QUEST_FINISHED received as the quest frame is closed after talking to an npc
-		self:LogEvent(colors.hide .. event .. colors.restore)
-		self.FramesOnScreen:removeFirst('QUEST_PROGRESS')
-		self:CursorAction(cursorAction, event)
-		self:UpdateMouselook(not cursorAction, event)
-		
-	else
-		self:LogEvent(event)
-	end
-	
 end
+--]]
+
+--[[ No need for these to my best knowledge. CURSOR_UPDATE handles it.
+function CombatMode:PET_BAR_UPDATE(event)
+	if  self.CursorActionActive  then
+		local cursorAction =  CursorHasItem()  or  SpellIsTargeting()
+		self:LogEvent(event, '  -> ResetCursor(), cursorAction=' .. colorBoolStr(cursorAction, false))
+		self:CursorAction(cursorAction, event)
+		ResetCursor()
+		-- triggers CURSOR_UPDATE, that will do self:UpdateMouselook(not cursorAction, event)
+	end
+end
+
+function CombatMode:ACTIONBAR_UPDATE_STATE(event)
+	if  self.CursorActionActive  then
+		local cursorAction =  CursorHasItem()  or  SpellIsTargeting()
+		self:LogEvent(event, '  -> ResetCursor(), cursorAction=' .. colorBoolStr(cursorAction, false))
+		self:CursorAction(cursorAction, event)
+		ResetCursor()
+		-- triggers CURSOR_UPDATE, that will do self:UpdateMouselook(not cursorAction, event)
+	end
+end
+--]]
+
+function CombatMode:QUEST_PROGRESS(event)
+	-- Event QUEST_PROGRESS received as the quest frame is shown when talking to an npc
+	local cursorAction =  CursorHasItem()  or  SpellIsTargeting()
+	self:LogEvent(colors.show .. event .. colors.restore)
+	self.FramesOnScreen:setInsertLast('QUEST_PROGRESS')
+	self:CursorAction(cursorAction, event)
+	self:UpdateMouselook(false, event)
+end
+
+function CombatMode:QUEST_FINISHED(event)
+	-- Event QUEST_FINISHED received as the quest frame is closed after talking to an npc
+	local cursorAction =  CursorHasItem()  or  SpellIsTargeting()
+	self:LogEvent(colors.hide .. event .. colors.restore)
+	self.FramesOnScreen:removeFirst('QUEST_PROGRESS')
+	self:CursorAction(cursorAction, event)
+	self:UpdateMouselook(not cursorAction, event)
+end
+
+
 
 
 --[[
@@ -542,15 +498,19 @@ function CombatMode:ExpectedMouselook()
 	--]]
 	if  state.CameraOrSelectOrMove  then  return false, 'Camera'  end
 	if  state.HoldToDisable  then  return false, 'HoldToDisable'  end
+	-- if  state.TurnOrAction  then  return not self.enabledPermanent, 'TurnOrAction'  end
+	local ena, dis = self:IsEnablePressed(), self:IsDisablePressed()
+	if  ena and not dis  then  return true, 'EnablePressed'  end
+	if  dis and not ena  then  return false, 'DisablePressed'  end
 	
 	-- FramesOnScreen higher priority than Move,Strafe
-	if  self:CheckForFramesOnScreen()	then  return false, 'FramesOnScreen'  end
+	if  self:CheckForFramesOnScreen()  then  return false, 'FramesOnScreen'  end
 	
-	-- Move,Strafe commands and enableAllways are the lowest priority
-	if  self:EnableWhileMoving()  then
+	-- Move,Strafe commands and enabledPermanent are the lowest priority
+	if  self.enabledWhileMoving  then
 		if  0 < #groups.MoveKeys					then  return true, table.concat(groups.MoveKeys)  end		-- 'Move,Strafe'  end
 	end
-	if  self.enableAllways				then  return true, 'enableAllways'  end
+	if  self.enabledPermanent				then  return true, 'enabledPermanent'  end
 	
 	-- By default Mouselook is OFF
 	return  false, 'NoKeysPressed'

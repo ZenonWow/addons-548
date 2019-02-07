@@ -1,4 +1,4 @@
-local AddonName, Addon = ...
+local ADDON_NAME, _ADDON = ...
 CombatMode.commands = {}
 
 
@@ -29,6 +29,8 @@ CombatMode.commands.grouping = {
 	
 	TurnWithMouse	= 'Mouselook',		-- custom command in Bindings.xml
 	TurnOrAction	= 'Mouselook',
+	MouseAction		= 'NeedCursor',		-- TurnOrAction remapped in CombatMode
+	
 	MoveAndSteer	= 'Mouselook',
 	-- TargetScanEnemy, TargetNearestEnemy:
 	TargetPriorityHighlight	= 'Mouselook',
@@ -75,7 +77,7 @@ CombatMode.commands.stopsAutoRun = {
 TurnOrAction, MoveAndSteer, TargetPriorityHighlight  start Mouselook when pushed and stop it when released.
 These are the only commands/functions altering Mouselook that I found. All other functions
 altering Mouselook will be logged as anomaly.
-Sidenote:  when  enableAllways == true  or  holdToEnable == true  then we want Mouselook to stay ON after releasing these keys,
+Sidenote:  when  enabledPermanent == true  or  TurnWithMouse == true  then we want Mouselook to stay ON after releasing these keys,
 therefore UpdateMouselook() will override the effect of the Stop functions.
 --]]
 CombatMode.commands.changingMouselook = {
@@ -88,6 +90,8 @@ CombatMode.commands.changingMouselook = {
 	TargetPriorityHighlightEnd		= false,
 }
 
+CombatMode.commands.map = {}
+
 
 
 
@@ -95,6 +99,15 @@ CombatMode.commands.changingMouselook = {
 function CombatMode.commands:StartStopHook(cmdName, state, event)
 
 	if  self.stopsAutoRun[event]  then  self:SwitchAutoRun(false, event)  end
+	
+	if  cmdName == 'TurnOrAction'  then
+		if  state  and  CombatMode.enabledPermanent  then
+			cmdName = 'MouseAction'
+			self.map.TurnOrAction = cmdName
+		elseif  not state  then
+			cmdName = self.map.TurnOrAction or cmdName
+		end
+	end
 	
 	if  state == self.state[cmdName]  then
 		local suffix= state  and  'key pressed again without being released'  or  'key released without being pressed before'
@@ -126,13 +139,13 @@ function CombatMode.commands:SetState(cmdName, state)
 	local groupName= self.grouping[cmdName]
 	local group= self.groups[groupName]		-- nil, if groupName == nil
 	if  group  then
-		local prefix= '  CM - SetState('.. CombatMode.colors[state] .. Addon.colorBoolStr(state, true) ..'|r):  groups.'.. groupName
+		local prefix= '  CM - SetState('.. CombatMode.colors[state] .. CombatMode.colorBoolStr(state, true) ..'|r):  groups.'.. groupName
 		if  state  then  
-			local removed= Addon.tableProto.setReInsertLast(group, cmdName)
+			local removed= _ADDON.tableProto.setReInsertLast(group, cmdName)
 			if  removed  then  CombatMode:LogAnomaly(prefix ..'  already contained  '.. CombatMode.colors.red .. tostring(removed) ..'|r')  end
 			if  removed  and  type(removed) ~= string  then  _G.CMremoved= removed  end
 		else
-			local removed= Addon.tableProto.removeFirst(group, cmdName)
+			local removed= _ADDON.tableProto.removeFirst(group, cmdName)
 			if  not removed  then  CombatMode:LogAnomaly(prefix ..'  did not contain  '.. CombatMode.colors.red .. cmdName ..'|r')  end
 		end
 	end
@@ -161,8 +174,8 @@ function CombatMode.commands:SwitchAutoRun(newState, event)
 	elseif  newState == (self.stateAutoRun or false)  then  return  end
 	
 	self.stateAutoRun= newState
-	CombatMode:LogState('  CM - SwitchAutoRun('.. CombatMode.colors.event .. event ..'|r):  ' .. Addon.colorBoolStr(newState, true) )
-	CombatMode.OverrideFrames.AutoRun:EnableOverrides(newState)
+	CombatMode:LogState('  CM - SwitchAutoRun('.. CombatMode.colors.event .. event ..'|r):  ' .. CombatMode.colorBoolStr(newState, true) )
+	CombatMode:EnableOverrides('AutoRun', newState)
 end
 
 

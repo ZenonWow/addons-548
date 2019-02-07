@@ -8,12 +8,7 @@
 		-- description="Toggle Combat Mode when clicked"
 		CombatMode:ToggleKey()
 	</Binding>
-	
-	<Binding name="COMBATMODE_HOLD" runOnUp="true">
-		-- description="Switch Combat Mode while holding"
-		CombatMode:HoldKey(keystate)
-	</Binding>
-	
+
 	<!--ModifiedClick action="CombatModeEnableModifier" default="NONE" />
 	<ModifiedClick action="CombatModeDisableModifier" default="NONE" /--> 
 

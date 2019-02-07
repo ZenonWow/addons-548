@@ -8,16 +8,26 @@
 ## X-Category: Misc
 
 ## SavedVariables: CombatModeDB
-## OptionalDeps: Ace3, tekDebug
+## OptionalDeps: Ace3, LibCommon, tekDebug
 
 ##- LoadManagers: AddonLoader
 ## X-LoadOn-Login:  UserInterface
 ## X-LoadOn-Always: delayed
 
 
-# Libs\libs.xml
+## Libs\libs.xml
+# Libs\LibStub\LibStub.lua
+# Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+# Libs\AceAddon-3.0\AceAddon-3.0.lua
+# Libs\AceEvent-3.0\AceEvent-3.0.lua
+# Libs\AceBucket-3.0\AceBucket-3.0.lua
+# Libs\AceDB-3.0\AceDB-3.0.lua
+# Libs\AceConsole-3.0\AceConsole-3.0.lua
+# Libs\AceGUI-3.0\AceGUI-3.0.xml
+# Libs\AceConfig-3.0\AceConfig-3.0.xml
+
+
 CombatMode.lua
 StateHandler.lua
-CombatMode.xml
 CommandHooks.lua
 MonitoredFrames.lua

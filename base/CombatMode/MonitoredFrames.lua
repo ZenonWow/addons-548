@@ -143,10 +143,19 @@ CombatMode.HookedFrames= setmetatable({}, { __mode = "v" })
 
 
 
+-- Does not support square brackets (eg. MovieFrame["CloseDialog"]), that would require intricate logic, unnecessary in this use-case.
+local function getfield(root, name)
+	for i,fieldname in ipairs({ string.split(".", name) }) do
+		if not root then  return nil  end
+		root = root[fieldname]
+	end
+	return root
+end
+
+
 function  CombatMode:HookFrame(frameName)
-	-- does not work for child frames like "MovieFrame.CloseDialog"
-	local frame = _G[frameName]
-	-- local frame= getglobal(frameName)		-- neither does this
+	-- _G[frameName] and getglobal(frameName) does not work for child frames like "MovieFrame.CloseDialog"
+	local frame =  _G[frameName]  or  getfield(_G, frameName)
 	if  not frame  then   return  end
 	
 	self.HookedFrames[frameName] = frame

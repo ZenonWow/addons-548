@@ -22,7 +22,7 @@ end
 
 
 local function CommandLockStartHook(cmds, cmdName, event)
-	if  not CombatMode:EnableWhileMoving()  then  CommandIgnored[cmdName]= true ; return  end
+	if  not CombatMode:IsEnabledWhileMoving()  then  CommandIgnored[cmdName]= true ; return  end
 	
 	if  cmds[cmdName]  then
 		CombatMode:LogAnomaly('CommandLockStartHook('.. cmdName ..'):  key pressed again without being released')
@@ -61,7 +61,7 @@ end
 
 local function CommandReleaseStartHook(cmds, cmdName, event)
 	--[[
-	Mouse is released for all Turn/Pitch actions even if  not CombatMode:EnableWhileMoving(),
+	Mouse is released for all Turn/Pitch actions even if  not CombatMode:IsEnabledWhileMoving(),
 	to work around the default behaviour of TURN* and LEFT* commands,
 	which STRAFE* if  IsMouselooking() == true  (as an indicator of BUTTON2 being pressed).
 	With CombatMode  BUTTON2 is NOT pressed, but IsMouselooking() == true
