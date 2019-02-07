@@ -272,7 +272,7 @@ function LGE:ScanUnitItems(unit,statTable,info)
 	local setTable =  info.Sets  or  info
 	local tmogTable = {}
 	-- if 3rd parameter is setTable then don't save Tmogs
-	if  info.Tmogs  or  info.Sets  then  info.Tmogs = tmogTable  end
+	if  info.Tmogs  or  info.Sets  then  info.TmogNames = tmogTable  end
 	
 	-- Check all item slots
 	--for _, slotName in ipairs(self.Slots) do
@@ -423,10 +423,10 @@ function LGE:ScanLineForTmog(text,tmogTable,invSlotID)
 	local tmogName = text:match(TRANSMOGRIFIED_PATTERN)
 	if  tmogName  then
 		print( "Found tooltip tmog line: "..text:gsub("|","||") )  -- gsub() to show any hidden coloring or escape
-		local tmogLink = select(2,GetItemInfo(tmogName))  or  tmogName
+		-- tmogName = select(2,GetItemInfo(tmogName))  or  tmogName
 		-- Can be accessed by slotID numbers and SlotName too
-		tmogTable[ self.SlotNames[invSlotID] ] = tmogLink
-		tmogTable[invSlotID] = tmogLink
+		tmogTable[ self.SlotNames[invSlotID] ] = tmogName
+		-- tmogTable[invSlotID] = tmogName
 	elseif  text:find("ransmog")  then
 		print( "Failed to parse tmog line: "..text:gsub("|","||") )
 	end

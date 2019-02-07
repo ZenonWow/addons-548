@@ -11,7 +11,7 @@ function AzMsg(msg) DEFAULT_CHAT_FRAME:AddMessage(tostring(msg):gsub("|1","|cfff
 local cfg, cache;
 
 -- Data Tables
-local info = { Sets = {}, Items = {}, Tmogs = {}, TmogIDs = {} };
+local info = { Sets = {}, Items = {}, Tmogs = {}, TmogIDs = {}, TmogNames = {} };
 local unitStats = {};
 local equippedSlots = {};
 local statTipStats1, statTipStats2 = {}, {};
@@ -173,6 +173,8 @@ function ex:ADDON_LOADED(event, addonName)
 	self[event] = nil;
 end
 
+
+
 -- Target Unit Changed
 function ex:PLAYER_TARGET_CHANGED(event)
 	if  self.unit ~= 'target'  then  return  end
@@ -191,6 +193,20 @@ function ex:UPDATE_MOUSEOVER_UNIT(event)
 	self:UnregisterEvent("UPDATE_MOUSEOVER_UNIT");
 end
 
+-- Modifier State Changed
+function ex:MODIFIER_STATE_CHANGED(event)
+	if (self.showingTooltip) then
+		local mFocus = GetMouseFocus();
+		if (mFocus and mFocus ~= UIParent) then
+			local onEnterFunc = mFocus:GetScript("OnEnter");
+			if (onEnterFunc) then
+				onEnterFunc(mFocus);
+			end
+		end
+	end
+end
+
+
 -- Model or Portrait Change
 function ex:UNIT_MODEL_CHANGED(event,unit)
 	--if (unit and self:ValidateUnit() and UnitIsUnit(unit,self.unit)) then
@@ -205,21 +221,10 @@ ex.UNIT_PORTRAIT_UPDATE = ex.UNIT_MODEL_CHANGED;
 function ex:UNIT_INVENTORY_CHANGED(event,unit)
 	--if (self:ValidateUnit() and UnitIsUnit(unit,self.unit) and CheckInteractDistance(self.unit,1)) then
 	if  unit  and  self.guid == UnitGUID(unit)  then
-		self:ScanGear(unit);
+		local wasLoaded = self.itemsLoaded
+		self:ScanGear(unit, event)
+		if  not wasLoaded  and  self.itemsLoaded  then  self:CachePlayer()  end
 		self:SendModuleEvent("OnInspectReady",unit,self.guid);
-	end
-end
-
--- Modifier State Changed
-function ex:MODIFIER_STATE_CHANGED(event)
-	if (self.showingTooltip) then
-		local mFocus = GetMouseFocus();
-		if (mFocus and mFocus ~= UIParent) then
-			local onEnterFunc = mFocus:GetScript("OnEnter");
-			if (onEnterFunc) then
-				onEnterFunc(mFocus);
-			end
-		end
 	end
 end
 
@@ -228,8 +233,10 @@ function ex:INSPECT_READY(event,guid)
 	self:UnregisterEvent("INSPECT_READY");
 	-- Ignore concurrent NotifyInspect()->INSPECT_READY possibly sent by other addon (tooltip addons like TipTop) right after ex:DoInspect().
 	-- /inspect is not likely to be run in this short amount of time.
-	if  guid  and  guid ~= self.guid  then  return  end
-	self:InspectReady(guid);
+	if  guid ~= self.guid  then
+		print("Examiner:INSPECT_READY(guid="..tostring(guid)..") different from initially inspected guid="..tostring(self.guid))
+	end
+	self:InspectReady(guid, event)
 end
 
 -- INSPECT_HONOR_UPDATE
@@ -509,6 +516,7 @@ function ex:LoadPlayerFromCache(entryName)
 		LibGearExam:ScanItemLink(link,unitStats);
 	end
 	info.Tmogs = entry.Tmogs  and  CopyTable(entry.Tmogs)  or  {}
+	info.TmogIDs = entry.TmogIDs  and  CopyTable(entry.TmogIDs)  or  {}
 	-- Sets + Set Bonuses [NEW]
 	for setName, setEntry in next, entry.Sets do
 		info.Sets[setName] = { count = setEntry.count, max = setEntry.max };
@@ -617,8 +625,9 @@ function ex:ClearInspect()
 end
 
 -- Inspect Ready
-function ex:InspectReady(guid)
-	if (self:ValidateUnit()) then
+function ex:InspectReady(guid, event)
+	-- if (self:ValidateUnit()) then
+	if  guid == UnitGUID(self.unit)  then
 		local unit = self.unit;
 		-- Guild Vars -- Returns zeros for unguilded people
 		local info = self.info;
@@ -627,7 +636,7 @@ function ex:InspectReady(guid)
 			info.guildLevel, info.guildXP, info.guildMembers = GetInspectGuildInfo(unit);	-- MoP: No more guildID as first return -- Az: move this into guild.lua?
 		end
 		-- Scan Gear & Post InspectReady
-		self:ScanGear(unit);
+		self:ScanGear(unit, event)
 		self:ShowModulePage();
 		self:SendModuleEvent("OnInspectReady",unit,guid);
 		-- Cache
@@ -703,7 +712,7 @@ function ex:DoInspect(unit,openFlag)
 		NotifyInspect(unit);
 		lastInspectRequest = GetTime();
 		-- When we call ScanGear here, even before INSPECT_READY. We can sorta force the client into precaching the items.
-		self:ScanGear(unit);
+		self:ScanGear(unit, "DoInspect")
 	end
 	-- Update the UI Objects
 	if (self.unitType == 1) and (cfg.activePage) then
@@ -735,27 +744,51 @@ function ex:DoInspect(unit,openFlag)
 	end
 end
 
+local function GetChatFrame(target)
+	-- FCF_OpenNewWindow(name)
+	local frame = FCF_OpenTemporaryWindow('LOOT')
+	FCF_SetWindowName(frame, target)
+	return frame
+end
+
 -- Scans the Gear
-function ex:ScanGear(unit)
+function ex:ScanGear(unit, event)
 	wipe(unitStats);
 	wipe(info.Sets);
+	local chat = GetChatFrame(UnitName(unit))
+	chat:AddMessage("Examiner:ScanGear("..unit..") event="..tostring(event))
 	LibGearExam:ScanUnitItems(unit,unitStats,info);
+
+	self.itemsLoaded = true
 	for slotName, slotId in next, LibGearExam.SlotIDs do
-		local link = (GetInventoryItemLink(unit,slotId) or ""):match(LibGearExam.ITEMLINK_PATTERN);
-		info.Items[slotName] = LibGearExam:FixItemStringLevel(link,ex.info.level);	-- Fix item string level
+		local link = GetInventoryItemLink(unit,slotId)
+		local linkMatch = link and link:match(LibGearExam.ITEMLINK_PATTERN)
+		-- Fix item string level
+		info.Items[slotName] = LibGearExam:FixItemStringLevel(linkMatch, ex.info.level)
 		
 		local strID =  link  and  link:match("item:(%d+)")
-		local visibleID = GetInventoryItemID(unit,slotId)
-		if  visibleID ~= tonumber(strID)  then
-			info.TmogIDs[slotName] = visibleID
-			print(slotName..": linkID="..tostring(strID).." visibleID="..tostring(visibleID).." "..(select(2,GetItemInfo(visibleID)) or "<data not loaded>") )
+		local tmogID = GetInventoryItemID(unit,slotId)
+		local tmogName, tmogLink
+		if tmogID then  tmogName, tmogLink = GetItemInfo(tmogID)  end
+
+		if  tmogID  and  tmogID ~= tonumber(strID)  then
+			info.TmogIDs[slotName] = tmogID
+			info.Tmogs[slotName] = tmogLink  or  "item:"..tmogID
+			chat:AddMessage(slotName..": linkID="..tostring(strID).." -> tmogID="..tostring(tmogID).." == "..tostring(link).." -> "..(tmogLink or "<data not loaded>") )
 		end
 		
-		if (link) then
-			ex.itemsLoaded = true;
+		if  tmogID and not link  or  tmogID and not tmogLink  or  link and not linkMatch  then
+			self.itemsLoaded = false
 		end
 	end
 end
+
+--[[
+function GetItemLink(itemIDorLink)
+	local link = type(itemIDorLink) == 'number'  and  "item:"..itemIDorLink  or  itemIDorLink
+	return select(2,GetItemInfo(link))
+end
+--]]
 
 --------------------------------------------------------------------------------------------------------
 --                                        Additional Inspection                                       --
