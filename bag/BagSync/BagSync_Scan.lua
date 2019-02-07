@@ -21,7 +21,7 @@ local L = BAGSYNC_L
 local Debug = ns.Debug
 
 local reportDataError = print
-	
+
 
 -----------------------------------------------------
 -- Database variables initialized in InitSavedDB() --
@@ -265,6 +265,11 @@ function BagSync:ScanEquipment()
 end
 
 
+function BagSync:PLAYER_MONEY()
+	PlayerDB.gold = GetMoney()
+end
+
+
 
 ----------------------------
 --     EQUIPPED BAGS      --
@@ -289,6 +294,7 @@ local function GetEquippedBags(bagIDFirst, bagIDLast)
 	return bags
 end
 
+
 function BagSync:ScanBackpackBags()
 	PlayerDB['equip'] = PlayerDB['equip'] or {}
 	PlayerDB['equip'].bags = GetEquippedBags(BACKPACK_CONTAINER+1, NUM_BAG_SLOTS)
@@ -308,9 +314,9 @@ end
 
 
 
-----------------------------
---       BACKPACK         --
-----------------------------
+-----------------------------
+-- Containers (bag & bank) --
+-----------------------------
 
 function BagSync:ScanContainer(storageName, bagID)
 	assert(ns.atBank  or  (BACKPACK_CONTAINER <= bagID  and  bagID <= NUM_BAG_SLOTS), "BagSync:ScanContainer("..storageName..", "..bagID.."): Must be at bank to be able to scan bags in bank")
@@ -335,49 +341,44 @@ function BagSync:ScanContainer(storageName, bagID)
 end
 
 
-function BagSync:ScanBackpack()    -- or ScanCarriedBags()
-	--reset our tooltip data since we scanned new items (we want current data not old)
-	BagSync:resetTooltip()
-	-- Reset bag data
-	PlayerDB['bag'] = {}
-	
-	-- Save carried backpack and bag contents 0 - 4
+BagSync.ContainersToScan = {}
+
+function BagSync:ScanContainers()
 	for  bagID = BACKPACK_CONTAINER, NUM_BAG_SLOTS  do
-		self:ScanContainer('bag', bagID)
+		if  self.ContainersToScan[bagID]  then  self:ScanContainer('bag', bagID)  end
 	end
-	
-	self:ScanBackpackBags()
+	if  self.ContainersToScan[BANK_CONTAINER]  then  self:ScanContainer('bank', BANK_CONTAINER)  end
+	for  bagID = NUM_BAG_SLOTS+1, NUM_BAG_SLOTS+NUM_BANKBAGSLOTS  do
+		if  self.ContainersToScan[bagID]  then  self:ScanContainer('bank', bagID)  end
+	end
+	wipe(self.ContainersToScan)
 end
 
 
 
 ----------------------------
---      BANK	            --
+--    Scheduled Scan      --
 ----------------------------
 
-function BagSync:ScanEntireBank()
-	print("BagSync:ScanEntireBank()")
-	-- Delayed scan was scheduled when bank was opened, maybe it has been closed in the meantime.
-	if  not ns.atBank  then  return  end
-	
-	--reset our tooltip data since we scanned new items (we want current data not old)
-	BagSync:resetTooltip()
-	
-	-- Reset bank data
-	PlayerDB['bank'] = {}
-	
-	-- Equipped bank bags are updated on BANKFRAME_OPENED event
-	PlayerDB['bank'].bags = GetEquippedBags(NUM_BAG_SLOTS+1, NUM_BAG_SLOTS+NUM_BANKBAGSLOTS)
-	
-	-- Save builtin bank contents
-	self:ScanContainer('bank', BANK_CONTAINER)
-	
-	-- Save bank bag contents 5 - 11
-	for  bagID = NUM_BAG_SLOTS+1, NUM_BAG_SLOTS+NUM_BANKBAGSLOTS  do
-		self:ScanContainer('bank', bagID)
+function BagSync:ScheduleScanBackpack()
+	BagSync:ScheduleScanContainer(BACKPACK_CONTAINER, NUM_BAG_SLOTS)
+	self:Schedule( self.ScanBackpackBags )
+end
+
+function BagSync:ScheduleScanBank()
+	self.ContainersToScan[BANK_CONTAINER] = true
+	BagSync:ScheduleScanContainer(NUM_BAG_SLOTS, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS)
+end
+
+function BagSync:ScheduleScanContainer(firstID, lastID)
+	self:Schedule( self.ScanContainers )
+	if  not lastID  then
+		self.ContainersToScan[firstID] = true
+		return
 	end
-	
-	self:ScanBankBags()
+	for  bagID = firstID, lastID  do
+		self.ContainersToScan[bagID] = true
+	end
 end
 
 
@@ -411,7 +412,7 @@ end
 --      GUILD BANK	        --
 ------------------------------
 
-function BagSync:GUILD_ROSTER_UPDATE()
+function BagSync:CheckGuildInfo()
 	local newGuild =  IsInGuild()  and  GetGuildInfo('player')
 	
 	if  PlayerDB.guild ~= newGuild  then
@@ -421,10 +422,16 @@ function BagSync:GUILD_ROSTER_UPDATE()
 	end
 end
 
+
+BagSync.GuildTabsToScan = {}
+
 function BagSync:ScanGuildTab(tabID)
 	local guildName = IsInGuild()  and  GetGuildInfo('player')
 	if not guildName then return end
+	tabID = tabID  or  next(self.GuildTabsToScan)
+	self.GuildTabsToScan[tabID] = nil
 	Debug("BagSync:ScanGuildTab("..tabID..")")
+	if  not tabID  then  return false  end
 	
 	--reset our tooltip data since we scanned new items (we want current data not old)
 	BagSync:resetTooltip()
@@ -445,17 +452,8 @@ function BagSync:ScanGuildTab(tabID)
 	
 	RealmGuildDB[guildName] = RealmGuildDB[guildName] or {}
 	RealmGuildDB[guildName][tabID] = tabItems
-end
-
-
-function BagSync:ScanGuildBank()
-	local guildName = IsInGuild()  and  GetGuildInfo('player')
-	if not guildName then return end
-	Debug("BagSync:ScanGuildBank()")
 	
-	for  tabID = 1, GetNumGuildBankTabs()  do
-		self:ScanGuildTab(tabID)
-	end
+	return true
 end
 
 
@@ -613,7 +611,7 @@ function BagSync:AfterLoginScan()
 	end
 	
 	-- Refresh equipment, backpack, bag and token database
-	self:Schedule( self.ScanBackpack )
+	self:ScheduleScanBackpack()
 	self:Schedule( self.ScanEquipment )
 	self:Schedule( self.ScanTokens )
 	
@@ -718,62 +716,6 @@ end
 
 
 
-
-
-----------------------------
---      BAG UPDATES  	    --
-----------------------------
-
-function BagSync:PLAYER_MONEY()
-	PlayerDB.gold = GetMoney()
-end
-
-function BagSync:ScheduleScanContainer(bagID)
-	self.BagsToScan = self.BagsToScan  or  {}
-	self.BagsToScan[bagID] = true
-	self:Schedule( self.ScanNextContainer )
-end
-
-function BagSync:ScanNextContainer()
-	local bagID = next(self.BagsToScan)
-	if  not bagID  then  return  end
-	self.BagsToScan[bagID] = nil
-	
-	-- Get the correct storage name based on it's id. Use constants defined in FrameXML\Constants.lua as Blizzard may change these in the future.
-	local storageName =  BACKPACK_CONTAINER <= bagID  and  bagID  <= NUM_BAG_SLOTS  and  'bag'
-		or  NUM_BAG_SLOTS < bagID  and  bagID <= NUM_BAG_SLOTS + NUM_BANKBAGSLOTS  and  'bank'
-		or  BANK_CONTAINER == bagID  and  'bank'
-	
-	if  not storageName  then  
-		local backpackIDs = BACKPACK_CONTAINER .." - ".. NUM_BAG_SLOTS
-		local bankIDs = BANK_CONTAINER ..", ".. (NUM_BAG_SLOTS+1) .." - ".. (NUM_BAG_SLOTS + NUM_BANKBAGSLOTS)
-		print("BagSync:ScanNextContainer(): unknown bagID="..bagID.." not in backpack ("..backpackIDs..") nor the bank ("..bankIDs..")")
-		return true  -- Call again to scan next
-	end
-	
-	if  storageName == 'bank'  and  not ns.atBank  then
-		print("BagSync:ScanNextContainer(): bagID="..bagID.."  storageName == 'bank' but not atBank")
-		return true  -- Call again to scan next
-	end
-	
-	-- Save the item information in the bag from bagupdate, this could be carried bag or bank bag
-	self:ScanContainer(storageName, bagID)
-	
-	--[[
-	-- 2018-12-04: PLAYERBANKSLOTS_CHANGED event is sent for changes in default bank container
-	if  ns.atBank  and  bagID ~= BANK_CONTAINER  then
-		-- We have to force the -1 default bank container because Blizzard doesn't push updates for it (for some stupid reason)
-		self:ScanContainer('bank', BANK_CONTAINER)
-	end
-	--]]
-	
-	return true  -- Call again to scan next
-end
-
-
-
-
-
 ------------------------
 --      TOKENS        --
 ------------------------
@@ -850,7 +792,7 @@ function BagSync:PLAYER_REGEN_ENABLED(event)
 	self:UnregisterEvent('PLAYER_REGEN_ENABLED')
 	-- we're out of an arena or battleground scan the points
 	ns.doTokenUpdate = nil
-	self:Schedule( self.ScanTokens )
+	self:Schedule( self.ScanTokens, 1 )
 end
 
 

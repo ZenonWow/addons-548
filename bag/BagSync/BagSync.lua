@@ -23,25 +23,32 @@
 
 
 -- Addon private namespace
-local ADDON_NAME, ns = ...
-local _G = _G
+local _G, ADDON_NAME, _ADDON = _G, ...
+-- local _G, _ADDON = LibEnv.UseAddonEnv(...)
+local GetTime = GetTime
 
--- Frames to draw before starting background scanning
-local SCHEDULE_DELAY_TICKS = 60
+-- Seconds to wait before initial scan.
+BagSync.LOGIN_SCAN_DELAY_SEC = 5
+-- Throttling:  seconds between container scans.
+BagSync.MIN_SCAN_INTERVAL = 1
+
 
 
 -- Event handler frame
 local BagSync = CreateFrame("Frame", "BagSync", UIParent)
+BagSync:Hide()
+LibStub("AceTimer-3.0"):Embed(BagSync)
+
 _G.BagSync = BagSync
 --_G[ADDON_NAME] = BagSync
 
 
 
 -- Debug(...) messages
-function ns.Debug(...)  if  BagSync.logFrame  then  BagSync.logFrame:AddMessage( string.join(", ", tostringall(...)) )  end end
+function _ADDON.Debug(...)  if  BagSync.logFrame  then  BagSync.logFrame:AddMessage( string.join(", ", tostringall(...)) )  end end
 BagSync.logFrame = tekDebug  and  tekDebug:GetFrame("BagSync")
 function BagSync.Debug(enable)  BagSync.logFrame =  enable  and  (tekDebug  and  tekDebug:GetFrame("BagSync")  or  DEFAULT_CHAT_FRAME)  end
-local Debug =  ns.Debug
+local Debug =  _ADDON.Debug
 
 local LogMsgs = {}
 local function log(msg) LogMsgs[#LogMsgs+1] = msg  end
@@ -104,8 +111,8 @@ function BagSync:ADDON_LOADED(event, addonName)
 		self.ADDON_LOADED = nil
 		Debug("[".. date('%H:%M:%S') .."] BagSync:ADDON_LOADED("..addonName..")")
 		-- SavedVariables loaded: check and reference it
-		ns.InitSavedDB()
-		self:SetRegisterEvents(true, ns.EventsToScan)
+		_ADDON.InitSavedDB()
+		self:SetRegisterEvents(true, _ADDON.EventsToScan)
 		
 		local BagSyncOpt = _G.BagSyncOpt
 		BagSyncOpt.minimap = BagSyncOpt.minimap or {}
@@ -134,20 +141,10 @@ function BagSync:PLAYER_ENTERING_WORLD()
 	BagSync:CheckTmoggableSlotIDs()
 	
 	-- If we missed the ADDON_LOADED event then do it now
-	if  self.ADDON_LOADED  then  ns.InitSavedDB()  end
+	if  self.ADDON_LOADED  then  _ADDON.InitSavedDB()  end
 
-	--[[ Update player info after login
-	playerName = UnitName('player')
-	playerRealm = GetRealmName()
-	playerClass = select(2, UnitClass('player'))
-	playerFaction = UnitFactionGroup('player')
-	--]]
-	
-	-- Register OnUpdate script to delay the initial scan with a fixed number of frames drawn.
-	-- With 30fps this should delay scan with 5 seconds. On a fast system with 60fps this will be 2.5 seconds.
-	--local setDelay = not self.scheduleDelay
-	self:Schedule( self.AfterLoginScan )
-	self.scheduleDelay = 150
+	self:ScheduleTimer( self.AfterLoginScan, self.LOGIN_SCAN_DELAY_SEC )
+	self.LOGIN_SCAN_DELAY_SEC = nil
 	
 	-- Unregister event and release memory
 	self:UnregisterEvent('PLAYER_ENTERING_WORLD')
@@ -155,49 +152,51 @@ function BagSync:PLAYER_ENTERING_WORLD()
 end
 
 
+local taskQueue  = {}
+local taskLocks  = {}
+local taskTimers = {}
 
 function BagSync:OnUpdate(elapsed)
-	if  self.scheduleDelay  then
-		self.scheduleDelay = self.scheduleDelay - 1
-		if  0 < self.scheduleDelay  then  return  end
-		
-		self.scheduleDelay = SCHEDULE_DELAY_TICKS
-		local method = self.scheduled[#self.scheduled]
-		self.scheduled[#self.scheduled] = nil
-		
-		local callAgain = method  and  method(self)
-		if  callAgain  then  table.insert(self.scheduled, method)  end
-		
-		if  0 == #self.scheduled  then  self.scheduleDelay = nil  end
-	end
-		
-	if  not self.scheduleDelay  then
-		self:SetScript('OnUpdate', nil)
-	end
+	-- Survives #self.taskQueue == 0, which can happen if the only scheduled taskFunc is removed while self:IsShown().
+	local taskFunc = next(taskQueue)
+	if  not taskFunc  then  return self:Hide()  end
+	
+	-- Remove taskFunc from list. If it causes error, won't be called over and over again.
+	taskQueue[taskFunc] = nil
+	taskLocks[taskFunc] = GetTime()
+	
+	local callAgain = taskFunc  and  taskFunc(self)
+	if  callAgain  then  taskQueue[taskFunc] = taskFunc  end
+	
 end
 
 
-
-
-local function  tremovebyval(tab, item)
-	for  i,v  in  ipairs(tab)  do
-		if  v == item  then  table.remove(tab, i)  return v  end
+--[[
+local function  tremovebyvalRev(t, item)
+	for  i = #t,1,-1  do
+		if  t[i] == item  then  table.remove(t, i)  return i  end
 	end
-	return nil
 end
+--]]
 
-
-function BagSync:Schedule(method)
-	self.scheduled = self.scheduled or {}
-	if  not self.scheduleDelay  then
-		self:SetScript('OnUpdate', self.OnUpdate)
-		self.scheduleDelay = SCHEDULE_DELAY_TICKS
-	else
-		if  self.scheduleDelay < SCHEDULE_DELAY_TICKS  then  self.scheduleDelay = SCHEDULE_DELAY_TICKS  end
+function BagSync:Schedule(taskFunc, minInterval)
+	if  taskQueue[taskFunc]  then  return false  end
+	
+	minInterval = minInterval or self.MIN_SCAN_INTERVAL
+	local now, lastRun, timerId = GetTime(), taskLocks[taskFunc] or 0, taskTimers[taskFunc]
+	
+	-- Delaying taskFunc until the lock expires. How much is left?
+	local lockLeft = lastRun + minInterval - now
+	if  lockLeft <= 0  then
+		if  timerId  then  self:CancelTimer(timerId) ; taskTimers[taskFunc] = nil  end
+		taskQueue[taskFunc] = taskFunc
+		return false
 	end
 	
-	local wasScheduled = tremovebyval(self.scheduled, method)
-	table.insert(self.scheduled, method)
+	if  not timerId  or  not AceTimer.activeTimers[bucket.timer]  then
+		taskTimers[taskFunc] = self:ScheduleTimer('Schedule', lockLeft, taskFunc, 0)
+	end
+	return true
 end
 
 

@@ -61,6 +61,8 @@ function BagSync:PLAYER_MONEY()
 end
 --]]
 
+-- Event for changes in backpack, carried bags, bank bags, but NOT the 28-slot base bank container,
+-- BAG_UPDATE(BANK_CONTAINER) is never triggered, but PLAYERBANKSLOTS_CHANGED instead. It's that big of a deal.
 function BagSync:BAG_UPDATE(event, bagID, slotID)
 	print("BagSync:"..event.."(bagID="..bagID..", slotID="..tostring(slotID)..")")
 	self:ScheduleScanContainer(bagID)
@@ -82,7 +84,7 @@ end
 
 function BagSync:BANKFRAME_OPENED()
 	ns.atBank = true
-	self:Schedule( self.ScanEntireBank )
+	self:ScheduleScanBank()
 end
 
 -- From FrameXML/Constants.lua:
@@ -110,6 +112,7 @@ function BagSync:PLAYERBANKSLOTS_CHANGED(event, slotID)
 		local bagID = NUM_BAG_SLOTS + slotID - NUM_BANKGENERIC_SLOTS
 		self:ScanBankBags(bagID)
 	else
+		print(LIGHTYELLOW_FONT_COLOR_CODE.."  Unknown slotID.|r")
 		-- When items in the builtin bank change PLAYERBANKSLOTS_CHANGED event is sent instead of BAG_UPDATE(BANK_CONTAINER).
 		self:ScheduleScanContainer(BANK_CONTAINER)
 		self:ScanBankBags()
@@ -156,31 +159,32 @@ end
 --      GUILD BANK	        --
 ------------------------------
 
---[[
 function BagSync:GUILD_ROSTER_UPDATE()
-	local newGuild =  IsInGuild()  and  GetGuildInfo('player')
-	
-	if  PlayerDB.guild ~= newGuild  then
-		PlayerDB.guild = newGuild
-		-- Delete guild bank data now  or  keep until next login
-		if  self.instantForgetGuildData  then  self:FixDB_Data(true)  end
-	end
+	self:CheckGuildInfo()
+	self.GuildTabQueried = 0
+	-- This probably races with GuildBankUI
+	self:QueryNextGuildBankTab()
 end
---]]
 
 function BagSync:GUILDBANKFRAME_OPENED()
 	ns.atGuildBank = true
 	if  not _G.BagSyncOpt.enableGuild  then  return  end
 	
-	ns.guildTabQueryQueue = {}
-	local numTabs = GetNumGuildBankTabs()
-	for  tabID = 1, numTabs  do
+	self:QueryNextGuildBankTab()
+end
+
+function BagSync:QueryNextGuildBankTab()
+	local nextTab = (self.GuildTabQueried or 0) + 1
+	for  tabID = nextTab, GetNumGuildBankTabs()  do
 		-- add this tab to the queue to refresh; if we do them all at once the server bugs and sends massive amounts of events
 		local name, icon, isViewable, canDeposit, numWithdrawals, remainingWithdrawals = GetGuildBankTabInfo(tabID)
 		if  isViewable  then
-			ns.guildTabQueryQueue[tabID] = true
+			_G.QueryGuildBankTab(tabID)
+			self.GuildTabQueried = tabID
+			return true
 		end
 	end
+	self.GuildTabQueried = nil
 end
 
 function BagSync:GUILDBANKFRAME_CLOSED()
@@ -189,25 +193,21 @@ function BagSync:GUILDBANKFRAME_CLOSED()
 end
 
 function BagSync:GUILDBANKBAGSLOTS_CHANGED(event, tabID, slotID)
-	if  not _G.BagSyncOpt.enableGuild  then  return  end
-	print("BagSync:"..event.."(tabID="..tostring(tabID)..", slotID="..tostring(slotID)..")")
-
-	if  ns.guildTabQueryQueue  then
-		-- check if we need to process the queue
-		local tabID = next(ns.guildTabQueryQueue)
-		if tabID then
-			QueryGuildBankTab(tabID)
-			ns.guildTabQueryQueue[tabID] = nil
+	self.GuildTabsToScan[tabID] = true
+	self:Schedule( self.ScanGuildTab, 0 )
+	if  self.GuildTabQueried  then
+		if  tabID == self.GuildTabQueried  then
+			self:QueryNextGuildBankTab()
 		else
-			-- the bank is ready for reading
-			self:Schedule( self.ScanGuildBank )
+			print("BagSync:GUILDBANKBAGSLOTS_CHANGED(tabID="..tabID.."): but GuildTabQueried=".. self.GuildTabQueried..", probably GuildBankUI queried another tab.")
+			_G.QueryGuildBankTab(self.GuildTabQueried)
 		end
 	end
 end
 
-------------------------------
+----------------------------
 --      MAILBOX  	        --
-------------------------------
+----------------------------
 
 function BagSync:MAIL_SHOW()
 	if ns.isCheckingMail then return end
