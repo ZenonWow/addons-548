@@ -1,4 +1,4 @@
-﻿--[[
+--[[
     Broker_CPU, display CPU/Memory usage, Framerate, Latency for World of Warcraft
     Copyright (C) 2010 Arnaud Dovi (ad@heapoverflow.com)
 
@@ -327,8 +327,10 @@ local function onCollect(c)
     return lastotalcpu or 0, totaldiff or 0, lastotalmem or 0, totalmemdiff or 0
 end
 
+local tooltipStayOpen
+
 local function OnLeave(self)
-    local self = self
+    if  tooltipStayOpen  and  self  then return end
     local GameTip = ldb.onupdate or nil
     if GameTip then
         if GameTip:GetScript("OnUpdate") then GameTip:SetScript("OnUpdate", nil) end
@@ -1008,7 +1010,16 @@ local function onSlash(c)
     end
 end
 
-local function onClick(self, button)
+local DOUBLECLICK_TIMEOUT = _G.DOUBLECLICK_TIMEOUT or 0.3
+local lastClick = 0
+
+local function OnDoubleClick(self, button)
+    print("Broker_CPU.OnDoubleClick()")
+  tooltipStayOpen = true
+end
+
+local function OnClick(self, button)
+    print("Broker_CPU.OnClick()")
     if button == "LeftButton" then
         if IsControlKeyDown() and IsAltKeyDown() then
             if scriptProfile then SetCVar("scriptProfile", 0)
@@ -1019,8 +1030,15 @@ local function onClick(self, button)
                 OnLeave(ldb.display)
             end
             return
-        else
+        elseif IsAltKeyDown() then
             return onCollectGarbage()
+        elseif  not IsModifierKeyDown()  then
+            tooltipStayOpen = false
+            --[[
+            local now = GetTime()
+            tooltipStayOpen =  now - lastClick < DOUBLECLICK_TIMEOUT
+            lastClick = now
+            --]]
         end
     end
     if button == "RightButton" then
@@ -1305,7 +1323,8 @@ local function OnEvent(_, ev, addon, v)
         type    = "data source",
         text    = "",
         icon    = icon,
-        OnClick = onClick,
+				OnDoubleClick = OnDoubleClick,
+        OnClick = OnClick,
         OnLeave = OnLeave,
     })
     --noinspection GlobalCreationOutsideO

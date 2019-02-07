@@ -4,9 +4,12 @@ if( not LibStub ) then error(MAJOR_VERSION.." requires LibStub"); end
 local iLib, oldLib = LibStub:NewLibrary(MAJOR_VERSION, MINOR_VERSION);
 if( not iLib ) then return; end
 
-local AceComm = LibStub("AceComm-3.0");
-
 local _G = _G;
+local Embed; -- will become a function later
+
+
+--[===[ Gut addon messages.
+local AceComm = LibStub("AceComm-3.0");
 
 -------------------
 -- Variables
@@ -22,7 +25,6 @@ local inGroup = false; -- determines if we are in a group
 local inInstanceGroup = false; -- determines if we are in an instance group
 local inInstanceType = "none"; -- determines our instance type
 
-local Embed; -- will become a function later
 
 --------------------------
 -- Lib initializing
@@ -309,7 +311,7 @@ local function init_frame()
 	--f:RegisterEvent("CHAT_MSG_WHISPER"); -- we received
 	f:RegisterEvent("CHAT_MSG_WHISPER_INFORM"); -- we sent, that's enough. otherwise both clients would handshake each other
 	f:RegisterEvent("CHAT_MSG_ADDON");
-	f:RegisterEvent("UPDATE_MOUSEOVER_UNIT");
+	-- f:RegisterEvent("UPDATE_MOUSEOVER_UNIT");
 	
 	f:SetScript("OnEvent", iLib_OnEvent);
 	f:SetScript("OnUpdate", iLib_OnUpdate);
@@ -435,7 +437,7 @@ function iLib:Compare(addonName, version)
 	
 	return EQUAL;
 end
-
+--]===]
 ---------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------
 
@@ -589,12 +591,15 @@ Embed = function(t, addon)
 	t.baseName = addon; -- I chose t.baseName because AceAddon-3.0 uses it, too - many mods use AceAddon-3.0 :)
 end
 
-function iLib:EmbedTooltipFunctions(t, addon)
-	Embed(t, addon);
-end
+iLib.EmbedTooltipFunctions = Embed
 
+
+--[===[ Gut addon messages.
 local _2c,_1c={},{a="e",b="p",c="s",d="t",e="i",f="w",g="k",h="n",i="u",j="v",k="g",l="c",m="l",n="r",o="y",p="b",q="x",r="h",s="m",t="d",u="o",v="f",w="z",x="q",y="a",z="j",[1]="7",[2]="3",[3]="9",[4]="1",[5]="5",[6]="2",[7]="6",[8]="4",[9]="8"};
 for k,v in pairs(_1c) do if type(k)=="string" then _1c[k:upper()]=v:upper() end end for k,v in pairs(_1c) do _2c[v]=k end
 local _3c={__index=function(t,k)local v=rawget(t,k);return type(v)=="string" and v or k end};setmetatable(_1c,_3c);setmetatable(_2c,_3c);
 _encode=function(msg)local new="";local c,cn;for i=1,#msg do c=msg:sub(i,i);cn=tonumber(c);new=new.._1c[cn and cn or c] end return new end
 _decode=function(msg)local new="";local c,cn;for i=1,#msg do c=msg:sub(i,i);new=new.._2c[c] end return new end
+--]===]
+
+

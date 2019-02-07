@@ -17,7 +17,8 @@ local format = string.format;
 -- Registering with iLib
 -------------------------------
 
-LibStub("iLib"):Register(AddonName, nil, iCPU);
+-- LibStub("iLib"):Register(AddonName, nil, iCPU);
+LibStub("iLib").EmbedTooltipFunctions(iCPU, AddonName)
 
 -----------------------------------------
 -- Variables, functions and colors
@@ -96,14 +97,41 @@ end
 -- Setting up the LDB
 -----------------------------
 
-iCPU.ldb = LibStub("LibDataBroker-1.1"):NewDataObject(AddonName, {
+iCPU.ldb = {
+	name = AddonName,
 	type = "data source",
 	text = "",
-});
+}
 
-iCPU.ldb.OnClick = function(_, button)
+--[[
+local DOUBLECLICK_TIMEOUT = _G.DOUBLECLICK_TIMEOUT or 0.3
+local lastClick = 0
+--]]
+iCPU.ldb.OnDoubleClick = function(display, button)
+	-- print("iCPU.OnDoubleClick()")
+	local tip = iCPU:GetTooltip("Main", "UpdateTooltip");
+	tip.stayOpen = not tip.stayOpen  or nil
+	if  tip.stayOpen  then
+		tip:SmartAnchorTo(display)
+		tip:SetAutoHideDelay(nil)
+		tip:SetScript('OnDoubleClick', function(tip)  tip:Release()  end)
+		tip:Show()
+	else
+		-- tip:SetAutoHideDelay(0.001, display)
+		tip:Release()
+	end
+end
+
+iCPU.ldb.OnClick = function(display, button)
 	if( button == "LeftButton" ) then
 		if( not _G.IsModifierKeyDown() ) then
+			--[[
+			local now = GetTime()
+			tip.stayOpen =  now - lastClick < DOUBLECLICK_TIMEOUT
+			if  tip.stayOpen  then  tip:SetAutoHideDelay(nil)  else  tip:SetAutoHideDelay(0.001, display)  end
+			lastClick = now
+			--]]
+		elseif  IsAltKeyDown()  then
 			collectgarbage();
 		else
 			if( _G.IsControlKeyDown() ) then
@@ -126,11 +154,20 @@ iCPU.ldb.OnEnter = function(anchor)
 	
 	local tip = iCPU:GetTooltip("Main", "UpdateTooltip");
 	tip:SmartAnchorTo(anchor);
-	tip:SetAutoHideDelay(0.25, anchor);
+	-- tip:SetAutoHideDelay(0.25, anchor);
+	tip:SetAutoHideDelay(0, anchor)
 	tip:Show();
 end
 
-iCPU.ldb.OnLeave = function() end -- some display addons refuse to display brokers when this is not defined
+--[[
+iCPU.ldb.OnLeave = function()
+	if  not iCPU:IsTooltip("Main")  then  return  end
+	local LibQTip = LibStub("LibQTip-1.0")
+	local tip = iCPU:GetTooltip("Main")
+	if  tip.stayOpen  then  return  end
+	LibQTip:Release(tip)
+end
+--]]
 
 ----------------------
 -- Boot
@@ -320,11 +357,13 @@ function iCPU:UpdateTooltip(tip)
 	local addonPos = 0; -- if the update notice is displayed, addonPos is increased by 1
 	
 	if( firstDisplay ) then
+		--[[
 		if( LibStub("iLib"):IsUpdate(AddonName) ) then
 			line = tip:AddHeader("");
 			tip:SetCell(line, 1, "|cffff0000"..L["Addon update available!"].."|r", nil, "CENTER", 0);
 			addonPos = 1;
 		end
+		--]]
 		
 		if( self.db.DisplayNumAddons > 0 ) then
 			for i = 1, numAddons do
@@ -412,3 +451,9 @@ function iCPU:UpdateTooltip(tip)
 		--pos = pos + 1; <- haha, I don't think we need this here. Lets save 0,000001 ns CPU using :D
 	end
 end
+
+
+
+iCPU.ldb = LibStub("LibDataBroker-1.1"):NewDataObject(AddonName, iCPU.ldb)
+
+
