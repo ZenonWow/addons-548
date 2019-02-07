@@ -1,15 +1,24 @@
 ﻿local LibStub = LibStub
-local ChocolateBar = LibStub("AceAddon-3.0"):GetAddon("ChocolateBar")
-local Debug = ChocolateBar.Debug
 local AceCfgDlg = LibStub("AceConfigDialog-3.0")
-local Drag = ChocolateBar.Drag
 local broker = LibStub("LibDataBroker-1.1")
-local L = LibStub("AceLocale-3.0"):GetLocale("ChocolateBar")
 local LSM = LibStub("LibSharedMedia-3.0")
+
+local APPNAME = "ChocolateBar"
+local ChocolateBar = LibStub("AceAddon-3.0"):GetAddon(APPNAME)
+local L = LibStub("AceLocale-3.0"):GetLocale(APPNAME)
+local version = GetAddOnMetadata(APPNAME,"X-Curse-Packaged-Version") or ""
+
+local Debug = ChocolateBar.Debug
+local Drag = ChocolateBar.Drag
 local _G, pairs, string = _G, pairs, string
-local version = GetAddOnMetadata("ChocolateBar","X-Curse-Packaged-Version") or ""
 local db, moreChocolate
 local index = 0
+local Options = ChocolateBar.Options or {}
+ChocolateBar.Options = Options
+
+local DEFAULT_ICON_TEX = "Interface\\AddOns\\ChocolateBar\\pics\\ChocolatePiece"
+
+
 
 local function GetStats(info)
 	local total = 0
@@ -22,21 +31,23 @@ local function GetStats(info)
 			if t == "data source" then
 				data = data + 1
 			end
-			local settings = db.objSettings[name]
+			local settings = rawget(db.objSettings, name)
 			if settings and settings.enabled then
 				enabled = enabled +1
 			end
 		end
 	end
-	
-	return _G.strjoin("\n","|cffffd200"..L["Enabled"].."|r  "..enabled, 
+
+	return _G.strjoin("\n","|cffffd200"..L["Enabled"].."|r  "..enabled,
 						"|cffffd200"..L["Disabled"].."|r  "..total-enabled,
 						"|cffffd200"..L["Total"].."|r  "..total,
 						"",
 						"|cffffd200"..L["Data Source"].."|r  "..data,
 						"|cffffd200"..L["Launcher"].."|r  "..total-data
-	) 
+	)
 end
+
+
 
 local function EnableAll(info)
 	for name, obj in LibStub("LibDataBroker-1.1"):DataObjectIterator() do
@@ -58,17 +69,28 @@ local function DisableLauncher(info)
 	end
 end
 
-local aceoptions = { 
-    name = "ChocolateBar".." "..version,
-    handler = ChocolateBar,
+local function DeleteAllMissing(info)
+	for name, obj in LibStub("LibDataBroker-1.1"):DataObjectIterator() do
+		ChocolateBar:DisableDataObject(name)
+	end
+end
+
+
+
+
+-- Options.NewBarName = nil
+
+local aceoptions = {
+	name = APPNAME.." "..version,
+	handler = ChocolateBar,
 	type='group',
-	desc = "ChocolateBar",
-    args = {
+	desc = APPNAME,
+		args = {
 		general={
 			name = L["Look and Feel"],
 			type="group",
 			order = 0,
-			
+
 			args={
 				general = {
 					inline = true,
@@ -76,16 +98,17 @@ local aceoptions = {
 					type="group",
 					order = 3,
 					args={
-						locked = {
+						editMode = {
 							type = 'toggle',
 							order = 1,
-							name = L["Lock Plugins"],
-							desc = L["Hold alt key to drag a plugin."],
+							name = L["Movable Plugins"],
+							desc = L["Hold alt key to drag a plugin if disabled."],
 							get = function(info, value)
-									return db.locked
+									return db.editMode
 							end,
 							set = function(info, value)
-									db.locked = value
+									-- db.editMode = value
+									ChocolateBar:ToggleEditMode(value)
 							end,
 						},
 						gap = {
@@ -163,12 +186,12 @@ local aceoptions = {
 						},
 						strata = {
 							type = 'select',
-							values = {FULLSCREEN_DIALOG="Fullscreen_Dialog",FULLSCREEN="Fullscreen", 
+							values = {FULLSCREEN_DIALOG="Fullscreen_Dialog",FULLSCREEN="Fullscreen",
 										DIALOG="Dialog",HIGH="High",MEDIUM="Medium",LOW="Low",BACKGROUND="Background"},
 							order = 6,
 							name = L["Bar Strata"],
 							desc = L["Bar Strata"],
-							get = function() 
+							get = function()
 								return db.strata
 							end,
 							set = function(info, value)
@@ -192,12 +215,12 @@ local aceoptions = {
 						},
 						barRightClick = {
 							type = 'select',
-							values = {NONE=L["none"],OPTIONS=L["ChocolateBar Options"], 
+							values = {NONE=L["none"],OPTIONS=L["ChocolateBar Options"],
 										BLIZZ=L["Blizzard Options"]},
 							order = 8,
 							name = L["Bar Right Click"],
 							desc = L["Select the action when right clicking on a bar."],
-							get = function() 
+							get = function()
 								return db.barRightClick
 							end,
 							set = function(info, value)
@@ -350,7 +373,7 @@ local aceoptions = {
 										end
 										db.combatopacity = value
 										--ChocolateBar:UpdateBarOptions("UpdateOpacity")
-										for name,bar in pairs(ChocolateBar:GetBars()) do
+										for name,bar in pairs(ChocolateBar.chocolateBars) do
 											bar.tempHide = bar:GetAlpha()
 											bar:SetAlpha(db.combatopacity)
 										end
@@ -379,7 +402,7 @@ local aceoptions = {
 									order = 1,
 									name = L["Background Texture"],
 									desc = L["Some of the textures may depend on other addons."],
-									get = function() 
+									get = function()
 										return db.background.textureName
 									end,
 									set = function(info, value)
@@ -436,7 +459,7 @@ local aceoptions = {
 									order = 2,
 									name = L["Background Texture"],
 									desc = L["Some of the textures may depend on other addons."],
-									get = function() 
+									get = function()
 										return db.background.textureName
 									end,
 									set = function(info, value)
@@ -499,7 +522,7 @@ local aceoptions = {
 								order = 1,
 								name = L["Font"],
 								desc = L["Some of the fonts may depend on other addons."],
-								get = function() 
+								get = function()
 									return db.fontName
 								end,
 								set = function(info, value)
@@ -549,13 +572,13 @@ local aceoptions = {
 									get = function(info)
 										return db.desaturated
 									end,
-									set = function(info, vale)
-										db.desaturated = vale
+									set = function(info, value)
+										db.desaturated = value
 										for name, obj in broker:DataObjectIterator() do
 											if db.objSettings[name] then
 												if db.objSettings[name].enabled then
 													local choco = ChocolateBar:GetChocolate(name)
-													if choco then
+													if choco and choco.icon then
 														choco:Update(choco, "iconR", nil)
 													end
 												end
@@ -612,14 +635,23 @@ local aceoptions = {
 			type ="group",
 			order = 20,
 			args ={
+				barName = {
+					type = 'input',
+					order = 0,
+					name = L["Bar name"],
+					desc = L["Name of your bar becomes a global frame name if you include 'Choco'!"],
+					set = function(info, value)
+						Options.NewBarName = value
+					end,
+				},
 				new = {
 					type = 'execute',
-		            --width = "half",
-					order = 0,
+					--width = "half",
+					order = 1,
 					name = L["Create Bar"],
-		            desc = L["Create New Bar"],
-		            func = function()
-						local name = ChocolateBar:AddBar()
+					desc = L["Create a new Bar"],
+					func = function()
+						local name = ChocolateBar:CreateBar(Options.NewBarName)
 						ChocolateBar:AddBarOptions(name)
 					end,
 				},
@@ -628,7 +660,7 @@ local aceoptions = {
 		chocolates={
 			name = L["Plugins"],
 			type="group",
-			order = -1,
+			order = 30,
 			args={
 				stats = {
 					inline = true,
@@ -674,10 +706,40 @@ local aceoptions = {
 				},
 			},
 		},
+		missingChocolate={
+			name = L["Missing Plugins"],
+			type="group",
+			order = 40,
+			disable = true,
+			args={
+				quickconfig = {
+					inline = true,
+					name = L["Quick Config"],
+					type = "group",
+					order = 2,
+					args ={
+						enableAll = {
+							type = 'execute',
+							order = 3,
+							name = L["Delete All"],
+							desc = L["Forget missing addons"],
+							func = DeleteAllMissing,
+						},
+					},
+				},
+			},
+		},
 	},
 }
-local chocolateOptions = aceoptions.args.chocolates.args
 local barOptions = aceoptions.args.bars.args
+local chocolateOptions = aceoptions.args.chocolates.args
+local missingChocolate = aceoptions.args.missingChocolate.args
+Options.barOptions = barOptions
+Options.chocolateOptions = chocolateOptions
+Options.missingChocolate = missingChocolate
+
+
+
 
 -----
 -- bar option functions
@@ -686,7 +748,7 @@ local barOptions = aceoptions.args.bars.args
 -- return the number of bars aligend to align (top or bottom)
 function ChocolateBar:GetNumBars(align)
 	local i = 0
-	for k,v in pairs(ChocolateBar:GetBars()) do
+	for k,v in pairs(ChocolateBar.chocolateBars) do
 		if v.settings.align == align then
 			i = i + 1
 		end
@@ -694,24 +756,36 @@ function ChocolateBar:GetNumBars(align)
 	return i
 end
 
-local function GetBarName(info)
-	local name = info[#info]
-	local bar = ChocolateBar:GetBar(name)
-	if bar and bar.settings.align == "top" then
-		name = name.." (top) "
-	elseif bar and bar.settings.align == "bottom" then
-		name = name.." (bottom) "
-	else
-		name = name.." (custom) "
+local function GetBarLabel(info)
+	local name = info[#info-2]
+	local settings = db.barSettings[name]
+	if settings.align then
+		name = name.." ("..settings.align..") "
 	end
+	return name
+end
+
+local function ChangeBarName(info)
+	local name = info[#info]
+	local newName = Options.ChangeBarName
+
+	ChocolateBar.chocolateBars[newName] = ChocolateBar.chocolateBars[name]
+	ChocolateBar.chocolateBars[name] = nil
+	db.barSettings[newName] = db.barSettings[name]
+	db.barSettings[name] = nil
+	barOptions[newName] = barOptions[name]
+	barOptions[name] = nil
+
+	Options.ChangeBarName = nil
+	-- LibStub("AceConfigRegistry-3.0"):NotifyChange(APPNAME)
 	return name
 end
 
 local function GetBarIndex(info)
 	local name = info[#info]
-	local bar = ChocolateBar:GetBar(name)
-	local index = bar.settings.index
-	if db.barSettings[name].align == "bottom" then
+	local settings = db.barSettings[name]
+	local index = settings.index
+	if settings.align == "bottom" then
 		--reverse order and force below top bars
 		index = index *-1 + 100
 	end
@@ -742,50 +816,50 @@ end
 
 local function MoveUp(info, value)
 	local name = info[#info-2]
-	local bar = ChocolateBar:GetBar(name)
-	local index = bar.settings.index
-	if bar then
-		if db.barSettings[name].align == "bottom" then
+	local settings = db.barSettings[name]
+	local index = settings.index
+	do
+		if settings.align == "bottom" then
 			index = index +1.5
 			if index > (ChocolateBar:GetNumBars("bottom")+1) then
 				index = ChocolateBar:GetNumBars("top")+1
 				SetBarAlign(info, "top")
 			end
-		elseif db.barSettings[name].align == "top" then
+		elseif settings.align == "top" then
 			index = index -1.5
 		else
-			db.barSettings[name].align = "top"
+			settings.align = "top"
 			index = 0
 			SetBarAlign(info, "top")
 		end
-		bar.settings.index = index
+		settings.index = index
 		ChocolateBar:AnchorBars()
 	end
 end
 
 local function MoveDown(info, value)
 	local name = info[#info-2]
-	local bar = ChocolateBar:GetBar(name)
-	local index = bar.settings.index
+	local settings = db.barSettings[name]
+	local index = settings.index
 	if bar then
-		if db.barSettings[name].align == "bottom" then
+		if settings.align == "bottom" then
 			index = index -1.5
-		elseif db.barSettings[name].align == "top" then
+		elseif settings.align == "top" then
 			index = index +1.5
 			if index > (ChocolateBar:GetNumBars("top")+1) then
 				index = ChocolateBar:GetNumBars("bottom")+1
 				SetBarAlign(info, "bottom")
 			end
 		else
-			db.barSettings[name].align = "top"
+			settings.align = "top"
 			index = 0
 			SetBarAlign(info, "top")
 		end
-		bar.settings.index = index
+		settings.index = index
 		ChocolateBar:AnchorBars()
 	end
 end
-	
+
 local function getAutoHide(info, value)
 	local name = info[#info-2]
 	return db.barSettings[name].autohide
@@ -795,14 +869,14 @@ local function setAutoHide(info, value)
 	local name = info[#info-2]
 	db.barSettings[name].autohide = value
 	local bar = ChocolateBar:GetBar(name)
-	bar:UpdateAutoHide(db)
+	if bar then  bar:UpdateAutoHide(db)  end
 	--ChocolateBar:UpdateBarOptions("UpdateAutoHide")
 end
 
 --hide bar during combat
 local function gethideBarInCombat(info, value)
 	local name = info[#info-2]
-	return db.barSettings[name].hideBarInCombat 
+	return db.barSettings[name].hideBarInCombat
 end
 
 local function sethideBarInCombat(info, value)
@@ -814,7 +888,7 @@ local function GetBarWidth(info)
 	--Debug(GetScreenWidth(),UIParent:GetEffectiveScale(),UIParent:GetWidth(),math.floor(GetScreenWidth()))
 	local name = info[#info-2]
 	local maxBarWidth = _G.math.floor(_G.GetScreenWidth())
-	
+
 	return db.barSettings[name].width
 end
 
@@ -824,14 +898,16 @@ local function SetBarWidth(info, value)
 	local settings = db.barSettings[name]
 	settings.width = value
 	local bar = ChocolateBar:GetBar(name)
+	if not bar then  return  end
+
 	if value > _G.GetScreenWidth() or value == 0 then
 		bar:SetPoint("RIGHT", "UIParent" ,"RIGHT",0, 0);
-	else	
+	else
 		local relative, relativePoint
 		settings.barPoint ,relative ,relativePoint,settings.barOffx ,settings.barOffy = bar:GetPoint()
-		if settings.barOffy == 0 then settings.barOffy = 1 end  
+		if settings.barOffy == 0 then settings.barOffy = 1 end
 		bar:ClearAllPoints()
-		bar:SetPoint(settings.barPoint, "UIParent",settings.barOffx,settings.barOffy)	
+		bar:SetPoint(settings.barPoint, "UIParent",settings.barOffx,settings.barOffy)
 		bar:SetWidth(value)
 	end
 end
@@ -850,22 +926,24 @@ end
 local function SetLockedBar(info, value)
 	--Debug("SetLockedBar", value)
 	local name = info[#info-2]
-	local settings = db.barSettings[name]
 	local bar = ChocolateBar:GetBar(name)
-	bar.locked = not value
+	if not bar then  return  end
+
+	local settings = db.barSettings[name]
+	bar.locked = value
 	if not value then
 		--unlock
 		if not moveBarDummy then
 			moveBarDummy = _G.CreateFrame("Frame",bar)
-			moveBarDummy:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background", 
-												nil, 
-												tile = true, tileSize = 16, edgeSize = 16, 
+			moveBarDummy:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+												nil,
+												tile = true, tileSize = 16, edgeSize = 16,
 												nil});
 			moveBarDummy:SetBackdropColor(1,0,0,1);
 			moveBarDummy:RegisterForDrag("LeftButton")
 			moveBarDummy:SetFrameStrata("FULLSCREEN_DIALOG")
 			moveBarDummy:SetFrameLevel(10)
-			moveBarDummy:SetScript("OnMouseUp", function(self, btn) 
+			moveBarDummy:SetScript("OnMouseUp", function(self, btn)
 				if btn == "RightButton" then
 					ChocolateBar:ChatCommand()
 				end
@@ -874,7 +952,7 @@ local function SetLockedBar(info, value)
 		moveBarDummy.bar = bar
 		moveBarDummy:SetAllPoints(bar)
 		moveBarDummy:Show()
-		
+
 		bar:RegisterForDrag("LeftButton")
 		bar:EnableMouse(true)
 		bar:SetFrameStrata("FULLSCREEN_DIALOG")
@@ -901,7 +979,7 @@ local function SetLockedBar(info, value)
 		settings.width = bar:GetWidth()
 		bar:SetFrameStrata(db.strata)
 		bar:SetFrameLevel(1)
-		if moveBarDummy then moveBarDummy:Hide() end 
+		if moveBarDummy then moveBarDummy:Hide() end
 	end
 end
 
@@ -915,14 +993,14 @@ local function SetFreeBar(info, value)
 	local name = info[#info-2]
 	--db.barSettings[name].align = value and "custom" or "top"
 	--Debug("SetFreeBar", db.barSettings[name].align,value,name)
+	db.barSettings[name].align =  value  and  "custom"  or  "top"
 	local bar = ChocolateBar:GetBar(name)
+	if not bar then  return  end
+
 	if not value then
 		SetLockedBar(info, true)
-		db.barSettings[name].align = "top"
 		bar:SetPoint("RIGHT", "UIParent" ,"RIGHT",0, 0);
 		ChocolateBar:AnchorBars()
-	else
-		db.barSettings[name].align = "custom"
 	end
 	bar:UpdateJostle(db)
 	--Debug("SetFreeBar", db.barSettings[name].align,value,name)
@@ -944,9 +1022,7 @@ end
 local function SetBarOff(info, value)
 	local name = info[#info-2]
 	local offtype = info[#info]
-	local bar = ChocolateBar:GetBar(name)
 	local settings = db.barSettings[name]
-	bar = ChocolateBar:GetBar(name)	
 	local relative, relativePoint
 	settings.barPoint ,relative ,relativePoint,settings.barOffx ,settings.barOffy = bar:GetPoint()
 	if offtype == "xoff" then
@@ -954,15 +1030,19 @@ local function SetBarOff(info, value)
 	else
 		settings.fineY = value
 	end
+
+	local bar = ChocolateBar:GetBar(name)
+	if not bar then  return  end
 	bar:ClearAllPoints()
-	bar:SetPoint(settings.barPoint, "UIParent",settings.barOffx + settings.fineX ,settings.barOffy + settings.fineY)	
+	bar:SetPoint(settings.barPoint, "UIParent",settings.barOffx + settings.fineX ,settings.barOffy + settings.fineY)
 end
 
 local function GetLockedBar(info, value)
 	local name = info[#info-2]
 	local bar = ChocolateBar:GetBar(name)
-	return not bar.locked
+	return  not bar or  bar.locked
 end
+
 
 
 -------------
@@ -970,45 +1050,59 @@ end
 --------------------
 local function IsDisabledFreeMove(info)
 	local name = info[#info-2]
-	Debug("IsDisabledFreeMove", not (db.barSettings[name].align == "custom"),db.barSettings[name].align,name)
-	return not (db.barSettings[name].align == "custom")
+	local settings = db.barSettings[name]
+	Debug("IsDisabledFreeMove", not (settings.align == "custom"),settings.align,name)
+	return not (settings.align == "custom")
 end
 
+--[[
 --return true if RemoveBar is disabled
 local function IsDisabledRemoveBar(info)
 	local name = info[#info-2]
-	return name == "ChocolateBar1"
+	return name == db.moreBar
 end
+--]]
 
 local function IsDisabledMoveDown(info)
 	local name = info[#info-2]
-	local bar = ChocolateBar:GetBar(name)
-	--local settings = db.barSettings[name]
-	local settings = bar.settings
+	local settings = db.barSettings[name]
 	return settings.align == "custom" or (settings.align == "bottom" and  settings.index < 1.5)
 end
 
 local function IsDisabledMoveUp(info)
 	local name = info[#info-2]
-	local bar = ChocolateBar:GetBar(name)
 	local settings = db.barSettings[name]
-	return settings.align == "custom" or (settings.align == "top" and  bar.settings.index < 1.5)
+	return settings.align == "custom" or (settings.align == "top" and  settings.index < 1.5)
 end
+
+
+
 
 -----
 -- chocolate option functions
 -----
-local function GetName(info)
-	local cleanName = info[#info]
-	local name = chocolateOptions[cleanName].desc
+local  function GetCleanName(label)
+	local cleanName
+	cleanName = string.gsub(label, "\|c........", "")
+	cleanName = string.gsub(cleanName, "\|r", "")
+	cleanName = string.gsub(cleanName, "[%c \127]", "")
+	return cleanName
+end
+
+local function GetFormattedName(info)
+	-- local cleanName = info[#info]
+	-- local name = chocolateOptions[cleanName].desc
+	local name = info[#info]
+	local dataobj = info.option.arg
+	local cleanName = info.option.cleanName    --  or GetCleanName(dataobj.label or name)
 	--local icon = chocolateOptions[cleanName].icon
-	local dataobj = broker:GetDataObjectByName(name)
+	--local dataobj = broker:GetDataObjectByName(name)
 	if(not db.objSettings[name].enabled)then
 		-- disabled
 		--cleanName = "|TZZ"..cleanName.."|t|T"..icon..":18|t |cFFFF0000"..cleanName.."|r"
 		cleanName = "|H"..cleanName.."|h|cFFFF0000"..cleanName.."|r"
 	elseif dataobj and dataobj.type == "data source" then
-		--enabled data scurce
+		--enabled data source
 		cleanName = "|H"..cleanName.."|h"..cleanName
 	else
 		--enabled launcher
@@ -1016,25 +1110,31 @@ local function GetName(info)
 	end
 	return cleanName
 end
-
+--[[
 local function GetType(info)
 	local cleanName = info[#info-2]
 	local name = chocolateOptions[cleanName].desc
 	return (broker:GetDataObjectByName(name).type == "data source" and L["Type"]..": "..L["Data Source"].."\n") or L["Type"]..": "..L["Launcher"].."\n"
 end
+--]]
+local function GetTypeText(objtype)
+	return objtype == "data source"  and  L["Type"]..": "..L["Data Source"].."\n"
+		or  L["Type"]..": "..L["Launcher"].."\n"
+end
 
 local function GetAlignment(info)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	-- local cleanName = info[#info-2]
+	-- local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	return db.objSettings[name].align
 end
 
 local function SetAlignment(info, value)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
-	db.objSettings[name].align = value
+	local name = info[#info-2]
+	local settings = db.objSettings[name]
+	settings.align = value
+	settings.index = 500
 	local choco = ChocolateBar:GetChocolate(name)
-    db.objSettings[name].index = 500
 	if choco and choco.bar then
 		choco.bar:UpdateBar(true)
 		--choco.bar:UpdateBar()
@@ -1042,77 +1142,65 @@ local function SetAlignment(info, value)
 end
 
 local function SetEnabled(info, value)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	if value then
-		local obj = broker:GetDataObjectByName(name)
-		ChocolateBar:EnableDataObject(name, obj)
+		ChocolateBar:EnableDataObject(name)
 	else
 		ChocolateBar:DisableDataObject(name)
 	end
 end
 
 local function GetEnabled(info, value)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	return db.objSettings[name].enabled
 end
 
 local function GetIcon(info, value)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	return db.objSettings[name].showIcon
 end
 
 local function SetIcon(info, value)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	db.objSettings[name].showIcon = value
 	ChocolateBar:AttributeChanged(nil, name, "updateSettings", value)
 end
 
 local function GetText(info, value)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	return db.objSettings[name].showText
 end
 
 local function SetText(info, value)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	db.objSettings[name].showText = value
 	ChocolateBar:AttributeChanged(nil, name, "updateSettings", value)
 end
 
 local function GetTextOffset(info, value)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	return db.objSettings[name].textOffset or db.textOffset
 end
 
 local function SetTextOffset(info, value)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	db.objSettings[name].textOffset = value
 	ChocolateBar:AttributeChanged(nil, name, "updateSettings", value)
 end
 
 local function GetWidth(info)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	return db.objSettings[name].width
 end
 
 local function SetWidth(info, value)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	db.objSettings[name].width = value
 	ChocolateBar:AttributeChanged(nil, name, "updateSettings", value)
 end
 
 local function GetWidthBehavior(info)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	--return db.objSettings[name].widthBehavior or "free" and db.objSettings[name].width == 0 or "fixed"
 	if not db.objSettings[name].widthBehavior and db.objSettings[name].width == 0 then
 		return "free"
@@ -1122,61 +1210,51 @@ local function GetWidthBehavior(info)
 end
 
 local function SetWidthBehavior(info, value)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	db.objSettings[name].widthBehavior = value
 	ChocolateBar:AttributeChanged(nil, name, "updateSettings", value)
 end
 
 local function IsDisabledTextWidth(info)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	return true and (db.objSettings[name].widthBehavior == "free" or not db.objSettings[name].widthBehavior) or false
 end
 
+--[[
 local function GetIconImage(info, name)
-	if info then
-		local cleanName = info[#info]
-		name = chocolateOptions[cleanName].desc
-	end
+	if info then  name = info[#info-2]  end
 	local obj = broker:GetDataObjectByName(name)
-	if obj and obj.icon then	
-		return obj.icon	
-	end
-	return "Interface\\AddOns\\ChocolateBar\\pics\\ChocolatePiece"
+	return  obj and obj.icon  or  DEFAULT_ICON_TEX
 end
+--]]
 
 local function GetIconCoords(info)
-	local cleanName = info[#info]
-	local name = chocolateOptions[cleanName].desc
-	local obj = broker:GetDataObjectByName(name)
-	if obj and obj.iconCoords then	
-		return obj.iconCoords	
-	end
+	-- local cleanName = info[#info]
+	-- local name = chocolateOptions[cleanName].desc
+	-- local obj = broker:GetDataObjectByName(name)
+	-- local name = info[#info]
+	local obj = info.option.arg
+	return obj and obj.iconCoords
 end
 
 local function IsDisabledIcon(info)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	local obj = broker:GetDataObjectByName(name)
 	return not (obj and obj.icon) --return true if there is no icon
 end
 
 local function IsDisabledSetTextOffset(info)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	return not db.objSettings[name].textOffset
 end
 
 local function IsEnabledSetTextOffset(info)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	return db.objSettings[name].textOffset
 end
 
 local function SetEnabledSetTextOffset(info)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	local settings =  db.objSettings[name]
 	if settings.textOffset then
 		settings.textOffset = nil
@@ -1187,8 +1265,7 @@ local function SetEnabledSetTextOffset(info)
 end
 
 local function SetEnabledOverwriteIconSize(info)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	local settings =  db.objSettings[name]
 	if settings.iconSize then
 		settings.iconSize = nil
@@ -1199,8 +1276,7 @@ local function SetEnabledOverwriteIconSize(info)
 end
 
 local function SetCustomIconSize(info, value)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	if value > 1 then
 		value = 1
 	elseif value < 0.01 then
@@ -1211,129 +1287,130 @@ local function SetCustomIconSize(info, value)
 end
 
 local function GetCustomIconSize(info, value)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	return db.objSettings[name].iconSize or db.iconSize
 end
 
 local function IsEnabledOvwerwriteIconSize(info)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	return db.objSettings[name].iconSize
 end
 
 local function IsDisabledOvwerwriteIconSize(info)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
+	local name = info[#info-2]
 	return not db.objSettings[name].iconSize
 end
 
+local function GetHeaderName(obj, name)
+	return "|T"..(obj.icon or DEFAULT_ICON_TEX)..":18|t "..name
+	-- return obj.icon  and  "|T"..obj.icon..":18|t "..name  or  name
+end
 
+--[[
 local function GetHeaderName(info)
-	local cleanName = info[#info-1]
-	local name = chocolateOptions[cleanName].desc
+	-- local cleanName = info[#info-1]
+	-- local name = chocolateOptions[cleanName].desc
+	local name = info[#info-1]
 	return "|T"..GetIconImage(nil, name)..":18|t "..name
 end
+--]]
 
+--[[
 local function GetHeaderImage(info)
-	local cleanName = info[#info-2]
-	local name = chocolateOptions[cleanName].desc
-	return GetIconImage(nil, name), 20 ,20
+	local name = info[#info-2]
+	local obj = broker:GetDataObjectByName(name)
+	return (obj.icon or DEFAULT_ICON_TEX), 20 ,20
 end
+--]]
 
-function ChocolateBar:RegisterOptions(data)
-	--self.db = LibStub("AceDB-3.0"):New("ChocolateBarDB", defaults, "Default")
-	db = data
-	moreChocolate = broker:GetDataObjectByName("MoreChocolate")
-	if moreChocolate then
-		aceoptions.args.morechocolate = moreChocolate:GetOptions()
-	end
-	
-	LibStub("AceConfig-3.0"):RegisterOptionsTable("ChocolateBar", aceoptions)
-	aceoptions.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-	--local optionsFrame = AceCfgDlg:AddToBlizOptions("ChocolateBar", "ChocolateBar")
-	AceCfgDlg:SetDefaultSize("ChocolateBar", 600, 600)
-	
-	self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
-	self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
-	self.db.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
-end
 
-local firstOpen = true
-function ChocolateBar:OpenOptions(chocolateBars, data, input, pluginName)
-	local AceCfgDlg = LibStub("AceConfigDialog-3.0")
-	
-	if firstOpen then
-		ChocolateBar:RegisterOptions(data)
-		for name,bar in pairs(chocolateBars) do
-			ChocolateBar:AddBarOptions(name)
+
+
+-- remove a bar and disable all plugins in it
+function ChocolateBar:RemoveBar(name, bar, noupdate)
+	bar = bar or self:GetBar(name)
+	if bar then
+		-- Disable all data pieces.
+		for name,choco in pairs(self.chocolist) do
+			ChocolateBar:DisableDataObject(name, choco, true)
 		end
-		
-		AceCfgDlg:SelectGroup("ChocolateBar", "chocolates")
-		AceCfgDlg:SelectGroup("ChocolateBar", "general")
-		firstOpen = false
+		wipe(self.chocolist)
+
+		self:DestroyBar(bar, noupdate)
 	end
-	if pluginName then
-		AceCfgDlg:SelectGroup("ChocolateBar", "chocolates",pluginName)
-	end
-	
-	for name, obj in broker:DataObjectIterator() do
-		ChocolateBar:AddObjectOptions(name, obj)
-	end
-	
-	if not input or input:trim() == "" then
-		AceCfgDlg:Open("ChocolateBar")
-	else
-		--AceCfgDlg:SelectGroup("ChocolateBar", "chocolates", input)
-		LibStub("AceConfigCmd-3.0").HandleCommand(ChocolateBar, "chocolatebar", "ChocolateBar", input)
-	end
+
+	barOptions[name] = nil
+	db.barSettings[name] = nil
 end
+
+
 
 function ChocolateBar:AddBarOptions(name)
+	if barOptions[name] then  return barOptions[name]  end
+
 	barOptions[name] = {
-		name = GetBarName,
+		name = GetBarLabel,
 		desc = name,
 		type = "group",
 		order = GetBarIndex,
 		args={
 			general = {
 				inline = true,
-				name=name,
-				type="group",
+				name = name,
+				type ="group",
 				order = 0,
-				args={
+				args = {
+					name = {
+						type = 'input',
+						order = 11,
+						name = L["Name"],
+						desc = L["Enter the name of this bar."],
+						get = function(info, value)  Options.ChangeBarName or name  end,
+						set = function(info, value)  Options.ChangeBarName = value  end,
+					},
+					rename = {
+						type = 'execute',
+						order = 12,
+						name = L["Rename Bar"],
+						desc = L["Change the name of this bar."],
+						width = 'half',
+						func = ChangeBarName,
+						disabled = function(info)  return Options.ChangeBarName and Options.ChangeBarName:trim() ~= ""  end,
+						confirm = true,
+					},
+					eatBar = {
+						type = 'execute',
+						order = 13,
+						name = L["Remove Bar"],
+						desc = L["Eat a whole chocolate bar, oh my.."],
+						width = 'half',
+						func = EatBar,
+						-- disabled = IsDisabledRemoveBar,
+						confirm = true,
+					},
+					hidebar = {
+						type = 'toggle',
+						order = 21,
+						name = L["Hide In Combat"],
+						desc = L["Hide this bar during combat."],
+						get = gethideBarInCombat,
+						set = sethideBarInCombat,
+					},
 					autohide = {
 						type = 'toggle',
-						order = 5,
+						order = 22,
 						name = L["Autohide"],
 						desc = L["Autohide"],
 						get = getAutoHide,
 						set = setAutoHide,
 					},
-					eatBar = {
-						type = 'execute',
-						order = 6,
-						name = L["Remove Bar"],
-						desc = L["Eat a whole chocolate bar, oh my.."],
-						func = EatBar,
-						disabled = IsDisabledRemoveBar,
-						confirm = true,
-					},
 					free = {
 						type = 'toggle',
-						order = -1,
+						order = 31,
 						name = L["Free Placement"],
 						desc = L["Enable free placement for this bar"],
 						get = GetFreeBar,
 						set = SetFreeBar,
-					},
-					hidebar = {
-						type = 'toggle',
-						order = 2,
-						name = L["Hide In Combat"],
-						desc = L["Hide this bar during combat."],
-						get = gethideBarInCombat,
-						set = sethideBarInCombat,
 					},
 				},
 			},
@@ -1421,53 +1498,44 @@ function ChocolateBar:AddBarOptions(name)
 	}
 end
 
-function ChocolateBar:RemoveBarOptions(name)
-	barOptions[name] = nil
-end
+
+
 
 local alignments = {left=L["Left"],center=L["Center"], right=L["Right"]}
 local widthBehaviorTypes  = {free=L["Free"],fixed=L["Fixed"], max=L["Max"]}
 
 function ChocolateBar:AddObjectOptions(name,obj)
 	local t = obj.type
-	if t ~= "data source" and t ~= "launcher" then
-		return
-	end
+	if t ~= "data source" and t ~= "launcher" then  return false  end
 	--local curse = GetAddOnMetadata(name,"X-Curse-Packaged-Version") or ""
 	--local version = GetAddOnMetadata(name,"Version") or ""
-	
-	t = t or "not set"
-	local cleanName
-	local label = obj.label
-	if label then 
-		cleanName = string.gsub(label, "\|c........", "")
-	else
-		cleanName = string.gsub(name, "\|c........", "")
-	end
-	cleanName = string.gsub(cleanName, "\|r", "")
-	cleanName = string.gsub(cleanName, "[%c \127]", "")
-	
+
 	--use cleanName of name because aceconfig does not like some characters in the plugin names
-		
-	chocolateOptions[cleanName] = {
-		name = GetName,
+	if chocolateOptions[name] then  return chocolateOptions[name]  end
+
+	chocolateOptions[name] = {
+		arg = obj,
+		objName = name,
+		cleanName = GetCleanName(obj.label or name),
+		name = GetFormattedName,
 		desc = name,
-		icon = GetIconImage,
+		--icon = GetIconImage,
+		icon = obj.icon,
 		--iconTexCoords = obj.iconCoords,
 		iconCoords = GetIconCoords,
 		type = "group",
 		args={
 			chocoSettings = {
 				inline = true,
-				name=GetHeaderName,
+				name = GetHeaderName(obj, name),
 				type="group",
 				order = 1,
 				args={
 					label = {
 						order = 2,
 						type = "description",
-						name = GetType,
-						--image = GetHeaderImage,
+						name = GetTypeText(obj.type),
+						--image = GetHeaderImage(obj),
 					},
 					enabled = {
 						type = 'toggle',
@@ -1529,7 +1597,7 @@ function ChocolateBar:AddObjectOptions(name,obj)
 					},
 				},
 			},
-			textOffset = {	
+			textOffset = {
 				inline = true,
 				name=L["Overwrite Text Offset"],
 				type="group",
@@ -1557,7 +1625,7 @@ function ChocolateBar:AddObjectOptions(name,obj)
 					},
 				},
 			},
-			iconSize = {	
+			iconSize = {
 				inline = true,
 				name=L["Overwrite Icon Size"],
 				type="group",
@@ -1589,33 +1657,16 @@ function ChocolateBar:AddObjectOptions(name,obj)
 			},
 		},
 	}
+	return chocolateOptions[name]
 end
 
--- remove a bar and disalbe all plugins in it
-function ChocolateBar:RemoveBar(name)
-	local bar = self:GetBar(name)
-	Drag:UnregisterFrame(bar)
-	if bar then
-		ChocolateBar:RemoveBarOptions(name)
-		bar:Disable()
-		--for k,v in pairs(chocolateObjects) do
-		--	if v.settings.barName == name then
-		--		self:DisableDataObject(k)
-		--	end
-		--end
-		for name,choco in pairs(bar.chocolist) do
-			self:DisableDataObject(name)
-		end
-	self:GetBars()[name] = nil
-	db.barSettings[name] = nil
-	self:AnchorBars()
-	end
-end
+
+
 
 -- call when general bar options change
 -- updatekey: the key of the update function
 function ChocolateBar:UpdateBarOptions(updatekey, value)
-	for name,bar in pairs(self:GetBars()) do
+	for name,bar in pairs(self.chocolateBars) do
 		local func = bar[updatekey]
 		if func then
 			func(bar, db)
@@ -1625,27 +1676,50 @@ function ChocolateBar:UpdateBarOptions(updatekey, value)
 	end
 end
 
+
+function ChocolateBar:RefreshBarOptions()
+	for barName, options in pairs(barOptions) do
+		-- Drop options panel of removed bars.
+		if  not rawget(db.barSettings, barName)  then  barOptions[barName] = nil  end
+	end
+	for barName, settings in pairs(db.barSettings) do
+		-- Add options panel for new bars.
+		self:AddBarOptions(barName)
+	end
+end
+
+
+function ChocolateBar:RefreshObjectOptions()
+	--[[
+	for cleanName, options in pairs(chocolateOptions) do
+		-- Drop options panel of removed bars.
+		if  not rawget(db.objSettings, options.objName)  then  chocolateOptions[cleanName] = nil  end
+	end
+	--]]
+	for name, options in pairs(chocolateOptions) do
+		-- Drop options panel of removed bars.
+		if  not rawget(db.objSettings, name)  then  chocolateOptions[name] = nil  end
+	end
+	for name, obj in broker:DataObjectIterator() do
+		self:AddObjectOptions(name, obj)
+	end
+end
+
+
 function ChocolateBar:OnProfileChanged(event, database, newProfileKey)
 	Debug("OnProfileChanged", event, database, newProfileKey)
 	db = database.profile
 	self:UpdateDB(db)
-	
-	for k, v in pairs(self:GetBars()) do
-		ChocolateBar:RemoveBarOptions(k)
-		v:Hide()
-		Drag:UnregisterFrame(v)
-		v = nil
-	end
-	--self:SetBars()
-	local barSettings = db.barSettings
-	for k, v in pairs(barSettings) do
-		local name = v.barName
-		self:AddBar(k, v, true) --force no anchor update
-		self:AddBarOptions(name)
-	end
-	self:AnchorBars()
-	
-	self:UpdateBarOptions()
+
+	-- Drop the Bar frames, but keep chocolateObjects, without parent.
+	self:UnloadBars()
+	-- Load Bars of new profile, refresh .settings, put reused chocolateObjects on them.
+	self:OnEnable()
+
+	wipe(barOptions)
+	self:RefreshBarOptions()
+
+	--[[ self:OnEnable() does differential EnableDataObject()/DisableDataObject()
 	for name, obj in broker:DataObjectIterator() do
 		local t = obj.type
 		if t == "data source" or t == "launcher" then
@@ -1666,4 +1740,53 @@ function ChocolateBar:OnProfileChanged(event, database, newProfileKey)
 	self:UpdateChoclates("resizeFrame")
 	moreChocolate = broker:GetDataObjectByName("MoreChocolate")
 	if moreChocolate then moreChocolate:SetBar(db) end
+	--]]
 end
+
+
+
+
+function ChocolateBar:RegisterOptions(database)
+	--self.db = LibStub("AceDB-3.0"):New("ChocolateBarDB", defaults, "Default")
+	db = database
+	moreChocolate = broker:GetDataObjectByName("MoreChocolate")
+	if moreChocolate then
+		aceoptions.args.morechocolate = moreChocolate:GetOptions()
+	end
+
+	aceoptions.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+	LibStub("AceConfig-3.0"):RegisterOptionsTable(APPNAME, aceoptions)
+
+	self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
+	self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
+	self.db.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
+
+	-- local optionsFrame = AceCfgDlg:AddToBlizOptions(APPNAME, APPNAME)
+	AceCfgDlg:SetDefaultSize(APPNAME, 600, 600)
+end
+
+local firstOpen = true
+function ChocolateBar:OpenOptions(optionsFrame, database, input, pluginName)
+	if firstOpen then
+		ChocolateBar:RegisterOptions(database)
+		-- AceCfgDlg:SelectGroup(APPNAME, "chocolates")
+		AceCfgDlg:SelectGroup(APPNAME, "general")
+		firstOpen = nil
+	end
+
+	if pluginName then  AceCfgDlg:SelectGroup(APPNAME, "chocolates", pluginName)  end
+
+	self:ToggleEditMode(true)
+	self:RefreshBarOptions()
+	self:RefreshObjectOptions()
+
+	if not input or input:trim() == "" then
+		AceCfgDlg:Open(APPNAME, optionsFrame)
+	else
+		--AceCfgDlg:SelectGroup(APPNAME, "chocolates", input)
+		LibStub("AceConfigCmd-3.0").HandleCommand(ChocolateBar, "chocolatebar", APPNAME, input)
+	end
+end
+
+
+

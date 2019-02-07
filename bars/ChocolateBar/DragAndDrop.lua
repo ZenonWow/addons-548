@@ -52,16 +52,17 @@ local function OnDragUpdate(frame, elapsed)
 end
 
 function Drag:RegisterFrame(frame)
-	local name = frame:GetName()
+	local name = frame:GetName() or frame
 	if name and not frameslist[name] then
 		frameslist[name] = frame
 	else
-		Debug("Drag:RegisterFrame(frame) no name or already registred")
+		Debug("Drag:RegisterFrame("..tostring(name)..") already registered")
 	end
 end
 
 function Drag:UnregisterFrame(frame)
-	frameslist[frame:GetName()] = nil
+	local name = frame:GetName() or frame
+	frameslist[name] = nil
 end
 
 function Drag:Start(bar, name, choco)

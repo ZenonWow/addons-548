@@ -1,8 +1,12 @@
-﻿local ChocolateBar = LibStub("AceAddon-3.0"):GetAddon("ChocolateBar")
-local LSM = LibStub("LibSharedMedia-3.0")
-local ChocolatePiece = ChocolateBar.ChocolatePiece
-local Drag = ChocolateBar.Drag
+﻿local _G, ADDON_NAME, _ADDON = _G, ...
+local ChocolateBar = _ADDON.ChocolateBar
+local LSM = _ADDON.LSM
+
+local Bar = _ADDON.Bar
+local ChocolatePiece = _ADDON.ChocolatePiece
 local Debug = ChocolateBar.Debug
+local Drag = ChocolateBar.Drag
+
 local _G, unpack, ipairs = _G, unpack, ipairs
 local GameTooltip, CreateFrame = GameTooltip, CreateFrame
 local tempAutoHide, db
@@ -81,6 +85,7 @@ local function SettingsUpdater(self, value)
 end
 
 local function IconColorUpdater(frame, value, name)
+	if not frame.icon then  return  end
 	frame.icon:SetDesaturated(db.desaturated);
 	if value then
 		local obj = frame.obj
@@ -143,8 +148,19 @@ local updaters = {
 		end
 	end,
 	
+	--[[ data.obj.OnClick() is called by proxy function OnClick() below, no need to SetScript.
 	OnClick = function(frame, value, name)
 		frame:SetScript("OnClick", value)
+	end,
+	--]]
+	
+	-- No proxy function for OnDoubleClick, OnReceiveDrag
+	OnDoubleClick = function(frame, value, name)
+		frame:SetScript("OnDoubleClick", value)
+	end,
+	
+	OnReceiveDrag = function(frame, value, name)
+		frame:SetScript("OnReceiveDrag", value)
 	end,
 	
 	iconCoords = function(frame, value, name)
@@ -190,7 +206,7 @@ local function OnEnter(self)
 	if (db.combathidebar and ChocolateBar.InCombat) or ChocolateBar.dragging then return end
 	
 	local obj  = self.obj
-	local name = self.name
+	-- local name = self.name
 	local bar = self.bar
 	if bar.autohide then
 		bar:ShowAll()
@@ -224,7 +240,7 @@ local function OnLeave(self)
 	if db.combathidebar and ChocolateBar.InCombat then return end
 	
 	local obj  = self.obj
-	local name = self.name
+	-- local name = self.name
 	
 	local bar = self.bar
 	if bar.autohide then
@@ -246,13 +262,14 @@ local function OnLeave(self)
 end
 
 local function OnClick(self, ...)
+	print("ChocolatePiece:OnClick("..tostring(self.name)..")")
 	if db.combatdisbar and ChocolateBar.InCombat then return end
 	if self.obj.OnClick then
 		self.obj.OnClick(self, ...)
 	end
 end
 
-local function Update(self, f,key, value, name)
+local function Update(self, f, key, value, name)
 	local update = updaters[key]
 	if update then
 		update(f, value, name)
@@ -260,7 +277,7 @@ local function Update(self, f,key, value, name)
 end
 
 local function OnDragStart(frame)
-	if not ChocolateBar.db.profile.locked or _G.IsAltKeyDown() then
+	if ChocolateBar.db.profile.editMode or _G.IsAltKeyDown() then
 		local bar = frame.bar
 		ChocolateBar:TempDisAutohide(true)
 		ChocolateBar.dragging = true
@@ -305,6 +322,7 @@ function ChocolatePiece:New(name, obj, settings, database)
 	--set update function
 	chocolate.Update = Update
 	chocolate.obj = obj
+	chocolate.name = name
 	
 	chocolate:EnableMouse(true)
 	chocolate:RegisterForDrag("LeftButton")
@@ -328,9 +346,13 @@ function ChocolatePiece:New(name, obj, settings, database)
 	
 	chocolate:RegisterForClicks("AnyUp")
 	--chocolate:SetScript("OnClick", obj.OnClick)
+	-- Check combat disable for OnClick()
 	chocolate:SetScript("OnClick", OnClick)
+	-- No combat disable for OnDoubleClick(), OnReceiveDrag()
+	chocolate:SetScript("OnDoubleClick", obj.OnDoubleClick)
+	chocolate:SetScript("OnReceiveDrag", obj.OnReceiveDrag)
 	
-	chocolate:Show()
+	-- chocolate:Show()
 	chocolate.settings = settings
 	
 	if text then
@@ -342,11 +364,11 @@ function ChocolatePiece:New(name, obj, settings, database)
 		--]]
 	end
 	
-	chocolate.name = name
 	chocolate:SetMovable(true)
 	chocolate:SetScript("OnDragStart", OnDragStart)
 	chocolate:SetScript("OnDragStop", OnDragStop)
 	SettingsUpdater(chocolate, settings.showText)
+	
 	return chocolate
 end
 

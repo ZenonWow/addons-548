@@ -1,17 +1,28 @@
+local _G, ADDON_NAME, _ADDON = _G, ...
+local ChocolateBar = _ADDON.ChocolateBar
+local LSM = _ADDON.LSM
+local jostle = _ADDON.Jostle
+--[[
 local ChocolateBar = LibStub("AceAddon-3.0"):GetAddon("ChocolateBar")
 local LSM = LibStub("LibSharedMedia-3.0")
-local Bar = ChocolateBar.Bar
-local chocolate = ChocolateBar.ChocolatePiece
-local Debug = ChocolateBar.Debug
 local jostle = LibStub("LibJostle-3.0", true)
+--]]
+local Bar = _ADDON.Bar
+local Chocolate = _ADDON.ChocolatePiece
+local Drag = ChocolateBar.Drag
+local Debug = ChocolateBar.Debug
+
 local pairs, ipairs, table, math, mod = pairs, ipairs, table, math, mod
 local CreateFrame, UIParent = CreateFrame, UIParent
 local db
 --GLOBALS: InterfaceOptionsFrame_OpenToCategory, GetCursorPosition
 
-function Bar:New(name, settings, database)
+
+function Bar:New(barName, database)
 	db = database
-	local frame = CreateFrame("Frame",name,UIParent)
+	local frameName =  barName:find("Choco")  and  barName  or  "ChocolateBar"..barName
+	local frame = CreateFrame("Frame", frameName, UIParent)
+	frame.barName = barName
 	frame.chocolist = {} --create list of chocolate chocolist in the bar
 	
 	-- add class methods to frame object
@@ -19,7 +30,44 @@ function Bar:New(name, settings, database)
 		frame[k] = v
 	end
 	
-	frame:SetPoint("TOPLEFT",-1,1);	
+	frame:EnableMouse(true)
+	frame:SetScript("OnEnter", function(self) 
+		if (db.combathidebar or self.settings.hideBarInCombat) and ChocolateBar.InCombat then return end
+		self:ShowAll()
+	end)
+	frame:SetScript("OnLeave", function(self) 
+		if (db.combathidebar or self.settings.hideBarInCombat) and ChocolateBar.InCombat then return end
+		if self.autohide then
+			self:HideAll()
+		end
+	end)
+	
+	frame:SetScript("OnMouseUp", function(self, button) 
+		if (db.combathidebar or self.settings.hideBarInCombat) and ChocolateBar.InCombat then return end
+		if button == "RightButton" then
+			if db.disableoptons and ChocolateBar.InCombat then return end
+			if db.barRightClick == "OPTIONS" then
+				ChocolateBar:LoadOptions()
+			elseif db.barRightClick == "BLIZZ" then
+				ChocolateBar:ToggleInterfaceOptions()
+			end
+		else
+			-- if db.moreBar == self:GetName() then
+				-- self:Hide()
+			if  not self.settings.enabled  then
+				self:Toggle()
+			end
+		end
+	end)
+	
+	Drag:RegisterFrame(frame)
+	return frame
+end
+
+
+function Bar:Init(settings, db)
+	local frame = self
+	frame:SetPoint("TOPLEFT",-1,1)
 	--frame:SetPoint("TOPLEFT", settings.xoff, settings.yoff);
 	--frame:SetClampedToScreen(true)
 	if settings.width == 0 then
@@ -32,41 +80,15 @@ function Bar:New(name, settings, database)
 	end
 	
 	frame:SetHeight(db.height)
-	frame:EnableMouse(true)
-	frame:SetScript("OnEnter", function(self) 
-		if (db.combathidebar or settings.hideBarInCombat) and ChocolateBar.InCombat then return end
-		self:ShowAll()
-	end)
-	frame:SetScript("OnLeave", function(self) 
-		if (db.combathidebar or settings.hideBarInCombat) and ChocolateBar.InCombat then return end
-		if self.autohide then
-			self:HideAll()
-		end
-	end)
 	
-	frame:SetScript("OnMouseUp", function(self, button) 
-		if (db.combathidebar or settings.hideBarInCombat) and ChocolateBar.InCombat then return end
-		if button == "RightButton" then
-			if db.disableoptons and ChocolateBar.InCombat then return end
-			if db.barRightClick == "OPTIONS" then
-				ChocolateBar:LoadOptions()
-			elseif db.barRightClick == "BLIZZ" then
-				InterfaceOptionsFrame_OpenToCategory("ChocolateBar");
-			end
-		else
-			if db.moreBar == self:GetName() then
-				self:Hide()
-			end
-		end
-	end)
-	
-	frame.settings = settings	
+	frame.settings = settings
 	frame.autohide = settings.hideonleave
 	frame:UpdateTexture(db)
 	frame:UpdateColors(db)
-	frame:UpdateStrata(db)	
+	frame:UpdateStrata(db)
 	return frame
 end
+
 
 function Bar:UpdateStrata(db)
 	self:SetFrameStrata(db.strata)
@@ -143,9 +165,11 @@ function Bar:ResetDrag(choco, name)
 	self:UpdateBar()
 end
 
+
+
 -- add some chocolate to a bar
 function Bar:AddChocolatePiece(choco, name, noupdate)
-	
+	assert(name == choco.name, "Bar:AddChocolatePiece() anomaly:  name='"..tostring(name).."' ~= choco.name='"..tostring(choco.name).."'")
 	local chocolist = self.chocolist
 	if chocolist[name] then
 		Debug("AddChocolatePiece: ",name," already in list.")
@@ -155,9 +179,10 @@ function Bar:AddChocolatePiece(choco, name, noupdate)
 	chocolist[name] = choco
 	choco:SetParent(self)
 	choco.bar = self
+	choco:Show()
 	
-	local settings = choco.settings
-	settings.barName = self:GetName() 
+	-- local settings = choco.settings
+	-- settings.barName = self.barName
 	--if not settings.index then
 	--	settings.index = 1
 	--end
@@ -173,31 +198,60 @@ function Bar:AddChocolatePiece(choco, name, noupdate)
 	end
 end
 
+
 -- eat some chocolate from a ChocolateBar
-function Bar:EatChocolatePiece(name)
+function Bar:EatChocolatePiece(choco, noupdate)
+	--[[
 	self.chocolist = self.chocolist or {}
 	local choco = self.chocolist[name]
-	
-	if choco then
-		choco:Hide()
-		self.chocolist[name] = nil
+	if  not choco  then  return  end
+	--]]
+
+	choco:Hide()
+	choco:SetParent(nil)
+	choco.bar = nil
+	self.chocolist[choco.name] = nil
+
+	if not noupdate then
 		self:UpdateBar()
 	end
 end
 
+
+function Bar:EatAll()
+	-- Just orphan the data pieces, don't UnregisterDataObject() or DisableDataObject()
+	for name,choco in pairs(self.chocolist) do
+		choco:Hide()
+		choco:SetParent(nil)
+		choco.bar = nil
+	end
+	wipe(self.chocolist)
+
+	self:Hide()
+	self:SetParent(nil)
+	Drag:UnregisterFrame(self)
+	if jostle then jostle:Unregister(self) end
+end
+
+
+
 function Bar:HideAll()
-	self:SetAlpha(0)
+	UIFrameFadeOut(self, 4, self:GetAlpha(), 0)
+	-- self:SetAlpha(0)
+
 	for k, v in pairs(self.chocolist) do
-		v.text:Hide()
+		-- v.text:Hide()
 		if v.icon then 
-			v.icon:Hide()
+			-- v.icon:Hide()
 		end
 	end
 end
 
 function Bar:ShowAll()
 	--Timer:SetScript("OnUpdate", nil)
-	self:SetAlpha(1)
+	UIFrameFadeIn(self, 1, self:GetAlpha(), 1)
+	-- self:SetAlpha(1)
+
 	local settings
 	for k, v in pairs(self.chocolist) do
 		settings = v.settings 
@@ -211,10 +265,11 @@ function Bar:ShowAll()
 	end
 end
 
-function Bar:Disable()
-	self:Hide()
-	if jostle then jostle:Unregister(self) end
+function Bar:Toggle()
+	if self:IsShown() then self:Hide() else self:Show() end
 end
+
+
 
 local function SortTab(tab)
 	local templeft = {}
@@ -320,7 +375,7 @@ local function createDummy(self, choco, name)
 	local dummy = self.dummy
 	if not dummy then  
 		--dummy = CreateFrame("Frame", "ChocolateDummy", self)
-		dummy = chocolate:New("dummy", choco.obj, choco.settings, ChocolateBar.db.profile)
+		dummy = Chocolate:New("dummy", choco.obj, choco.settings, ChocolateBar.db.profile)
 		dummy:SetParent(self)
 		--dummy:SetAllPoints(chocolate.frame)
 		dummy.name = "dummy"
@@ -419,13 +474,13 @@ function Bar:Drop(choco, pos)
 	if oldbar == self then -- same bar
 		self.dummy:Hide()
 		self.dummy = nil
-		self.chocolist[choco.obj.name] = choco --replace dummy with original
+		self.chocolist[choco.name] = choco --replace dummy with original
 	else -- cross bars
-		oldbar.chocolist[choco.obj.name] = nil --remove from oldbar
+		oldbar.chocolist[choco.name] = nil --remove from oldbar
 		oldbar.dummy:Hide()
 		oldbar.dummy = nil
 		oldbar:UpdateBar(true)
-		self:AddChocolatePiece(choco, choco.obj.name)
+		self:AddChocolatePiece(choco, choco.name)
 	end
 	self:UpdateBar(true)
 end

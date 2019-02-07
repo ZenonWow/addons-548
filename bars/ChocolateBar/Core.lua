@@ -1,26 +1,39 @@
-﻿local LibStub = LibStub
-local broker = LibStub("LibDataBroker-1.1")
-local LSM = LibStub("LibSharedMedia-3.0")
-local ChocolateBar = LibStub("AceAddon-3.0"):NewAddon("ChocolateBar", "AceConsole-3.0", "AceEvent-3.0")
-local L = LibStub("AceLocale-3.0"):GetLocale("ChocolateBar")
+﻿local _G, ADDON_NAME, _ADDON = _G, ...
+_ADDON.LibStub = LibStub
+_ADDON.LDB = LibStub("LibDataBroker-1.1")
+_ADDON.LSM = LibStub("LibSharedMedia-3.0")
+_ADDON.Jostle = LibStub("LibJostle-3.0", true)
+_ADDON.ChocolateBar = LibStub("AceAddon-3.0"):NewAddon("ChocolateBar", "AceConsole-3.0", "AceEvent-3.0")
+_ADDON.L = LibStub("AceLocale-3.0"):GetLocale("ChocolateBar")
+
 local _G, pairs, ipairs, table, string, tostring = _G, pairs, ipairs, table, string, tostring
 local select, strjoin, CreateFrame = select, strjoin, CreateFrame
 
-ChocolateBar.Bar = {}
-ChocolateBar.ChocolatePiece = {}
+local broker = _ADDON.LDB
+local LSM = _ADDON.LSM
+local ChocolateBar = _ADDON.ChocolateBar
+local L = _ADDON.L
+
+_ADDON.Bar = {}
+_ADDON.ChocolatePiece = {}
 ChocolateBar.Drag = {}
 
-local Drag = ChocolateBar.Drag
-local Chocolate = ChocolateBar.ChocolatePiece
-local Bar = ChocolateBar.Bar
+local Bar = _ADDON.Bar
+local Chocolate = _ADDON.ChocolatePiece
+-- local Drag = ChocolateBar.Drag
 
-local chocolateBars = {}
-local chocolateObjects = {}
+ChocolateBar.chocolateBars = {}
+local chocolateBars = ChocolateBar.chocolateBars
+ChocolateBar.chocolateObjects = {}
+local chocolateObjects = ChocolateBar.chocolateObjects
 local db --reference to ChocolateBar.db.profile
 
 --------
 -- utility functions
 --------
+function ChocolateBar.Debug(...)  print("ChocolateBar Debug:", ...)  end
+local Debug = ChocolateBar.Debug
+--[[
 local function Debug(...)
 	if ChocolateBar.db.char.debug then
 	 	local s = "ChocolateBar Debug:"
@@ -35,12 +48,15 @@ end
 function ChocolateBar:Debug(...)
 	Debug(self, ...)
 end
+--]]
+
 
 function debugbars()
 	for k,v in pairs(chocolateBars) do
 		Debug(k,v)
 	end
 end
+
 
 --------
 -- drop points functions
@@ -78,8 +94,8 @@ local function dropOptions(frame, choco)
 end
 
 local function dropDisable(frame, choco)
-		choco:Hide()
-		ChocolateBar:DisableDataObject(choco.name)
+		-- choco:Hide()
+		ChocolateBar:DisableDataObject(choco.name, choco)
 		frame:SetBackdropColor(0,0,0,1) 
 end
 
@@ -122,7 +138,7 @@ local function createDropPoint(name, dropfunc, offx, text, texture)
 		
 	frame.Drag = function(frame) end
 	frame.LoseFocus = function(frame) frame:SetBackdropColor(0,0,0,1) end
-	Drag:RegisterFrame(frame)
+	ChocolateBar.Drag:RegisterFrame(frame)
 	return frame
 end
 
@@ -159,7 +175,7 @@ function ChocolateBar:OnInitialize()
 			barRightClick = "OPTIONS",
 			gap = 7,
 			textOffset = 1,
-			moreBar = "none",
+			moreBar = "NewChocolate",
 			moreBarDelay = 4,
 			fontPath = " ",
 			fontSize = 12,
@@ -177,7 +193,7 @@ function ChocolateBar:OnInitialize()
 			textColor = nil,
 			barSettings = {
 				['*'] = {
-					barName = "ChocolateBar1",
+					-- barName = "TopBar",
 					align = "top",
 					autohide = false,
 					enabled = true,
@@ -186,20 +202,10 @@ function ChocolateBar:OnInitialize()
 					--fineX = 0,
 					--fineY = 0,
 				},
-				['ChocolateBar1'] = {
-					barName = "ChocolateBar1",
-					align = "top",
-					autohide = false,
-					enabled = true,
-					index = 1,
-					width = 0,
-					--fineX = 0,
-					--fineY = 0,
-				},
 			},
 			objSettings = {
 				['*'] = {
-					barName = "",
+					barName = nil,
 					align = "left",
 					enabled = true,
 					showText = true,
@@ -235,22 +241,22 @@ function ChocolateBar:OnInitialize()
 	
 	self:RegisterEvent("PLAYER_REGEN_DISABLED","OnEnterCombat")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED","OnLeaveCombat")
-	self:RegisterEvent("PLAYER_ENTERING_WORLD","OnEnterWorld")
+	-- self:RegisterEvent("PLAYER_ENTERING_WORLD","OnEnterWorld")
 
 	self:RegisterEvent("PET_BATTLE_OPENING_START","OnPetBattleOpen")
 	self:RegisterEvent("PET_BATTLE_CLOSE","OnPetBattleOver")
 	
-	db = self.db.profile
+	-- db = self.db.profile
 	
-	local barSettings = db.barSettings
-	for k, v in pairs(barSettings) do
-		local name = v.barName
-		self:AddBar(k, v, true) --force no anchor update
-	end
-	self:AnchorBars()
+	self:LoadBars()
 	
 	local optionPanel = CreateFrame( "Frame", "ChocolateBarPanel", _G.UIParent );
 	optionPanel.name = "ChocolateBar";
+	optionPanel:SetScript("OnShow", function()
+		optionPanel:SetScript("OnShow", nil)  -- avoid recursion
+		ChocolateBar:ToggleInterfaceOptions(true)
+	end)
+	--[[
 	local button = CreateFrame("Button",nil,optionPanel, "UIPanelButtonTemplate")
 	button:SetWidth(150)
 	button:SetHeight(22)
@@ -261,37 +267,47 @@ function ChocolateBar:OnInitialize()
 	end)
 	button:SetText("Configure")
 	button:SetPoint("TOPLEFT",20,-20)
+	--]]
 	_G.InterfaceOptions_AddCategory(optionPanel);
 end
 
 function ChocolateBar:OnEnable()
+	self:LoadBars()
+
 	for name, obj in broker:DataObjectIterator() do
-		self:LibDataBroker_DataObjectCreated(nil, name, obj, true) --force noupdate on chocolateBars
+		self:LibDataBroker_DataObjectCreated('OnEnable', name, obj, true) --force noupdate on chocolateBars
 	end
-	self:UpdateBars() --update chocolateBars here
 	broker.RegisterCallback(self, "LibDataBroker_DataObjectCreated")
 
+	self:UpdateBars() --update chocolateBars here
+	self:UpdateChoclates("resizeFrame")
+
+	--[[
 	local moreChocolate = LibStub("LibDataBroker-1.1"):GetDataObjectByName("MoreChocolate")
 	if moreChocolate then
 		moreChocolate:SetBar(db)
 	end
+	--]]
 end
 
 function ChocolateBar:OnDisable()
-	for name, obj in broker:DataObjectIterator() do
-		if chocolateObjects[name] then chocolateObjects[name]:Hide() end
-	end
-	for k,v in pairs(chocolateBars) do
-		v:Hide()
-	end
 	broker.UnregisterCallback(self, "LibDataBroker_DataObjectCreated")
+
+	for name,choco in pairs(chocolateObjects) do
+		self:UnregisterDataObject(name, choco, true)
+	end
+	
+	self:UnloadBars()
+	assert(not next(chocolateObjects))
 end
 
+--[[
 --/run LibStub("AceAddon-3.0"):GetAddon("ChocolateBar"):UpdateChoclates("updateSettings")
 function ChocolateBar:OnEnterWorld()
-	self:UpdateChoclates("resizeFrame")
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 end
+--]]
+
 
 function ChocolateBar:OnPetBattleOpen(...)
 	Debug("OnPetBattleOpen", ...)
@@ -355,36 +371,48 @@ end
 --------
 -- LDB callbacks
 --------
+
 function ChocolateBar:LibDataBroker_DataObjectCreated(event, name, obj, noupdate)
 	local t = obj.type
 	if t == "data source" or t == "launcher" then
-		if db.objSettings[name].enabled then
+		local enabled = db.objSettings[name].enabled
+		if enabled then
+			self:RegisterDataObject(name, obj, noupdate)
+		elseif enabled == nil then
 			self:EnableDataObject(name, obj, noupdate)
+		else
+			self:UnregisterDataObject(name, nil, noupdate)
 		end
 	else
 		Debug("Unknown type", t, name)
 	end
 end
 
+
+function ChocolateBar:LibDataBroker_DataObjectRemoved(event, name, obj, noupdate)
+	self:UnregisterDataObject(name, nil, noupdate)
+end
+
+
 function ChocolateBar:EnableDataObject(name, obj, noupdate)
+	obj = obj or broker:GetDataObjectByName(name)
+
 	local t = obj.type
 	if t ~= "data source" and t ~= "launcher" then
 		Debug("Unknown type", t, name)
-		return 0
+		return false
 	end
-	local settings = db.objSettings[name]
-	settings.enabled = true
-	
-	--get bar from setings
-	local barName = settings.barName
-	
-	-- set default values depending on data source
-	if barName == "" then
-		--barName = "ChocolateBar1"
-		settings.barName = "ChocolateBar1"
+
+	local settings = rawget(db.objSettings, name)
+
+	-- First time?
+	-- if  settings.enabled == nil  then
+	if  not settings  then
+		settings = db.objSettings[name]
+		-- set default values depending on data source
 		if t and t == "data source" then
 			settings.align = "left"
-			settings.showText = true
+			-- settings.showText = true
 			if db.autodissource then
 				settings.enabled = false
 				return
@@ -393,40 +421,74 @@ function ChocolateBar:EnableDataObject(name, obj, noupdate)
 				settings.align = "right"
 				settings.index = -1
 			end
-		else	
+		else
 			settings.align = "right"
-			settings.showText = false
+			-- settings.showText = false
 			if db.autodislauncher then
 				settings.enabled = false
 				return
 			end
 		end
 	end
-	obj.name = name
-	
-	local choco = Chocolate:New(name, obj, settings, db)
-	chocolateObjects[name] = choco
-	
-	local bar = chocolateBars[barName]
-	if bar then
-		bar:AddChocolatePiece(choco, name,noupdate)
-	else
-		chocolateBars["ChocolateBar1"]:AddChocolatePiece(choco, name,noupdate)
-	end
-	broker.RegisterCallback(self, "LibDataBroker_AttributeChanged_"..name, "AttributeChanged")
+
+	settings.enabled = true
+	self:RegisterDataObject(name, obj, noupdate)
 end
 
-function ChocolateBar:DisableDataObject(name)
-	broker.UnregisterCallback(self,"LibDataBroker_AttributeChanged_"..name)
-	--get bar from setings
-	if db.objSettings[name] then
-		db.objSettings[name].enabled = false
-		local barName = db.objSettings[name].barName 
-		if(barName and chocolateBars[barName])then
-			chocolateBars[barName]:EatChocolatePiece(name)
-		end
+function ChocolateBar:RegisterDataObject(name, obj, noupdate)
+	-- Save name to dataobj. The display shouldn't modify the model, but the name should be set by LibDataBroker, anyway.
+	obj.name = name
+
+	local barName = settings.barName
+	local bar = chocolateBars[barName]    -- or chocolateBars[db.moreBar]
+	if  not bar  and  not rawget(db.barSettings, barName)  then
+		-- Put new and lost pieces on the NewChocolate bar. Create it if necessary.
+		barName, bar = self:CreateBar(db.moreBar)
+	end
+
+	-- Disabled bar?
+	if not bar then  return  end
+
+	local choco = chocolateObjects[name]
+	if choco then
+		-- Reusing Chocolate from a different Bar.
+		-- No need to refresh display attachment: it's the same frame on a different parent.
+		-- _G.safecall(obj.DetachDisplay, obj, choco)
+		bar:AddChocolatePiece(choco, name, noupdate)
+		-- _G.safecall(obj.AttachDisplay, obj, choco)
+	else
+		choco = Chocolate:New(name, obj, settings, db)
+		chocolateObjects[name] = choco
+		bar:AddChocolatePiece(choco, name, noupdate)
+
+		broker.RegisterCallback(self, "LibDataBroker_AttributeChanged_"..name, "AttributeChanged")
+		-- Call obj:AttachDisplay(choco) if set.
+		_G.safecall(obj.AttachDisplay, obj, choco)
 	end
 end
+
+
+function ChocolateBar:DisableDataObject(name, choco, noupdate)
+	db.objSettings[name].enabled = false
+	ChocolateBar:UnregisterDataObject(name, choco, noupdate)
+end
+
+function ChocolateBar:UnregisterDataObject(name, choco, noupdate)
+	local choco = choco or chocolateObjects[name]
+	if  not choco  then  return  end
+
+	name = name or choco.name
+	broker.UnregisterCallback(self,"LibDataBroker_AttributeChanged_"..name)
+
+	local obj, bar = choco.obj, choco.bar
+	-- Call obj:DetachDisplay(choco) if set.
+	_G.safecall(obj.DetachDisplay, obj, choco)
+
+	if bar then  bar:EatChocolatePiece(choco, noupdate)  end
+	chocolateObjects[name] = nil
+end
+
+
 
 function ChocolateBar:AttributeChanged(event, name, key, value)
 	--Debug("ChocolateBar:AttributeChanged ",name," key: ", key, value)
@@ -454,9 +516,39 @@ function ChocolateBar:TempDisAutohide(value)
 	end
 end
 
+
+function ChocolateBar:ToggleEditMode(editMode)
+	if  editMode == nil  then  editMode = not db.editMode
+	elseif  db.editMode == editMode  then  return  end
+
+	db.editMode = editMode
+	for barName,settings in pairs(db.barSettings) do
+		if settings.enabled then
+		elseif editMode then
+			self:CreateBar(barName, settings)
+		else
+			self:DestroyBar(chocolateBars[barName])
+		end
+	end
+	--[[
+	local newPiecesBar = chocolateBars[db.moreBar]
+	if  newPiecesBar  then
+		newPiecesBar:SetShown(editMode)
+		if  editMode  then
+			UIFrameFadeIn(newPiecesBar, 4, self:GetAlpha(), 1)
+		end
+	end
+	--]]
+end
+
+
 -- returns nil if the plugin is disabled 
 function ChocolateBar:GetChocolate(name)
 	return chocolateObjects[name]
+end
+
+function ChocolateBar:GetNewPiecesBar()
+	return chocolateBars[db.moreBar]
 end
 
 function ChocolateBar:GetBar(name)
@@ -477,12 +569,14 @@ local function getFreeBarName()
 	local name
 	for i=1,100 do
 		name = "ChocolateBar"..i
+		--[[
 		for k,v in pairs(chocolateBars) do
 			if name == v:GetName() then
 				used = true
 			end
 		end
-		if not used then
+		--]]
+		if not chocolateBars[name] then
 			return name
 		end
 		used = false
@@ -499,22 +593,66 @@ end
 --------
 -- Bars Management
 --------
-function ChocolateBar:AddBar(name, settings, noupdate)
-	if not name then --find free name
-		name = getFreeBarName()
-	end
-	if not settings then
-		settings = db.barSettings[name]
-	end
-	local bar = Bar:New(name,settings,db)
-	Drag:RegisterFrame(bar)
-	chocolateBars[name] = bar
-	settings.barName = name
-	if not noupdate then
-		self:AnchorBars()
-	end
-	return name, bar
+
+local function IsBarEnabled(barName)
+	local s = rawget(db.barSettings, barName)
+	return  s and s.enabled  or  db.editMode
 end
+
+function ChocolateBar:LoadBars()
+	-- if  next(chocolateBars)  then  return  end
+
+	for barName, bar in pairs(chocolateBars) do
+		if  not IsBarEnabled(barName)  then  self:DestroyBar(bar, true)  end
+	end
+	for barName, settings in pairs(db.barSettings) do
+		if  IsBarEnabled(barName)  then  self:CreateBar(barName, settings, true)  end
+	end
+	-- No anchor update until done with all bars.
+	self:AnchorBars()
+end
+
+function ChocolateBar:UnloadBars()
+	for barName,bar in pairs(chocolateBars) do
+		self:DestroyBar(bar, true)
+	end
+	assert(not next(chocolateBars))
+end
+
+
+function ChocolateBar:CreateBar(barName, settings, noupdate)
+	local bar = chocolateBars[barName]
+	settings = settings or db.barSettings[barName]
+	if  bar  and  bar.settings == settings  then
+		return barName, bar
+	end
+
+	if  not barName  then
+		-- Find free barName.
+		barName = getFreeBarName()
+		settings.barName = barName
+	end
+
+	if  not bar  then
+		bar = Bar:New(barName, db)
+		chocolateBars[barName] = bar
+	end
+
+	-- if  bar.settings ~= settings  then
+	bar:Init(settings, db)
+
+	if  not noupdate  then  self:AnchorBars()  end
+	return barName, bar
+end
+
+function ChocolateBar:DestroyBar(bar, noupdate)
+	if not bar then  return  end
+	bar:EatAll()
+	chocolateBars[bar.barName] = nil
+	if  not noupdate  then  self:AnchorBars()  end
+end
+
+
 
 function ChocolateBar:UpdateBars(updateindex)
 	for k,v in pairs(chocolateBars) do
@@ -591,18 +729,40 @@ end
 -- option functions
 --------
 function ChocolateBar:ChatCommand(input)
-	ChocolateBar:LoadOptions(nil, input)
+	local pluginName = nil
+	if  ChocolateBar:LoadOptions()  then
+		ChocolateBar:OpenOptions(chocolateBars, db, input, pluginName)
+	end
+end
+
+function ChocolateBar:ToggleInterfaceOptions(show)
+	if show == nil then  show = not InterfaceOptionsFrame:IsShown()  end
+
+	self:ToggleEditMode(not show)
+	if  not show  then
+		HideUIPanel(InterfaceOptionsFrame)
+	else
+		ChocolateBar:LoadOptions()
+		InterfaceOptionsFrame_OpenToCategory("ChocolateBar")
+		InterfaceOptionsFrame_OpenToCategory("ChocolateBar")
+	end
+	return show
 end
 
 function ChocolateBar:LoadOptions(pluginName, input)
-	_G.EnableAddOn("ChocolateBar_Options")
-	local loaded, reason = _G.LoadAddOn("ChocolateBar_Options")
-	--Debug(loaded, reason)
-	if loaded then
-		ChocolateBar:OpenOptions(chocolateBars, db, input, pluginName)
-	else
-		_G.DEFAULT_CHAT_FRAME:AddMessage(L["Could not load ChocolateBar_Options, make sure it's installed."])
+	local OPTIONS_NAME = "ChocolateBar_Options"
+	if  _G.IsAddOnLoaded(OPTIONS_NAME)  then  return true, "Already loaded."  end
+	
+	local _, _, _, wasEnabled = GetAddOnInfo(OPTIONS_NAME)
+	_G.EnableAddOn(OPTIONS_NAME)
+	local loaded, reason = _G.LoadAddOn(OPTIONS_NAME)
+	if  not wasEnabled  then  _G.DisableAddOn(OPTIONS_NAME)  end
+
+	-- ChocolateBar:OpenOptions(chocolateBars, db, input, pluginName)
+	if not loaded then
+		print( L["Could not load "..OPTIONS_NAME..", make sure it's installed."], "  Error:", reason )
 	end
+	return loaded
 end
 
 function ChocolateBar:UpdateDB(data)

@@ -1,21 +1,27 @@
-﻿-- a LDB object that will show/hide the chocolatebar set in the chocolatebar options
-local LibStub = LibStub
+﻿local _G, ADDON_NAME, _ADDON = _G, ...
+local ChocolateBar = _ADDON.ChocolateBar
+local LDB = _ADDON.LDB
+local L = _ADDON.L
+
+-- An LDB object that will show/hide the chocolatebar designated for newly installed broker/addons.
 local counter = 0
 local delay = 4
-local Timer = CreateFrame("Frame")
-local ChocolateBar = LibStub("AceAddon-3.0"):GetAddon("ChocolateBar")
+-- local Timer = CreateFrame("Frame")
 local bar
-local L = LibStub("AceLocale-3.0"):GetLocale("ChocolateBar")
 local wipe, pairs = wipe, pairs
 --GLOBALS: InterfaceOptionsFrame_OpenToCategory
 
-local moreChocolate = LibStub("LibDataBroker-1.1"):NewDataObject("ChocolateBar", {
+local moreChocolate = LDB:NewDataObject("ChocolateBar", {
 	type = "launcher",
 	icon = "Interface\\AddOns\\ChocolateBar\\pics\\ChocolatePiece",
 	label = "ChocolateBar",
 	
 	OnClick = function(self, btn)
-		if btn == "LeftButton" then 
+		if btn == "LeftButton" then
+			ChocolateBar:ToggleEditMode()
+			--[[
+			local bar = ChocolateBar:GetNewPiecesBar()
+			if bar then  bar:Toggle()  end
 			if bar then
 				if bar:IsShown() then
 					bar:Hide()
@@ -28,22 +34,25 @@ local moreChocolate = LibStub("LibDataBroker-1.1"):NewDataObject("ChocolateBar",
 					end
 				end
 			end
-		else
-			InterfaceOptionsFrame_OpenToCategory("ChocolateBar");
+			--]]
+		elseif btn == "MiddleButton" then
+			ChocolateBar:ToggleInterfaceOptions()
+		elseif btn == "RightButton" then
+			ChocolateBar:ChatCommand()
 		end
 	end,
 })
-moreChocolate.barNames = {none = "none"}
+moreChocolate.barNames = {none = "None"}
 
 local function GetList()
 	wipe(moreChocolate.barNames)
 	moreChocolate.barNames.none = L["None"]
-	for k,v in pairs(ChocolateBar:GetBars()) do
+	for k,v in pairs(ChocolateBar.chocolateBars) do
 		moreChocolate.barNames[k] = k
 	end
 	return moreChocolate.barNames
 end
-
+--[[
 function Timer:OnUpdate(elapsed)
 	counter = counter + elapsed
 	if counter >= delay and bar and not ChocolateBar.dragging then
@@ -71,6 +80,7 @@ function moreChocolate:SetBar(db)
 	end
 	delay = db.moreBarDelay
 end
+--]]
 
 function moreChocolate:GetOptions()
 	local options ={
@@ -94,7 +104,7 @@ function moreChocolate:GetOptions()
 						label = {
 							order = 2,
 							type = "description",
-							name = L["A broker plugin to toggle a bar."],
+							name = L["A broker plugin to toggle the bar for new chocolate pieces."],
 						},
 						selectBar = {
 							type = 'select',
@@ -110,7 +120,7 @@ function moreChocolate:GetOptions()
 									bar:Show()
 								end
 								ChocolateBar.db.profile.moreBar = value
-								moreChocolate:SetBar(ChocolateBar.db.profile)
+								-- moreChocolate:SetBar(ChocolateBar.db.profile)
 							end,
 						},
 						delay = {
