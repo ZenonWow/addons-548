@@ -220,7 +220,7 @@ function containerProto:BagsUpdated(bagIds)
 end
 
 function containerProto:CanUpdate()
-	return not addon.holdYourBreath and not addon.globalLock and not self.paused and self:IsVisible()
+	return not addon.holdYourBreath and not addon.globalLock and not self.paused and self:IsVisible() and not self:IsMouseOver()
 end
 
 function containerProto:FiltersChanged(event, forceLayout)

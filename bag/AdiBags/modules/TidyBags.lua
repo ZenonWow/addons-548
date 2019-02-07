@@ -216,8 +216,8 @@ end
 
 function bagProto:UpdateButton(event)
 	if self.button then
-		--[===[@debug@
 		self:Debug('UpdateButton on', event, self.running and "(running)" or "", 'GetNextMove:', self:GetNextMove())
+		--[===[@debug@
 		--@end-debug@]===]
 		if not self.running and not addon.spellIsTargeting and (self:GetNextMove() or (self.container and self.container.dirtyLayout)) then
 			self.button:Enable()

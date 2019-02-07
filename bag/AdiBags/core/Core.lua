@@ -30,8 +30,8 @@ local unpack = _G.unpack
 --GLOBALS>
 
 LibStub('AceAddon-3.0'):NewAddon(addon, addonName, 'AceEvent-3.0', 'AceBucket-3.0', 'AceHook-3.0', 'AceConsole-3.0')
---[===[@debug@
 _G[addonName] = addon
+--[===[@debug@
 --@end-debug@]===]
 
 --------------------------------------------------------------------------------
@@ -64,6 +64,7 @@ end
 addon:SetDefaultModuleState(false)
 
 function addon:OnInitialize()
+	print("AdiBags:OnInitialize()")
 	local bfd = self:GetFontDefaults(GameFontHighlightLarge)
 	bfd.r, bfd.g, bfd.b = 1, 1, 1
 	self.DEFAULT_SETTINGS.profile.bagFont = bfd
@@ -98,7 +99,7 @@ function addon:OnInitialize()
 end
 
 function addon:OnEnable()
-
+	print("AdiBags:OnEnable()")
 	self.globalLock = false
 
 	self:RegisterEvent('BAG_UPDATE')

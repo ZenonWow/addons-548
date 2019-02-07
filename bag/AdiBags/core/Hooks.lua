@@ -2,6 +2,7 @@
 AdiBags - Adirelle's bag addon.
 Copyright 2010-2012 Adirelle (adirelle@gmail.com)
 All rights reserved.
+/dump AdiBags:IsEventRegistered('BAG_UPDATE')
 --]]
 local addonName, addon = ...
 local L = addon.L
@@ -10,6 +11,7 @@ local L = addon.L
 
 
 function addon:RegisterHooks()
+	print("AdiBags:RegisterHooks()")
 	self:RawHook('ToggleAllBags', true)
 	-- Called by keybinding OPENALLBAGS  and  clicks on bagbar if IsModifiedClick('OPENALLBAGS')
 	self:RawHook('ToggleBag', true)
@@ -48,7 +50,7 @@ end
 
 function addon:ToggleAllBags()
 	-- Called by keybinding OPENALLBAGS  and  clicks on bagbar if IsModifiedClick("OPENALLBAGS")
-	--print('ToggleAllBags()')
+	print('ToggleAllBags()')
 	
 	-- Only want to handle keybinding OPENALLBAGS but _not_ clicks on bagbar if IsModifiedClick('OPENALLBAGS')
 	local toggleAdiBag =  not GetMouseButtonClicked()
