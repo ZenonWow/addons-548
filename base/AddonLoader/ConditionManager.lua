@@ -1,15 +1,29 @@
-local ADDON_NAME, private = ...
-local AddonLoader = AddonLoader
-local tostrjoin = private.tostrjoin
-local Debug = private.Debug
-local _G, tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown = 
-      _G, tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown
-local EMPTY = {}  -- constant empty object to use in place of nil table reference
+local _G, ADDON_NAME, _ADDON = _G, ...
+
+-- Upvalued Lua globals:
+local AddonLoader = _G.AddonLoader
+local LibCommon,DevMode = LibCommon,DevMode
+local tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown = 
+      tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown
 
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: GetAddOnInfo GetAddOnMetadata IsAddOnLoaded IsAddOnLoadOnDemand GetNumAddOns LoadAddOn
 -- GLOBALS: AddonLoaderSV
+
+-- Used from _G:  AddonLoader
+-- Used from LibCommon:  tostrjoin,EMPTYTABLE
+-- Exported to LibCommon:  AutoTablesMeta
+-- Used from _ADDON:  Debug
+
+AddonLoader.name = ADDON_NAME
+local tostrjoin,EMPTYTABLE = LibCommon:Import("tostrjoin,EMPTYTABLE", AddonLoader)
+-- local tostrjoin,EMPTYTABLE = LibCommon.Require.tostrjoin, LibCommon.Require.EMPTYTABLE
+local Debug = _ADDON.Debug
+
+--- LibCommon. AutoTablesMeta:  metatable that auto-creates empty inner tables when first referenced.
+LibCommon.AutoTablesMeta = LibCommon.AutoTablesMeta or { __index = function(self, key)  if key ~= nil then  self[key] = {}  end  ;  return self[key]  end }
+local AutoTablesMeta = LibCommon.AutoTablesMeta
 
 
 local ConditionManager = CreateFrame('Frame')    -- , 'AddonLoaderConditionManager')
@@ -18,20 +32,16 @@ AddonLoader.ConditionManager = ConditionManager
 AddonLoader.frame = ConditionManager  -- Deprecated: easy reference for use in X-LoadOn-Events
 
 
--- Import from CallbackHandler: metatable that auto-creates empty inner tables when first referenced.
-local AutoCreateTablesMeta = _G.AutoCreateTablesMeta  or  {__index = function(self, key) self[key] = {} return self[key] end}
--- Want optimized lua syntax: local AutoCreateTablesMeta = { __index = function(self, key)  return self[key] = {}  end }
-
-ConditionManager.AddonMetadata = setmetatable({}, AutoCreateTablesMeta)
-ConditionManager.AddonOverrides = setmetatable({}, AutoCreateTablesMeta)
-ConditionManager.MergedConditions = setmetatable({}, AutoCreateTablesMeta)
+ConditionManager.AddonMetadata = setmetatable({}, AutoTablesMeta)
+ConditionManager.AddonOverrides = setmetatable({}, AutoTablesMeta)
+ConditionManager.MergedConditions = setmetatable({}, AutoTablesMeta)
 
 ConditionManager.EventHooks = {}
 ConditionManager.FrameHooks = {}
 ConditionManager.SecureHooks = {}
 
 -- Slashes:  ["AddonName"] = { "ADDON_SLASH"="/slash", "ADDON_DOTHIS"="/dothis", .. }, ["AnotherAddon"] = ..
-ConditionManager.Slashes = setmetatable({}, AutoCreateTablesMeta)
+ConditionManager.Slashes = setmetatable({}, AutoTablesMeta)
 
 
 
@@ -50,43 +60,43 @@ function ConditionManager.ReportFieldError(fieldOrCond, msg)
 	end
 	msg = msg .. formatSourceField(fieldOrCond)
 	print(msg)
-	geterrorhandler()(msg)
 end
 
 
 -- Lua-kind error (exception) handling: a try-catch block around unsafeFunc(...)
 -- Report eventual error to standard geterrorhandler(): BugGrabber or Swatter or Lua error popup.
--- Then continue processing without the aborting all code in the current event handler.
-function private.safecall(unsafeFunc, ...)
-	local function localErrorHandler(...)
-		local msg = "AddonLoader: safecall failed (no params): "  -- extra space intentional
+-- Then continue processing without aborting all code in the current event handler.
+function _ADDON.safecall(unsafeFunc, ...)
+	if type(unsafeFunc) ~= "function" then  return  end
+	local argCount, args = select('#',...)
+
+	local function localErrorHandler(errorMessage, errorObject, ...)
+		errorObject = errorObject or {}
+		if type(errorObject)=='table' then  errorObject.params = args or {}  end
+
+		local params = args  and  "params: "..tostrjoin(", ", unpack(args,1,args.n))  or  "no params"
+		local msg = "Failed:  AddonLoader.safecall ("..params.."): "  -- extra space intentional
 		ConditionManager.ReportFieldError(msg .. tostrjoin(" ",...))
-		return geterrorhandler()(...)
+
+		local result = _G.geterrorhandler()(errorMessage, errorObject, ...)
+		return result
 	end
 
-	if type(unsafeFunc) ~= "function" then  return  end
 	-- Without parameters call the function directly
-	local nParams = select('#',...)
-	if  0 == nParams  then
+	if  0 == args.n  then
 		return xpcall(unsafeFunc, localErrorHandler)
   end
 
 	-- Pack the parameters to pass to the actual function
-	local tParams = { ... }
-
-	local function localErrorHandler(...)
-		local msg = "AddonLoader: safecall failed (params: " .. tostrjoin(", ", unpack(tParams,1,nParams)) .. "): "
-		ConditionManager.ReportFieldError(msg .. tostrjoin(" ",...))
-		return geterrorhandler()(...)
-	end
+	args = { n = argCount, ... }
 
 	-- Unpack the parameters in the thunk
-	local function safecallThunk()  return unsafeFunc( unpack(tParams,1,nParams) )  end
+	local function safecallThunk()  return unsafeFunc( unpack(args,1,args.n) )  end
 	-- Do the call through the thunk
 	return xpcall(safecallThunk, localErrorHandler)
 end
 
-local safecall = private.safecall
+local safecall = _ADDON.safecall
 
 
 
@@ -107,12 +117,12 @@ do
 		return packNonEmpty(strsplit( SPLIT_CHARS, fieldValue ))
 	end
 
-	private.SPLIT_CHARS = SPLIT_CHARS
-	private.packNonEmpty = packNonEmpty
-	private.splitValue = splitValue
+	_ADDON.SPLIT_CHARS = SPLIT_CHARS
+	_ADDON.packNonEmpty = packNonEmpty
+	_ADDON.splitValue = splitValue
 end
 
-local splitValue = private.splitValue
+local splitValue = _ADDON.splitValue
 
 
 
@@ -151,7 +161,7 @@ end
 
 do
 	local function formatFieldReference(objectName)
-		local field = ConditionManager.parsedField  or  EMPTY
+		local field = ConditionManager.parsedField  or  EMPTYTABLE
 		local addonName = field.addonName or ""
 		local fieldName = field.fieldName and " "..field.fieldName or ""
 		return "_G."..tostring(objectName).."  referenced in "..addonName.." metadata"..fieldName
@@ -214,7 +224,7 @@ do
 		if  eventObj  then  return  eventObj  end
 		
 		-- First time reference, create it
-		eventObj = setmetatable({}, AutoCreateTablesMeta)
+		eventObj = setmetatable({}, AutoTablesMeta)
 		Hooks[eventKey] = eventObj
 		-- Tries to install the dispatcher only the first time the EventObj is requested. If it fails there's no errormessage spam.
 		Hooks:InstallDispatcher(objectName, eventName, eventKey)
@@ -438,7 +448,7 @@ function ConditionManager:RegisterConditionHooks(addonName, condition)
 	self.parsedField = condition
 
 	-- Register for events in condition.eventList
-	for  _, eventName  in pairs(condition.eventList or EMPTY) do
+	for  _, eventName  in pairs(condition.eventList or EMPTYTABLE) do
 		self.EventHooks:AddConditionHook(nil, eventName, condition)
 	end
 
@@ -448,7 +458,7 @@ function ConditionManager:RegisterConditionHooks(addonName, condition)
 	
 	local registerChildHook =  condition.registerChildHook
 	if  registerChildHook  then
-		for  i, childName  in ipairs(condition.childList or EMPTY) do
+		for  i, childName  in ipairs(condition.childList or EMPTYTABLE) do
 			local childCond = condition.childConds[childName]
 			local ran, result = safecall(registerChildHook, childCond or condition, childName)
 		end

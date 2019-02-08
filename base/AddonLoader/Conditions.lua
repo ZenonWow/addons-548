@@ -1,3 +1,39 @@
+local _G, ADDON_NAME, _ADDON = _G, ...
+
+-- Upvalued Lua globals:
+local AddonLoader = _G.AddonLoader
+local LibCommon,DevMode = LibCommon,DevMode
+local tostringall, tonumber, tostring, string, strjoin, type, pairs, ipairs, tremove, select, next, pcall, xpcall = 
+      tostringall, tonumber, tostring, string, strjoin, type, pairs, ipairs, tremove, select, next, pcall, xpcall
+
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: INTERFACEOPTIONS_ADDONCATEGORIES InterfaceOptionsFrame_OpenToCategory InterfaceOptions_AddCategory
+-- GLOBALS: IsInInstance InCombatLockdown GetNumRaidMembers GetNumPartyMembers
+-- GLOBALS: GetRealmName IsInGuild UnitIsPVP UnitClass IsResting UnitLevel
+-- GLOBALS: GetAddOnDependencies
+-- GLOBALS: CreateFrame hooksecurefunc geterrorhandler LibStub UIParent setfenv
+-- GLOBALS: IsAddOnLoaded
+
+-- Used from _G:  AddonLoader
+-- Used from LibCommon:  tostrjoin
+-- Exported to LibCommon:  tindexOf
+-- Used from _ADDON:  Debug
+
+local tostrjoin = LibCommon.Require.tostrjoin
+-- local safecall,tostrjoin = LibCommon:Import("safecall,tostrjoin", AddonLoader)
+local LDB = _G.LibStub("LibDataBroker-1.1")
+
+local Debug,safecall = _ADDON.Debug,_ADDON.safecall
+local ConditionManager = AddonLoader.ConditionManager
+
+LibCommon.indexOf = LibCommon.indexOf or function(t, item)
+	local last = t and #t or 0  ;  for i = 1,last do  if t[i] == item then  return i  end  return nil  end
+end
+local tindexOf = LibCommon.indexOf
+
+
+
 --[[
 ## X-LoadOn:  Login
 ## X-Load-OnlyOne:  Crafting
@@ -21,30 +57,11 @@
 ## X-Load-Before:
 --]]
 
-local ADDON_NAME, _ADDON = ...
-local AddonLoader = AddonLoader
-local tostrjoin = _ADDON.tostrjoin
-local Debug = _ADDON.Debug
-local safecall = _ADDON.safecall
-local ConditionManager = AddonLoader.ConditionManager
-local _G, tostringall, tonumber, tostring, string, strjoin, type, pairs, ipairs, tremove, select, next, pcall, xpcall = 
-      _G, tostringall, tonumber, tostring, string, strjoin, type, pairs, ipairs, tremove, select, next, pcall, xpcall
-local EMPTY = {}  -- constant empty object to use in place of nil table reference
-local LDB = _G.LibStub("LibDataBroker-1.1")
-
--- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
--- List them here for Mikk's FindGlobals script
--- GLOBALS: INTERFACEOPTIONS_ADDONCATEGORIES InterfaceOptionsFrame_OpenToCategory InterfaceOptions_AddCategory
--- GLOBALS: IsInInstance InCombatLockdown GetNumRaidMembers GetNumPartyMembers
--- GLOBALS: GetRealmName IsInGuild UnitIsPVP UnitClass IsResting UnitLevel
--- GLOBALS: GetAddOnDependencies
--- GLOBALS: CreateFrame hooksecurefunc geterrorhandler LibStub UIParent setfenv
--- GLOBALS: IsAddOnLoaded
 
 
 
 -- Called from metadata: global function to check if any frame is shown from the parameters
-function _G.IsFrameShown(...)
+_G.IsFrameShown = _G.IsFrameShown  or function (...)
 	for  i = 1,select('#', ...)  do
 		local f = select(i, ...)
 		-- Accept name of frame
@@ -61,10 +78,6 @@ end
 
 --local function dontParse(fieldValue)  return fieldValue  end
 local dontParse = nil
-
-local function tindexof(arr, item)
-	for i = 1,#arr  do  if  arr[i] == item  then  return i  end end
-end
 
 local function strsplitObjectKey(hookedName)
 	local object, key = strsplit(".:", hookedName)
@@ -97,25 +110,24 @@ end
 
 
 
-local function DeleteDataObject(dataobj)
-	-- Will this break? DataBrokers still have the reference.
-	-- Hopefully they overwrite it when the addon creates the real DataObject.
-	local name = LDB.namestorage[dataobj]
-	if  name  then  LDB.proxystorage[name] = nil  end
-	LDB.namestorage[dataobj] = nil
-	LDB.attributestorage[dataobj] = nil
-end
 
 
-
-local function RemoveInterfaceOptions(name)
-	for k, f in ipairs(INTERFACEOPTIONS_ADDONCATEGORIES) do
-		if f == name or f.name == name then
-			tremove(INTERFACEOPTIONS_ADDONCATEGORIES, k)
-			break
+local function RemoveInterfaceOptions(nameOrFrame)
+	for i, frame in ipairs(_G.INTERFACEOPTIONS_ADDONCATEGORIES) do
+		if frame == nameOrFrame or frame.name == nameOrFrame then
+			tremove(_G.INTERFACEOPTIONS_ADDONCATEGORIES, i)
+			_G.InterfaceAddOnsList_Update();
+			return frame
 		end
 	end
+	return nil
 end
+
+-- Export for some addons.
+function AddonLoader.RemoveInterfaceOptions(nameOrFrameOrSelf, nameOrFrame)
+	return RemoveInterfaceOptions(nameOrFrameOrSelf ~= AddonLoader  and  nameOrFrameOrSelf  or  nameOrSelf)
+end
+
 
 local function InterfaceOptions_OnShow(self)
 	if  not IsAddOnLoaded(self.addonName)  then
@@ -476,7 +488,7 @@ ConditionManager.ConditionTemplates = {
 			local loadedAddon = ...
 			-- If the loaded addon is in addonList then return a truthy value (the index in the list)
 			local addonList = cond.childList
-			if  tindexof(addonList, loadedAddon)  then
+			if  tindexOf(addonList, loadedAddon)  then
 				return  cond.childConds[loadedAddon]  or  cond
 			end
 		end,
@@ -562,6 +574,8 @@ ConditionManager.ConditionTemplates = {
 		
 		--handler = function(cond)
 		registerHook = function(cond)
+			assert(LDB.DeleteDataObject, 'X-LoadOn-LDB-Launcher requires "LibDataBroker.DeleteDataObject"')
+			
 			local dataobj = cond.mainValue
 			if  not dataobj  then  return  end
 			
@@ -571,7 +585,7 @@ ConditionManager.ConditionTemplates = {
 			end
 			function dataobj.OnClick(...)
 				-- Delete the mock DataObject.
-				DeleteDataObject(dataobj)
+				LDB:DeleteDataObject(dataobj)
 				-- Save parameters to call addon's OnClick
 				cond.dataobjOnClickParams = { ... }
 				AddonLoader.QueueLoadAddOn(cond.addonName, cond)

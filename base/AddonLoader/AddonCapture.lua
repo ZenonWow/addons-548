@@ -10,12 +10,18 @@
 	trigger_hooksecurefunc(funcName)
 --]]
 
-local ADDON_NAME, private = ...
-local AddonLoader = AddonLoader
-local Debug = private.Debug
+local _G, ADDON_NAME, _ADDON = _G, ...
+
+-- Upvalued Lua globals:
+local AddonLoader = _G.AddonLoader
+
+-- Used from _ADDON:  Debug
+-- Exported to _ADDON:  AddonCapture
+
+local Debug = _ADDON.Debug
 local AddonCapture = {}
 -- Export to AddonLoader
-private.AddonCapture = AddonCapture
+_ADDON.AddonCapture = AddonCapture
 
 
 
@@ -72,7 +78,7 @@ function SendFrameEvent(frame, ...)
 	if  not frame  then  return nil  end
 	local OnEvent = frame:GetScript('OnEvent')
 	if  not OnEvent  then  return nil  end
-	return safecall(OnEvent, frame, ...)
+	return _ADDON.safecall(OnEvent, frame, ...)
 end
 
 function AddonCapture:FireEvent(...)  -- ?

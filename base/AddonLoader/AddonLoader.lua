@@ -11,16 +11,32 @@
 -- AddonLoader:LoadAddOn(addonName, loadCondition)
 --]]
 
-local ADDON_NAME, _ADDON = ...
-local safecall = _ADDON.safecall
-local _G, tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown = 
-      _G, tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown
-local EMPTY = {}  -- constant empty object to use in place of nil table reference
+local _G, ADDON_NAME, _ADDON = _G, ...
 
--- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
--- List them here for Mikk's FindGlobals script
+-- Upvalued Lua globals:
+local LibCommon,DevMode = LibCommon,DevMode
+local tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown = 
+      tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown
+local format = string.format
+
+-- Global vars/functions used without `_G.` prefix:  list them here for Mikk's FindGlobals script.
 -- GLOBALS: GetAddOnInfo GetAddOnMetadata IsAddOnLoaded IsAddOnLoadOnDemand GetNumAddOns LoadAddOn
 -- GLOBALS: AddonLoaderSV
+
+-- Exported to _G:  AddonLoader
+-- Used from LibCommon:
+-- Exported to LibCommon:  tostrjoin, EMPTYTABLE
+-- Used from _ADDON:  Debug
+
+-- local safecall = LibCommon.Require.safecall
+
+LibCommon.tostrjoin = LibCommon.tostrjoin  or function(separator, ...)  return strjoin(separator, tostringall(...))  end
+local tostrjoin = LibCommon.tostrjoin
+
+-- Constant empty table to use in place of nil table reference.
+LibCommon.EMPTYTABLE = LibCommon.EMPTYTABLE  or setmetatable({}, { __newindex = function()  error("Can't add properties to the EMPTYTABLE.")  end, __metatable = "EMPTYTABLE is not to be modified." })
+local EMPTYTABLE = LibCommon.EMPTYTABLE
+
 
 
 local AddonLoader = CreateFrame('Frame', 'AddonLoader')
@@ -29,17 +45,17 @@ _G.AddonLoader = AddonLoader
 
 
 -- Debug(...) messages
-function _ADDON.tostrjoin(separator, ...)  return strjoin(separator, tostringall(...))  end
-local tostrjoin = _ADDON.tostrjoin
-function _ADDON.Debug(...)  if  AddonLoader.logFrame  then  AddonLoader.logFrame:AddMessage( tostrjoin(", ", ...) )  end end
+-- function _ADDON.Debug(...)  if  AddonLoader.logFrame  then  AddonLoader.logFrame:AddMessage( tostrjoin(", ", ...) )  end end
+-- AddonLoader.logFrame = tekDebug  and  tekDebug:GetFrame("AddonLoader")  or  ChatFrame4
+
+
+_ADDON.Debug = DevMode and DevMode.AddonLoader.log  or  function() end
 local Debug = _ADDON.Debug
+local printPrefix = "|cFF33FF99AddonLoader|r:"
+local print = DevMode and DevMode.AddonLoader.print  or  function(...)  print(0 < select('#',...) and printPrefix or "", ...)  end
 
-AddonLoader.logFrame = tekDebug  and  tekDebug:GetFrame("AddonLoader")  or  ChatFrame4
-if  not tekDebug  then  ChatFrame4:Show()  end
+-- local print, Debug = DevModeStub.print, DevModeStub.log
 
-
-AddonLoader.loadReason = {}
-AddonLoader.loadError = {}
 
 local textColors = {
 	error = { 1,0,0,1 },		-- red
@@ -47,12 +63,9 @@ local textColors = {
 	white = { 1,1,1,1 },
 }
 
-function AddonLoader:Print(text)
-	_G.DEFAULT_CHAT_FRAME:AddMessage("|cFF33FF99AddonLoader|r: ".. tostring(text))
-end
-
+function AddonLoader:Print(...)  print(...)  end
 function AddonLoader:Toast(text, color)
-	_G.DEFAULT_CHAT_FRAME:AddMessage("|cFF33FF99AddonLoader|r: ".. tostring(text))
+	AddonLoader:Print(text)
 	UIErrorsFrame:AddMessage(text, unpack(color or textColors.white))
 end
 
@@ -63,6 +76,9 @@ end
 --------------------------------------
 -- Addon loading and initialization --
 --------------------------------------
+
+AddonLoader.loadReason = {}
+AddonLoader.loadError = {}
 
 --[[
 function AddonLoader:LoadAddOn(addonName, loadCondition)
@@ -106,10 +122,10 @@ function AddonLoader.LoadAddOn(addonName, loadCondition, _shift)
 	-- Use safecall to protect callers from any error that might occur while hacking the addon initialization.
 	--safecall( function() self:LoadAndInitialize(addonName, loadCondition) end )
 	-- Alternative:
-	local ran, result = safecall(self.LoadAndInitialize, self, addonName, loadCondition)
+	local ran, result = _ADDON.safecall(self.LoadAndInitialize, self, addonName, loadCondition)
 	if  ran  then  return  loaded, result  end
 	
-	print( "AddonLoader.LoadAndInitialize("..tostring(addonName)..") failed, reverting to original LoadAddOn. Error:  "..tostring(loaded) )
+	print( "LoadAndInitialize("..tostring(addonName)..") failed, reverting to original LoadAddOn. Error:  "..tostring(loaded) )
 	return AddonLoader.origLoadAddOn(addonName)
 end
 
@@ -162,7 +178,7 @@ function AddonLoader:LoadAndInitialize(addonName, loadCondition)
 
 	-- Before load cleanup is not as important as loading the addon. Ignore if it fails, Buggrabber's errorhandler will catch the error.
 	local this = self  -- need to save in closure
-	local ran, result = safecall(function() this:BeforeLoadAddOn(addonName) end)
+	local ran, result = _ADDON.safecall(function() this:BeforeLoadAddOn(addonName) end)
 
 	-- AddonCapture is loaded after AddonLoader. If the hooked _G.LoadAddOn() is called in the meantime, capturing is not possible.
 	local AddonCapture = _ADDON.AddonCapture
@@ -197,7 +213,7 @@ function AddonLoader:LoadAndInitialize(addonName, loadCondition)
 	-- After load callback function loaded from metadata
 	local afterLoadFunc =  loadCondition  and  loadCondition.afterLoadFunc
 	if  loaded  and  afterLoadFunc  then
-		local ran, result = safecall(afterLoadFunc)
+		local ran, result = _ADDON.safecall(afterLoadFunc)
 		if  not ran  then  print()  end
 	end
 	
@@ -323,7 +339,7 @@ function AddonLoader:LoadOneAddon()
 	end
 	
 	if  not addonDeps[toload]  then  print("LoadOneAddon():  addonDeps["..tostring(toload).."] == nil")  end
-	local deps, loadIdx = addonDeps[toload]  or  EMPTY
+	local deps, loadIdx = addonDeps[toload]  or  EMPTYTABLE
 	for  i = 1, #deps  do
 		if  not IsAddOnLoaded(deps[i])  then  loadIdx, toload = i, deps[i] ; break  end
 	end
