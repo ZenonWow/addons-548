@@ -72,13 +72,14 @@ function _ADDON.safecall(unsafeFunc, ...)
 
 	local function localErrorHandler(errorMessage, errorObject, ...)
 		errorObject = errorObject or {}
-		if type(errorObject)=='table' then  errorObject.params = args or {}  end
+		if type(errorObject)=='table' then  errorObject.arguments = args or {}  end
 
-		local params = args  and  "params: "..tostrjoin(", ", unpack(args,1,args.n))  or  "no params"
-		local msg = "Failed:  AddonLoader.safecall ("..params.."): "  -- extra space intentional
+		local argsStr = args  and  "arguments: "..tostrjoin(", ", unpack(args,1,args.n))  or  "no arguments"
+		local msg = "Failed:  AddonLoader.safecall ("..argsStr.."): "  -- extra space intentional
 		ConditionManager.ReportFieldError(msg .. tostrjoin(" ",...))
 
-		local result = _G.geterrorhandler()(errorMessage, errorObject, ...)
+		local errorhandler = _G.geterrorhandler()
+		local result = errorhandler(errorMessage, errorObject, ...)
 		return result
 	end
 

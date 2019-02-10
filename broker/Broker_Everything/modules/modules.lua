@@ -224,9 +224,16 @@ end
 		end
 end
 
-local function tindexOf(t, item)
-	for  i = 1,t and #t or 0  do  if  t[i] == item  then  return i  end end
+
+-- Exported to LibCommon:  indexOf
+
+local LibCommon = _G.LibCommon or {}  ;  _G.LibCommon = LibCommon
+LibCommon.indexOf = LibCommon.indexOf or function(t, item)
+	local last = t and #t or 0  ;  for i = 1,last do  if t[i] == item then  return i  end end
 end
+
+local tindexOf = LibCommon.indexOf
+
 
 --local
 function sendEvent(modData, event)
