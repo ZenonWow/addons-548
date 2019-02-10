@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 	Enchantrix Addon for World of Warcraft(tm).
 	Version: 5.20.5464 (RidiculousRockrat)
 	Revision: $Id: EnxAutoDisenchant.lua 5422 2013-06-15 18:03:26Z brykrys $

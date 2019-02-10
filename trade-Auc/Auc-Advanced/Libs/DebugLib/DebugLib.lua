@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 	DebugLib - An embedded library which works as a higher layer for nLog,
 	by providing easier usage of debugging features.
 	Version: 5.20.5464 (RidiculousRockrat)

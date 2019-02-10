@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 	WARNING: This is a generated file.
 	If you wish to perform or update localizations, please go to our Localizer website at:
 	http://localizer.norganna.org/

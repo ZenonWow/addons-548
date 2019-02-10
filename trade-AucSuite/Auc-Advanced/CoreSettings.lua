@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 	Auctioneer
 	Version: 5.20.5464 (RidiculousRockrat)
 	Revision: $Id: CoreSettings.lua 5461 2014-06-19 10:37:18Z brykrys $

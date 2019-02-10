@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 	Enchantrix Addon for World of Warcraft(tm).
 	Version: 5.20.5464 (RidiculousRockrat)
 	Revision: $Id: EnxStorage.lua 5264 2012-01-08 22:30:41Z ccox $

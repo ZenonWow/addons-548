@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 	Enchantrix:Barker Addon for World of Warcraft(tm).
 	Version: 5.20.5464 (RidiculousRockrat)
 	Revision: $Id: EnchantrixBarker.lua 5139 2011-05-01 18:22:28Z kandoko $

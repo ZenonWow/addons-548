@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 	Auctioneer - Search UI - Searcher Arbitrage
 	Version: 5.20.5464 (RidiculousRockrat)
 	Revision: $Id: SearcherArbitrage.lua 5368 2012-09-29 09:50:29Z brykrys $

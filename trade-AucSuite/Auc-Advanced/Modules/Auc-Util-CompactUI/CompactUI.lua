@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 	Auctioneer - Price Level Utility module
 	Version: 5.20.5464 (RidiculousRockrat)
 	Revision: $Id: CompactUI.lua 5444 2013-11-29 18:35:10Z brykrys $
