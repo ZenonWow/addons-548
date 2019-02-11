@@ -15,7 +15,7 @@
 ## X-Localizations: enUS
 ## X-CompatibleLocales: deDE, enCN, enTW, enUS, esES, esMX, frFR, koKR, ptBR, ptPT, ruRU, zhCN, zhTW
 ## X-Embeds: FlyPaper
-## SavedVariables: DevPadGUIOptions
+## SavedVariables: _DevPadGUIOptions
 ## RequiredDeps: DevPad
 ## OptionalDeps: FlyPaper
 ## LoadOnDemand: 1

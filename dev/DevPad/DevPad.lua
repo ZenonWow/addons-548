@@ -1,11 +1,11 @@
 --[[****************************************************************************
-  * DevPad by Saiket                                                          *
-  * DevPad.lua - Notepad for Lua scripts and mini-addons.                     *
+  * _DevPad by Saiket                                                          *
+  * _DevPad.lua - Notepad for Lua scripts and mini-addons.                     *
   ****************************************************************************]]
 
 
 local AddOnName, NS = ...;
-DevPad = NS;
+_DevPad = NS;
 
 NS.Frame = CreateFrame( "Frame" );
 NS.Callbacks = LibStub( "CallbackHandler-1.0" ):New( NS );
@@ -306,7 +306,7 @@ do
 		if ( self._TextChanged ) then -- Recompile
 			local Chunk, ErrorMessage = loadstring( self._Text, self._Name );
 			if ( not Chunk ) then
-				error( ErrorMessage, 0 ); -- 0 keeps DevPad's name out of the error message
+				error( ErrorMessage, 0 ); -- 0 keeps _DevPad's name out of the error message
 			end
 			self._Chunk, self._TextChanged = Chunk;
 		end
@@ -434,7 +434,7 @@ function NS.Frame:ADDON_LOADED ( Event, AddOn )
 		self:UnregisterEvent( Event );
 		self[ Event ] = nil;
 
-		local Options = DevPadOptions;
+		local Options = _DevPadOptions;
 		local Scripts = ( Options and Options.Scripts ) or NS.DefaultScripts;
 		if ( Scripts ) then
 			NS.FolderRoot:Unpack( Scripts );
@@ -447,13 +447,13 @@ function NS.Frame:ADDON_LOADED ( Event, AddOn )
 		AceComm.RegisterComm( NS, COMM_PREFIX );
 		-- Replace settings last in case of errors loading them
 		self:RegisterEvent( "PLAYER_LOGOUT" );
-		--DevPadOptions = nil; -- GC options
+		--_DevPadOptions = nil; -- GC options
 		NS.DefaultScripts = nil;
 	end
 end
 --- Save settings before exiting.
 function NS.Frame:PLAYER_LOGOUT ()
-	DevPadOptions = {
+	_DevPadOptions = {
 		Scripts = NS.FolderRoot:Pack();
 	};
 end

@@ -1,31 +1,31 @@
 --[[****************************************************************************
-  * DevPad by Saiket                                                          *
-  * DevPad.DefaultScripts.lua - Optional defaults file.  Safe to delete.      *
+  * _DevPad by Saiket                                                          *
+  * _DevPad.DefaultScripts.lua - Optional defaults file.  Safe to delete.      *
   ****************************************************************************]]
 
 
-local DevPad = select( 2, ... );
-local L = DevPad.L;
+local _DevPad = select( 2, ... );
+local L = _DevPad.L;
 
 
 
 
 --- Settings table compatible with Folder:Unpack used when no saved variables are found.
 -- Note: Don't use tabs in script text fields!
-DevPad.DefaultScripts = { Class = "Folder"; Name = "ROOT";
+_DevPad.DefaultScripts = { Class = "Folder"; Name = "ROOT";
 	{ Class = "Script"; Name = L.README;
 		Text = L.README_TEXT;
 	},
 	{ Class = "Folder"; Name = L.IMPORTERS;
 		{ Class = "Script"; Name = "Hack"; Lua = true;
 			Text = [=[
---- Run with Hack enabled to transfer all settings to DevPad.
+--- Run with Hack enabled to transfer all settings to _DevPad.
 -- Hack books transfer as folders.
 -- NOTE: You must replace script references to Hack yourself!
---   Ex) Hack.Run("Page") > DevPad:FindScripts("Page")()
+--   Ex) Hack.Run("Page") > _DevPad:FindScripts("Page")()
 
 local DB = assert( HackDB, "Hack saved variables not found." );
-local FolderClass, ScriptClass = DevPad:GetClass( "Folder" ), DevPad:GetClass( "Script" );
+local FolderClass, ScriptClass = _DevPad:GetClass( "Folder" ), _DevPad:GetClass( "Script" );
 local Hack = FolderClass:New();
 Hack:SetName( "Hack Import" );
 for _, BookData in ipairs( DB.books ) do
@@ -41,15 +41,15 @@ for _, BookData in ipairs( DB.books ) do
   end
   Hack:Insert( Book );
 end
-return DevPad.FolderRoot:Insert( Hack );]=];
+return _DevPad.FolderRoot:Insert( Hack );]=];
 		},
 		{ Class = "Script"; Name = "TinyPad"; Lua = true;
 			Text = [=[
---- Run with TinyPad enabled to transfer all settings to DevPad.
+--- Run with TinyPad enabled to transfer all settings to _DevPad.
 
 local DB = assert( TinyPadPages, "TinyPad saved variables not found." );
-local ScriptClass = DevPad:GetClass( "Script" );
-local TinyPad = DevPad:GetClass( "Folder" ):New();
+local ScriptClass = _DevPad:GetClass( "Script" );
+local TinyPad = _DevPad:GetClass( "Folder" ):New();
 TinyPad:SetName( "TinyPad Import" );
 for Index, Text in ipairs( DB ) do
   local Script = ScriptClass:New();
@@ -58,19 +58,19 @@ for Index, Text in ipairs( DB ) do
   Script:SetLua( false );
   TinyPad:Insert( Script );
 end
-return DevPad.FolderRoot:Insert( TinyPad );]=];
+return _DevPad.FolderRoot:Insert( TinyPad );]=];
 		},
 		{ Class = "Script"; Name = "WowLua"; Lua = true;
 			Text = [=[
---- Run with WowLua loaded to transfer all settings to DevPad.
--- DevPad doesn't support script "locking"; All imported scripts will be writable.
+--- Run with WowLua loaded to transfer all settings to _DevPad.
+-- _DevPad doesn't support script "locking"; All imported scripts will be writable.
 
 if ( IsAddOnLoadOnDemand( "WowLua" ) ) then
   LoadAddOn( "WowLua" ); -- In case AddonLoader is installed
 end
 local DB = assert( WowLua_DB, "WowLua saved variables not found." );
-local ScriptClass = DevPad:GetClass( "Script" );
-local WowLua = DevPad:GetClass( "Folder" ):New();
+local ScriptClass = _DevPad:GetClass( "Script" );
+local WowLua = _DevPad:GetClass( "Folder" ):New();
 WowLua:SetName( "WowLua Import" );
 for _, PageData in ipairs( DB.pages ) do
   local Script = ScriptClass:New();
@@ -79,7 +79,7 @@ for _, PageData in ipairs( DB.pages ) do
   Script:SetLua( true );
   WowLua:Insert( Script );
 end
-return DevPad.FolderRoot:Insert( WowLua );]=];
+return _DevPad.FolderRoot:Insert( WowLua );]=];
 		},
 	},
 
@@ -92,7 +92,7 @@ return DevPad.FolderRoot:Insert( WowLua );]=];
 local NS = ...; --- First arg is always the table representing this script.
 -- Any extra parameters are optionally passed in by the caller.
 
--- This same table is used even if the script is called more than once, so its contents can be used to keep track of state between calls.  Key names prefixed with a single underscore character (like "._Name") are used internally by DevPad.
+-- This same table is used even if the script is called more than once, so its contents can be used to keep track of state between calls.  Key names prefixed with a single underscore character (like "._Name") are used internally by _DevPad.
 
 
 
@@ -109,9 +109,9 @@ NS.Loaded = true;
 
 
 -- Fetch the "AddOnInit" script contained in the "Libs" folder.
-local AddOnInit = DevPad( "Libs", "AddOnInit" );
+local AddOnInit = _DevPad( "Libs", "AddOnInit" );
 -- This script object is like the "NS" variable above, but used by AddOnInit.  Another way to get a reference to AddOnInit is by searching, like this:
---   local AddOnInit = DevPad:FindScripts( "AddOnInit" )
+--   local AddOnInit = _DevPad:FindScripts( "AddOnInit" )
 -- In either case, AddOnInit may be nil if that script isn't found.
 
 AddOnInit(); -- Runs the script, allowing it to initialize its table.
@@ -124,17 +124,17 @@ AddOnInit(); -- Runs the script, allowing it to initialize its table.
 AddOnInit:Register( "Blizzard_MacroUI", function ()
     -- At this point, Blizzard_MacroUI and its saved variables are already loaded.
     
-    -- Since our custom font is in the separate addon DevPad.GUI, we must wait for that to load too.
-    AddOnInit:Register( "DevPad.GUI", function ()
-        -- At this point, both Blizzard_MacroUI and DevPad.GUI are loaded.
+    -- Since our custom font is in the separate addon _DevPad.GUI, we must wait for that to load too.
+    AddOnInit:Register( "_DevPad.GUI", function ()
+        -- At this point, both Blizzard_MacroUI and _DevPad.GUI are loaded.
         
-        -- Set the macro window text to use DevPad's editor font.
-        MacroFrameText:SetFontObject( DevPad.GUI.Editor.Font );
+        -- Set the macro window text to use _DevPad's editor font.
+        MacroFrameText:SetFontObject( _DevPad.GUI.Editor.Font );
         -- The macro window will now use the editor's saved font and font size.
     end );
 end );
 
--- Hopefully this example helps illustrate how multiple scripts can interact with each other, and how scripts can easily manipulate addons other than DevPad.]=];
+-- Hopefully this example helps illustrate how multiple scripts can interact with each other, and how scripts can easily manipulate addons other than _DevPad.]=];
 	},
 	{ Class = "Folder"; Name = "Libs";
 		{ Class = "Script"; Name = "AddOnInit"; Lua = true;
@@ -147,7 +147,7 @@ end
 
 
 local Frame = CreateFrame( "Frame" );
-Frame:SetScript( "OnEvent", DevPad.Frame.OnEvent );
+Frame:SetScript( "OnEvent", _DevPad.Frame.OnEvent );
 
 local AddOnInitializers = {};
 
@@ -163,7 +163,7 @@ local function InitializeAddOn ( Name )
     AddOnInitializers[ Name ] = nil;
     if ( type( Initializer ) == "table" ) then
       for _, Script in ipairs( Initializer ) do
-        DevPad.SafeCall( Script ); -- Don't break execution if one initializer fails
+        _DevPad.SafeCall( Script ); -- Don't break execution if one initializer fails
       end
     else
       Initializer();
@@ -210,7 +210,7 @@ return lib;]=];
 		{ Class = "Script"; Name = "RegisterForSave"; Lua = true;
 			Text = [=[
 --- Provides an API for scripts to save data between sessions.
--- @usage local Value = DevPad( "Libs", "RegisterForSave" )( "VariableName"[, DefaultValue] );
+-- @usage local Value = _DevPad( "Libs", "RegisterForSave" )( "VariableName"[, DefaultValue] );
 --   Set new values to _G[ "VariableName" ] and they will be saved on logout.
 local lib = ...;
 if ( lib.Register ) then
@@ -225,7 +225,7 @@ local function GetData ()
   local Data = lib:GetRelObject( true, DATA_NAME );
   if ( not Data ) then
     -- Add data folder just after this library
-    Data = DevPad:GetClass( "Folder" ):New();
+    Data = _DevPad:GetClass( "Folder" ):New();
     lib._Parent:Insert( Data, lib:GetIndex() + 1 );
     Data:SetName( DATA_NAME );
     Data:SetClosed( true );
@@ -276,7 +276,7 @@ do
       else
         local Script = Data:GetRelObject( Name );
         if ( not Script ) then
-          Script = DevPad:GetClass( "Script" ):New();
+          Script = _DevPad:GetClass( "Script" ):New();
           Script:SetName( Name );
           Script:SetLua( false );
           Data:Insert( Script );
@@ -285,9 +285,9 @@ do
       end
     end
   end
-  local Pack = DevPad.FolderRoot.Pack;
-  --- Saves variables just before DevPad does.
-  function DevPad.FolderRoot:Pack ( ... )
+  local Pack = _DevPad.FolderRoot.Pack;
+  --- Saves variables just before _DevPad does.
+  function _DevPad.FolderRoot:Pack ( ... )
     pcall( SerializeData ); -- Entire pad is at stake!
     return Pack( self, ... );
   end

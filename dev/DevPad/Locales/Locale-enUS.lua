@@ -1,5 +1,5 @@
 --[[****************************************************************************
-  * DevPad by Saiket                                                          *
+  * _DevPad by Saiket                                                          *
   * Locales/Locale-enUS.lua - Localized string constants (en-US).              *
   ****************************************************************************]]
 
@@ -8,7 +8,7 @@
 select( 2, ... ).L = setmetatable( {
 	EXAMPLE = "Example Script",
 	IMPORTERS = "Importers",
-	PRINT_FORMAT = "_|cffcccc88DevPad|r: %s",
+	PRINT_FORMAT = "|cffcccc88DevPad|r: %s",
 	README = "Instruction Manual",
 	README_TEXT = [=[--- A short guide to DevPad's features.
 
@@ -16,14 +16,14 @@ select( 2, ... ).L = setmetatable( {
 
 
 
-DevPad lets you write notes, scripts, and mini addons in-game.  The following sections describe key features of the mod:
+_DevPad lets you write notes, scripts, and mini addons in-game.  The following sections describe key features of the mod:
 
 
 # Windows:
   * Windows can be snapped together by dragging one near another.
 
 ## List Window:
-  * DevPad organizes scripts into nestable folders, shown in the list.  You can organize them by dragging and dropping.
+  * _DevPad organizes scripts into nestable folders, shown in the list.  You can organize them by dragging and dropping.
   * The arrow to the right of each script toggles auto-running it when you log in or reload UI.  Use it to turn a page of code into a mini addon.
   * Double click any entry to rename it.
   * Multiple entries can have the same name, even within the same folder.
@@ -41,7 +41,7 @@ DevPad lets you write notes, scripts, and mini addons in-game.  The following se
   * Font and font size controls are also at the top-right of the window.
   * Click a line number to select that entire line (even if the line numbers appear out of alignment).
   * Text is saved as you type.
-  * Undo and redo changes with the left and right arrow buttons at the top right, or with the keyboard shortcuts below.  Each script remembers its last 128 edits, although this limit can be changed or removed from within `DevPad.GUI/DevPad.GUI.Editor.History.lua`.
+  * Undo and redo changes with the left and right arrow buttons at the top right, or with the keyboard shortcuts below.  Each script remembers its last 128 edits, although this limit can be changed or removed from within `_DevPad.GUI/_DevPad.GUI.Editor.History.lua`.
   * Limited keyboard shortcuts are available:
     + `Ctrl+Z`/`Ctrl+Shift+Z`: Undo/redo one change.
     + `Ctrl+G`: Go to line number dialog.
@@ -49,14 +49,14 @@ DevPad lets you write notes, scripts, and mini addons in-game.  The following se
     + `F3`/`Shift+F3`: Jump to next/previous search result.
 
 
-# Scripts and the DevPad API:
+# Scripts and the _DevPad API:
   * Scripts receive the following arguments when run: `(ScriptObject, ...)`, where `...` are custom parameters from the caller.
   * Optional returns from the script's main chunk propagate out to the caller.
-  * Run other scripts like this: `DevPad:FindScripts( "NamePattern" )( ... );` or `DevPad( "Path", "to", "script" )( ... );`
+  * Run other scripts like this: `_DevPad:FindScripts( "NamePattern" )( ... );` or `_DevPad( "Path", "to", "script" )( ... );`
   * See `DevPad/DevPad.lua` for documentation on manipulating scripts and folders programatically.
 ]=],
 	RECEIVE_MESSAGE_FORMAT = "You have received a script or folder from |cffffffff%s|r called |cff808080“%s”|r.",
-	RECEIVE_MESSAGE_REOPEN = "Open your _|cffcccc88DevPad|r to save or discard it.",
+	RECEIVE_MESSAGE_REOPEN = "Open your |cffcccc88DevPad|r to save or discard it.",
 	SLASH_GUIERROR_FORMAT = "Couldn't load |cff808080“DevPad.GUI”|r: %s.",
 	SLASH_RUN_AMBIGUOUS_FORMAT = "Multiple matches found for |cff808080“%s”|r; Running script |cff808080“%s”|r.",
 	SLASH_RUN_MISSING_FORMAT = "Couldn't find script named |cff808080“%s”|r.",
@@ -74,5 +74,5 @@ SLASH_DEVPAD1 = "/devpad";
 SLASH_DEVPAD2 = "/pad";
 
 -- Bindings
-BINDING_HEADER_DEVPAD = "_|cffcccc88DevPad|r";
+BINDING_HEADER_DEVPAD = "DevPad";
 BINDING_NAME_DEVPAD_TOGGLE = "Toggle Pad List";

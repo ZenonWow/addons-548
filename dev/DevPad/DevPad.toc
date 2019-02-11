@@ -1,5 +1,5 @@
 ## Interface: 50001
-## Title: _|cffCCCC88DevPad|r
+## Title: DevPad
 ## Notes: Notepad for Lua scripts and mini-addons.
 ## Author: Saiket
 ## Version: 5.0.0.1
@@ -13,9 +13,8 @@
 ## X-Curse-Project-ID: devpad
 ## X-Localizations: enUS
 ## X-CompatibleLocales: deDE, enCN, enTW, enUS, esES, esMX, frFR, koKR, ptBR, ptPT, ruRU, zhCN, zhTW
-
-## SavedVariables: DevPadOptions
-## OptionalDeps: _Dev, Ace3
+## SavedVariables: _DevPadOptions
+## OptionalDeps: Dev, _Dev, Ace3
 
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Slash: /pad, /devpad
@@ -31,3 +30,4 @@ Locales\Locale-enUS.lua
 DevPad.lua
 # Optional default scripts file
 DevPad.DefaultScripts.lua
+
