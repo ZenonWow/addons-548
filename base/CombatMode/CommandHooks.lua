@@ -100,6 +100,8 @@ function CombatMode.commands:StartStopHook(cmdName, state, event)
 
 	if  self.stopsAutoRun[event]  then  self:SwitchAutoRun(false, event)  end
 	
+	-- if  cmdName == 'MoveAndSteer'  then  CombatMode:EnableOverrides(cmdName, state)  end
+	
 	if  cmdName == 'TurnOrAction'  then
 		if  state  and  CombatMode.enabledPermanent  then
 			cmdName = 'MouseAction'
@@ -154,6 +156,24 @@ function CombatMode.commands:SetState(cmdName, state)
 end
 
 
+local MoveAndSteerFrame = CreateFrame('Frame')
+
+
+function CombatMode.commands.uniqueHooks.MoveAndSteerStart()
+	-- CombatMode.EnableOverrides('MoveAndSteer', true)
+	print("SetOverrideBinding(MoveAndSteerFrame, true, 'BUTTON2', 'AUTORUN')")
+	SetOverrideBinding(MoveAndSteerFrame, true, 'BUTTON2', 'AUTORUN')
+	SetOverrideBinding(MoveAndSteerFrame, true, 'BUTTON5', 'COMBATMODE_TOGGLE')
+end
+
+function CombatMode.commands.uniqueHooks.MoveAndSteerStop()
+	-- CombatMode.EnableOverrides('MoveAndSteer', false)
+	print("SetOverrideBinding(MoveAndSteerFrame, true, 'BUTTON2', nil)")
+	SetOverrideBinding(MoveAndSteerFrame, true, 'BUTTON2', nil)
+	SetOverrideBinding(MoveAndSteerFrame, true, 'BUTTON5', nil)
+end
+--[[
+--]]
 
 function CombatMode.commands.uniqueHooks.ToggleAutoRun()
 	-- no self, these 3 are called as plain functions, not methods, therefore no ':' before the function name

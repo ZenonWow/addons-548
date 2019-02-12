@@ -491,12 +491,16 @@ CombatMode.config.optionsTable = {
 CombatMode.config.optionsTableList = { 
 	opt("BUTTON1", "Left Click", "Override original behavior of Left Mouse Button"),
 	opt("BUTTON2", "Right Click", "Override original behavior of Right Mouse Button"),
+	opt("X", "X"),
 	opt("ALT-BUTTON1", "Alt + Left Click"),
 	opt("ALT-BUTTON2", "Alt + Right Click"),
+	opt("X", "X"),
 	opt("SHIFT-BUTTON1", "Shift + Left Click"),
 	opt("SHIFT-BUTTON2", "Shift + Right Click"),
+	opt("X", "X"),
 	opt("CTRL-BUTTON1", "Control + Left Click"),
 	opt("CTRL-BUTTON2", "Control + Right Click"),
+	opt("X", "X"),
 	optMoving("enabledWhileMoving", "Enable while moving", "While pressing any movement key CombatMode is enabled"),
 	optMod("CM_ENABLE_MOD", "Enable with this modifier:", "While pressing this modifier the camera turns with the mouse."),
 	optMod("CM_DISABLE_MOD", "Disable with this modifier:", "While pressing this modifier the mouse cursor is free to move."),
@@ -590,7 +594,7 @@ end
 -- Command binding overrides
 -------------------------------
 
-CombatMode.OverrideFrames = { CombatMode = CreateFrame("Frame"), AutoRun = CreateFrame("Frame"), Mouselook = {} }
+CombatMode.OverrideFrames = { User = CreateFrame("Frame"), CombatMode = CreateFrame("Frame"), AutoRun = CreateFrame("Frame"), MoveAndSteer = CreateFrame("Frame"), Mouselook = {} }
 local OverrideFrames = CombatMode.OverrideFrames
 -- OverrideFrames.CombatMode.SetBinding = SetOverrideBinding
 
@@ -599,6 +603,8 @@ function OverrideFrames.CombatMode:SetBinding(priority, key, toUpper)
 	SetOverrideBinding(self, priority, key, toUpper)
 end
 OverrideFrames.AutoRun.SetBinding = OverrideFrames.CombatMode.SetBinding
+OverrideFrames.MoveAndSteer.SetBinding = OverrideFrames.CombatMode.SetBinding
+OverrideFrames.User.SetBinding = OverrideFrames.CombatMode.SetBinding
 
 function OverrideFrames.Mouselook:SetBinding(priority, key, toUpper)
 	print("SetMouselookOverrideBinding("..key..", "..tostring(toUpper))
@@ -655,6 +661,7 @@ function OverrideFrames.CombatMode:OverrideCommand(fromCmd, toCmd, priority)
 end
 
 OverrideFrames.AutoRun.OverrideCommand = OverrideFrames.CombatMode.OverrideCommand
+OverrideFrames.MoveAndSteer.OverrideCommand = OverrideFrames.CombatMode.OverrideCommand
 
 
 function OverrideFrames.Mouselook:OverrideCommand(fromCmd, toCmd)
@@ -714,15 +721,23 @@ end  -- function CombatMode:UpdateOverrideBindings()
 
 
 function CombatMode:EnableOverrides(mode, enable)
-	-- print('  CombatMode:EnableOverrides('..mode..', '..colorBoolStr(enable, true)..')')
+	print('  CombatMode:EnableOverrides('..mode..', '..colorBoolStr(enable, true)..')')
 	local frame = self.OverrideFrames[mode]
 
 	if  mode == 'CombatMode'  then
-		frame:OverrideCommand('MoveAndSteer', enable and 'MoveForward')  -- priority over CombatMode's override
-		frame:OverrideCommand('TurnOrAction', enable and 'TARGETNEARESTANDINTERACTNPC')    -- Peaceful
+		-- frame:SetBinding(false, 'BUTTON2', enable and 'MOVEFORWARD' or nil)
+		-- frame:OverrideCommand('MoveAndSteer', enable and 'MoveForward')  -- priority over CombatMode's override
+		-- frame:OverrideCommand('TurnOrAction', enable and 'TARGETNEARESTANDINTERACTNPC')    -- Peaceful
 	end
 	if  mode == 'AutoRun'  then
-		frame:OverrideCommand('MoveAndSteer', enable and 'TurnOrAction', true)  -- priority over CombatMode's override
+		-- frame:OverrideCommand('MoveAndSteer', enable and 'TurnOrAction', true)  -- priority over CombatMode's override
+		-- frame:SetBinding(true, 'BUTTON1', enable and 'TURNORACTION')
+		frame:SetBinding(true, 'BUTTON1', enable and 'CAMERAORSELECTORMOVE')
+	end
+	if  mode == 'MoveAndSteer'  then
+		-- frame:OverrideCommand('TurnOrAction', enable and 'AutoRun', true)
+		frame:SetBinding(true, 'BUTTON2', enable and 'AUTORUN')
+		frame:SetBinding(true, 'BUTTON5', enable and 'COMBATMODE_TOGGLE')
 	end
 
 	if enable then  self:CheckOverrides(frame)  end
@@ -803,8 +818,10 @@ function CombatMode.CustomBindings:BindKeys(newKeyMap)
 			dynKeys[key] = self
 		end
 		
-		-- Set new overrides
-		self:SetBinding(false, key, cmd)
+		if cmd ~= "" then
+			-- Set new overrides
+			self:SetBinding(false, key, cmd)
+		end
 	end --end
 	
 	-- Make it nil if empty

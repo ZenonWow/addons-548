@@ -177,8 +177,8 @@ function  CombatMode:HookUpFrames()
 	local missingFrames = {}
 	
 	for  idx, frameName  in  ipairs(self.FramesToHook)  do
-		if  self.HookedFrames[frameName]  then  print('CombatMode:HookUpFrames(): frame hooked again:  ' .. frameName)  end
-		local frame= self:HookFrame(frame)
+		-- if  self.HookedFrames[frameName]  then  print('CombatMode:HookUpFrames(): frame hooked again:  ' .. frameName)  end
+		local frame= self:HookFrame(frameName)
 		if  not frame  then	
 			-- missing frames stored for a next round
 			missingFrames[frameName] = frameName
