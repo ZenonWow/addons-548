@@ -6,7 +6,8 @@
 local IsShiftKeyDown,IsControlKeyDown = IsShiftKeyDown,IsControlKeyDown
 local ActionStatus_DisplayMessage = ActionStatus_DisplayMessage
 
-local _G, _ADDON = LibEnv.UseAddonEnv(...)
+-- local _G, _ADDON = LibEnv.UseAddonEnv(...)
+local _G, ADDON_NAME, _ADDON = _G, ...
 -- _ADDON = addon environment/namespace
 -- local ADDON_NAME = _ADDON.ADDON_NAME    -- ADDON_NAME = ... = name of addon folder
 -- local OptionDesc = _ADDON.OptionDesc

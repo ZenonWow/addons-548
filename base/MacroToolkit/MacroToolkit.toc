@@ -30,6 +30,7 @@
 #@no-lib-strip@
 # Libraries
 embeds.xml
+libs\LibAdvancedIconSelector-1.0\LibAdvancedIconSelector-1.0.xml
 #@end-no-lib-strip@
 
 locales\locales.xml

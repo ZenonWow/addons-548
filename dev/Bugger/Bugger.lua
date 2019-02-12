@@ -431,6 +431,7 @@ function Bugger:SetupFrame()
 
 	self.frame:SetParent(UIParent)
 	self.frame:SetScript("OnShow", nil)
+	self.frame:EnableMouse(true)
 
 	self.editBox:SetFontObject(GameFontHighlight)
 	self.editBox:SetTextColor(0.9, 0.9, 0.9)

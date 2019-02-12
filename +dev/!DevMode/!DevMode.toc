@@ -1,5 +1,5 @@
 ## Interface: 50400
-## Title: DevTools
+## Title: DevMode
 ## Author: Mongusius
 ## Notes: Installs debugging hooks early to monitor addon loading process.
 
@@ -9,7 +9,7 @@
 ## X-Curse-Project-ID: dev-tools
 ## X-Curse-Repository-ID: wow/dev-tools/mainline
 
-## SavedVariables: DevToolsDB
+## SavedVariables: DevModeDB
 
 
 DebugChatFrame.lua
