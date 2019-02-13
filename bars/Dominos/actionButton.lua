@@ -37,8 +37,8 @@ function ActionButton:New(id)
 	local b = self:Restore(id) or self:Create(id)
 
 	if b then
-		-- Handle Shift-Click as chatlink.
-		b:SetAttribute("shift-type*", "chatlink")
+		-- Handle Shift-LeftClick as chatlink.
+		b:SetAttribute("shift-type1", "chatlink")
 		b:SetAttribute("_chatlink", ActionButton_LinkClick)
 
 		b:SetAttribute('showgrid', 0)

@@ -29,7 +29,7 @@ CombatMode.commands.grouping = {
 	
 	TurnWithMouse	= 'Mouselook',		-- custom command in Bindings.xml
 	TurnOrAction	= 'Mouselook',
-	MouseAction		= 'NeedCursor',		-- TurnOrAction remapped in CombatMode
+	MouseAction		= 'NeedCursor',		-- TurnOrAction remapped to MouseAction in CombatMode
 	
 	MoveAndSteer	= 'Mouselook',
 	-- TargetScanEnemy, TargetNearestEnemy:
@@ -108,6 +108,7 @@ function CombatMode.commands:StartStopHook(cmdName, state, event)
 			self.map.TurnOrAction = cmdName
 		elseif  not state  then
 			cmdName = self.map.TurnOrAction or cmdName
+			self.map.TurnOrAction = nil
 		end
 	end
 	

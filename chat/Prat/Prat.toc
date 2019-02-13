@@ -13,7 +13,7 @@
 ## X-Website: http://www.wowace.com/wiki/Prat
 ## X-License: GPLv3
 
-## Notes: A framework for chat ehancement modules. 
+## Notes: A framework for chat enhancement modules. 
 ## Notes-zhCN: 整合的聊天增强助手
 ## Notes-zhTW: 整合的聊天視窗模組。
 ## Notes-frFR: Framework pour des modules concernant les fen\195\170tres de discussion

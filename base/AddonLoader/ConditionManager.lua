@@ -55,7 +55,7 @@ local function formatSourceField(field)
 end
 
 function ConditionManager.ReportFieldError(fieldOrCond, msg)
-	if  not msg  and  type(fieldOrCond) == 'string')  then
+	if  not msg  and  type(fieldOrCond) == 'string'  then
 		msg, fieldOrCond = fieldOrCond,  ConditionManager.parsedField  or  ConditionManager.evaluatedCondition
 	end
 	msg = msg .. formatSourceField(fieldOrCond)
