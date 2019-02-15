@@ -13,14 +13,13 @@ local function GetSpellName(number)
 	return n
 end
 local function UpdateSpecial() -- Need to add a way to update options table.
-	db.uniqueSettings.list = {};
+	local list = {}
 	for k_c,k_v in pairs(db.uniqueSettings) do
-		if db.uniqueSettings[k_c].name then
-			if type(db.uniqueSettings[k_c].name) == "string" then
-				db.uniqueSettings.list[k_c] = db.uniqueSettings[k_c].name
-			end
+		if type(k_v.name) == "string" then
+			list[k_c] = k_v.name
 		end
 	end
+	db.uniqueSettings.list = list
 	t.Update()
 end
 
@@ -4327,13 +4326,13 @@ local CustomOpts_OrderCnt = 30;
 local clipboard = nil;
 for k_c,v_c in ipairs(db.uniqueSettings) do
 	CustomOpts["#"..k_c] = {
-		name = "#"..k_c..". "..db.uniqueSettings[k_c].name,
+		name = "#"..k_c..". "..v_c.name,
 		type = "group",
 		--disabled = function() if db.totemSettings[totemID[k_c][2]][1] then return false else return true end end,
 		order = CustomOpts_OrderCnt,
 		args = {
 			Header = {
-				name = db.uniqueSettings[k_c].name,
+				name = v_c.name,
 				type = "header",
 				order = 0,
 			},
@@ -4344,7 +4343,7 @@ for k_c,v_c in ipairs(db.uniqueSettings) do
 				inline = true,
 				args = {
 					SetName = {
-						name = db.uniqueSettings[k_c].name,
+						name = v_c.name,
 						type = "input",
 						order = 1,
 						width = "full",
@@ -4365,7 +4364,7 @@ for k_c,v_c in ipairs(db.uniqueSettings) do
 						func = function() 
 							if UnitExists("Target") then
 								local target = UnitName("Target")
-								db.uniqueSettings[k_c].name = target
+								v_c.name.name = target
 								options.args.Custom.args["#"..k_c].name = "#"..k_c..". "..target
 								options.args.Custom.args["#"..k_c].args.Header.name = target
 								options.args.Custom.args["#"..k_c].args.Name.args.SetName.name = target
@@ -4381,7 +4380,7 @@ for k_c,v_c in ipairs(db.uniqueSettings) do
 						order = 3,
 						width = "single",
 						func = function() 
-							db.uniqueSettings[k_c].name = ""
+							v_c.name.name = ""
 							options.args.Custom.args["#"..k_c].name = "#"..k_c..". "..""
 							options.args.Custom.args["#"..k_c].args.Header.name = ""
 							options.args.Custom.args["#"..k_c].args.Name.args.SetName.name = ""
@@ -4399,7 +4398,7 @@ for k_c,v_c in ipairs(db.uniqueSettings) do
 						type = "execute",
 						func = function()
 							clipboard = {}
-							clipboard = t.CopyTable(db.uniqueSettings[k_c])
+							clipboard = t.CopyTable(v_c)
 							t.Print(L["Copied!"])
 						end,
 					},
@@ -4414,13 +4413,14 @@ for k_c,v_c in ipairs(db.uniqueSettings) do
 							else
 								t.Print(L["Nothing to paste!"])
 							end
-							options.args.Custom.args["#"..k_c].name = "#"..k_c..". "..db.uniqueSettings[k_c].name
-							options.args.Custom.args["#"..k_c].args.Header.name = db.uniqueSettings[k_c].name
-							options.args.Custom.args["#"..k_c].args.Name.args.SetName.name = db.uniqueSettings[k_c].name
-							if tonumber(db.uniqueSettings[k_c].icon) == nil then 
-								options.args.Custom.args["#"..k_c].args.Icon.args.Icon.image = db.uniqueSettings[k_c].icon
+							local k_v = db.uniqueSettings[k_c]
+							options.args.Custom.args["#"..k_c].name = "#"..k_c..". "..k_v.name
+							options.args.Custom.args["#"..k_c].args.Header.name = k_v.name
+							options.args.Custom.args["#"..k_c].args.Name.args.SetName.name = k_v.name
+							if tonumber(k_v.icon) == nil then 
+								options.args.Custom.args["#"..k_c].args.Icon.args.Icon.image = k_v.icon
 							else
-								local icon = select(3, GetSpellInfo(tonumber(db.uniqueSettings[k_c].icon)))
+								local icon = select(3, GetSpellInfo(tonumber(k_v.icon)))
 								if icon then
 									options.args.Custom.args["#"..k_c].args.Icon.args.Icon.image = icon
 								else

@@ -9,7 +9,7 @@
 ## X-Curse-Project-ID: dev-tools
 ## X-Curse-Repository-ID: wow/dev-tools/mainline
 
-## SavedVariables: DevModeDB
+## SavedVariables: DevModeDB, DEVMODE
 
 
 DebugChatFrame.lua

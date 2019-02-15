@@ -10,7 +10,7 @@ local ActionStatus_DisplayMessage = ActionStatus_DisplayMessage
 local _G, ADDON_NAME, _ADDON = _G, ...
 -- _ADDON = addon environment/namespace
 -- local ADDON_NAME = _ADDON.ADDON_NAME    -- ADDON_NAME = ... = name of addon folder
--- local OptionDesc = _ADDON.OptionDesc
+local OptionDesc = _ADDON.OptionDesc
 
 
 -- Global vars/functions common for all files in this addon. Format also understood by Mikk's FindGlobals script.

@@ -2,6 +2,8 @@
 /run EventTracker.PrintLog()
 --]]
 
+DEVMODE = DEVMODE or {}
+
 PlaySound([[Interface\Addons\TellMeWhen\Sounds\Ding3.ogg]])
 
 for i = 1, NUM_CHAT_WINDOWS, 1 do
