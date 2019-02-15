@@ -17,7 +17,7 @@
 ## X-WoWI-ID: 23144
 
 ## SavedVariables: BuggerDB
-## OptionalDependencies: !BugGrabber
+## OptionalDependencies: !BugGrabber, LibSharedMedia-3.0, Ace3
 ## X-BugGrabber-Display: Bugger
 
 # Libs\LibStub\LibStub.lua

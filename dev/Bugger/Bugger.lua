@@ -26,12 +26,29 @@ Bugger.dbDefaults = {
 	autoshow = false,
 	chat  = true,  -- show a message in the chat frame when an error is captured
 	sound = false, -- play a sound when an error is captured
+	soundMedia = "Baby Murloc",
 	minimap = {},
 }
 
+local MIN_INTERVAL = 60
+
 ------------------------------------------------------------------------
 
-local MIN_INTERVAL = 30
+local LSM = _G.LibStub("LibSharedMedia-3.0")
+LSM:Register("sound", "Baby Murloc",        [[Sound\creature\BabyMurloc\BabyMurlocC.ogg]])
+LSM:Register("sound", "Cat Miao",           [[Sound\creature\Cat\CatStepA.ogg]])
+LSM:Register("sound", "Flying Reindeer",    [[Sound\creature\FlyingReindeer\FyingReindeerJump.ogg]])
+LSM:Register("sound", "Wolpertinger 2",     [[Sound\creature\Wolpertinger\WolpertingerClickable2.ogg]])
+LSM:Register("sound", "Wolpertinger 3",     [[Sound\creature\Wolpertinger\WolpertingerClickable3.ogg]])
+LSM:Register("sound", "Wolpertinger 4",     [[Sound\creature\Wolpertinger\WolpertingerClickable4.ogg]])
+LSM:Register("sound", "Water Medium",       [[Sound\Effects\DeathImpacts\InWater\mDeathImpactMediumWaterA.ogg]])
+LSM:Register("sound", "Water Small",        [[Sound\Effects\DeathImpacts\InWater\mDeathImpactSmallWaterA.ogg]])
+LSM:Register("sound", "Map Ping",           [[Sound\INTERFACE\MapPing.ogg]])
+LSM:Register("sound", "Magic Click",        [[Sound\INTERFACE\MagicClick.ogg]])
+LSM:Register("sound", "Wisp",               [[Sound\Event Sounds\Wisp\WispYes2.ogg]])
+LSM:Register("sound", "TMW - Ding 1",       [[Interface\Addons\BugSack\Media\Ding1.ogg]])
+
+------------------------------------------------------------------------
 
 local ICON_GRAY  = "Interface\\AddOns\\Bugger\\Icons\\Bug-Gray"
 local ICON_GREEN = "Interface\\AddOns\\Bugger\\Icons\\Bug-Green"
@@ -204,30 +221,23 @@ function Bugger:BugGrabber_BugGrabbed(event, errorObject, newErrors)
 	
 	local open = self.frame and self.frame:IsShown()
 	if  not errorObject  then
-		if open then  self:ShowError(self.error)  end
+		if open then  self:ShowError()  end
 		return
 	end
 	
-	if not self.error then
-		local errors = self:GetErrors(self.session)
-		self.error = tindexof(errors, errorObject)
-	end
-
 	local now = time()
 	if  MIN_INTERVAL < now - (self.lastError or 0)  then
 		self.lastError = now
 		if self.db.chat then
 			self:Print(L["An error has been captured!"].."  "..BugGrabber:GetChatLink(errorObject))
 		end
-		--[[
 		if self.db.sound then
 			local sound = LibStub("LibSharedMedia-3.0"):Fetch("sound", self.db.soundMedia)
 			PlaySoundFile(sound, "Master")
 		end
-		--]]
-		-- Update frame
-		if open then  self:ShowError(self.error)
-		elseif  self.db.autoshow  then  self:DisplayError(errorObject)
+		-- Do not disturb the user if already open.
+		if  self.db.autoshow  and  not open  then
+			self:DisplayError(errorObject)
 		end
 	end
 end
@@ -616,14 +626,14 @@ menu.initialize = function(_, level)
 	info.checked = Bugger.db.chat
 	info.keepShownOnClick = 1
 	UIDropDownMenu_AddButton(info, level)
---[[ TODO
+
 	info = UIDropDownMenu_CreateInfo()
 	info.text = L["Sound alerts"]
 	info.func = menu.soundFunc
 	info.checked = Bugger.db.sound
 	info.keepShownOnClick = 1
 	UIDropDownMenu_AddButton(info, level)
---]]
+
 	if LibStub("LibDBIcon-1.0"):IsRegistered(BUGGER) then
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["Minimap icon"]

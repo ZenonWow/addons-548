@@ -26,26 +26,21 @@ end
 _G[ADDON_NAME] = addon
 
 
-local LSM
-
-function addon:InitLSM()
-	if  LSM  then  return  end
-	LSM = _G.LibStub("LibSharedMedia-3.0", true)
-	if  not LSM  then  return  end
-	LSM:Register("sound", "TMW - Ding 1",       [[Interface\Addons\BugSack\Media\Ding1.ogg]])
-	LSM:Register("sound", "BugSack: Fatality",  [[Interface\AddOns\BugSack\Media\error.ogg]])
-	LSM:Register("sound", "Water Medium",       [[Sound\Effects\DeathImpacts\InWater\mDeathImpactMediumWaterA.ogg]])
-	LSM:Register("sound", "Water Small",        [[Sound\Effects\DeathImpacts\InWater\mDeathImpactSmallWaterA.ogg]])
-	LSM:Register("sound", "Baby Murloc",        [[Sound\creature\BabyMurloc\BabyMurlocC.ogg]])
-	LSM:Register("sound", "Cat Miao",           [[Sound\creature\Cat\CatStepA.ogg]])
-	LSM:Register("sound", "Flying Reindeer",    [[Sound\creature\FlyingReindeer\FyingReindeerJump.ogg]])
-	LSM:Register("sound", "Wolpertinger 2",     [[Sound\creature\Wolpertinger\WolpertingerClickable2.ogg]])
-	LSM:Register("sound", "Wolpertinger 3",     [[Sound\creature\Wolpertinger\WolpertingerClickable3.ogg]])
-	LSM:Register("sound", "Wolpertinger 4",     [[Sound\creature\Wolpertinger\WolpertingerClickable4.ogg]])
-	LSM:Register("sound", "Wisp",               [[Sound\Event Sounds\Wisp\WispYes2.ogg]])
-	LSM:Register("sound", "Map Ping",           [[Sound\INTERFACE\MapPing.ogg]])
-	LSM:Register("sound", "Magic Click",        [[Sound\INTERFACE\MagicClick.ogg]])
-end
+-- Sound
+local LSM = _G.LibStub("LibSharedMedia-3.0")
+LSM:Register("sound", "Baby Murloc",        [[Sound\creature\BabyMurloc\BabyMurlocC.ogg]])
+LSM:Register("sound", "Cat Miao",           [[Sound\creature\Cat\CatStepA.ogg]])
+LSM:Register("sound", "Flying Reindeer",    [[Sound\creature\FlyingReindeer\FyingReindeerJump.ogg]])
+LSM:Register("sound", "Wolpertinger 2",     [[Sound\creature\Wolpertinger\WolpertingerClickable2.ogg]])
+LSM:Register("sound", "Wolpertinger 3",     [[Sound\creature\Wolpertinger\WolpertingerClickable3.ogg]])
+LSM:Register("sound", "Wolpertinger 4",     [[Sound\creature\Wolpertinger\WolpertingerClickable4.ogg]])
+LSM:Register("sound", "Water Medium",       [[Sound\Effects\DeathImpacts\InWater\mDeathImpactMediumWaterA.ogg]])
+LSM:Register("sound", "Water Small",        [[Sound\Effects\DeathImpacts\InWater\mDeathImpactSmallWaterA.ogg]])
+LSM:Register("sound", "Map Ping",           [[Sound\INTERFACE\MapPing.ogg]])
+LSM:Register("sound", "Magic Click",        [[Sound\INTERFACE\MagicClick.ogg]])
+LSM:Register("sound", "Wisp",               [[Sound\Event Sounds\Wisp\WispYes2.ogg]])
+LSM:Register("sound", "TMW - Ding 1",       [[Interface\Addons\BugSack\Media\Ding1.ogg]])
+LSM:Register("sound", "BugSack: Fatality",  [[Interface\AddOns\BugSack\Media\error.ogg]])
 
 
 -----------------------------------------------------------------------
@@ -157,7 +152,8 @@ function eventFrame:ADDON_LOADED(event, loadedAddon)
 	if type(sv.mute) ~= "boolean" then sv.mute = false end
 	if type(sv.auto) ~= "boolean" then sv.auto = false end
 	if type(sv.chatframe) ~= "boolean" then sv.chatframe = false end
-	if type(sv.soundMedia) ~= "string" then sv.soundMedia = "TMW - Ding 1" end
+	if type(sv.soundMedia) ~= "string" then sv.soundMedia = "Baby Murloc" end
+	-- if type(sv.soundMedia) ~= "string" then sv.soundMedia = "TMW - Ding 1" end
 	if type(sv.fontSize) ~= "string" then sv.fontSize = "GameFontHighlight" end
 	addon.db = sv
 
@@ -170,7 +166,6 @@ end
 function eventFrame:PLAYER_LOGIN(event)
 	self:UnregisterEvent("PLAYER_LOGIN")
 	self.PLAYER_LOGIN = nil
-	addon:InitLSM()
 
 	--[[
 	-- TODO: pop up a tooltip on ldb dataobject or minimap icon to inform the user about any errors before this (while loading)
