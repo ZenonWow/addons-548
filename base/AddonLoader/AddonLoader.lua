@@ -25,7 +25,7 @@ local format = string.format
 
 -- Exported to _G:  AddonLoader
 -- Used from LibCommon:
--- Exported to LibCommon:  tostrjoin, EMPTYTABLE
+-- Exported to LibCommon:  tostrjoin, AutoTablesMeta, ConstEmptyTable
 -- Used from _ADDON:  Debug
 
 -- local safecall = LibCommon.Require.safecall
@@ -33,9 +33,13 @@ local format = string.format
 LibCommon.tostrjoin = LibCommon.tostrjoin  or function(separator, ...)  return strjoin(separator, tostringall(...))  end
 local tostrjoin = LibCommon.tostrjoin
 
--- Constant empty table to use in place of nil table reference.
-LibCommon.EMPTYTABLE = LibCommon.EMPTYTABLE  or setmetatable({}, { __newindex = function()  error("Can't add properties to the EMPTYTABLE.")  end, __metatable = "EMPTYTABLE is not to be modified." })
-local EMPTYTABLE = LibCommon.EMPTYTABLE
+--- LibCommon. AutoTablesMeta:  metatable that auto-creates empty inner tables when first referenced.
+LibCommon.AutoTablesMeta = LibCommon.AutoTablesMeta or { __index = function(self, key)  if key ~= nil then  local v={} ; self[key]=v ; return v  end  end }
+local AutoTablesMeta = LibCommon.AutoTablesMeta
+
+-- Constant empty table to use as a default table, where nil would cause an error.
+LibCommon.ConstEmptyTable = LibCommon.ConstEmptyTable  or _G.setmetatable({}, { __newindex = function()  _G.error("Can't add properties to the ConstEmptyTable.")  end, __metatable = "ConstEmptyTable is not to be modified." })
+local ConstEmptyTable = LibCommon.ConstEmptyTable
 
 
 
@@ -339,7 +343,7 @@ function AddonLoader:LoadOneAddon()
 	end
 	
 	if  not addonDeps[toload]  then  print("LoadOneAddon():  addonDeps["..tostring(toload).."] == nil")  end
-	local deps, loadIdx = addonDeps[toload]  or  EMPTYTABLE
+	local deps, loadIdx = addonDeps[toload]  or  ConstEmptyTable
 	for  i = 1, #deps  do
 		if  not IsAddOnLoaded(deps[i])  then  loadIdx, toload = i, deps[i] ; break  end
 	end

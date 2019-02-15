@@ -12,18 +12,13 @@ local tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date,
 -- GLOBALS: AddonLoaderSV
 
 -- Used from _G:  AddonLoader
--- Used from LibCommon:  tostrjoin,EMPTYTABLE
--- Exported to LibCommon:  AutoTablesMeta
+-- Used from LibCommon:  tostrjoin, AutoTablesMeta, ConstEmptyTable
 -- Used from _ADDON:  Debug
 
 AddonLoader.name = ADDON_NAME
-local tostrjoin,EMPTYTABLE = LibCommon:Import("tostrjoin,EMPTYTABLE", AddonLoader)
--- local tostrjoin,EMPTYTABLE = LibCommon.Require.tostrjoin, LibCommon.Require.EMPTYTABLE
+local tostrjoin,AutoTablesMeta,ConstEmptyTable = LibCommon:Import("tostrjoin,AutoTablesMeta,ConstEmptyTable", AddonLoader)
+-- local tostrjoin,ConstEmptyTable = LibCommon.Require.tostrjoin, LibCommon.Require.ConstEmptyTable
 local Debug = _ADDON.Debug
-
---- LibCommon. AutoTablesMeta:  metatable that auto-creates empty inner tables when first referenced.
-LibCommon.AutoTablesMeta = LibCommon.AutoTablesMeta or { __index = function(self, key)  if key ~= nil then  self[key] = {}  end  ;  return self[key]  end }
-local AutoTablesMeta = LibCommon.AutoTablesMeta
 
 
 local ConditionManager = CreateFrame('Frame')    -- , 'AddonLoaderConditionManager')
@@ -162,7 +157,7 @@ end
 
 do
 	local function formatFieldReference(objectName)
-		local field = ConditionManager.parsedField  or  EMPTYTABLE
+		local field = ConditionManager.parsedField  or  ConstEmptyTable
 		local addonName = field.addonName or ""
 		local fieldName = field.fieldName and " "..field.fieldName or ""
 		return "_G."..tostring(objectName).."  referenced in "..addonName.." metadata"..fieldName
@@ -449,7 +444,7 @@ function ConditionManager:RegisterConditionHooks(addonName, condition)
 	self.parsedField = condition
 
 	-- Register for events in condition.eventList
-	for  _, eventName  in pairs(condition.eventList or EMPTYTABLE) do
+	for  _, eventName  in pairs(condition.eventList or ConstEmptyTable) do
 		self.EventHooks:AddConditionHook(nil, eventName, condition)
 	end
 
@@ -459,7 +454,7 @@ function ConditionManager:RegisterConditionHooks(addonName, condition)
 	
 	local registerChildHook =  condition.registerChildHook
 	if  registerChildHook  then
-		for  i, childName  in ipairs(condition.childList or EMPTYTABLE) do
+		for  i, childName  in ipairs(condition.childList or ConstEmptyTable) do
 			local childCond = condition.childConds[childName]
 			local ran, result = safecall(registerChildHook, childCond or condition, childName)
 		end

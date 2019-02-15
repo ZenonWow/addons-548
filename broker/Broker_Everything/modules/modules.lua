@@ -4,6 +4,28 @@ local GetTime = GetTime
 
 local AceEvent = LibStub:GetLibrary("AceEvent-3.0")
 local AceTimer = LibStub:GetLibrary("AceTimer-3.0")
+local LibCommon = _G.LibCommon or {}  ;  _G.LibCommon = LibCommon
+
+
+-- Exported to LibCommon:  indexOf, pairsOrNil
+
+--- LibCommon. indexOf(array, item):  Find item in array.
+LibCommon.indexOf = LibCommon.indexOf or function(t, item)
+	local last = t and #t or 0  ;  for i = 1,last do  if t[i] == item then  return i  end  return nil  end
+end
+local tindexOf = LibCommon.indexOf
+
+--- LibCommon. pairsOrNil(t):   like  pairs(t), without raising error in any case.
+local function nonext(t,i)     return nil,nil  end
+LibCommon.pairsOrNil  = LibCommon.pairsOrNil  or  function(t)  if type(t)=='table' then  return next ,t,nil  else  if not t then  return nonext,t,nil  else  error( "pairsOrNil(t) expected table or nil, got "..type(t))  end end end
+local pairsOrNil = LibCommon.pairsOrNil
+
+--[[
+--- LibCommon. ConstEmptyTable:  Constant empty table to use as a default table in places where nil would cause an error.
+LibCommon.ConstEmptyTable = LibCommon.ConstEmptyTable  or _G.setmetatable({}, { __newindex = function()  _G.error("Can't add properties to the ConstEmptyTable.")  end, __metatable = "ConstEmptyTable is not to be modified." })
+local ConstEmptyTable = LibCommon.ConstEmptyTable
+--]]
+
 
 -- ------------------------------- --
 -- modules table and init function --
@@ -66,9 +88,6 @@ end
 -- Forward declaration
 local sendEvent    -- function sendEvent(modData, event)
 
--- pairs(nil or EMPTYTABLE) to not crash
-local EMPTYTABLE = setmetatable({}, { __newindex = function()  error("Can't add properties to the EMPTYTABLE.")  end, __metatable = "EMPTYTABLE is not to be modified." })
-
 
 
 local function moduleInit(name, modData)
@@ -83,12 +102,12 @@ local function moduleInit(name, modData)
 		if  not modDB  then  modDB = {}  Broker_EverythingDB[name] = modDB  end
 
 		-- Reset disallowed values.
-		for  varname,allowed  in  pairs(modData.config_allowed or EMPTYTABLE)  do
+		for  varname,allowed  in  pairsOrNil(modData.config_allowed)  do
 			if  not allowed[ modDB[varname] ]  then  modDB[varname] = nil  end
 		end
 		if  not CONFIG_USE_META  and  modData.config_defaults  then
 			-- Copy missing default values.
-			for  varname,default  in  pairs(modData.config_defaults or EMPTYTABLE)  do
+			for  varname,default  in  pairsOrNil(modData.config_defaults)  do
 				if modDB[varname] == nil then  modDB[varname] = default  end
 			end
 		elseif  modData.config_defaults  then
@@ -225,14 +244,6 @@ end
 end
 
 
--- Exported to LibCommon:  indexOf
-
-local LibCommon = _G.LibCommon or {}  ;  _G.LibCommon = LibCommon
-LibCommon.indexOf = LibCommon.indexOf or function(t, item)
-	local last = t and #t or 0  ;  for i = 1,last do  if t[i] == item then  return i  end end
-end
-
-local tindexOf = LibCommon.indexOf
 
 
 --local
@@ -284,7 +295,7 @@ function ns.modulesOnLogout()
 	for  name,module  in  pairs(ns.modules)  do
 		local modDB = Broker_EverythingDB[name]
 		-- Also check modDB ~= nil for safety.
-		for  varname,default  in pairs(modDB and module.config_defaults or EMPTYTABLE)  do
+		for  varname,default  in pairsOrNil(modDB and module.config_defaults)  do
 			if  modDB[varname] == default  then  modDB[varname] = nil  end
 		end
 	end
