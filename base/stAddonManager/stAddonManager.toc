@@ -1,13 +1,17 @@
-## Interface: 50100
+## Interface: 50400
 ## Author: Safturento
-## Version: 1.2.5
+## Version: 1.3
 ## Title: |cff00aaffst|rAddonManager
 ## Notes: A simple and minimalistic addon to disable/enabled addons without logging out.
-## OptionalDependencies: Tukui, ElvUI, Aurora
+## OptionalDependencies: Tukui, ElvUI, SaftUI, AsphyxiaUI, DuffedUI, Aurora
 ## SavedVariables: stAM_Profiles, stAM_Config
+## SavedVariablesPerCharacter: stAM_Profiles_PerChar
 
-initialize.lua
-api.lua
-stAddonManager.lua
-profiles.lua
-config.lua
+# Libs\Libs.xml
+
+Initialize.lua
+API.lua
+SharedMedia.lua
+MainWindow.lua
+ProfileWindow.lua
+Config.lua

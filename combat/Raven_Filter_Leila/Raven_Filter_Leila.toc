@@ -1,0 +1,16 @@
+## Interface: 50400
+## Title: Raven Filter Leila
+## Author: Tomber
+## Notes: Adds a 'Spell list' dropdown menu to the Buff and Debuff tab of Raven Bar Groups.
+## DefaultState: enabled
+## LoadManagers: AddonLoader
+## RequiredDeps: Raven
+
+## X-Credits: Spell list by Leilameda
+## X-RelSite-WoWI: 20276
+## X-Curse-Packaged-Version: v1.95
+## X-Curse-Project-Name: Raven Filter: Leila
+## X-Curse-Project-ID: raven-filter-leila
+## X-Curse-Repository-ID: wow/raven-filter-leila/mainline
+
+Raven_Filter_Leila.lua

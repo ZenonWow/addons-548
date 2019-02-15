@@ -1,44 +1,20 @@
-local addon, API = ...
+local M, F, L, D = unpack(stAddonManager) --Import: Modules, Functions/Utilities, Locales, Data
 
----------------------------------------------------------
--- Pulling in some Tukui functions for easier skinning --
----------------------------------------------------------
-API.pixelfont = {format('Interface\\AddOns\\%s\\media\\visitor.ttf', addon), 12, 'MONOCHROMEOUTLINE'}
-API.normalfont = {'Fonts\\FRIZQT__.TTF', 10, 'THINOUTLINE'}
-API.font = API.pixelfont
-API.barTex = format('Interface\\AddOns\\%s\\media\\normTex.tga', addon)
-API.blankTex = format('Interface\\AddOns\\%s\\media\\blankTex.tga', addon)
-API.glowTex = format('Interface\\AddOns\\%s\\media\\glowTex.tga', addon)
-API.bordercolor = {0.2, 0.2, 0.2}
-API.backdropcolor = {0.05, 0.05, 0.05}
-API.hovercolorHex = '00aaff'
-API.hovercolor = {0/255, 170/255, 255/255}
+F.dummy = function() end
 
-API.dummy = function() end
-
-if Tukui then
-	local C = Tukui[2]
-	API.font = { C.media.pixelfont, 12, 'MONOCHROMEOUTLINE' }
-	API.barTex = C.media.normTex
-	API.backdropcolor = C.general.backdropcolor
-	API.bordercolor = C.general.bordercolor
+function GetCustomUI()
+	if (AsphyxiaUI or DuffedUI or Tukui) then
+		return 'Tukui'
+	elseif ElvUI then
+		return 'ElvUI'
+	elseif SaftUI then
+		return 'SaftUI'
+	else
+		return ''
+	end			
 end
 
-if ElvUI then
-	local E, L, V, P, G, _ = unpack(ElvUI); --Inport: Engine, Locales, PrivateDB, ProfileDB, GlobalDB, Localize Underscore
-	API.backdropcolor = P.general.backdropcolor
-	API.bordercolor = P.general.bordercolor
-end
-
-local function RegisterEvents(self, events)
-	if not type(events) == 'table' then error('Events must be passed as a table') return end
-
-	for _,event in pairs(events) do
-		self:RegisterEvent(event)
-	end
-end
-
-local function Kill(object)
+function F.Kill(object)
 	if object.UnregisterAllEvents then
 		object:UnregisterAllEvents()
 	end
@@ -46,7 +22,7 @@ local function Kill(object)
 	object:Hide()
 end
 
-local function StripTextures(object, kill)
+function F.StripTextures(object, kill)
 	for i=1, object:GetNumRegions() do
 		local region = select(i, object:GetRegions())
 		if region:GetObjectType() == 'Texture' then
@@ -59,132 +35,28 @@ local function StripTextures(object, kill)
 	end		
 end
 
-function API.SetPixelFont(text)
-	text:SetFont(unpack(API.font))
-	text:SetShadowOffset(0,0)
-end
+function F.SetFontTemplate(text)
+	if GetCustomUI() == 'Tukui' then
 
+	elseif GetCustomUI() == 'ElvUI' then
 
-local function CreateBackdrop(f, t, tex)
-	if f.backdrop then return end
-	if not t then t = 'Default' end
-
-	local b = CreateFrame('Frame', nil, f)
-	b:Point('TOPLEFT', -2 + inset, 2 - inset)
-	b:Point('BOTTOMRIGHT', 2 - inset, -2 + inset)
-	b:SetTemplate(t, tex)
-
-	if f:GetFrameLevel() - 1 >= 0 then
-		b:SetFrameLevel(f:GetFrameLevel() - 1)
-	else
-		b:SetFrameLevel(0)
+	elseif GetCustomUI() == 'SaftUI' then
+		text:SetFontTemplate()
+	else			
+		text:SetFont(unpack(D.Saved.Font))
+		text:SetShadowOffset(0,0)
 	end
-	
-	f.backdrop = b
 end
 
-local function SetTemplate(f, t, tex)
-	local texture = tex and API.barTex or API.blankTex
+function F.GetBackdrop(inset)
+	inset = inset or 2
 
-	f:SetBackdrop({
-	  bgFile = texture, 
-	  edgeFile = API.blankTex, 
-	  tile = false, tileSize = 0, edgeSize = 1,
-	})
-
-	if not noinset and not f.isInsetDone then
-		f.insettop = f:CreateTexture(nil, 'BORDER')
-		f.insettop:SetPoint('TOPLEFT', f, 'TOPLEFT', -1, 1)
-		f.insettop:SetPoint('TOPRIGHT', f, 'TOPRIGHT', 1, -1)
-		f.insettop:SetHeight(1)
-		f.insettop:SetTexture(0,0,0)	
-		f.insettop:SetDrawLayer('BORDER', -7)
-		
-		f.insetbottom = f:CreateTexture(nil, 'BORDER')
-		f.insetbottom:SetPoint('BOTTOMLEFT', f, 'BOTTOMLEFT', -1, -1)
-		f.insetbottom:SetPoint('BOTTOMRIGHT', f, 'BOTTOMRIGHT', 1, -1)
-		f.insetbottom:SetHeight(1)
-		f.insetbottom:SetTexture(0,0,0)	
-		f.insetbottom:SetDrawLayer('BORDER', -7)
-		
-		f.insetleft = f:CreateTexture(nil, 'BORDER')
-		f.insetleft:SetPoint('TOPLEFT', f, 'TOPLEFT', -1, 1)
-		f.insetleft:SetPoint('BOTTOMLEFT', f, 'BOTTOMLEFT', 1, -1)
-		f.insetleft:SetWidth(1)
-		f.insetleft:SetTexture(0,0,0)
-		f.insetleft:SetDrawLayer('BORDER', -7)
-		
-		f.insetright = f:CreateTexture(nil, 'BORDER')
-		f.insetright:SetPoint('TOPRIGHT', f, 'TOPRIGHT', 1, 1)
-		f.insetright:SetPoint('BOTTOMRIGHT', f, 'BOTTOMRIGHT', -1, -1)
-		f.insetright:SetWidth(1)
-		f.insetright:SetTexture(0,0,0)	
-		f.insetright:SetDrawLayer('BORDER', -7)
-
-		f.insetinsidetop = f:CreateTexture(nil, 'BORDER')
-		f.insetinsidetop:SetPoint('TOPLEFT', f, 'TOPLEFT', 1, -1)
-		f.insetinsidetop:SetPoint('TOPRIGHT', f, 'TOPRIGHT', -1, 1)
-		f.insetinsidetop:SetHeight(1)
-		f.insetinsidetop:SetTexture(0,0,0)	
-		f.insetinsidetop:SetDrawLayer('BORDER', -7)
-		
-		f.insetinsidebottom = f:CreateTexture(nil, 'BORDER')
-		f.insetinsidebottom:SetPoint('BOTTOMLEFT', f, 'BOTTOMLEFT', 1, 1)
-		f.insetinsidebottom:SetPoint('BOTTOMRIGHT', f, 'BOTTOMRIGHT', -1, 1)
-		f.insetinsidebottom:SetHeight(1)
-		f.insetinsidebottom:SetTexture(0,0,0)	
-		f.insetinsidebottom:SetDrawLayer('BORDER', -7)
-		
-		f.insetinsideleft = f:CreateTexture(nil, 'BORDER')
-		f.insetinsideleft:SetPoint('TOPLEFT', f, 'TOPLEFT', 1, -1)
-		f.insetinsideleft:SetPoint('BOTTOMLEFT', f, 'BOTTOMLEFT', -1, 1)
-		f.insetinsideleft:SetWidth(1)
-		f.insetinsideleft:SetTexture(0,0,0)
-		f.insetinsideleft:SetDrawLayer('BORDER', -7)
-		
-		f.insetinsideright = f:CreateTexture(nil, 'BORDER')
-		f.insetinsideright:SetPoint('TOPRIGHT', f, 'TOPRIGHT', -1, -1)
-		f.insetinsideright:SetPoint('BOTTOMRIGHT', f, 'BOTTOMRIGHT', 1, 1)
-		f.insetinsideright:SetWidth(1)
-		f.insetinsideright:SetTexture(0,0,0)	
-		f.insetinsideright:SetDrawLayer('BORDER', -7)
-
-		f.isInsetDone = true
-	end
-	local r, g, b = unpack(API.backdropcolor)
-	local a = t == 'Transparent' and 0.8 or 1
-	f:SetBackdropColor(r, g, b, a)
-	r, g, b = unpack(API.bordercolor)
-	f:SetBackdropBorderColor(r, g, b)
-end
-
-local function SetInside(obj, anchor, xOffset, yOffset)
-	xOffset = xOffset or 2
-	yOffset = yOffset or 2
-	anchor = anchor or obj:GetParent()
-
-	if obj:GetPoint() then obj:ClearAllPoints() end
-	
-	obj:SetPoint('TOPLEFT', anchor, 'TOPLEFT', xOffset, -yOffset)
-	obj:SetPoint('BOTTOMRIGHT', anchor, 'BOTTOMRIGHT', -xOffset, yOffset)
-end
-
-local function CreateBackdrop(f, t, tex)
-	if f.backdrop then return end
-	if not t then t = 'Default' end
-
-	local b = CreateFrame('Frame', nil, f)
-	b:SetPoint('TOPLEFT', -2 + inset, 2 - inset)
-	b:SetPoint('BOTTOMRIGHT', 2 - inset, -2 + inset)
-	b:SetTemplate(t, tex)
-
-	if f:GetFrameLevel() - 1 >= 0 then
-		b:SetFrameLevel(f:GetFrameLevel() - 1)
-	else
-		b:SetFrameLevel(0)
-	end
-	
-	f.backdrop = b
+	return {
+		bgFile = D.blankTex, 
+		edgeFile = D.blankTex, 
+		tile = false, tileSize = 0, edgeSize = 1, 
+		insets = { left = inset, right = inset, top = inset, bottom = inset}
+	}
 end
 
 local function CreateShadow(f, t)
@@ -206,28 +78,131 @@ local function CreateShadow(f, t)
 	f.shadow = shadow
 end
 
-function API.CreateButton(name, parent, width, height, point, text, onclick)
-	local button = CreateFrame('Button', name or nil, parent or UIParent)
-	button:SetTemplate()
-	button:SetSize(width or 50, height or 20) -- Just random numbers to have a basic form and 
-	button:SetScript('OnEnter', function(self) self:SetBackdropBorderColor(unpack(API.hovercolor)) end)
-	button:SetScript('OnLeave', function(self) self:SetBackdropBorderColor(unpack(API.bordercolor)) end)
-	
-	if onclick then
-		button:SetScript('OnClick', function(self, btn) onclick(self, btn) end)
+local function HideBorder(self)
+	if self.insets then
+		for _,inset in pairs(self.insets) do
+			inset:Hide()
+		end
 	end
-	
-	if point then
-		button:SetPoint(unpack(point))
-	end
+end
 
-	button.text = API.CreateFontString(button, nil, 'OVERLAY', text or '', {'CENTER', 0,0}, 'CENTER', API.FontStringTable or nil)
+--Cleaner way to toggle borders
+local function ShowBorder(self) self.innerborder:Show(); self.outerborder:Show(); end
+local function HideBorder(self) self.innerborder:Hide(); self.outerborder:Hide(); end
+
+local function CreateThickBorder(self)
+	if self.outerborder then return end
+
+	local backdrop = F.GetBackdrop(0)
+	backdrop.bgFile = nil
+	
+	self.outerborder = CreateFrame("Frame", nil, self)
+	F.SetInside(self.outerborder, self, -1)
+	self.outerborder:SetBackdrop(backdrop)
+	self.outerborder:SetBackdropBorderColor(0, 0, 0, 1)
+	self.outerborder:SetFrameLevel(max(0, self:GetFrameLevel()-1))
+
+	self.innerborder = CreateFrame("Frame", nil, self)
+	F.SetInside(self.innerborder, self, 1)
+	self.innerborder:SetBackdrop(backdrop)
+	self.innerborder:SetBackdropBorderColor(0, 0, 0, 1)
+	self.innerborder:SetFrameLevel(max(0, self:GetFrameLevel()-1))
+
+	self.ShowBorder = ShowBorder
+	self.HideBorder = HideBorder
+end
+
+local function ClearTemplate(self)
+	self:SetBackdrop(nil)
+	if self.HideBorder then self:HideBorder() end
+	if self.shadow then self.shadow:Hide() end
+end
+
+local function SetTemplate(f, mods)
+	mods = mods or ''
+
+	--Start with a clean slate
+	ClearTemplate(f)
+
+	--If a clear template is desired, don't continue
+	if strfind(mods, 'N') then return end
+
+	local blankTex = D.blankTex
+	f:SetBackdrop(F.GetBackdrop())
+
+	if not f.ShowBorder then CreateThickBorder(f) else f:ShowBorder() end
+
+	local r, g, b = unpack(D.Saved.Colors.backdrop)
+	local a = strfind(mods, 'T') and 0.8 or 1
+	f:SetBackdropColor(r, g, b, a)
+	
+	r, g, b = unpack(D.Saved.Colors.border)
+	f:SetBackdropBorderColor(r, g, b)
+end
+
+function F.SetTemplate(self, temp, tex)
+	if self.SetTemplate then
+		self:SetTemplate(temp)
+	else			
+		SetTemplate(self, temp)
+	end
+end
+
+function F.SetInside(obj, anchor, xOffset, yOffset)
+	local off = 2
+	if GetCustomUI() == 'SaftUI' then
+		off = SaftUI[1].GetBorderInset()
+	end 
+	xOffset = xOffset or off
+	yOffset = yOffset or xOffset or off
+	anchor = anchor or obj:GetParent()
+
+	if obj:GetPoint() then obj:ClearAllPoints() end
+	
+	obj:SetPoint('TOPLEFT', anchor, 'TOPLEFT', xOffset, -yOffset)
+	obj:SetPoint('BOTTOMRIGHT', anchor, 'BOTTOMRIGHT', -xOffset, yOffset)
+end
+
+function F.CreateBackdrop(f, t, tex)
+	--Use custom UI's function if available	
+	if f.CreateBackdrop then f:CreateBackdrop(f, t, tex) return end
+
+	if f.backdrop then return end
+	if not t then t = 'Default' end
+
+	local b = CreateFrame('Frame', nil, f)
+	b:SetPoint('TOPLEFT', -2 + inset, 2 - inset)
+	b:SetPoint('BOTTOMRIGHT', 2 - inset, -2 + inset)
+	F.SetTemplate(b, t, tex)
+
+	if f:GetFrameLevel() - 1 >= 0 then
+		b:SetFrameLevel(f:GetFrameLevel() - 1)
+	else
+		b:SetFrameLevel(0)
+	end
+	
+	f.backdrop = b
+end
+
+function F.CreateButton(name, parent, width, height, point, text, onclick)
+	local button = CreateFrame('Button', name or nil, parent or UIParent)
+	F.SetTemplate(button)
+	button:SetSize(width or 50, height or 20) -- Just random numbers to have a basic form and 
+	button:SetScript('OnEnter', function(self) self:SetBackdropBorderColor(unpack(D.Saved.Colors.hover)) end)
+	button:SetScript('OnLeave', function(self) F.SetTemplate(self) end)
+	
+	if point then button:SetPoint(unpack(point)) end
+	if onclick then button:SetScript('OnClick', onclick) end
+
+	button.text = F.CreateFontString(button)
+	button.text:SetText(text or '')
+	button.text:SetPoint('CENTER')
 	return button
 end
 
-function API.CreateCheckBox(name, parent, width, height, point, onclick)
+function F.CreateCheckBox(name, parent, width, height, point, onclick)
 	local checkbox = CreateFrame('CheckButton', name or nil, parent or UIParent)
-	checkbox:SetTemplate()
+	F.SetTemplate(checkbox)
 	checkbox:SetSize(width or 10, height or 10)
 
 	if point then checkbox:SetPoint(unpack(point)) end
@@ -235,102 +210,107 @@ function API.CreateCheckBox(name, parent, width, height, point, onclick)
 
 	--Time to sexify these textures
 	local checked = checkbox:CreateTexture(nil, 'OVERLAY')
-	checked:SetTexture(unpack(API.hovercolor))
-	checked:SetInside(checkbox)
+	checked:SetTexture(unpack(D.Saved.Colors.hover))
+	F.SetInside(checked, checkbox)
 	checkbox:SetCheckedTexture(checked)
 
 	local hover = checkbox:CreateTexture(nil, 'OVERLAY')
 	hover:SetTexture(1, 1, 1, 0.3)
-	hover:SetInside(checkbox)
+	F.SetInside(hover, checkbox)
 	checkbox:SetHighlightTexture(hover)
 
-
-	checkbox.text = API.CreateFontString(checkbox, nil, 'OVERLAY', text or '', {'LEFT', 5,0}, 'CENTER', API.FontStringTable or nil)
+	checkbox.text = F.CreateFontString(checkbox)
 	return checkbox
 end
 
-function API.CreateEditBox(name, parent, width, height, point)
+function F.CreateEditBox(name, parent, width, height, point)
 	local search = CreateFrame('EditBox', name or nil, parent or UIParent)
 	search:SetSize(width or 150, height or 20)
 	if point then search:SetPoint(unpack(point)) end
-	search:SetTemplate()
+	F.SetTemplate(search)
 	search:SetAutoFocus(false)
 	search:SetTextInsets(5, 5, 0, 0)
 
-	API.SetPixelFont(search)
+	F.SetFontTemplate(search)
 	search:SetTextColor(1, 1, 1)
-	tinsert(API.FontStringTable, search)
 
 	--Just some basic scripts to make sure your cursor doesn't get stuck in the edit box
 	search:HookScript('OnEnterPressed', function(self) self:ClearFocus() end)
 	search:HookScript('OnEscapePressed', function(self) self:ClearFocus() end)
-	search:HookScript('OnEditFocusGained', function(self) self:SetBackdropBorderColor(unpack(API.hovercolor)); self:HighlightText() end)
-	search:HookScript('OnEditFocusLost', function(self) self:SetBackdropBorderColor(unpack(API.bordercolor)); self:HighlightText(0,0) end)
+	search:HookScript('OnEditFocusGained', function(self) self:SetBackdropBorderColor(unpack(D.Saved.Colors.hover)); self:HighlightText() end)
+	search:HookScript('OnEditFocusLost', function(self)  F.SetTemplate(self); self:HighlightText(0,0) end)
 
 	return search
 end
 
-function API.CreateFontString(self, name, layer, text, point, justification, storageTable)
-	local fs = self:CreateFontString(name or nil, layer or 'OVERLAY')
-	API.SetPixelFont(fs)
+function F.SetFont(self)
+		self:SetFont(unpack(D.Saved.Font))
+		self:SetShadowOffset(0, 0)
+end
 
-	if point then fs:SetPoint(unpack(point)) end
-	if text then fs:SetText(text) end
-	if justification then fs:SetJustifyH(justification) end
-
-	--useful for mass changing fonts for an addon
-	if storageTable then
-		tinsert(storageTable, fs)
-	end
-
+function F.CreateFontString(self)
+	local fs = self:CreateFontString(nil, 'OVERLAY')
+	F.SetFont(fs)
 	return fs
 end
 
-local function Kill(object)
-	if object.UnregisterAllEvents then
-		object:UnregisterAllEvents()
-	end
-	object.Show = noop
-	object:Hide()
+function F.AddTooltip(self, func)
+	assert(func, 'You need to add a function to execute line additions to tooltip')
+	self:HookScript('OnEnter', function(self)
+		GameTooltip:SetOwner(self, 'ANCHOR_RIGHT', 5, -self:GetHeight())
+		GameTooltip:ClearLines()
+		
+		func()
+		
+		GameTooltip:Show()
+	end)
+	self:HookScript('OnLeave', function() GameTooltip:Hide() end)
 end
 
-local function StripTextures(object, kill)
-	for i=1, object:GetNumRegions() do
-		local region = select(i, object:GetRegions())
-		if region:GetObjectType() == 'Texture' then
-			if kill then
-				region:Kill()
-			else
-				region:SetTexture(nil)
+---------------------------
+-- TABLE FUNCTIONS --------
+---------------------------
+--Make a copy of a table
+function F.CopyTable(t, deep, seen)
+	seen = seen or {}
+	if t == nil then return nil end
+	if seen[t] then return seen[t] end
+
+	local nt = {}
+	for k, v in pairs(t) do
+		if deep and type(v) == 'table' then
+			nt[k] = F.CopyTable(v, deep, seen)
+		else
+			nt[k] = v
+		end
+	end
+	setmetatable(nt, F.CopyTable(getmetatable(t), deep, seen))
+	seen[t] = nt
+	return nt
+end
+
+--Merge two tables, with variables from t2 overwriting t1 when a duplicate is found
+function F.MergeTable(t1, t2)
+	for k, v in pairs(t2) do
+		if (type(v) == "table") and (type(t1[k] or false) == "table") then
+		   F.MergeTables(t1[k], t2[k])
+		else
+			t1[k] = v
+		end
+	end
+	return t1
+end
+
+--Purge any variable of t1 who's value is set to the same as t2
+function F.PurgeTable(t1, t2)
+	for k, v in pairs(t2) do
+		if (type(v) == "table") and (type(t1[k] or false) == "table") then
+			F.PurgeTable(t1[k], t2[k])
+		else
+			if t1[k] == v then
+				t1[k] = nil
 			end
 		end
-	end		
-end
-
-local function addapi(object)
-	local mt = getmetatable(object).__index
-	if not object.RegisterEvents then mt.RegisterEvents = RegisterEvents end
-	if not object.SetTemplate then mt.SetTemplate = SetTemplate end
-	if not object.SetInside then mt.SetInside = SetInside end
-	if not object.CreateBackdrop then mt.CreateBackdrop = CreateBackdrop end
-	if not object.CreateShadow then mt.CreateShadow = CreateShadow end
-	if not object.Kill then mt.Kill = Kill end
-	if not object.StripTextures then mt.StripTextures = StripTextures end
-
-end
-
-local handled = {['Frame'] = true}
-local object = CreateFrame('Frame')
-addapi(object)
-addapi(object:CreateTexture())
-addapi(object:CreateFontString())
-
-object = EnumerateFrames()
-while object do
-	if not handled[object:GetObjectType()] then
-		addapi(object)
-		handled[object:GetObjectType()] = true
 	end
-
-	object = EnumerateFrames(object)
+	return t1
 end
