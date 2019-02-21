@@ -1,4 +1,45 @@
 --[[
+	Name alternatives:
+CursorMode (normal) / LookAroundMode (LeftButton) / MouselookMode (RightButton).
+ActionMode = MouselookMode without pressing RightButton. Riding the hypetrain of ActionCombat (not in wow...) and ActionCamera (this is a thing, try DynamicCam addon, will change your life).
+ActionCameraMode? ?? (as opposite of FreeCameraMode makes sense)
+FreeCameraMode = LookAroundMode = CameraMode
+MouseCursorMode = FreeCursorMode = CursorMode, for short.
+
+Actually you can be in CursorMode while in ActionMode by pressing RightButton.
+Pressing LeftButton will go into CameraMode or start moving (MoveAndSteer) in ActionMode,
+depending on the setting of ActionModeMoveWithButton1.
+
+CombatMode
+CameraMode
+MouseCameraMode-MouseCursorMode-MouselookMode
+Mouselook
+https://en.wikipedia.org/wiki/Free_look
+
+	Inspired by:
+Immersive Combat Mode for Guild Wars 2    http://wesslen.org/ICM/
+CombatMode addon
+CombatMode Reborn addon
+Mouse_Look_Lock    https://github.com/DWishR/Mouse-Look-Lock
+MouselookHandler    https://github.com/meribold/MouselookHandler
+
+https://www.wowinterface.com/downloads/info24776-CombatModeReborn.html
+https://wow.curseforge.com/projects/combat-mode
+https://wow.curseforge.com/projects/mouse-look-lock
+-- It also causes the mouse buttons to remap to movement (forward and backward) keys to match the configuration found in Dark Age of Camelot.
+https://wow.curseforge.com/projects/kiki-utils
+-- Mouselook : Real DAoC mouse look mode. Key1 switch to and from Mouselook on each press. Hold Key2 to move the camera (when in Mouselook mode). In Mouselook mode, Button1 and Button2 are remapped to MoveForward and MoveBackward. Mouselook mode does NOT break follow mode.
+https://wow.curseforge.com/projects/mouselookhandler
+https://wow.curseforge.com/projects/mouselook
+https://wow.curseforge.com/projects/mouselook-binding
+https://wow.curseforge.com/projects/mouse-combat
+--]]
+
+--[[
+/targetenemy [noharm][dead]
+/target[harm][dead]
+-> InteractTarget -> loot?
+
 /dump GetBindingByKey('BUTTON1'), GetBindingByKey('BUTTON2')
 /dump GetBindingKey('CAMERAORSELECTORMOVE'), GetBindingKey('TURNORACTION'), GetBindingKey('TARGETNEARESTFRIEND')
 Reset to default:
@@ -32,21 +73,29 @@ local pairsOrOne,ipairsOrOne,packOrOne = LibCommon:Import("pairsOrOne,ipairsOrOn
 
 -- Key bindings' labels
 BINDING_HEADER_CombatMode= "Combat Mode"
-BINDING_NAME_COMBATMODE_ENABLE= "Enable while holding or toggle with click"
-BINDING_NAME_COMBATMODE_TOGGLE= "Toggle Combat Mode when clicked"
+BINDING_NAME_COMBATMODE_ENABLE= "Enable Action mode"
+BINDING_NAME_COMBATMODE_TOGGLE= "Toggle Action mode"
 
 -- Builtin commands
 BINDING_NAME_CAMERAORSELECTORMOVE 			= "Rotate Camera (Left Button default)"			-- targeting  or  camera rotation, original binding of BUTTON1
 BINDING_NAME_TURNORACTION 							= "Turn or Action (Right Button default)"		-- the original binding of BUTTON2
 -- Custom commands
 BINDING_NAME_SMARTTARGETANDINTERACTNPC 	= "Smart Target: target and interact closest friendly npc"
-BINDING_NAME_FOCUSMOUSEOVER 						= "Focus Mouseover"		-- no turning or camera
+
+local FocusMouseoverBinding = 'BINDING_NAME_CLICK FocusMouseoverButton:LeftButton'
+
+do
+	-- BINDING_NAME_FOCUSMOUSEOVER 						= "Focus Mouseover"		-- no turning or camera
+	_G[FocusMouseoverBinding] = "Focus Mouseover"
+	local FocusMouseoverButton = CreateFrame('Button', 'FocusMouseoverButton', UIParent, 'SecureActionButtonTemplate')
+	FocusMouseoverButton:SetAttribute('type', 'macro')
+	FocusMouseoverButton:SetAttribute('macrotext', '/focus mouseover')
+end
 
 
 -- Init state:
-CombatMode.enabledPermanent= false		-- permanent combat mode with no buttons pressed
-CombatMode.holdKeyState= nil			-- 'HoldToEnable' or 'HoldToDisable': temporarily change combat mode (if not nil) while bound key/button is pressed
-CombatMode.CursorActionActive= false
+CombatMode.enabledActionMode= nil
+CombatMode.enabledOverride= nil
 --local combatModeTemporaryDisable = true		-- combatModeTemporaryDisable is expected to be == not IsMouselooking()
 CombatMode.BoundCommand= 'TARGETNEARESTFRIEND'  -- default action for TARGETNEARESTANDINTERACTNPC: INTERACTTARGET or TARGETNEARESTFRIEND
 
@@ -59,31 +108,46 @@ CombatMode.config= {}
 CombatMode.config.settingsDefaults= {
 	--global = { version = "1.0.0", },
 	profile= {
-		enabledWhileMoving= true,
+		enabledOnLogin= false,
+		enabledWhileMoving= false,
+		enableWithBothButtons= true,
+		enableWithMoveAndSteer= true,
+		disableWithLookAround= true,
+		ActionModeMoveWithButton1= false,
 		bindings= {  -- 2018-10-21:
 			--['BUTTON1']				= "TARGETNEARESTANDINTERACTNPC",
+			['BUTTON1']				= "CAMERAORSELECTORMOVE",  -- Rotate Camera (LeftButton default),
+			['BUTTON2']				= "TURNORACTION",  -- Turn or Action (RightButton default),
+			['ALT-BUTTON1']		= "MOVEANDSTEER",
+			['ALT-BUTTON2']		= "AUTORUN",
+			['SHIFT-BUTTON1'] = "STRAFELEFT",
+			['SHIFT-BUTTON2'] = "STRAFERIGHT",
+			['CTRL-BUTTON1']	= "TARGETNEARESTANDINTERACTNPC",
+			['CTRL-BUTTON2']	= "INTERACTMOUSEOVER",  -- Does INTERACTTARGET if there is nothing under the mouse (no mouseover)
+			--[[
 			['BUTTON1']				= "MOVEANDSTEER",
 			['BUTTON2']				= "TURNORACTION",
-			['ALT-BUTTON1']		= "CAMERAORSELECTORMOVE",  -- Rotate Camera (Left Button default),
-			['ALT-BUTTON2']		= "TURNORACTION",  -- Turn or Action (Right Button default),
+			['ALT-BUTTON1']		= "CAMERAORSELECTORMOVE",  -- Rotate Camera (LeftButton default),
+			['ALT-BUTTON2']		= "TURNORACTION",  -- Turn or Action (RightButton default),
 			['SHIFT-BUTTON1'] = "TARGETNEARESTFRIEND",
 			['SHIFT-BUTTON2'] = "TARGETNEARESTENEMY",
 			['CTRL-BUTTON1']	= "TARGETNEARESTANDINTERACTNPC",
 			['CTRL-BUTTON2']	= "INTERACTMOUSEOVER",  -- Does INTERACTTARGET if there is nothing under the mouse (no mouseover)
+			--]]
 			--[[
 			['BUTTON1']				= "TARGETNEARESTANDINTERACTNPC",
 			--['BUTTON1']				= "MOVEANDSTEER",
 			['BUTTON2']				= "TARGETSCANENEMY",
-			['ALT-BUTTON1']		= "CAMERAORSELECTORMOVE",  -- Rotate Camera (Left Button default),
-			['ALT-BUTTON2']		= "TURNORACTION",  -- Turn or Action (Right Button default),
-			['SHIFT-BUTTON1'] = "FOCUSMOUSEOVER",
+			['ALT-BUTTON1']		= "CAMERAORSELECTORMOVE",  -- Rotate Camera (LeftButton default),
+			['ALT-BUTTON2']		= "TURNORACTION",  -- Turn or Action (RightButton default),
+			['SHIFT-BUTTON1'] = FocusMouseoverBinding,
 			['SHIFT-BUTTON2'] = "TARGETNEARESTENEMY",
 			['CTRL-BUTTON1']	= "INTERACTMOUSEOVER",  -- Does INTERACTTARGET if there is nothing under the mouse (no mouseover)
 			['CTRL-BUTTON2']	= "TARGETNEARESTANDINTERACTNPC",
 			--]]
 			--[[
 			['SHIFT-BUTTON1'] = "TARGETMOUSEOVER",
-			['SHIFT-BUTTON2'] = "FOCUSMOUSEOVER",
+			['SHIFT-BUTTON2'] = FocusMouseoverBinding,
 			['SHIFT-BUTTON1'] = "TARGETPREVIOUSFRIEND",
 			['CTRL-BUTTON1']	= "TARGETNEARESTFRIEND",
 			['CTRL-BUTTON2']	= "INTERACTTARGET",
@@ -126,7 +190,7 @@ CombatMode.config.commands = {
 		'TARGETNEARESTENEMY',					-- target nearest, no turning
 
 		'TARGETMOUSEOVER',						-- no turning or camera -> hook mouse button directly to disable Mouselook while pressed
-		'FOCUSMOUSEOVER',							-- no turning or camera
+		FocusMouseoverBinding,							-- no turning or camera
 
 		-- Target Nearest (tab targeting, no turning or camera, mouse influences direction to look for the nearest)
 		'TARGETNEARESTFRIENDPLAYER',
@@ -167,7 +231,7 @@ CombatMode.config.commandLabelsCustom = {
 		['CAMERAORSELECTORMOVE'] 			= "Rotate Camera",		-- targeting  or  camera rotation, original binding of BUTTON1
 		['TURNORACTION'] 							= "Turn or Action",		-- the original binding of BUTTON2
 		['TARGETNEARESTANDINTERACTNPC'] = "Target and interact closest friendly npc",
-		['FOCUSMOUSEOVER'] 						= "Focus Mouseover",	-- no turning or camera
+		[FocusMouseoverBinding] 						= "Focus Mouseover",	-- no turning or camera
 		--]]
 }
 
@@ -182,8 +246,7 @@ CombatMode.config.commandLabelsCustom = {
 /run CombatMode.colors['nil']= CombatMode.colors.blue
 /run CombatMode.colors[false]= CombatMode.colors.blue
 /run CombatMode.colors[true]= CombatMode.colors.green
-/run CombatMode.colors.holdKeyState = CombatMode.colors.purple
-/run CombatMode.colors.enabledPermanent = CombatMode.colors.orange
+/run CombatMode.colors.enabledActionMode = CombatMode.colors.orange
 --]]
 CombatMode.colors = {
 		black			= "|cFF000000",
@@ -214,10 +277,8 @@ colors.down				= colors.green		--colors.purple
 colors.show				= colors.green
 colors.hide				= colors.lightblue
 colors.event			= colors.lightgreen
-colors.holdKeyState			= colors.event
-colors.enabledPermanent	= colors.orange
-colors.Mouselook					= colors.yellow
-colors.CursorActionActive	= colors.yellow
+colors.enabledActionMode    = colors.orange
+colors.Mouselook          = colors.yellow
 
 function CombatMode.colorBoolStr(value, withColor)
 	local boolStr=  value == true and 'ON'  or  value == false and 'OFF'  or  tostring(value)
@@ -257,7 +318,7 @@ function CombatMode:OnInitialize()
 	To have character-specific profiles when creating/initializing a new character
 	/run  CombatModeDB.profileKeys['default']= false
 	--]]
-	local defaultProfile= CombatModeDB  and  CombatModeDB.profileKeys  and  CombatModeDB.profileKeys.default
+	local defaultProfile= CombatModeDB  and  CombatModeDB.profileKeys  and  CombatModeDB.profileKeys.Default
 	if  defaultProfile == nil  then  defaultProfile= true  end		-- false to have character-specific profiles
 	self.db = LibStub("AceDB-3.0"):New("CombatModeDB", self.config.settingsDefaults, defaultProfile)
 	self.db.RegisterCallback(self, "OnProfileChanged", "ProfileChanged")
@@ -273,43 +334,56 @@ function CombatMode:OnInitialize()
 	self:ProfileChanged()
 end	
 
+
 function CombatMode:OnEnable()
 	-- Run on PLAYER_LOGIN, before PLAYER_ENTERING_WORLD
 	-- frame sizes and positions are loaded before this event
 	self:LogInit('  CombatMode:OnEnable()')
-	--self:HookUpFrames()
-	-- Register Events
-	-- find missing frames when delayed loading any addon
-	self:RegisterEvent('CURSOR_UPDATE')
-	self:RegisterEvent('QUEST_PROGRESS')
-	self:RegisterEvent('QUEST_FINISHED')
-	--[[
-	self:RegisterEvent('PET_BAR_UPDATE', CombatMode_OnEvent)
-	self:RegisterEvent('ACTIONBAR_UPDATE_STATE', CombatMode_OnEvent)
-	self:RegisterEvent('PET_BAR_UPDATE')
-	self:RegisterEvent('ACTIONBAR_UPDATE_STATE')
-	--]]
 
 	-- Do self.SmartInteract:Enable(true)
 	-- self:UpdateOverrideBindings()
-	
+
+	-- Find frames now.
 	self:HookUpFrames()
+	-- Find missing frames when delayed loading any addon.
 	self:RegisterEvent('ADDON_LOADED')
+
+	-- Disable OverrideBindings before combat.
+	self:RegisterEvent('PLAYER_REGEN_DISABLED')
+	self:RegisterEvent('PLAYER_REGEN_ENABLED')
+	-- Monitor Shift/Ctrl/Alt.
+	self:RegisterEvent('MODIFIER_STATE_CHANGED')
+
+	-- Targeting and questing shows cursor.
+	self:RegisterEvent('CURSOR_UPDATE')
+	self:RegisterEvent('QUEST_PROGRESS')
+	self:RegisterEvent('QUEST_FINISHED')
+	-- self:RegisterEvent('PET_BAR_UPDATE')
+	-- self:RegisterEvent('ACTIONBAR_UPDATE_STATE')
 end
 
 function CombatMode:OnDisable()
 	self:LogInit('  CombatMode:OnDisable()')
 	-- Called when the addon is disabled
+
+	self.enabledActionMode = false
+	self.enabledOverride = nil
+
+	self:UnregisterEvent('ADDON_LOADED')
+	self:UnregisterEvent('PLAYER_REGEN_DISABLED')
+	self:UnregisterEvent('PLAYER_REGEN_ENABLED')
+	self:UnregisterEvent('MODIFIER_STATE_CHANGED')
+
 	self:UnregisterEvent('CURSOR_UPDATE')
 	self:UnregisterEvent('QUEST_PROGRESS')
 	self:UnregisterEvent('QUEST_FINISHED')
-	self:UnregisterEvent('PET_BAR_UPDATE')
-	self:UnregisterEvent('ACTIONBAR_UPDATE_STATE')
-	-- self:UnregisterEvent('MODIFIER_STATE_CHANGED')
+	-- self:UnregisterEvent('PET_BAR_UPDATE')
+	-- self:UnregisterEvent('ACTIONBAR_UPDATE_STATE')
 
 	self.SmartInteract:Enable(false)
 	self.SmartInteract:UnregisterEvent('PLAYER_REGEN_ENABLED')
 end
+
 
 function CombatMode:ADDON_LOADED(event, addonName)
 	-- registered for event after PLAYER_LOGIN fires:
@@ -320,15 +394,14 @@ function CombatMode:ADDON_LOADED(event, addonName)
 	self:HookUpFrames()
 end
 
+
 function CombatMode:ProfileChanged()
 	self.config:MigrateSettings()
-	-- on-load value of enabledWhileMoving
-	--self.enabledWhileMoving= self.db.profile.enabledWhileMoving
-	self:UpdateEnableModifiers()
-	self:SetEnabledWhileMoving(self.db.profile.enabledWhileMoving)
+	-- self:UpdateEnableModifiers()
 	-- SmartTargeting, OverrideCommands
 	self.CustomBindings:Update()
 end
+
 
 
 
@@ -336,60 +409,15 @@ end
 -- Enable state
 ------------------
 
-function CombatMode:IsEnabledWhileMoving()  return self.enabledWhileMoving  end
-function CombatMode:SetEnabledWhileMoving(enable)  self.enabledWhileMoving= enable  end
+function CombatMode:IsEnabledWhileMoving()  return self.db.profile.enabledWhileMoving  end
+function CombatMode:SetEnabledWhileMoving(enable)  self.db.profile.enabledWhileMoving= enable  end
 
-function CombatMode:SetEnabledPermanent(enable)
-	if  self.enabledPermanent == enable  then  return  end
-	self.enabledPermanent = enable
-	self:EnableOverrides('CombatMode', enable)
+function CombatMode:SetActionMode(enable)
+	self.enabledActionMode = enable
+	self.enabledOverride = nil
+	if enable ~= self:ExpectedMouselook() then  self.enabledOverride = enable  end
+	self:OverrideBindingsIn('ActionMode', enable)
 end
-
-
-local falseFunc= function ()  return false  end
-local trueFunc=  function ()  return true  end
-local isModifierPressedFunc= {
-	SHIFT = IsShiftKeyPressed,
-	CTRL = IsCtrlKeyPressed,
-	ALT = IsAltKeyPressed,
-}
-
-function CombatMode:UpdateEnableModifiers()
-	local modifiers = self.db.profile.modifiers
-	self.IsEnablePressed  = isModifierPressedFunc[ modifiers.CM_ENABLE_MOD ]  or  falseFunc
-	self.IsDisablePressed = isModifierPressedFunc[ modifiers.CM_DISABLE_MOD ]  or  falseFunc
-	if  self.IsEnablePressed == falseFunc  and  self.IsDisablePressed == falseFunc  then
-		self:UnregisterEvent('MODIFIER_STATE_CHANGED')
-	else
-		self:RegisterEvent('MODIFIER_STATE_CHANGED')
-	end
-end
-
---[[
-function CombatMode:UpdateEnableModifiers()
-	local IsEnableModifierPressed  = isModifierPressedFunc[ self.db.profile.modifiers.CM_ENABLE_MOD ]  or  falseFunc
-	local IsDisableModifierPressed = isModifierPressedFunc[ self.db.profile.modifiers.CM_DISABLE_MOD ]  or  falseFunc
-
-	-- Simple IsEnabledWhileMoving()
-	CombatMode.IsEnabledWhileMoving = function(self)
-		return  self.enabledWhileMoving  and  not IsDisableModifierPressed()  or  IsEnableModifierPressed()
-		--return  self.enabledWhileMoving  and  not IsModifiedClick('CM_DISABLE_MOD')  or  IsModifiedClick('CM_ENABLE_MOD')
-	end
-
-	-- Experiment: Optimized IsEnabledWhileMoving with complex setup
-	local IsNoDisableModifierPressed =  IsDisableModifierPressed == falseFunc  and  trueFunc  or  function () return not IsDisableModifierPressed() end
-
-	-- Make a closure with the above calculated values.
-	-- This is for experimenting with alternative designs.
-	-- Not necessary, as overriding SetEnabledWhileMoving and IsEnabledWhileMoving is confusing.
-	CombatMode.SetEnabledWhileMoving = function(self, enable)
-		self.enabledWhileMoving = enable
-		self.IsEnabledWhileMoving =  enable  and  IsNoDisableModifierPressed  or  IsEnableModifierPressed
-	end
-	CombatMode:SetEnabledWhileMoving(self.enabledWhileMoving)
-end
---]]
-
 
 
 
@@ -455,14 +483,14 @@ local function optMod(action, name, desc, defValues)
 		set = function(info, idx)
 			--if  value == ''  or  value == 'NONE'  then  value= nil  end
 			CombatMode.db.profile.modifiers[action]= CombatMode.config.modifierKeys[idx]
-			CombatMode:UpdateEnableModifiers()
+			-- CombatMode:UpdateEnableModifiers()
 		end,
 	}
 	CombatMode.config.optionsTable.args[action]= optInfo
 	return optInfo
 end
 
-local function optMoving(key, name, desc)
+local function optToggle(key, name, desc)
 	optCnt= optCnt + 1
 	local optInfo= {
 		name = name,
@@ -470,10 +498,10 @@ local function optMoving(key, name, desc)
 		order = optCnt,
 		type = "toggle",
 		--width = "full",
+		-- setting = link(db).profile[key],
 		get = function()  return CombatMode.db.profile[key]  end,
 		set = function(info, value)
 			CombatMode.db.profile[key]= value
-			CombatMode:SetEnabledWhileMoving(value)
 		end,
 	}
 	CombatMode.config.optionsTable.args[key]= optInfo
@@ -501,9 +529,14 @@ CombatMode.config.optionsTableList = {
 	opt("CTRL-BUTTON1", "Control + Left Click"),
 	opt("CTRL-BUTTON2", "Control + Right Click"),
 	opt("X", "X"),
-	optMoving("enabledWhileMoving", "Enable while moving", "While pressing any movement key CombatMode is enabled"),
-	optMod("CM_ENABLE_MOD", "Enable with this modifier:", "While pressing this modifier the camera turns with the mouse."),
-	optMod("CM_DISABLE_MOD", "Disable with this modifier:", "While pressing this modifier the mouse cursor is free to move."),
+	optToggle("enabledOnLogin", "Enable on login", "Surprise your little brother/sister next time he/she logs in."),
+	optToggle("enabledWhileMoving", "Enable while moving", "While pressing any movement key the mouse will turn the camera and your character."),
+	optToggle("enableWithBothButtons", "Enable with both mouse buttons", "After pressing LeftButton and RightButton together: ActionMode will stay enabled."),
+	optToggle("enableWithMoveAndSteer", "Enable with Move and steer", "After pressing MoveAndSteer: ActionMode will stay enabled."),
+	optToggle("disableWithLookAround", "Disable with looking around", "Turning the camera away from the direction your character looks (with LeftButton) will disable ActionMode."),
+	optToggle("ActionModeMoveWithButton1", "Move with LeftButton", "Effective in ActionMode you will move forward while pressing LeftButton. Try RightButton as well, and the two together (MouseCursorMode, LookAroundMode)"),
+	optMod("ActionModeEnableModifier", "Enable with modifier:", "While pressing this modifier the camera turns with the mouse."),
+	optMod("ActionModeDisableModifier", "Disable with modifier:", "While pressing this modifier the mouse cursor is free to move."),
 	--opt("smarttargeting", "Smart Targeting", "Buttons that target the closest friendly NPC and interact with it if close enough", SmartTargetValues),
 }
 
@@ -522,6 +555,7 @@ end
 
 
 local function SetBindings(keys, command)
+	if not keys then  return  end
 	for  i,key  in  ipairs(keys)  do
 		SetBinding(key, command)
 	end
@@ -571,20 +605,12 @@ function CombatMode.config:MigrateSettings()
 	--[[ 2018-01-23
 	Renamed commands: keep the old as hidden and rebind to new on load
 	"Combat Mode Toggle" -> COMBATMODE_TOGGLE
-	"(Hold) Switch Mode" -> COMBATMODE_HOLD -> Use RightClick = TURNORACTION
+	"(Hold) Switch Mode" -> Use RightClick = TURNORACTION
 	--]]
 	local  keys1= { GetBindingKey("Combat Mode Toggle") }
 	local  keys2= { GetBindingKey("(Hold) Switch Mode") }
-	if  #keys1 == 0  then  keys1= nil  end
-	if  #keys2 == 0  then  keys2= nil  end
-
-  if  keys1  and  keys2  then
-		SetBindings(keys1, "COMBATMODE_TOGGLE")
-	  -- SetBindings(keys2, "COMBATMODE_HOLD")
-	elseif  key1  or  key2  then
-		-- If only one is bound -> COMBATMODE_ENABLE
-	  SetBindings(key1 or key2, "COMBATMODE_ENABLE")
-	end
+	SetBindings(keys1, "COMBATMODE_TOGGLE")
+	SetBindings(keys2, "TURNORACTION")
 end
 
 
@@ -594,17 +620,17 @@ end
 -- Command binding overrides
 -------------------------------
 
-CombatMode.OverrideFrames = { User = CreateFrame("Frame"), CombatMode = CreateFrame("Frame"), AutoRun = CreateFrame("Frame"), MoveAndSteer = CreateFrame("Frame"), Mouselook = {} }
+CombatMode.OverrideFrames = { Static = CreateFrame("Frame"), ActionMode = CreateFrame("Frame"), AutoRun = CreateFrame("Frame"), MoveAndSteer = CreateFrame("Frame"), Mouselook = {} }
 local OverrideFrames = CombatMode.OverrideFrames
 -- OverrideFrames.CombatMode.SetBinding = SetOverrideBinding
 
-function OverrideFrames.CombatMode:SetBinding(priority, key, toUpper)
+function OverrideFrames.ActionMode:SetBinding(priority, key, toUpper)
 	print("SetOverrideBinding(_, "..tostring(priority)..", "..key..", "..tostring(toUpper))
 	SetOverrideBinding(self, priority, key, toUpper)
 end
-OverrideFrames.AutoRun.SetBinding = OverrideFrames.CombatMode.SetBinding
-OverrideFrames.MoveAndSteer.SetBinding = OverrideFrames.CombatMode.SetBinding
-OverrideFrames.User.SetBinding = OverrideFrames.CombatMode.SetBinding
+OverrideFrames.AutoRun.SetBinding = OverrideFrames.ActionMode.SetBinding
+OverrideFrames.MoveAndSteer.SetBinding = OverrideFrames.ActionMode.SetBinding
+OverrideFrames.Static.SetBinding = OverrideFrames.ActionMode.SetBinding
 
 function OverrideFrames.Mouselook:SetBinding(priority, key, toUpper)
 	print("SetMouselookOverrideBinding("..key..", "..tostring(toUpper))
@@ -656,12 +682,12 @@ local function OverrideCommand(frame, fromUpper, toUpper, priority)
 end
 
 
-function OverrideFrames.CombatMode:OverrideCommand(fromCmd, toCmd, priority)
+function OverrideFrames.ActionMode:OverrideCommand(fromCmd, toCmd, priority)
 	OverrideCommand(self, fromCmd:upper(), toCmd and toCmd:upper(), priority)
 end
 
-OverrideFrames.AutoRun.OverrideCommand = OverrideFrames.CombatMode.OverrideCommand
-OverrideFrames.MoveAndSteer.OverrideCommand = OverrideFrames.CombatMode.OverrideCommand
+OverrideFrames.AutoRun.OverrideCommand = OverrideFrames.ActionMode.OverrideCommand
+OverrideFrames.MoveAndSteer.OverrideCommand = OverrideFrames.ActionMode.OverrideCommand
 
 
 function OverrideFrames.Mouselook:OverrideCommand(fromCmd, toCmd)
@@ -685,20 +711,24 @@ function CombatMode:UpdateOverrideBindings()
 	print("CombatMode:UpdateOverrideBindings()")
 
 	-- MoveAndSteerStop() stops AutoRun, which is very disturbing when turning with MoveAndSteer while in AutoRun mode.
-	-- Override with MoveForward in CombatMode to avoid this annoyance.
-	-- OverrideFrames.CombatMode:OverrideCommand('MoveAndSteer', 'MoveForward')
+	-- Override with MoveForward in ActionMode to avoid this annoyance.
+	-- OverrideFrames.ActionMode:OverrideCommand('MoveAndSteer', 'MoveForward')
 	-- Or override to TurnOrAction in AutoRun mode.
-	-- OverrideFrames.AutoRun:OverrideCommand('MoveAndSteer', 'TurnOrAction', true)  -- priority over CombatMode's override
+	-- OverrideFrames.AutoRun:OverrideCommand('MoveAndSteer', 'TurnOrAction', true)  -- priority over ActionMode's override
 
 	-- BUTTON2 = TURNORACTION: Turning is always on and Action does nothing when mouse is hidden -> override with:
-	-- OverrideFrames.CombatMode:OverrideCommand('TurnOrAction', 'TARGETNEARESTANDINTERACTNPC')    -- Peaceful
-	-- if GetCVarBool('interactOnLeftClick') then  OverrideFrames.CombatMode:OverrideCommand('TurnOrAction', 'TargetNearestEnemy')  end    -- Combatant
-	-- if true then  OverrideFrames.CombatMode:OverrideCommand('TurnOrAction', 'CombatMode_Hold')  end    -- Regain mouse while pressed. Do instead MouselookStop().
-	-- if true then  OverrideFrames.CombatMode:OverrideCommand('TurnOrAction', 'CombatMode_Disable')  end    -- Regain mouse.
+	-- OverrideFrames.ActionMode:OverrideCommand('TurnOrAction', 'TARGETNEARESTANDINTERACTNPC')    -- Peaceful
+	-- if GetCVarBool('interactOnLeftClick') then  OverrideFrames.ActionMode:OverrideCommand('TurnOrAction', 'TargetNearestEnemy')  end    -- Combatant
+	-- if true then  OverrideFrames.ActionMode:OverrideCommand('TurnOrAction', 'TurnOrAction')  end    -- Regain mouse while pressed. Do instead MouselookStop().
+	-- if true then  OverrideFrames.ActionMode:OverrideCommand('TurnOrAction', 'CombatMode_Disable')  end    -- Regain mouse.
+
+	-- MoveAndSteer stops MoveForward when released while MoveForward is still pressed. Minor annoyance.
+	OverrideFrames.Static:OverrideCommand('MoveAndSteer', 'MOVEFORWARD')    -- TODO: Should only override MouseButton bindings.
+	OverrideFrames.Mouselook:OverrideCommand('MoveAndSteer', 'MOVEFORWARD')
 
 	-- InteractMouseover is useless in Mouselook mode.
-	-- Tipically pressed if the user wants the mouse to select something.
-	OverrideFrames.Mouselook:OverrideCommand('InteractMouseover', 'CombatMode_Disable')    -- Regain mouse.
+	-- Typically pressed if the user wants the mouse to select something.
+	OverrideFrames.Mouselook:OverrideCommand('InteractMouseover', 'TURNORACTION')    -- Regain mouse.
 	-- OverrideFrames.Mouselook:OverrideCommand('InteractMouseover', 'TARGETNEARESTANDINTERACTNPC')
 
 	-- InteractTarget does nothing if there is no target.
@@ -720,34 +750,50 @@ end  -- function CombatMode:UpdateOverrideBindings()
 
 
 
-function CombatMode:EnableOverrides(mode, enable)
-	print('  CombatMode:EnableOverrides('..mode..', '..colorBoolStr(enable, true)..')')
+function CombatMode:OverrideBindingsIn(mode, enable)
+	print('  CombatMode:OverrideBindingsIn('..mode..', '..colorBoolStr(enable, true)..')')
 	local frame = self.OverrideFrames[mode]
 
-	if  mode == 'CombatMode'  then
+	if  mode == 'ActionMode'  then
 		-- frame:SetBinding(false, 'BUTTON2', enable and 'MOVEFORWARD' or nil)
-		-- frame:OverrideCommand('MoveAndSteer', enable and 'MoveForward')  -- priority over CombatMode's override
+		-- frame:OverrideCommand('MoveAndSteer', enable and 'MoveForward')
 		-- frame:OverrideCommand('TurnOrAction', enable and 'TARGETNEARESTANDINTERACTNPC')    -- Peaceful
 	end
 	if  mode == 'AutoRun'  then
-		-- frame:OverrideCommand('MoveAndSteer', enable and 'TurnOrAction', true)  -- priority over CombatMode's override
+		frame:OverrideCommand('MoveAndSteer', enable and 'TurnOrAction', true)  -- priority over ActionMode's override
 		-- frame:SetBinding(true, 'BUTTON1', enable and 'TURNORACTION')
-		frame:SetBinding(true, 'BUTTON1', enable and 'CAMERAORSELECTORMOVE')
+		-- frame:SetBinding(true, 'BUTTON1', enable and 'CAMERAORSELECTORMOVE')
 	end
 	if  mode == 'MoveAndSteer'  then
 		-- frame:OverrideCommand('TurnOrAction', enable and 'AutoRun', true)
-		frame:SetBinding(true, 'BUTTON2', enable and 'AUTORUN')
-		frame:SetBinding(true, 'BUTTON5', enable and 'COMBATMODE_TOGGLE')
+		-- frame:SetBinding(true, 'BUTTON2', enable and 'AUTORUN')
+		-- frame:SetBinding(true, 'BUTTON5', enable and 'COMBATMODE_TOGGLE')
 	end
 
 	if enable then  self:CheckOverrides(frame)  end
 end
+
 
 function CombatMode:CheckOverrides(frame)
 	for  cmd,keys  in pairsOrOne(frame.cmdKeys) do  if  CombatMode.commands.state[cmd]  then
 		CombatMode:LogAnomaly("CombatMode:CheckOverrides(): "..cmd.." is pressed, overriding may cause stuck key: "..strjoin(", ", keys))
 	end end  -- for if
 end
+
+
+function CombatMode:PLAYER_REGEN_DISABLED()
+	CombatMode:OverrideBindingsIn('ActionMode',   false)
+	CombatMode:OverrideBindingsIn('AutoRun',      false)
+	CombatMode:OverrideBindingsIn('MoveAndSteer', false)
+end
+
+function CombatMode:PLAYER_REGEN_ENABLED()
+	CombatMode:OverrideBindingsIn('ActionMode',   self.enabledActionMode)
+	CombatMode:OverrideBindingsIn('AutoRun',      self.commands.state.TurnOrAction)
+	CombatMode:OverrideBindingsIn('MoveAndSteer', self.commands.state.MoveAndSteer)
+end
+
+
 
 
 
@@ -886,14 +932,14 @@ function CombatMode.CustomBindings:Update()
 end
 
 
-CombatMode:EnableOverrides('CombatMode', false)
-CombatMode:EnableOverrides('AutoRun', false)
+CombatMode:OverrideBindingsIn('CombatMode', false)
+CombatMode:OverrideBindingsIn('AutoRun', false)
 CombatMode.CustomBindings:Hide()
 
 
 --[[
-/run CombatMode:EnableOverrides('CombatMode', true)
-/run CombatMode:EnableOverrides('AutoRun', true)
+/run CombatMode:OverrideBindingsIn('CombatMode', true)
+/run CombatMode:OverrideBindingsIn('AutoRun', true)
 /run CombatMode.CustomBindings:Show()
 /run CombatMode.CustomBindings:SetBinding(false, 'BUTTON1', nil) ; CombatMode.CustomBindings:SetBinding(false, 'BUTTON2', nil)
 
@@ -909,8 +955,8 @@ CombatMode.CustomBindings:Hide()
 /run  SetOverrideBinding(CombatMode.OverrideFrames.AutoRun, false, 'BUTTON2', nil)
 /run  SetMouselookOverrideBinding('X')
 /run  CombatMode.OverrideFrames.CombatMode:Show()
-/run  CombatMode:EnableOverrides('CombatMode',true)
-/run  CombatMode:EnableOverrides('AutoRun',true)
+/run  CombatMode:OverrideBindingsIn('CombatMode',true)
+/run  CombatMode:OverrideBindingsIn('AutoRun',true)
 --]]
 
 

@@ -78,16 +78,7 @@ function CombatMode:MigrateSettings()
 
 
 
-function CombatMode:MODIFIER_STATE_CHANGED(modifier, state)
-	-- modifier:  "LSHIFT", "RSHIFT", "LCTRL", "RCTRL", "LALT", "RALT"
-	-- remove first char
-	local key= substr(modifier, 2)
-	local pressed= state == 1
-	
-end
-
-
-
+--[[
 Conditionals:
 --
 button:1/.../5/<virtual click> or btn:1/.../5/<virtual click> — Macro activated with the given mouse button.

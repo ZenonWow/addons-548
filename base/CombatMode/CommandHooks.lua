@@ -1,26 +1,17 @@
 local ADDON_NAME, _ADDON = ...
-CombatMode.commands = {}
-
-
-BINDING_NAME_TURNWITHMOUSE = "Turn with mouse, no actions"
-
-function CombatMode.commands:TurnWithMouseKey(keystate)
-	local start= keystate == 'down'
-	local event= start  and  'TurnWithMouseDown'  or  'TurnWithMouseUp'
-	self:StartStopHook(start, 'TurnWithMouse', event)
-end
-
-
-
-CombatMode.commands.uniqueHooks = {}
-CombatMode.commands.state= {}
-CombatMode.commands.groups= {
+local commands = {}
+CombatMode.commands = commands
+commands.uniqueHooks = {}
+commands.state= {}
+commands.map = {}
+commands.groups= {
 	NeedCursor		= {},
 	Mouselook			= {},
 	MoveKeys			= {},
 }
 
-CombatMode.commands.grouping = {
+
+commands.grouping = {
 	CameraOrSelectOrMove		= 'NeedCursor',    -- not if TurnOrAction is pressed
 	TurnLeft			= 'NeedCursor',
 	TurnRight			= 'NeedCursor',
@@ -28,8 +19,8 @@ CombatMode.commands.grouping = {
 	PitchDown			= 'NeedCursor',
 	
 	TurnWithMouse	= 'Mouselook',		-- custom command in Bindings.xml
-	TurnOrAction	= 'Mouselook',
-	MouseAction		= 'NeedCursor',		-- TurnOrAction remapped to MouseAction in CombatMode
+	-- TurnOrAction	= 'Mouselook',
+	TurnOrAction	= false,          -- Inverse of ExpectedMouselook() before pressed.
 	
 	MoveAndSteer	= 'Mouselook',
 	-- TargetScanEnemy, TargetNearestEnemy:
@@ -39,35 +30,13 @@ CombatMode.commands.grouping = {
 	MoveBackward	= 'MoveKeys',
 	StrafeLeft		= 'MoveKeys',
 	StrafeRight		= 'MoveKeys',
-	
-	HoldToEnable	= 'Mouselook',		-- same action as TurnWithMouse
-	HoldToDisable	= 'NeedCursor',		-- this gets stuck if bound to a mouse button: the 'up' event is not received
 }
 
-local StartStop = {'Start', 'Stop'}
-CombatMode.commands.hooked = {
-	CameraOrSelectOrMove	= StartStop,
-	TurnLeft			= StartStop,
-	TurnRight			= StartStop,
-	PitchUp				= StartStop,
-	PitchDown			= StartStop,
-	
-	TurnWithMouse	= nil,
-	TurnOrAction	= StartStop,
-	MoveAndSteer	= StartStop,
-	TargetPriorityHighlight	= {'Start', 'End'},
-	
-	MoveForward		= StartStop,
-	MoveBackward	= StartStop,
-	StrafeLeft		= StartStop,
-	StrafeRight		= StartStop,
+commands.hooked = {
+	TargetPriorityHighlight	= _G.TargetPriorityHighlightStart and 'TargetPriorityHighlightEnd' or false,
 }
-StartStop= nil
--- new function in Warlords:
-if  not _G.TargetPriorityHighlightStart  then  CombatMode.commands.hooked.TargetPriorityHighlight	= nil		end
 
-
-CombatMode.commands.stopsAutoRun = {
+commands.stopsAutoRun = {
 	MoveAndSteerStart	= 1,
 	MoveForwardStart	= 1,
 	MoveBackwardStart	= 1,
@@ -80,7 +49,7 @@ altering Mouselook will be logged as anomaly.
 Sidenote:  when  enabledPermanent == true  or  TurnWithMouse == true  then we want Mouselook to stay ON after releasing these keys,
 therefore UpdateMouselook() will override the effect of the Stop functions.
 --]]
-CombatMode.commands.changingMouselook = {
+commands.changingMouselook = {
 	TurnOrActionStart	= true,
 	TurnOrActionStop	= false,
 	MoveAndSteerStart	= true,
@@ -90,60 +59,86 @@ CombatMode.commands.changingMouselook = {
 	TargetPriorityHighlightEnd		= false,
 }
 
-CombatMode.commands.map = {}
 
 
-
-
-
-function CombatMode.commands:StartStopHook(cmdName, state, event)
-
+-- The entry point of all hooks.
+--
+function commands:StartStopHook(cmdName, pressed, event)
 	if  self.stopsAutoRun[event]  then  self:SwitchAutoRun(false, event)  end
+	-- if  cmdName == 'MoveAndSteer'  then  CombatMode:OverrideBindingsIn(cmdName, pressed)  end
 	
-	-- if  cmdName == 'MoveAndSteer'  then  CombatMode:EnableOverrides(cmdName, state)  end
+	local stateOk = self:SetState(cmdName, pressed)
 	
-	if  cmdName == 'TurnOrAction'  then
-		if  state  and  CombatMode.enabledPermanent  then
-			cmdName = 'MouseAction'
-			self.map.TurnOrAction = cmdName
-		elseif  not state  then
-			cmdName = self.map.TurnOrAction or cmdName
-			self.map.TurnOrAction = nil
-		end
+	if not stateOk then
+		local suffix= pressed  and  "key pressed again without being released. Stuck key?"  or  "key released without being pressed before."
+		CombatMode:LogAnomaly("  CM - StartStopHook(".. CombatMode.colors.red .. cmdName .."|r):  ".. suffix)
+	else
+		local keystate=  pressed  and  'down'  or  'up'
+		CombatMode:LogCommand("  CM - StartStopHook(".. CombatMode.colors[keystate] .. cmdName .." ".. keystate:upper() .."|r)")
 	end
-	
-	if  state == self.state[cmdName]  then
-		local suffix= state  and  'key pressed again without being released'  or  'key released without being pressed before'
-		CombatMode:LogAnomaly('  CM - StartStopHook('.. CombatMode.colors.red .. cmdName ..'|r):  '.. suffix)
-		--CombatMode:UpdateMouselook(state, event)
-		return
-	end
-	
-	local keystate=  state  and  'down'  or  'up'
-	CombatMode:LogCommand('  CM - StartStopHook('.. CombatMode.colors[keystate] .. cmdName ..' '.. keystate:upper() ..'|r)')
-	
-	self:SetState(cmdName, state)
 	
 	-- Commands in NeedCursor group disable Mouselook: expected Mouselook state is the opposite of the keypress state
-	if  self.grouping[cmdName] == 'NeedCursor'  then  state= not state  end
+	if  self.grouping[cmdName] == 'NeedCursor'  then  pressed= not pressed  end
 	
 	-- Do MouselookStart/Stop as necessary
-  CombatMode:UpdateMouselook(state, event)
+  CombatMode:UpdateMouselook(pressed, event)
 end
 
 
-function CombatMode.commands:SetState(cmdName, state)
-	if  state == (self.state[cmdName] or false)  then  return false  end
+function commands:SetState(cmdName, pressed)
+	-- Allow multiple keys bound to the same command to be pressed at the same time?
+	-- That results in multiple calls with same cmdName, pressed.
+	-- Press 2 buttons, release 1, state should be pressed.
+	-- On the other hand if a binding is changed mid-button-press, then the Up/Stop event won't be called,
+	-- the counter remains incremented, and the state is stuck.
+	-- That actually happens, while pressing 2 keys bound to the same command not so much.
+	if  pressed == (self.state[cmdName] or false)  then
+		-- Patch MoveAndSteer press + MouselookOverrideBinding(MoveAndSteer->MoveForward) + MoveForward release
+		-- to stop Mouselook started by MoveAndSteer.
+		if cmdName == 'MoveForward' and self.state.MoveAndSteer then
+			CombatMode:LogAnomaly("  CM - SetState(".. CombatMode.colors[keystate] .. cmdName .." ".. keystate:upper() .."|r) - patched to MoveAndSteer")
+			cmdName = 'MoveAndSteer'
+		else
+			return false
+		end
+	else
+		if cmdName == 'MoveForward' and GetMouseButtonClicked() then
+			CombatMode:LogAnomaly("  CM - SetState(".. CombatMode.colors[keystate] .. cmdName .." ".. keystate:upper() .."|r) - patched to MoveAndSteer")
+			cmdName = 'MoveAndSteer'
+		end
+  end
 	
+	-- TurnOrAction inverts the Mouselook state before it was pressed.
+	if cmdName == 'TurnOrAction' then
+		if pressed
+		then  self.state.TurnOrActionForcesState = not CombatMode:ExpectedMouselook()
+		else  self.state.TurnOrActionForcesState = nil
+		end
+		-- To get the Mouselook state before pressing TurnOrAction
+		-- CombatMode:ExpectedMouselook() must be called before  self.state[cmdName]= pressed  is set.
+		-- Note: This is the secure hook ran after TurnOrActionStart(), which just enabled Mouselook,
+		-- therefore IsMouselooking() returns true in any case.
+	end
+
+	if cmdName == 'MoveAndSteer' then  CombatMode.OverrideBindingsIn('MoveAndSteer', press))  end
+
+	if pressed then
+		if cmdName == 'MoveAndSteer' and CombatMode.enableWithMoveAndSteer then  CombatMode:SetActionMode(true)  end
+	end
+	-- TODO:
+	-- CombatMode.enableWithBothButtons ", "Enable with both mouse buttons", "After pressing LeftButton and RightButton together: ActionMode will stay enabled."),
+	-- CombatMode.enableWithMoveAndSteer", "Enable with Move and steer", "After pressing MoveAndSteer: ActionMode will stay enabled."),
+	-- CombatMode.disableWithLookAround ", "Disable with looking around", "Turning the camera away from the direction your character looks (with LeftButton) will disable ActionMode."),
+
 	-- Set command pressed state
-	self.state[cmdName]= state
-	
-	-- Increment/decrement command's group count
+	self.state[cmdName]= pressed
+
+	-- Increment/decrement command group's count
 	local groupName= self.grouping[cmdName]
-	local group= self.groups[groupName]		-- nil, if groupName == nil
+	local group= self.groups[groupName]		-- nil, if groupName == nil/false
 	if  group  then
-		local prefix= '  CM - SetState('.. CombatMode.colors[state] .. CombatMode.colorBoolStr(state, true) ..'|r):  groups.'.. groupName
-		if  state  then  
+		local prefix= '  CM - SetState('.. CombatMode.colors[pressed] .. CombatMode.colorBoolStr(pressed, true) ..'|r):  groups.'.. groupName
+		if  pressed  then  
 			local removed= _ADDON.tableProto.setReInsertLast(group, cmdName)
 			if  removed  then  CombatMode:LogAnomaly(prefix ..'  already contained  '.. CombatMode.colors.red .. tostring(removed) ..'|r')  end
 			if  removed  and  type(removed) ~= string  then  _G.CMremoved= removed  end
@@ -157,63 +152,45 @@ function CombatMode.commands:SetState(cmdName, state)
 end
 
 
-local MoveAndSteerFrame = CreateFrame('Frame')
 
 
-function CombatMode.commands.uniqueHooks.MoveAndSteerStart()
-	-- CombatMode.EnableOverrides('MoveAndSteer', true)
-	print("SetOverrideBinding(MoveAndSteerFrame, true, 'BUTTON2', 'AUTORUN')")
-	SetOverrideBinding(MoveAndSteerFrame, true, 'BUTTON2', 'AUTORUN')
-	SetOverrideBinding(MoveAndSteerFrame, true, 'BUTTON5', 'COMBATMODE_TOGGLE')
+function commands.uniqueHooks.ToggleAutoRun()
+	-- No self here: these 3 are called as plain functions, not methods, therefore no ':' before the function name
+	commands:SwitchAutoRun(nil, 'ToggleAutoRun')
 end
 
-function CombatMode.commands.uniqueHooks.MoveAndSteerStop()
-	-- CombatMode.EnableOverrides('MoveAndSteer', false)
-	print("SetOverrideBinding(MoveAndSteerFrame, true, 'BUTTON2', nil)")
-	SetOverrideBinding(MoveAndSteerFrame, true, 'BUTTON2', nil)
-	SetOverrideBinding(MoveAndSteerFrame, true, 'BUTTON5', nil)
-end
---[[
---]]
-
-function CombatMode.commands.uniqueHooks.ToggleAutoRun()
-	-- no self, these 3 are called as plain functions, not methods, therefore no ':' before the function name
-	CombatMode.commands:SwitchAutoRun(nil, 'ToggleAutoRun')
+function commands.uniqueHooks.StartAutoRun()
+	commands:SwitchAutoRun(true, 'StartAutoRun')
 end
 
-function CombatMode.commands.uniqueHooks.StartAutoRun()
-	CombatMode.commands:SwitchAutoRun(true, 'StartAutoRun')
-end
-
-function CombatMode.commands.uniqueHooks.StopAutoRun()
-	CombatMode.commands:SwitchAutoRun(false, 'StopAutoRun')
+function commands.uniqueHooks.StopAutoRun()
+	commands:SwitchAutoRun(false, 'StopAutoRun')
 end
 
 
-function CombatMode.commands:SwitchAutoRun(newState, event)
-	if  newState == nil  then  newState= not self.stateAutoRun
-	elseif  newState == (self.stateAutoRun or false)  then  return  end
+function commands:SwitchAutoRun(newState, event)
+	if  newState == nil  then  newState= not self.state.AutoRun
+	elseif  newState == (self.state.AutoRun or false)  then  return  end
 	
-	self.stateAutoRun= newState
+	self.state.AutoRun= newState
 	CombatMode:LogState('  CM - SwitchAutoRun('.. CombatMode.colors.event .. event ..'|r):  ' .. CombatMode.colorBoolStr(newState, true) )
-	CombatMode:EnableOverrides('AutoRun', newState)
+	CombatMode:OverrideBindingsIn('AutoRun', newState)
 end
 
 
 
 
-function CombatMode.commands:HookCommandPrefixed(cmdName, suffixStart, suffixStop)
-	local  funcStart = cmdName .. (suffixStart or 'Start')
-  local  funcStop  = cmdName .. (suffixStop  or 'Stop' )
+function commands:HookCommandPrefixed(cmdName, funcStart, funcStop)
 	hooksecurefunc(funcStart, function ()  self:StartStopHook(cmdName, true,  funcStart )  end)
 	hooksecurefunc(funcStop , function ()  self:StartStopHook(cmdName, false, funcStop  )  end)
 end
 
-function CombatMode.commands:HookCommands()
+function commands:HookCommands()
 	CombatMode:LogInit('CM - HookCommands()')
 	
-	for  cmdName,suffix  in  pairs(self.hooked)  do if  suffix  then
-		self:HookCommandPrefixed(cmdName, suffix[1], suffix[2])
+	for  cmdName,group  in  pairs(self.grouping)  do
+		local stopFunc = self.hooked[cmdName]
+		if stopFunc ~= false then  self:HookCommandPrefixed(cmdName, cmdName..'Start', stopFunc or cmdName..'Stop')  end
 	end end
 	self.hooked= nil		-- free up, not used until /reload
 	

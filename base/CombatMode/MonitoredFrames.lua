@@ -154,6 +154,8 @@ end
 
 
 function  CombatMode:HookFrame(frameName)
+	if self.HookedFrames[frameName] then  return  end
+
 	-- _G[frameName] and getglobal(frameName) does not work for child frames like "MovieFrame.CloseDialog"
 	local frame =  _G[frameName]  or  getfield(_G, frameName)
 	if  not frame  then   return  end
@@ -175,7 +177,16 @@ end
 function  CombatMode:HookUpFrames()
 	self:LogInit('CombatMode:HookUpFrames()')
 	local missingFrames = {}
+
+	-- Monitor UISpecialFrames[]:  some windows added by bliz FrameXML and also addons. No need to list them by name.
+	for  idx, frameName  in  ipairs(_G.UISpecialFrames)  do
+		local frame= self:HookFrame(frameName)
+	end
 	
+	-- UIChildWindows[]:  parents should be monitored.
+	-- UIMenus[]:  
+	
+
 	for  idx, frameName  in  ipairs(self.FramesToHook)  do
 		-- if  self.HookedFrames[frameName]  then  print('CombatMode:HookUpFrames(): frame hooked again:  ' .. frameName)  end
 		local frame= self:HookFrame(frameName)
@@ -185,7 +196,7 @@ function  CombatMode:HookUpFrames()
 			missingFrames[#missingFrames+1]= frameName
 		end
 	end
-	
+
 	self.FramesToHook= missingFrames
 	if  0 < #missingFrames  and  self:IsLogging('Init')  and  self.logging.Anomaly  then
 		--local missingList= table.concat(missingFrames, ', ')		-- this can be long
