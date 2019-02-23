@@ -1,4 +1,4 @@
-CombatMode.FramesReleasingMouseCleanup = {
+ImmersiveAction.FramesReleasingMouseCleanup = {
 	'GameMenuFrame','InterfaceOptionsFrame','VideoOptionsFrame',
 	'WorldMapFrame',
 	'AuctionFrame','BankFrame','CharacterFrame','BattlefieldFrame',
@@ -40,40 +40,8 @@ CombatMode.FramesReleasingMouseCleanup = {
 	
 	-- 'NxMap1',  (carbonite's world map breaks mouselook)
 	-- 'StoreFrame', (causes taint??!??  wtf, blizzard?)
-}  -- end CombatMode.FramesReleasingMouse
+} -- end ImmersiveAction.FramesReleasingMouse
 
-
-
-
-function CombatMode:MigrateSettings()
-	--[[
-	-- alternative approach
-	for  idx,old  in  pairs(bindings)  do
-		if  type(old) == 'table'  and  old.key  then
-			-- old.key was in self.DatabaseDefaults, and has been removed, therefore its nil, and this won't work
-			bindings[old.key]= old.value
-			bindings[idx]= nil
-		end
-	end
-	--]]
-	--[[
-	-- explicit key mapping approach
-	migration= {
-		button1= "BUTTON1",
-		button2= "BUTTON2",
-		shiftbutton1= "SHIFT-BUTTON1",
-		shiftbutton2= "SHIFT-BUTTON2",
-		ctrlbutton1= "CTRL-BUTTON1",
-		ctrlbutton2= "CTRL-BUTTON2",
-	}
-	for  oldKey,newKey  in  pairs(migration)  do
-		local old=  bindings[oldKey]
-		if  old  and  not bindings[newKey]  then
-			bindings[newKey]= old.value
-			bindings[oldKey]= nil
-		end
-	end
-	--]]
 
 
 

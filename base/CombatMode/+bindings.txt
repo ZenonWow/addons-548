@@ -39,8 +39,8 @@ AutoRun:     rebind MoveAndSteer to TurnOrAction  (delay until not InCombat)
 
 
 -- MoveAndSteer halts MoveForward, if I remember right. Minor annoyance when moving with keys and mouse at the same time, mouse will halt keypress.
-CombatMode:  rebind MoveAndSteer to MoveForward  (delay until not InCombat)
-CombatMode bindings with SecureHandler:
+ImmersiveAction:  rebind MoveAndSteer to MoveForward  (delay until not InCombat)
+ImmersiveAction bindings with SecureHandler:
 -> Camera (B1 / B1+B2 -> disable CameraMode) won't rebind MoveForward to MoveAndSteer -> character will run straight, that's a problem.
 -> B1:Camera+B2:Turn, MoveAndSteer won't rebind MoveAndSteer to MoveForward -> AutoRun will halt, irrelevant in combat.
 Rebind MoveForward with MouselookOverrideBinding?
@@ -49,7 +49,7 @@ Rebind MoveForward with MouselookOverrideBinding?
 -- MoveAndSteer state gets stuck and needs patching in CommandHooks.
 
 Alternative: avoid bliz mistaking the released binding by using MoveForward always
-and explicitly enabling Mouselook for MoveForward if GetMouseButtonClicked(), by mapping MoveForward to MoveAndSteer in commands:SetState()
+and explicitly enabling Mouselook for MoveForward if GetMouseButtonClicked(), by mapping MoveForward to MoveAndSteer in :SetCommandState()
 
 
 
@@ -84,5 +84,12 @@ DAoC - Dark Age of Camelot:
 /run SetBinding('BUTTON5','STRAFERIGHT')
 
 
+Targeting
+--
+/run SetBinding('BUTTON1','TARGETNEARESTFRIEND')
+/run SetBinding('BUTTON2','TARGETNEARESTENEMY')
 
+TARGETLASTHOSTILE / TARGETLASTTARGET
+TARGETNEARESTENEMY / TARGETPREVIOUSENEMY / TARGETSCANENEMY
+TARGETNEARESTENEMYPLAYER / TARGETPREVIOUSENEMYPLAYER
 

@@ -1,18 +1,18 @@
 <Bindings>
 
-	<Binding name="COMBATMODE_ENABLE" header="CombatMode">
-		-- description="Enable Action mode"
-		CombatMode:EnableKey(keystate)
-		-- CombatMode:EnableKey(keystate)  --  runOnUp="true">
-	</Binding>
-	
 	<Binding name="COMBATMODE_TOGGLE">
 		-- description="Toggle Action mode"
 		CombatMode:ToggleKey()
 	</Binding>
 
-	<ModifiedClick action="ActionModeEnableModifier" default="SHIFT" />
-	<ModifiedClick action="ActionModeDisableModifier" default="ALT" /> 
+	<Binding name="INTERACTNEAREST">
+		-- description="Target and interact with closest friendly npc"
+		-- Rebound dynamically to either INTERACTTARGET or TARGETNEARESTFRIEND.
+		print("INTERACTNEAREST is disabled:  range checking is not working.")
+	</Binding>
+
+	<ModifiedClick action="ActionModeEnable" default="SHIFT" />
+	<ModifiedClick action="ActionModeDisable" default="ALT" /> 
 
 	<!--
 	Renamed commands: keep the old configuration with hidden bindings and rebind to the new on load.

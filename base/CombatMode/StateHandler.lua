@@ -1,271 +1,193 @@
--- Methods for event handling, state update of CombatMode, Mouselook, SmartTargeting
-local ADDON_NAME, _ADDON = ...
+-- Methods for event handling, commandState update of ImmersiveAction, Mouselook, SmartTargeting
+local _G, ADDON_NAME, _ADDON = _G, ...
+local ImmersiveAction = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = ImmersiveAction
+local Log = ImmersiveAction.Log or {}  ;  ImmersiveAction.Log = Log
+local colorBoolStr = ImmersiveAction.colorBoolStr
+local colors = ImmersiveAction.colors
+
+ImmersiveAction.commandState = {}
+
+--[[
+-- commandGroups:  `false` value here means 'not pressed'
+ImmersiveAction.commandGroups = {
+	Turn       = { TurnLeft=false, TurnRight=false },
+	Pitch      = { PitchUp=false, PitchDown=false },
+	MoveKeys   = { MoveForward=false, MoveBackward=false, StrafeLeft=false, StrafeRight=false },
+	Mouselook  = { MoveAndSteer=true, TargetPriorityHighlight=true },  --, TurnOrAction=true }, -- false in ActionMode
+}
+--]]
+-- commandGroups:  `nil` is 'not pressed'
+ImmersiveAction.commandGroups = {
+	Turn       = {},
+	Pitch      = {},
+	MoveKeys   = {},
+	Mouselook  = {},
+}
 
 --[[ Analyzing key press state:
 -- commands can get stuck in pressed state if the binding is changed and the "up" event goes to a different command
-/dump CombatMode.db.profile.enabledOnLogin
-/dump CombatMode.commands.state, CombatMode.commands.groups
-/run CombatMode:ResetState()
--- Cause of CombatMode:
-/dump CombatMode.db.profile.enabledWhileMoving
-/dump CombatMode:IsEnabledWhileMoving()
-/dump CombatMode:ExpectedMouselook()
-/dump CombatMode.FramesOnScreen
+/dump ImmersiveAction.db.profile.enabledOnLogin
+/dump ImmersiveAction.commandState, ImmersiveAction.commandGroups
+/run ImmersiveAction:ResetState()
+-- Cause of ImmersiveAction:
+/dump ImmersiveAction.db.profile.enableWithMoveKeys
+/dump ImmersiveAction:ExpectedMouselook()
+/dump ImmersiveAction.WindowsOnScreen
 -- Overridden bindings:
 
-/dump CombatMode.MouselookOverrideBindings= {}
-/dump CombatMode.MoveAndSteerKeys= {}
+/dump ImmersiveAction.MouselookOverrideBindings= {}
+/dump ImmersiveAction.MoveAndSteerKeys= {}
 
 -- Settings:
-/dump CombatMode.db.profile
-/dump CombatModeDB
+/dump ImmersiveAction.db.profile
+/dump ImmersiveActionDB
 -- Explicit:
-/run CombatMode:ResetState()
+/run ImmersiveAction:ResetState()
 /run MouselookStart()
 /run MouselookStop()
--- logging:
 /dump 'Me:'..(UnitIsPVP('player') and 'PvP' or 'non-pvp'), UnitName('target')..':'..(UnitIsPVP('target') and 'PvP' or 'non-pvp')
-/run CombatMode.logging.all= false
-/run CombatMode.logging.Anomaly= false
-/run CombatMode.logging.State= false
-/run CombatMode.logging.Update= true
-/run CombatMode.logging.Command= true
--- set to true or false  to override individual event settings
-/run CombatMode.logging.Event.all= false
--- individual events
-/run CombatMode.logging.Event.CURSOR_UPDATE= false
-/run CombatMode.logging.Event.PLAYER_TARGET_CHANGED= false
-/run CombatMode.logging.Event.PET_BAR_UPDATE= false
-/run CombatMode.logging.Event.ACTIONBAR_UPDATE_STATE= false
-/run CombatMode.logging.Event.QUEST_PROGRESS= false
-/run CombatMode.logging.Event.QUEST_FINISHED= false
---]]
-CombatMode.logging= {
-	all= nil,		-- set to true or false to override individual settings
-	--all= true,
-	State= false,
-	Update= false,
-	Command= false,
-	-- Anomaly= false,
-	Anomaly= true,
-	Init= false,
-	Frame= false,
-}
-CombatMode.logging.Event= {
-	all= false,		-- set to true or false to override individual event settings
-	--all= true,
-	CURSOR_UPDATE= false,
-	PLAYER_TARGET_CHANGED= true,
-	-- PET_BAR_UPDATE= true,
-	-- ACTIONBAR_UPDATE_STATE= false,
-	QUEST_PROGRESS= true,
-	QUEST_FINISHED= true,
-}
-
-
-local colorBoolStr = CombatMode.colorBoolStr
-local colors = CombatMode.colors
-
-
-
-local function makeLogFunc(logType)
-	--return  function (self, ...)  if  self:IsLogging(logType)  then  print(...)  end  end
-	return  function (self, ...)  self:Log(logType, ...)  end
-end
-CombatMode.LogState   = makeLogFunc('State')
-CombatMode.LogUpdate  = makeLogFunc('Update')
-CombatMode.LogCommand = makeLogFunc('Command')
-CombatMode.LogAnomaly = makeLogFunc('Anomaly')
-CombatMode.LogInit    = makeLogFunc('Init')
-CombatMode.LogFrame   = makeLogFunc('Frame')
--- 1<->1 mapping:   :LogState(...)  <->  :Log('State',...)
-
-function CombatMode:Log(logType, ...)  if  self:IsLogging(logType)  then  print(...)  end  end
-function CombatMode:LogEvent(event, extraMessage)
-	if  self:IsLoggingEvent(event)  then
-		print(event ..':  cursor='.. (GetCursorInfo() or 'hand')
-		..' CursorHasAny()='.. colorBoolStr(CursorHasAny(),true)
-		..' SpellIsTargeting()='.. colorBoolStr(SpellIsTargeting(),true)
-		.. (extraMessage or '') )
-	end
-end
-
-function CombatMode:IsLogging(logType)
-	if  self.logging  then
-		if  self.logging.all ~= nil  then  return  self.logging.all  end
-		return  self.logging[logType]
-	end
-end
-
-function CombatMode:IsLoggingEvent(event)
-	if  self.logging  and  self.logging.all ~= false  and  self.logging.Event  then
-		if  self.logging.Event.all ~= nil  then  return  self.logging.Event.all  end
-		return  self.logging.Event[event]
-	end
-end
-
-
-
-
-
-function CombatMode:ToggleKey()
-	local inverseState= not IsMouselooking()
-	-- local inverseState= not self:ExpectedMouselook()
-	-- local inverseState= not self.enabledActionMode
-	
-	self:SetActionMode(inverseState)
-	self:UpdateMouselook(inverseState, 'ToggleKey')
-end	
-
-function CombatMode:EnableKey()
-	self:SetActionMode(true)
-	self:UpdateMouselook(true, 'ToggleKey')
-end	
-
-
-
-
-local isModifierPressedFunc= {
-	SHIFT = IsShiftKeyPressed,
-	CTRL = IsCtrlKeyPressed,
-	ALT = IsAltKeyPressed,
-}
-
-function CombatMode:MODIFIER_STATE_CHANGED(event)
-	local modifiers = self.db.profile.modifiers
-	local IsEnableModPressed  = isModifierPressedFunc[ modifiers.ActionModeEnableModifier ]
-	local IsDisableModPressed = isModifierPressedFunc[ modifiers.ActionModeDisableModifier ]
-	local state= self.commands.state
-	self.EnableModPressed  = IsEnableModPressed  and IsEnableModPressed ()
-	self.DisableModPressed = IsDisableModPressed and IsDisableModPressed()
-	if self.EnableModPressed and self.DisableModPressed then
-		-- Both pressed disables both.
-		self.EnableModPressed,self.DisableModPressed  =  nil,nil
-	end
-	self:UpdateMouselook(nil, 'Modifier')
-end
-
-
-
-
-function CombatMode:CURSOR_UPDATE(event, ...)
-	--[[ CURSOR_UPDATE sent when
-	1. cursor is shown (as hand) after being hidden for CameraOrSelectOrMove, TurnOrAction, MoveAndSteer, Mouselook
-	2. before UPDATE_MOUSEOVER_UNIT:  cursor changes over actionable object to  bubble (gossip) / sword (enemy) / dragon (flightmaster) / mail (mailbox) / satchel (vendor,bank,auction) / hearthstone (innkeeper) / what else?
-	-- event is not sent twice when moving over an actionable object:  hidden -> show hand cursor -> action cursor
-	-- event is NOT sent when hiding cursor
-	3. after/before CURRENT_SPELL_CAST_CHANGED
-	--]]
-	local state= self.commands.state
-	local lastState = state.CursorObjectOrSpellTargeting
-	-- state.CursorHasItem = CursorHasItem()
-	state.CursorHasAny = GetCursorInfo()
-	-- state.CursorHasAny = CursorHasItem()  or  CursorHasMacro()  or  CursorHasMoney()  or  CursorHasSpell()
-	state.SpellIsTargeting = SpellIsTargeting()
-	state.CursorObjectOrSpellTargeting = state.CursorHasAny or state.SpellIsTargeting
-
-	self:LogEvent(event, '  -> cursorAction=' .. colorBoolStr(state.CursorObjectOrSpellTargeting, false))
-	if not lastState ~= not state.CursorObjectOrSpellTargeting then
-		self:UpdateMouselook(not state.CursorObjectOrSpellTargeting, 'CURSOR_UPDATE')
-	end
-end
-
-
-function CombatMode:QUEST_PROGRESS(event)
-	-- Event QUEST_PROGRESS received as the quest frame is shown when talking to an npc
-	self:LogEvent(colors.show .. event .. colors.restore)
-	self.FramesOnScreen:setInsertLast('QUEST_PROGRESS')
-	self:UpdateMouselook(false, event)
-end
-
-function CombatMode:QUEST_FINISHED(event)
-	-- Event QUEST_FINISHED received as the quest frame is closed after talking to an npc
-	self:LogEvent(colors.hide .. event .. colors.restore)
-	self.FramesOnScreen:removeFirst('QUEST_PROGRESS')
-	self:UpdateMouselook(true, event)
-end
-
-
---[[
--- ranged spell targeting starts/ends
-function CombatMode:CURRENT_SPELL_CAST_CHANGED()
-	-- start:
-	--CURSOR_UPDATE
-	--CURRENT_SPELL_CAST_CHANGED
-	--CURSOR_UPDATE
-	--ACTIONBAR_UPDATE_STATE
-	-- + CURSOR_UPDATE
-	-- + CURSOR_UPDATE
-	
-	-- end:
-	--UNIT_SPELL_CAST_FAILED_QUIET
-	--UNIT_SPELL_CAST_FAILED_QUIET
-	--CURSOR_UPDATE
-	--CURRENT_SPELL_CAST_CHANGED
-	--ACTIONBAR_UPDATE_STATE
-	
-	-- additional:
-	--PLAYER_STARTED_MOVING
-	--PLAYER_STOPPED_MOVING
-	--MODIFIER_STATE_CHANGED
-end
---]]
-
---[[ No need for these to my best knowledge. CURSOR_UPDATE handles it.
-function CombatMode:PET_BAR_UPDATE(event)
-	if  self.commands.state.CursorObjectOrSpellTargeting  then
-		self:LogEvent(event, '  -> ResetCursor()')
-		ResetCursor()
-		-- Triggers CURSOR_UPDATE, that will do self:UpdateMouselook(not cursorAction, event)
-	end
-end
-
-function CombatMode:ACTIONBAR_UPDATE_STATE(event)
-	if  self.commands.state.CursorObjectOrSpellTargeting  then
-		self:LogEvent(event, '  -> ResetCursor()')
-		ResetCursor()
-		-- Triggers CURSOR_UPDATE, that will do self:UpdateMouselook(not cursorAction, event)
-	end
-end
 --]]
 
 
 
 
-function  CombatMode:ResetState()
-	CombatMode:LogState(colors.red .. 'RESETing|r keypress state')
+------------------
+-- Enable state
+------------------
+
+function ImmersiveAction:SetActionMode(enable)
+	local cstate = self.commandState
+	if cstate.ActionModeRecent == enable then  return  end
+	cstate.ActionModeRecent = enable
+	cstate.ActionMode = enable
+	self:OverrideCommandsIn('ActionMode', enable)
+end
+
+
+
+
+function  ImmersiveAction:ResetState()
+	Log.State(colors.red .. 'RESETing|r keypress state')
 	
 	-- A command might be stuck in pressed state, reset state to free mouse
-	local cmds= self.commands.state
-	for  cmdName,pressed  in  pairs(cmds)  do  if  pressed == true  then
-		CombatMode:LogState('  '.. colors.red .. cmdName ..'|r was PRESSED, is reset now')
-		cmds[cmdName]= nil
-	end end
+	local cstate = self.commandState
+	for  cmdName,pressed  in  pairs(cstate)  do  if  pressed  then
+		Log.State('  '.. colors.red .. cmdName ..'|r was PRESSED, is reset now')
+		-- cstate[cmdName]= nil
+	end end -- for if
+	wipe(cstate)
 	
 	-- Reset group counters
-	local groups= self.commands.groups
-	for  groupName,group  in  pairs(groups)  do  if  0 ~= #group  then
-		CombatMode:LogState('  Group "'.. colors.yellow .. groupName ..'"|r had '.. table.concat(group) ..' keys pressed, is reset now')
-		groups[groupName]= {}
-	end end
+	local groups= self.commandGroups
+	for  groupName,group  in  pairs(groups)  do  if  next(group)  then
+		local keys = ""
+		for k,v in group do  keys = keys..k  end
+		Log.State('  Group "'.. colors.yellow .. groupName ..'"|r had "'..keys..'" keys pressed, is reset now')
+		wipe(group)
+	end end -- for if
 end
 
 
 
 
-function  CombatMode:UpdateMouselook(possibleTransition, event)
+-------------------------------------
+-- State handling `business` logic --
+-------------------------------------
+
+function ImmersiveAction:SetCommandState(cmdName, pressed)
+	-- Do not accept multiple keys bound to the same command to be pressed at the same time.
+	-- That results in multiple calls with same cmdName, pressed. Press 2 buttons, release 1,
+	-- and the client thinks both are released.
+	-- Minor issue compared to its counter-case: if a binding is changed mid-button-press,
+	-- bliz will release the new binding, not the one that was pressed originally.
+	-- This causes stuck keys, stuck MouselookMode, unable to get back the cursor :-D
+	local keystate =  pressed  and  'down'  or  'up'
+	local cstate = self.commandState
+
+	if  not pressed == not cstate[cmdName]  then
+		-- Patch MoveAndSteer press + MouselookOverrideBinding(MoveAndSteer->MoveForward) + MoveForward release
+		-- to stop Mouselook started by MoveAndSteer.
+		if cmdName == 'MoveForward' and cstate.MoveAndSteer then
+			Log.Anomaly("  CM - SetCommandState(".. ImmersiveAction.colors[keystate] .. cmdName .." ".. keystate:upper() .."|r) - patched to MoveAndSteer")
+			cmdName = 'MoveAndSteer'
+		else
+			return false
+		end
+	else
+		if cmdName == 'MoveForward' and GetMouseButtonClicked() then
+			Log.Anomaly("  CM - SetCommandState(".. ImmersiveAction.colors[keystate] .. cmdName .." ".. keystate:upper() .."|r) - patched to MoveAndSteer")
+			cmdName = 'MoveAndSteer'
+		end
+  end
+	
+	-- TurnOrAction inverts the previous Mouselook state (the state before it was pressed).
+	if cmdName == 'TurnOrAction' then
+		if pressed
+		then  cstate.TurnOrActionForcesState = not ImmersiveAction.lastMouselook
+		else  cstate.TurnOrActionForcesState = nil
+		end
+		-- Note: This is the secure hook ran after TurnOrActionStart(), which just enabled Mouselook,
+		-- therefore IsMouselooking() returns true in any case.
+	end
+
+	-- Update ActionMode to retain lastMouselook after specific buttons were pressed.
+	if not pressed then
+		if not ImmersiveAction.lastMouselook then
+			-- Clicking LeftButton (turning the camera away from the direction your character looks) will disable ActionMode.
+			if  cmdName=='CameraOrSelectOrMove'  and  ImmersiveAction.disableWithLookAround  then  ImmersiveAction:SetActionMode(false)  end
+		else
+			-- After pressing MoveAndSteer:  ActionMode will stay enabled.
+			if  cmdName=='MoveAndSteer' and  ImmersiveAction.enableAfterMoveAndSteer  then  ImmersiveAction:SetActionMode(true)  end
+			-- After pressing LeftButton and RightButton together:  ActionMode will stay enabled.
+			-- Rule:  one button released while the other is pressed.
+			if ImmersiveAction.enableAfterBothButtons then
+				if  cmdName=='CameraOrSelectOrMove' and self.TurnOrAction
+				or  cmdName=='TurnOrAction' and self.CameraOrSelectOrMove
+				then  ImmersiveAction:SetActionMode(true)  end
+			end
+		end
+	end
+	
+	-- Set command pressed state. This changes the result of ImmersiveAction:ExpectedMouselook().
+	cstate[cmdName]= pressed
+
+	-- Update group state.
+	local groupName= self.commandsHooked[cmdName]
+	if  groupName  then  self:SetGroupCommand(groupName, cmdName, pressed)  end
+
+	-- Update bindings.
+	if cmdName=='AutoRun' then  ImmersiveAction:OverrideCommandsIn(cmdName, pressed)  end
+
+	return true
+end
+
+
+function ImmersiveAction:SetGroupCommand(groupName, cmdName, pressed)
+	local group= self.commandGroups[groupName]
+	group[cmdName] = pressed or nil
+	cstate[groupName] = next(group)
+end
+
+
+
+
+-------------------------------------------
+-- Control and debug new Mouselook state --
+-------------------------------------------
+
+function  ImmersiveAction:UpdateMouselook(possibleTransition, event)
 	event= event  or  'nil'
 	local currentState= not not IsMouselooking()
 	local outsideChange= self.lastMouselook ~= currentState
 	
 	-- Report modified IsMouselooking() to catch commands changing it. Like  MoveAndSteerStart  and  TurnOrActionStart
-	if  outsideChange  and  currentState ~= self.commands.changingMouselook[event]  then
-		CombatMode:LogAnomaly('  '.. colors.red .. event .. '|r changed Mouselook: '.. colorBoolStr(self.lastMouselook, true) ..'->'.. colorBoolStr(currentState, true) )
+	if  outsideChange  and  currentState ~= self.commandsChangingMouselook[event]  then
+		Log.Anomaly('  '.. colors.red .. event .. '|r changed Mouselook: '.. colorBoolStr(self.lastMouselook, true) ..'->'.. colorBoolStr(currentState, true) )
 	end
 	
 	local expState, reason= self:ExpectedMouselook()
 	if  possibleTransition ~= nil  and  expState ~= possibleTransition  and  expState ~= currentState  and  not outsideChange  then
-		CombatMode:LogAnomaly('  CM:Update('.. event:sub(1,16) ..'):  '.. colors.yellow .. reason ..'|r->'.. colorBoolStr(expState, colors.red)  ..' is not possibleTransition='.. colorBoolStr(possibleTransition))
+		Log.Anomaly('  CM:Update('.. event:sub(1,16) ..'):  '.. colors.yellow .. reason ..'|r->'.. colorBoolStr(expState, colors.red)  ..' is not possibleTransition='.. colorBoolStr(possibleTransition))
 	end
 	
 	-- Report every update, reason and result for debugging
@@ -278,86 +200,95 @@ function  CombatMode:UpdateMouselook(possibleTransition, event)
 	local suffix= reason ..'->'.. stateStr			-- .. '|n------'
 	
 	if  (self.lastMouselook ~= expState)  or  outsideChange
-  then  self:LogState(prefix .. suffix)
-	else  self:LogUpdate(prefix .. suffix)
+  then  Log.State(prefix .. suffix)
+	else  Log.Update(prefix .. suffix)
   end
 	self.lastMouselook= expState
 	
 	-- Commit the change
 	if  expState ~= currentState  then
-    if  SpellIsTargeting()  then  return  end  -- otherwise spell targeting does nothing
+    if  SpellIsTargeting()  then
+			print(prefix .. suffix .. "  SpellIsTargeting():  Mouselook change might prevent casting the spell.")
+			-- TODO: remove print. Spell targeting does nothing? The improved priority order in ExpectedMouselook() might have fixed this.
+			return
+		end
 		if  expState  then  MouselookStart()  else  MouselookStop()  end
 		--self.lastMouselookSet= expState
 	end
 end
 
-CombatMode.lastMouselook= not not IsMouselooking()
---CombatMode.lastMouselookSet= false
+ImmersiveAction.lastMouselook= not not IsMouselooking()
+--ImmersiveAction.lastMouselookSet= false
 
 
 
-function CombatMode:CheckForFramesOnScreen()
-	return  0 < #CombatMode.FramesOnScreen
-end
-
-
-function CombatMode:ExpectedMouselook()
-	local groups= self.commands.groups
-	local state= self.commands.state
+-------------------------------------
+--- ImmersiveAction:ExpectedMouselook() implements the brainstem of ImmersiveAction:
+-- 
+-- Calculates the effective Mouselook state in a declarative manner,
+-- based on 13 game state parameters collected from user actions and game events.
+-- The evaluation order is a delicate priority crafted to get the most
+-- natural result in every circumstance. 2^13 = 8k distinct inputs
+-- include many corner cases and quirks of the wow client.
+-- In one word: it can be broken by looking at it the wrong way.
+--
+function ImmersiveAction:ExpectedMouselook()
+	-- local groups = self.commandGroups
+	local cstate = self.commandState
 	
 	-- Turn,Pitch is first in priority:
-	-- Requires Mouselook OFF to actually turn the character; with Mouselook ON it acts as Strafe,Move.
-	if  state.Turn   then  return false, 'Turn'   end
-	if  state.Pitch  then  return false, 'Pitch'  end
-	--if  0 < #groups.NeedCursor		then  return false, table.concat(groups.NeedCursor)  end		-- 'Turn, Pitch, Camera'  end
+	-- Requires Mouselook OFF to actually turn the character.
+	-- With Mouselook ON it acts as Strafe,Move, which is very unexpected, and usually happens at the worst time, like standing on the edge of a cliff.
+	if  cstate.Turn   then  return false, cstate.Turn   end
+	if  cstate.Pitch  then  return false, cstate.Pitch  end
 	
-	-- CameraOrSelectOrMove (LeftButton) + TurnOrAction (RightButton)  requires Mouselook ON to actually move the character.
-	-- if  state.CameraOrSelectOrMove  and  state.TurnOrAction  then  return true, 'BothCameraAndTurn'  end
-
-	-- TurnOrActionForcesState provides just this result with one exception:
-	-- In ActionMode B2+B1=Cursor+Camera (order matters) inverts ActionMode to CursorMode, therefore the character won't move.
-	-- B1:MoveAndSteer or B1+B2:MoveAndSteer (depending on ActionModeMoveWithButton1) is the binding for movement.
-	
+	-- CameraOrSelectOrMove (LeftButton, B1) + TurnOrAction (RightButton, B2)  requires Mouselook ON to actually move the character.
+	-- This will be done using TurnOrActionForcesState, which takes care of a special case:
+	-- In ActionMode B2+B1=Cursor+Camera (order matters) inverts MouselookMode to FreeCameraMode, allowing look-around. 
+	-- To move press B1 or B1+B2 (depending on actionModeMoveWithCameraButton).
 
 	-- TurnOrAction (RightButton) will _invert_ the Mouselook state active at the time it is pressed.
-	-- Even if SpellIsTargeting or CursorHasAny it takes precedence.
-	if  state.TurnOrAction  and  nil~=state.TurnOrActionForcesState  then  return state.TurnOrActionForcesState, 'TurnOrAction'  end
+	-- It takes precedence over WindowsOnScreen, SpellIsTargeting, CursorPickedUp, MoveAndSteer and modifiers (Shift/Ctrl/Alt).
+	-- As long as you press the RightButton those do not matter, nor effect the behaviour.
+	if  nil~=cstate.TurnOrActionForcesState  then  return cstate.TurnOrActionForcesState, 'TurnOrAction'  end
 
-	-- CameraOrSelectOrMove (LeftButton) + Mouselook would move the character instead of rotating the camera,
-	-- therefore Mouselook is disabled when CameraOrSelectOrMove (LeftButton) is pressed.
-	-- Or Button1 becomes MoveAndSteer in ActionMode.
-	if  state.CameraOrSelectOrMove  and  not self.db.profile.ActionModeMoveWithButton1  then  return false, 'Camera'  end
-	
-	-- MoveAndSteer,TargetScanEnemy,TargetNearestEnemy ignores FramesOnScreen, SpellIsTargeting and CursorHasAny.
+	-- In ActionMode (enables MouselookMode) the LeftButton would do MoveAndSteer instead of FreeCameraMode,
+	-- just like when both buttons are pressed. To enter FreeCameraMode we disable MouselookMode.
+	-- Except when the user requested that LeftButton moves in ActionMode.
+	-- Note: in this case pressing the RightButton _first_ will set TurnOrActionForcesState = false,
+	-- then pressing LeftButton will return `false` in the above line, and enable FreeCameraMode. Uff.
+	local freeCamera =  cstate.CameraOrSelectOrMove  and  not (cstate.ActionMode and self.db.profile.actionModeMoveWithCameraButton)
+	if  freeCamera  then  return false, 'CameraOrSelectOrMove'  end
+
+	-- MoveAndSteer,TargetScanEnemy,TargetNearestEnemy takes precedence over WindowsOnScreen, SpellIsTargeting and CursorPickedUp.
 	-- Maybe all Move,Strafe bound to mouse button should do so. In that case extra logic is needed to detect when Move is caused by a mouse button.
-	if  0 < #groups.Mouselook  then  return true, "Mouselook:"..table.concat(groups.Mouselook)  end		-- 'MoveAndSteer, ScanEnemy, HoldToEnable'  end
+	if  cstate.Mouselook  then  return true, "Mouselook:"..cstate.Mouselook  end		-- 'MoveAndSteer, ScanEnemy'  end
 
-	if  state.EnableModPressed   then  return true,  'EnableModPressed'   end
-	if  state.DisableModPressed  then  return false, 'DisableModPressed'  end
-	
-	-- Any new event: SpellIsTargeting, CursorHasAny, new FramesOnScreen will delete enabledOverride.
-	if  nil~=self.enabledOverride  then  return self.enabledOverride, 'enabledOverride'  end
+	if  cstate.enableModPressed   then  return true,  'enableModPressed'   end
+	if  cstate.disableModPressed  then  return false, 'disableModPressed'  end
+
+	-- Any new event: SpellIsTargeting, CursorPickedUp, new WindowsOnScreen will delete ActionModeRecent.
+	if  nil~=cstate.ActionModeRecent  then  return cstate.ActionModeRecent, 'ActionModeRecent'  end
 
 	-- Cursor actions:
-	if  state.SpellIsTargeting	then  return false, 'SpellIsTargeting'  end
-	if  state.CursorHasAny			then  return false, 'CursorHasAny'     end
-	--if  state.CursorObjectOrSpellTargeting  then  return false, 'CursorObjectOrSpellTargeting'  end
-	
-	-- FramesOnScreen are higher priority than  enabledWhileMoving:Move,Strafe.
-	-- if  self:CheckForFramesOnScreen()  then  return false, 'FramesOnScreen'  end
-	if  0 < #CombatMode.FramesOnScreen  then  return false, 'FramesOnScreen:'..(CombatMode.FramesOnScreen[1]:GetName() or "<noname>")  end
-	
-	-- Move,Strafe commands enable if enabledWhileMoving and no FramesOnScreen.
-	if  self.db.profile.enabledWhileMoving  and  0 < #groups.MoveKeys  then
-		return true, "enabledWhileMoving:"..table.concat(groups.MoveKeys)
+	if  cstate.SpellIsTargeting	then  return false, 'SpellIsTargeting'  end
+	if  cstate.CursorPickedUp		then  return false, 'CursorPickedUp'    end
+	--if  cstate.CursorObjectOrSpellTargeting  then  return false, 'CursorObjectOrSpellTargeting'  end
+
+	-- WindowsOnScreen are higher priority than  enableWithMoveKeys:Move,Strafe.
+	-- if  self:CheckForFramesOnScreen()  then  return false, 'WindowsOnScreen'  end
+	if  0 < #ImmersiveAction.WindowsOnScreen  then  return false, 'WindowsOnScreen:'..(ImmersiveAction.WindowsOnScreen[1]:GetName() or "<noname>")  end
+
+	-- Move,Strafe commands enable if enableWithMoveKeys and no WindowsOnScreen.
+	if  self.db.profile.enableWithMoveKeys  and  cstate.MoveKeys  then
+		return true, "enableWithMoveKeys:"..cstate.MoveKeys
 	end
 
-	-- Lowest priority:  enabledActionMode.. in this session, or  enabledOnLogin.. in a session before.
-	if  nil~=self.enabledActionMode  then  return self.enabledActionMode, 'enabledActionMode'  end
-	if  self.db.profile.enabledOnLogin  then  return true, 'enabledOnLogin'  end
-	
-	-- By default Mouselook is OFF
-	return  false, 'NoKeysPressed'
+	-- Lowest priority as a static setting:  ActionMode.
+	if  cstate.ActionMode  then  return cstate.ActionMode, 'ActionMode'  end
+
+	-- By default Mouselook is off.
+	return  false, 'NoAction'
 end
 
 
