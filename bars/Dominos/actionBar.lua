@@ -81,46 +81,66 @@ function ActionBar:OnSizeChanged()
 	end
 end
 
---TODO: change the position code to be based more on the number of action bars
-function ActionBar:GetDefaults()
-	local defaults = {}
-	defaults.point = 'BOTTOM'
-	defaults.x = 0
-	defaults.y = 40*(self.id-1)
-	defaults.pages = {}
-	defaults.pagesAllClass = self:GetBarPagingDefaults(self.id)
-	defaults.spacing = 4
-	defaults.padW = 2
-	defaults.padH = 2
-	defaults.numButtons = self:MaxLength()
 
-	return defaults
+-- Defaults for paging bars (aka. offset) individually for each class. Only the played classes are initialized by AceDB.
+-- Bar default paging offset: +1-5, druid forms: +6-9, rogue stealth: +6
+-- local mainbarOffsets = {
+local mainbarPages = {
+	-- defaults for all classes
+	page2 = 1,
+	page3 = 2,
+	page4 = 3,
+	page5 = 4,
+	page6 = 5,
+--[[
+	-- DRUID defaults
+	cat = 6,
+	bear = 8,
+	moonkin = 9,
+	tree = 7,
+	-- ROGUE defaults
+	stealth = 6,
+	shadowdance = 6,
+--]]
+}
+
+local classLocalized, class = UnitClass('player')
+if class == 'DRUID' then
+	mainbarPages.cat = 6
+	mainbarPages.bear = 8
+	mainbarPages.moonkin = 9
+	mainbarPages.tree = 7
+elseif class == 'ROGUE' then
+	mainbarPages.stealth = 6
+	mainbarPages.shadowdance = 6
 end
 
--- bar default paging: +1-5, druid forms: +6-9, rogue stealth: +6
--- new instance for each profile, otherwise 2 profiles made in the same loadui session
--- would share it and its modifications
-function ActionBar:GetBarPagingDefaults(barid)
-	if  barid == 1  then  return {
-		-- main bar
-		-- defaults for all classes
-		page2 = 1,
-		page3 = 2,
-		page4 = 3,
-		page5 = 4,
-		page6 = 5,
-		-- DRUID defaults
-		cat = 6,
-		bear = 8,
-		moonkin = 9,
-		tree = 7,
-		-- ROGUE defaults
-		stealth = 6,
-		shadowdance = 6,
-	}
-	-- all other bars no paging
-	else  return {}
+
+local defaults = {}
+defaults.point = 'BOTTOM'
+defaults.spacing = 4
+defaults.padW = 2
+defaults.padH = 2
+defaults.pages = { ['*'] = {} }
+defaults.pagesAllClass = {}
+
+--TODO: change the position code to be based more on the number of action bars
+function ActionBar:GetDefaults()
+	-- New instance of defaults for each bar.
+	local defaults = _G.LibCommon.merge({}, defaults)
+
+	local x = math.floor((self.id-1) / 3)
+	if x > 2 then  x = 2  end
+	local y = self.id - x*3
+	defaults.numButtons = self:MaxLength()
+	defaults.x = x * 40 * defaults.numButtons
+	defaults.y = y * 40
+
+	if self.id == 1 then
+		defaults.pages = { ['*'] = mainbarPages }
+		defaults.pagesAllClass = mainbarPages
 	end
+	return defaults
 end
 
 
