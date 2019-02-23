@@ -1,0 +1,14 @@
+## Interface: 50400
+## Title: LUI_Dynamics
+## Notes: LUI Module to dinamically change your Interface when you change Role.
+## Author: Kaliad @EU-Pozzo Dell'Eternità
+## LoadManagers: AddonLoader
+
+## X-LoadOn-Always: delayed
+
+## Version: 2.3
+## Dependencies: LUI
+## OptionalDeps: Forte_Core, Bartender4, Grid, Vuhdo, Healbot, DBM-Core, BigWigs, DXE_Loader, Skada
+
+
+LUI_Dynamics.lua
