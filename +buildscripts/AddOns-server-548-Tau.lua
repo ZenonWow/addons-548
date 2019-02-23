@@ -35,7 +35,7 @@ AceSerializer-3.0
 AceTab-3.0
 AceTimer-3.0
 CallbackHandler-1.0
-LibCommon
+LibShared
 LibDataBroker-1.1
 LibDataBrokerIcon-1.0
 LibSharedMedia-3.0

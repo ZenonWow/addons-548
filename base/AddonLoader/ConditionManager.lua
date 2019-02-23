@@ -2,7 +2,7 @@ local _G, ADDON_NAME, _ADDON = _G, ...
 
 -- Upvalued Lua globals:
 local AddonLoader = _G.AddonLoader
-local LibCommon,DevMode = LibCommon,DevMode
+local LibShared,DevMode = LibShared,DevMode
 local tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown = 
       tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown
 
@@ -12,12 +12,12 @@ local tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date,
 -- GLOBALS: AddonLoaderSV
 
 -- Used from _G:  AddonLoader
--- Used from LibCommon:  tostrjoin, AutoTablesMeta, ConstEmptyTable
+-- Used from LibShared:  tostrjoin, AutoTablesMeta, ConstEmptyTable
 -- Used from _ADDON:  Debug
 
 AddonLoader.name = ADDON_NAME
-local tostrjoin,AutoTablesMeta,ConstEmptyTable = LibCommon:Import("tostrjoin,AutoTablesMeta,ConstEmptyTable", AddonLoader)
--- local tostrjoin,ConstEmptyTable = LibCommon.Require.tostrjoin, LibCommon.Require.ConstEmptyTable
+local tostrjoin,AutoTablesMeta,ConstEmptyTable = LibShared:Import("tostrjoin,AutoTablesMeta,ConstEmptyTable", AddonLoader)
+-- local tostrjoin,ConstEmptyTable = LibShared.Require.tostrjoin, LibShared.Require.ConstEmptyTable
 local Debug = _ADDON.Debug
 
 

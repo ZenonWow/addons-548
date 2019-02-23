@@ -127,7 +127,7 @@ defaults.pagesAllClass = {}
 --TODO: change the position code to be based more on the number of action bars
 function ActionBar:GetDefaults()
 	-- New instance of defaults for each bar.
-	local defaults = _G.LibCommon.merge({}, defaults)
+	local defaults = _G.LibShared.merge({}, defaults)
 
 	local x = math.floor((self.id-1) / 3)
 	if x > 2 then  x = 2  end

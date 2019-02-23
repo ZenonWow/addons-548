@@ -14,7 +14,7 @@
 local _G, ADDON_NAME, _ADDON = _G, ...
 
 -- Upvalued Lua globals:
-local LibCommon,DevMode = LibCommon,DevMode
+local LibShared,DevMode = LibShared,DevMode
 local tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown = 
       tostringall, tostring, string, strjoin, pairs, ipairs, select, next, date, time, GetTime, InCombatLockdown
 local format = string.format
@@ -24,22 +24,22 @@ local format = string.format
 -- GLOBALS: AddonLoaderSV
 
 -- Exported to _G:  AddonLoader
--- Used from LibCommon:
--- Exported to LibCommon:  tostrjoin, AutoTablesMeta, ConstEmptyTable
+-- Used from LibShared:
+-- Exported to LibShared:  tostrjoin, AutoTablesMeta, ConstEmptyTable
 -- Used from _ADDON:  Debug
 
--- local safecall = LibCommon.Require.safecall
+-- local safecall = LibShared.Require.safecall
 
-LibCommon.tostrjoin = LibCommon.tostrjoin  or function(separator, ...)  return strjoin(separator, tostringall(...))  end
-local tostrjoin = LibCommon.tostrjoin
+LibShared.tostrjoin = LibShared.tostrjoin  or function(separator, ...)  return strjoin(separator, tostringall(...))  end
+local tostrjoin = LibShared.tostrjoin
 
---- LibCommon. AutoTablesMeta:  metatable that auto-creates empty inner tables when first referenced.
-LibCommon.AutoTablesMeta = LibCommon.AutoTablesMeta or { __index = function(self, key)  if key ~= nil then  local v={} ; self[key]=v ; return v  end  end }
-local AutoTablesMeta = LibCommon.AutoTablesMeta
+--- LibShared. AutoTablesMeta:  metatable that auto-creates empty inner tables when first referenced.
+LibShared.AutoTablesMeta = LibShared.AutoTablesMeta or { __index = function(self, key)  if key ~= nil then  local v={} ; self[key]=v ; return v  end  end }
+local AutoTablesMeta = LibShared.AutoTablesMeta
 
 -- Constant empty table to use as a default table, where nil would cause an error.
-LibCommon.ConstEmptyTable = LibCommon.ConstEmptyTable  or _G.setmetatable({}, { __newindex = function()  _G.error("Can't add properties to the ConstEmptyTable.")  end, __metatable = "ConstEmptyTable is not to be modified." })
-local ConstEmptyTable = LibCommon.ConstEmptyTable
+LibShared.ConstEmptyTable = LibShared.ConstEmptyTable  or _G.setmetatable({}, { __newindex = function()  _G.error("Can't add properties to the ConstEmptyTable.")  end, __metatable = "ConstEmptyTable is not to be modified." })
+local ConstEmptyTable = LibShared.ConstEmptyTable
 
 
 

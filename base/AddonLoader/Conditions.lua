@@ -2,7 +2,7 @@ local _G, ADDON_NAME, _ADDON = _G, ...
 
 -- Upvalued Lua globals:
 local AddonLoader = _G.AddonLoader
-local LibCommon,DevMode = LibCommon,DevMode
+local LibShared,DevMode = LibShared,DevMode
 local tostringall, tonumber, tostring, string, strjoin, type, pairs, ipairs, tremove, select, next, pcall, xpcall = 
       tostringall, tonumber, tostring, string, strjoin, type, pairs, ipairs, tremove, select, next, pcall, xpcall
 
@@ -16,21 +16,21 @@ local tostringall, tonumber, tostring, string, strjoin, type, pairs, ipairs, tre
 -- GLOBALS: IsAddOnLoaded
 
 -- Used from _G:  AddonLoader
--- Used from LibCommon:  tostrjoin
--- Exported to LibCommon:  tindexOf
+-- Used from LibShared:  tostrjoin
+-- Exported to LibShared:  tindexOf
 -- Used from _ADDON:  Debug
 
-local tostrjoin = LibCommon.Require.tostrjoin
--- local safecall,tostrjoin = LibCommon:Import("safecall,tostrjoin", AddonLoader)
+local tostrjoin = LibShared.Require.tostrjoin
+-- local safecall,tostrjoin = LibShared:Import("safecall,tostrjoin", AddonLoader)
 local LDB = _G.LibStub("LibDataBroker-1.1")
 
 local Debug,safecall = _ADDON.Debug,_ADDON.safecall
 local ConditionManager = AddonLoader.ConditionManager
 
-LibCommon.indexOf = LibCommon.indexOf or function(t, item)
+LibShared.indexOf = LibShared.indexOf or function(t, item)
 	local last = t and #t or 0  ;  for i = 1,last do  if t[i] == item then  return i  end  return nil  end
 end
-local tindexOf = LibCommon.indexOf
+local tindexOf = LibShared.indexOf
 
 
 

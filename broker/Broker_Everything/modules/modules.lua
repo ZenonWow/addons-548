@@ -4,26 +4,26 @@ local GetTime = GetTime
 
 local AceEvent = LibStub:GetLibrary("AceEvent-3.0")
 local AceTimer = LibStub:GetLibrary("AceTimer-3.0")
-local LibCommon = _G.LibCommon or {}  ;  _G.LibCommon = LibCommon
+local LibShared = _G.LibShared or {}  ;  _G.LibShared = LibShared
 
 
--- Exported to LibCommon:  indexOf, pairsOrNil
+-- Exported to LibShared:  indexOf, pairsOrNil
 
---- LibCommon. indexOf(array, item):  Find item in array.
-LibCommon.indexOf = LibCommon.indexOf or function(t, item)
+--- LibShared. indexOf(array, item):  Find item in array.
+LibShared.indexOf = LibShared.indexOf or function(t, item)
 	local last = t and #t or 0  ;  for i = 1,last do  if t[i] == item then  return i  end  return nil  end
 end
-local tindexOf = LibCommon.indexOf
+local tindexOf = LibShared.indexOf
 
---- LibCommon. pairsOrNil(t):   like  pairs(t), without raising error in any case.
+--- LibShared. pairsOrNil(t):   like  pairs(t), without raising error in any case.
 local function nonext(t,i)     return nil,nil  end
-LibCommon.pairsOrNil  = LibCommon.pairsOrNil  or  function(t)  if type(t)=='table' then  return next ,t,nil  else  if not t then  return nonext,t,nil  else  error( "pairsOrNil(t) expected table or nil, got "..type(t))  end end end
-local pairsOrNil = LibCommon.pairsOrNil
+LibShared.pairsOrNil  = LibShared.pairsOrNil  or  function(t)  if type(t)=='table' then  return next ,t,nil  else  if not t then  return nonext,t,nil  else  error( "pairsOrNil(t) expected table or nil, got "..type(t))  end end end
+local pairsOrNil = LibShared.pairsOrNil
 
 --[[
---- LibCommon. ConstEmptyTable:  Constant empty table to use as a default table in places where nil would cause an error.
-LibCommon.ConstEmptyTable = LibCommon.ConstEmptyTable  or _G.setmetatable({}, { __newindex = function()  _G.error("Can't add properties to the ConstEmptyTable.")  end, __metatable = "ConstEmptyTable is not to be modified." })
-local ConstEmptyTable = LibCommon.ConstEmptyTable
+--- LibShared. ConstEmptyTable:  Constant empty table to use as a default table in places where nil would cause an error.
+LibShared.ConstEmptyTable = LibShared.ConstEmptyTable  or _G.setmetatable({}, { __newindex = function()  _G.error("Can't add properties to the ConstEmptyTable.")  end, __metatable = "ConstEmptyTable is not to be modified." })
+local ConstEmptyTable = LibShared.ConstEmptyTable
 --]]
 
 
