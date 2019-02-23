@@ -1,0 +1,41 @@
+-- ASCII Control Characters
+-- https://en.wikipedia.org/wiki/C0_and_C1_control_codes#Field_separators
+-- https://ascii.cl/control-characters.htm
+
+-- Format: '<ALT-num>'<copy from Lua>'<ALT-0num>'
+-- Format:  -- <decimal code> = '<ALT-num>'<copy from Lua>'<ALT-0num>' -- <mnemonic> - <name>
+-- 02 = '♥''☻'
+-- 03 = '♥''♥'  -- Often used as a "break" character (Ctrl-C) to interrupt or terminate a program or process.
+-- 04 = '♦''  -- Often used on Unix to indicate end-of-file on a terminal.
+-- 05 = '♣''
+-- 06 = '♠''
+-- 07 = '•''
+-- 08 = '◘''
+-- 09 = '○'	'  -- HL/TAB - Horizontal Tabulation
+-- 10 = '◙'
+'
+'  -- On typewriters, printers, and some terminal emulators, moves the cursor down one row without affecting its column position.
+-- 11 = '♂'♂''
+-- 12 = '♀'♀''  -- On printers, load the next page. Treated as whitespace in many programming languages, and may be used to separate logical divisions in code. In some terminal emulators, it clears the screen. It still appears in some common plain text files as a page break character, such as the RFCs published by IETF.
+-- 13 = '♪''  -- Originally used to move the cursor to column zero while staying on the same line. The Enter or Return key on a keyboard will send this character, but it may be converted to a different end-of-line sequence by a terminal program.
+-- 14 = '♫'♫''  -- Switch to an alternative character set.
+-- 15 = '☼'☼''  -- Return to regular character set after Shift Out.
+-- 16 = '►'►''  -- DLE - Data Link Escape   -- Cause the following octets to be interpreted as raw data, not as control codes or graphic characters. Returning to normal usage would be implementation dependent.
+-- 17 = '◄'◄''
+-- 18 = '↕'↕''
+-- 19 = '‼'‼''
+-- 20 = '¶'¶''  -- DC4 - Device Control 4  -- DC3 and DC4 were intended primarily to indicate pausing or turning off a device.
+-- 21 = '§'§''  -- NAK - Negative Acknowledge
+-- 22 = '▬'▬''
+-- 23 = '↨'↨''
+-- 24 = '↑'↑''
+-- 25 = '↓'↓''
+-- 26 = '→'→''  -- SUB - Substitute  -- In DOS, Windows and other CP/M derivatives, it is used to indicate the end of file, both when typing on the terminal, and sometimes in text files stored on disk.
+-- 27 = '←'←''
+-- 28 = '∟'∟''  -- Can be used as delimiters to mark fields of data structures. If used for hierarchical levels, US is the lowest level (dividing plain-text data items), while RS, GS, and FS are of increasing level to divide groups made up of items of the level beneath it.
+-- 29 = '↔'↔''  -- GS - Group Separator
+-- 30 = '▲'▲''
+-- 31 = '▼'▼'▼'  -- US - Unit Separator  -- Can be used as delimiters to mark fields of data structures. If used for hierarchical levels, US is the lowest level (dividing plain-text data items), while RS, GS, and FS are of increasing level to divide groups made up of items of the level beneath it.
+-- 32 = ' ' ' '
+-- 33 = '!'!'!'
+
