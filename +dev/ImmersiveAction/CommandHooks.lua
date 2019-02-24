@@ -4,49 +4,32 @@ local Log = ImmersiveAction.Log
 local Log = ImmersiveAction.Log or {}  ;  ImmersiveAction.Log = Log
 
 
-------------------------------------------
--- Bindings --
-------------------------------------------
+-- TODO: pet battle handling
 
--- Key bindings' labels
+----------------------
+-- Command bindings --
+----------------------
+
+-- Label visible in key bindings UI.
 BINDING_HEADER_ImmersiveAction = "Immersive Action"
-BINDING_NAME_COMBATMODE_TOGGLE = "Toggle Action mode"
---[[
-BINDING_NAME_COMBATMODE_ENABLE= "Enable Action mode"
-BINDING_NAME_COMBATMODE_DISABLE= "Disable Action mode"
 
-function ImmersiveAction:EnableKey()
-	self:SetActionMode(true)
-	self:UpdateMouselook(true, 'EnableKey')
-end	
-
-<Binding name="COMBATMODE_ENABLE" header="ImmersiveAction">
-	-- description="Enable Action mode"
-	ImmersiveAction:EnableKey(keystate)
-</Binding>
---]]	
-
-
--- Builtin commands
-BINDING_NAME_CAMERAORSELECTORMOVE  = "Rotate Camera (Left Button default)"    -- targeting  or  camera rotation, original binding of BUTTON1
-BINDING_NAME_TURNORACTION 				 = "Turn or Action (Right Button default)"  -- the original binding of BUTTON2
 -- Custom commands
-BINDING_NAME_INTERACTNEAREST       = "Target and interact with closest friendly npc"
+BINDING_NAME_INTERACTNEAREST    = "Target and interact with closest friendly npc"
+BINDING_NAME_ToggleActionMode   = "Toggle Action mode"
+BINDING_NAME_TurnOrActionHijack = "Turn without Interacting"
 
-local FocusMouseoverBinding = 'BINDING_NAME_CLICK FocusMouseoverButton:LeftButton'
-do
-	-- BINDING_NAME_FOCUSMOUSEOVER 						= "Focus Mouseover"		-- no turning or camera
-	_G[FocusMouseoverBinding] = "Focus Mouseover"
-	local FocusMouseoverButton = CreateFrame('Button', 'FocusMouseoverButton', UIParent, 'SecureActionButtonTemplate')
-	FocusMouseoverButton:SetAttribute('type', 'macro')
-	FocusMouseoverButton:SetAttribute('macrotext', '/focus mouseover')
-end
-
+-- Builtin commands without a description
+BINDING_NAME_CAMERAORSELECTORMOVE = "Rotate Camera     (LeftButton default)"
+BINDING_NAME_TURNORACTION 				= "Turn or Interact (RightButton default)"
 
 
 ------------------------------------------
 -- Model of commands, declarative style --
 ------------------------------------------
+
+-- Save original MouselookStart, then securehook the global to catch addon usage.
+ImmersiveAction.MouselookStart = _G.MouselookStart
+ImmersiveAction.MouselookStop  = _G.MouselookStop
 
 ImmersiveAction.commandsHooked = {
 	TurnLeft			= 'Turn',
@@ -61,6 +44,7 @@ ImmersiveAction.commandsHooked = {
 	MoveAndSteer	= 'Mouselook',
 	-- TargetScanEnemy, TargetNearestEnemy:
 	TargetPriorityHighlight	= 'Mouselook',
+	Mouselook     = 'Mouselook',      -- Capture addons' usage and take into account.
 
 	MoveForward		= 'MoveKeys',
 	MoveBackward	= 'MoveKeys',
@@ -115,10 +99,10 @@ function ImmersiveAction:CommandHook(cmdName, pressed, event)
 	
 	if not stateOk then
 		local suffix= pressed  and  "key pressed again without being released. Stuck key?"  or  "key released without being pressed before."
-		Log.Anomaly("  CM - CommandHook(".. ImmersiveAction.colors.red .. cmdName .."|r):  ".. suffix)
+		Log.Anomaly("  CM - CommandHook(".. self.colors.red .. cmdName .."|r):  ".. suffix)
 	else
 		local keystate=  pressed  and  'down'  or  'up'
-		Log.Command("  CM - CommandHook(".. ImmersiveAction.colors[keystate] .. cmdName .." ".. keystate:upper() .."|r)")
+		Log.Command("  CM - CommandHook(".. self.colors[keystate] .. cmdName .." ".. keystate:upper() .."|r)")
 	end
 	
 	-- if self.commandsHooked[cmdName]=='Mouselook' then  possibleTransition = pressed  else  possibleTransition = not pressed  end
@@ -154,11 +138,24 @@ function ImmersiveAction:HookCommands()
 			hooksecurefunc(funcName, hookFunc)
 		end
 	end
+
+	hooksecurefunc('MouselookStart', ImmersiveAction.NotifyMouselookUsage)
 	
 	-- Release this function, ensure it's not called again.
 	self.HookCommands = nil
 end
 
+
+function ImmersiveAction.NotifyMouselookUsage()
+	if  ImmersiveAction.notifiedMouselook  or  ImmersiveAction.db.global.dontNotify  then  return  end
+	ImmersiveAction.notifiedMouselook = true
+	local callerFrame = 3  -- 0:debugstack, 1:this function, 2:MouselookStart (the hooked one), 3:caller (or another hook added later)
+	local callerStack = _G.debugstack(callerFrame,3,0)  -- read 3 frames to allow for tailcails (no filepath in those)
+	local callerPath = callerStack and callerStack:match("^(.-): ")
+	local msg = ImmersiveAction.colors.yellow.."ImmersiveAction|r:  another addon also uses MouselookStart(). If you experience unexpected mouse beaviour then consider disabling one addon. The call seems to originate from:  "..callerPath
+	print(msg)
+	LibShared.softassert(false, msg)
+end
 
 
 
@@ -166,15 +163,22 @@ end
 -- Bindings.xml implementation --
 ---------------------------------
 
-function ImmersiveAction:ToggleKey(toState)
+function ImmersiveAction:ToggleActionMode(toState)
 	-- Invert current state if called without argument.
 	if toState==nil then  toState = not IsMouselooking()  end
 	-- local inverseState= not self:ExpectedMouselook()
 	-- local inverseState= not self.commandState.ActionMode
 	
 	self:SetActionMode(toState)
-	self:UpdateMouselook(toState, 'ToggleKey')
-end	
+	self:UpdateMouselook(toState, 'ToggleActionMode')
+end
+
+
+function ImmersiveAction:TurnOrActionHijack(pressed)
+	-- TurnOrAction was pressed, then hijacked just before being released to avoid Interacting. Act as if TurnOrAction was released.
+	self:SetCommandState('TurnOrAction', pressed)
+	self:UpdateMouselook(nil, 'TurnOrActionHijack')
+end
 
 
 
@@ -222,7 +226,7 @@ function ImmersiveAction:CURSOR_UPDATE(event, ...)
 	cstate.SpellIsTargeting = SpellIsTargeting()
 	cstate.CursorObjectOrSpellTargeting = cstate.CursorPickedUp or cstate.SpellIsTargeting
 
-	Log.Event(event, '  -> cursorAction=' .. colorBoolStr(cstate.CursorObjectOrSpellTargeting, false))
+	Log.Event(event, '  -> cursorAction=' .. ImmersiveAction.colorBoolStr(cstate.CursorObjectOrSpellTargeting, false))
 	if not lastState ~= not cstate.CursorObjectOrSpellTargeting then
 		cstate.ActionModeRecent = nil    -- There is a more recent event now.
 		self:UpdateMouselook(not cstate.CursorObjectOrSpellTargeting, 'CURSOR_UPDATE')

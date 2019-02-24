@@ -5,6 +5,7 @@ local Log = ImmersiveAction.Log or {}  ;  ImmersiveAction.Log = Log
 assert(_ADDON.WindowList, "Include WindowList.lua before WindowHooks.lua")
 local getSubField = assert(_ADDON.getSubField, "getSubField() missing from WindowList.lua")
 local tDeleteItem = _G.tDeleteItem  -- from FrameXML/Util.lua
+local colors = ImmersiveAction.colors
 
 ImmersiveAction.WindowsOnScreen = {}
 ImmersiveAction.HookedFrames = {}
@@ -26,7 +27,7 @@ local FramesToHookMap = {}
 
 
 local indexOf = LibShared.Require.indexOf
-local removeFirst = assert(_G.tDeleteItem, "Bliz deleted FrameXML/Util.lua # function tDeleteItem()"
+local removeFirst = assert(_G.tDeleteItem, "Bliz deleted FrameXML/Util.lua # function tDeleteItem()")
 
 local function setInsertLast(item)
 	if  indexOf(self, item)  then  return false  end
@@ -47,7 +48,7 @@ end
 -------------------------
 
 local function FrameOnShow(frame)
-	Log.Frame('  CM_FrameOnShow('.. ImmersiveAction.colors.show .. frame:GetName() ..'|r)')
+	Log.Frame('  CM_FrameOnShow('.. colors.show .. frame:GetName() ..'|r)')
 	-- if already visible do nothing
 	if  not setInsertLast(ImmersiveAction.WindowsOnScreen, frame)  then  return  end
 
@@ -57,7 +58,7 @@ end
 
 
 local function FrameOnHide(frame)
-	Log.Frame('  CM_FrameOnHide('.. ImmersiveAction.colors.hide .. frame:GetName() ..'|r)')
+	Log.Frame('  CM_FrameOnHide('.. colors.hide .. frame:GetName() ..'|r)')
 	local removed= removeFirst(ImmersiveAction.WindowsOnScreen, frame)
 	if  not removed  then  return  end
 	
@@ -86,7 +87,7 @@ function  ImmersiveAction:HookFrame(frameName)
 	if  not frame:GetScript('OnHide')  then  frame:SetScript('OnHide', FrameOnHide)  end
 	
 	if  frame:IsShown()  then
-		Log.Frame('  CM:HookUpFrames():  '.. ImmersiveAction.colors.show .. frame:GetName() ..'|r is already visible')
+		Log.Frame('  CM:HookUpFrames():  '.. colors.show .. frame:GetName() ..'|r is already visible')
 		setInsertLast(ImmersiveAction.WindowsOnScreen, frame)
 	end
 	

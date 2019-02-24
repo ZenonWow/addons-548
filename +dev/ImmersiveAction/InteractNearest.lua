@@ -86,6 +86,12 @@ local InCombatSnippet = [===[
 	self:SetAttribute('InteractBinding', newstate)
 ]===]
 
+--- AddKey(key, toCmd)
+local AddKey = [===[
+	local key, toCmd = ...
+	DynamicKeys[key] = toCmd
+]===]
+
 --- OverrideBindingsSnippet(self, name, value)
 -- Set all keys to the new InteractBinding.
 --
@@ -109,6 +115,7 @@ function InteractNearest:InitProtectedFrame()
 	local NoCombatCondition = "[nocombat] ignore ; "
 	local MouseOverCondition = "[@mouseover,harm,dead] INTERACTMOUSEOVER ; [@mouseover,noharm,nodead] INTERACTMOUSEOVER ; "
 	local TargetCondition = "[harm,dead] INTERACTTARGET ; [noharm,nodead] INTERACTTARGET"
+	-- SecureStateDriverManager:RegisterEvent("UPDATE_MOUSEOVER_UNIT")  -- necessary?
 
 	local handler = CreateFrame('Frame', nil, 'SecureHandlerStateTemplate,SecureHandlerAttributeTemplate')
 	self.InCombatHandler = handler
@@ -119,24 +126,28 @@ function InteractNearest:InitProtectedFrame()
 	
 	-- Createthe "globals" available to the snippets in the protected environment.
 	-- DynamicKeys (key->toCmd) restricted table:
-	handler:RunSnippet(" DynamicKeys = newtable() ")
+	handler:Run(" DynamicKeys = newtable() ")
 	handler.Env = GetManagedEnvironment(handler)
 	-- TargetCommand:  copy of InteractNearest.TargetCommand
-	handler.Env.TargetCommand = self.TargetCommand
+	handler:SetAttribute('_setTargetCommand', " TargetCommand = ... ")
+	handler:SetAttribute('_set', " local name,value=... ; _G[name] = value ")
+	handler:SetAttribute('_addKey', " local key,toCmd=... ; DynamicKeys[key] = toCmd ")
+	-- handler.Env.TargetCommand = self.TargetCommand
+	handler:RunSnippet('_setTargetCommand', self.TargetCommand)
 
 	_G.RegisterStateDriver(InCombatHandler, 'InteractBinding', NoCombatCondition .. MouseOverCondition .. TargetCommand)
 	self.InitProtectedFrame = nil
 end
 
 
--- Upload the managed keys from the insecure keys table to the secure (restricted) DynamicKeys table.
+-- Upload the managed keys from the insecure table to the secure (restricted) DynamicKeys table.
 function InteractNearest.InCombatHandler:UploadKeys(insecureKeys)
 	print("InCombatHandler:UploadKeys()")
-	-- local DynamicKeys = GetManagedEnvironment(self).DynamicKeys
-	local DynamicKeys = handler.Env.DynamicKeys
-	_G.rtable.wipe(DynamicKeys)
+	handler:Run(" wipe(DynamicKeys) ")
 	for key,toCmd in pairs(insecureKeys) do
-		DynamicKeys[key] = toCmd    -- strings are allowed in restricted tables
+		-- handler:RunSnippet('_addKey', key, toCmd)
+		-- RunSnippet() is not found on Earth, or in any code. Only "Iriel’s Field Guide to Secure Handlers" mentions it, but not how to set tje snippets.
+		handler:Run(" local key,toCmd=... ; DynamicKeys[key] = toCmd ", key, toCmd)
 	end
 end
 
@@ -195,7 +206,8 @@ function InteractNearest:PLAYER_REGEN_ENABLED(event)
 
 	-- Update TargetCommand in protected environment in case :SetTargetEnemiesToo() was called.
 	-- Before OverrideBindings(), that will use it.
-	self.InCombatHandler.Env.TargetCommand = self.TargetCommand
+	-- self.InCombatHandler.Env.TargetCommand = self.TargetCommand
+	self.InCombatHandler:RunSnippet('_setTargetCommand', self.TargetCommand)
 	
 	self:StartTacking()
 end

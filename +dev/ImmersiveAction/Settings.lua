@@ -6,6 +6,69 @@ local ImmersiveAction = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = Immers
 local indexOf = _G.LibShared.Require.indexOf
 
 
+
+---------------------------
+-- Default configuration
+---------------------------
+
+ImmersiveAction.defaultSettings= {
+	--global = { version = "1.0.0", },
+	profile= {
+		enabledOnLogin= false,
+		enableWithMoveKeys= false,
+		enableAfterBothButtons= true,
+		enableAfterMoveAndSteer= true,
+		disableWithLookAround= true,
+		actionModeMoveWithCameraButton= false,
+		bindingsInGeneral = {},
+		bindingsInActionMode = {},
+		bindings= {  -- 2018-10-21:
+			--['BUTTON1']				= "INTERACTNEAREST",
+			['BUTTON1']				= "CAMERAORSELECTORMOVE",  -- Rotate Camera (LeftButton default),
+			['BUTTON2']				= "TURNORACTION",  -- Turn or Action (RightButton default),
+			['ALT-BUTTON1']		= "MOVEANDSTEER",
+			['ALT-BUTTON2']		= "AUTORUN",
+			['SHIFT-BUTTON1'] = "STRAFELEFT",
+			['SHIFT-BUTTON2'] = "STRAFERIGHT",
+			['CTRL-BUTTON1']	= "INTERACTNEAREST",
+			['CTRL-BUTTON2']	= "INTERACTMOUSEOVER",  -- Does INTERACTTARGET if there is nothing under the mouse (no mouseover)
+			--[[
+			['BUTTON1']				= "MOVEANDSTEER",
+			['BUTTON2']				= "TURNORACTION",
+			['ALT-BUTTON1']		= "CAMERAORSELECTORMOVE",  -- Rotate Camera (LeftButton default),
+			['ALT-BUTTON2']		= "TURNORACTION",  -- Turn or Action (RightButton default),
+			['SHIFT-BUTTON1'] = "TARGETNEARESTFRIEND",
+			['SHIFT-BUTTON2'] = "TARGETNEARESTENEMY",
+			['CTRL-BUTTON1']	= "INTERACTNEAREST",
+			['CTRL-BUTTON2']	= "INTERACTMOUSEOVER",  -- Does INTERACTTARGET if there is nothing under the mouse (no mouseover)
+			--]]
+			--[[
+			['BUTTON1']				= "INTERACTNEAREST",
+			--['BUTTON1']				= "MOVEANDSTEER",
+			['BUTTON2']				= "TARGETSCANENEMY",
+			['ALT-BUTTON1']		= "CAMERAORSELECTORMOVE",  -- Rotate Camera (LeftButton default),
+			['ALT-BUTTON2']		= "TURNORACTION",  -- Turn or Action (RightButton default),
+			['SHIFT-BUTTON1'] = LibShared.softassert(UIShortcuts.FocusMouseoverBinding),
+			['SHIFT-BUTTON2'] = "TARGETNEARESTENEMY",
+			['CTRL-BUTTON1']	= "INTERACTMOUSEOVER",  -- Does INTERACTTARGET if there is nothing under the mouse (no mouseover)
+			['CTRL-BUTTON2']	= "INTERACTNEAREST",
+			--]]
+			--[[
+			['SHIFT-BUTTON1'] = "TARGETMOUSEOVER",
+			['SHIFT-BUTTON2'] = LibShared.softassert(UIShortcuts.FocusMouseoverBinding),
+			['SHIFT-BUTTON1'] = "TARGETPREVIOUSFRIEND",
+			['CTRL-BUTTON1']	= "TARGETNEARESTFRIEND",
+			['CTRL-BUTTON2']	= "INTERACTTARGET",
+			--]]
+		},
+		modifiers= {
+		},
+	}
+}
+
+
+
+
 -------------------
 -- Configuration
 -------------------
@@ -19,6 +82,7 @@ turning (character with mouse) = ImmersiveAction (term from GuildWars2 community
 camera (rotation) = look around with mouse, like turning, but the character does not move / change direction
 	- only possible with CAMERAORSELECTORMOVE command and disabled ImmersiveAction
 --]]
+
 Config.commands = { 
 		'',		-- don't override --
 
@@ -39,7 +103,7 @@ Config.commands = {
 		'TARGETNEARESTENEMY',					-- target nearest, no turning
 
 		'TARGETMOUSEOVER',						-- no turning or camera -> hook mouse button directly to disable Mouselook while pressed
-		FocusMouseoverBinding,							-- no turning or camera
+		UIShortcuts.FocusMouseoverBinding,    -- no turning or camera
 
 		-- Target Nearest (tab targeting, no turning or camera, mouse influences direction to look for the nearest)
 		'TARGETNEARESTFRIENDPLAYER',
@@ -80,7 +144,7 @@ Config.commandLabelsCustom = {
 	['CAMERAORSELECTORMOVE'] = "Rotate Camera",		 -- targeting  or  camera rotation, original binding of BUTTON1
 	['TURNORACTION']         = "Turn or Action",	 -- the original binding of BUTTON2
 	['INTERACTNEAREST']      = "Target and interact with closest friendly npc",
-	[FocusMouseoverBinding]  = "Focus Mouseover",	 -- no turning or camera
+	[UIShortcuts.FocusMouseoverBinding]  = "Focus Mouseover",	 -- no turning or camera
 	--]]
 }
 

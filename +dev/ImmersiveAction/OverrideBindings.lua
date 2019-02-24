@@ -118,12 +118,12 @@ function ImmersiveAction:UpdateUserBindings()
 	the new binding will receive the "up" event without a "down" event.
 	This results in unexpectedly entering or leaving ImmersiveAction when rebinding a command that changes ImmersiveAction.
 	--]]
-	local wasMouselooking = IsMouselooking()
+	local wasMouselooking = _G.IsMouselooking()
 	if wasMouselooking then
 		-- Log.Anomaly('ImmersiveAction:UpdateUserBindings() while IsMouselooking() could cause stuck keys, not updating bindings.')
 		-- return
 		Log.Anomaly('ImmersiveAction:UpdateUserBindings() while IsMouselooking() could cause stuck keys, temporarily disabling Mouselook.')
-		MouselookStop()
+		ImmersiveAction.MouselookStop()
 	end
 
 	ClearOverrideBindings(UserBindings)
@@ -132,11 +132,11 @@ function ImmersiveAction:UpdateUserBindings()
 
 	-- Modifiers (SHIFT/CTRL/ALT) to turn on/off ActionMode.
 	-- Currently the ModifiedClick is not used, only the profile.modifiers.* setting.
-	SetModifiedClick('ActionModeEnable', profile.modifiers.enableModifier)
-	SetModifiedClick('ActionModeDisable', profile.modifiers.disableModifier)
+	-- SetModifiedClick('ActionModeEnable', profile.modifiers.enableModifier)
+	-- SetModifiedClick('ActionModeDisable', profile.modifiers.disableModifier)
 
 	-- self:ResetState()
-	if wasMouselooking then  MouselookStart()  end
+	if wasMouselooking then  ImmersiveAction.MouselookStart()  end
 end
 
 
@@ -214,7 +214,7 @@ function OverrideBindings:SetMouselookOverrideBindings(fromCmd, toCmd)
 	-- Keys to override when enabled.
 	for i,key in ipairsOrOne(self.cmdKeys[fromCmd]) do
 		if LibShared.softassert(not self.MouselookOverrides[key]) then
-			LibShared.softassertf(fromCmd~='TURNORACTION' and fromCmd~='TARGETSCANENEMY', "SetMouselookOverrideBindings():  overriding bindings of %q to %q will cause stucking in Mouselook mode.', fromCmd, toCmd)
+			LibShared.softassertf(fromCmd~='TURNORACTION' and fromCmd~='TARGETSCANENEMY', "SetMouselookOverrideBindings():  overriding bindings of %q to %q will cause stucking in Mouselook mode.", fromCmd, toCmd)
 			self.MouselookOverrides[key] = toCmd
 			_G.SetMouselookOverrideBinding(key, toCmd)
 		end
@@ -229,7 +229,7 @@ end
 ------------------------------
 
 function ImmersiveAction:OverrideCommandsIn(mode, enable)
-	print('  ImmersiveAction:OverrideCommandsIn('..mode..', '..colorBoolStr(enable, true)..')')
+	print('  ImmersiveAction:OverrideCommandsIn('..mode..', '..ImmersiveAction.colorBoolStr(enable, true)..')')
 	if InCombatLockdown() then
 		Log.State("ImmersiveAction:OverrideCommandsIn() ignored:  Can't update bindings when InCombatLockdown()")
 	else
@@ -308,36 +308,82 @@ end
 
 
 
+-- Ctrl+LeftClick UP:  what is Ctrl-B1-UP stickycamera??
+-- CameraOrSelectOrMoveStop(IsModifiedClick("STICKYCAMERA"));
+
 -------------------------------
 -- Experiment: SecureHandler hooking WorldFrame to capture mouse button commands.
--- Result:  WorldFrame has no OnClick handler (not a Button), and SecureHandlers don't support OnMouseDown/OnMouseUp handlers. Neat. Intended.
+-- Result:  WorldFrame has no OnClick handler (not a Button), and SecureHandlerClickTemplate don't support OnMouseDown/OnMouseUp handlers.
+-- Trying SecureHandlerMouseUpDownTemplate.
 -------------------------------
 
 
-function ImmersiveAction:RegisterOverrides()
-	-- Secure wrapper  function  WorldMapFrame_OnClick(self, button, down)
-	local preBody = [===[
-	print("WorldFrame_OnMouseUp_preBody("..button..")")
-	if  down  and  button == 'LeftButton'  then
-		self:SetBinding(true, 'BUTTON2', 'AUTORUN')
+function ImmersiveAction:InitSecureCommandPatches()
+	-- Secure wrapper function WorldFrame_OnMouseDown_preBody(self, button, down)
+	-- If CameraButton (LeftButton) is pressed then rebinds TurnBUTTON (BUTTON2) to AUTORUN.
+	-- In the secure environment:  owner == WorldClickHandler, self == WorldFrame
+	local prePressBody = [===[
+	print(" WorldFrame_OnMouseDown_preBody("..button..") ")
+	if ReboundTurnBUTTON then  return  end
+
+	if  button == CameraButton  then
+		ReboundTurnBUTTON = 'AUTORUN'
+		owner:SetBinding(true, TurnBUTTON, ReboundTurnBUTTON)
 	end
 	]===]
-	local postBody = [===[
-	print("WorldFrame_OnMouseDown_postBody("..button..")")
-	if  not down  and  button == 'LeftButton'  then
-		self:ClearBinding('BUTTON2')
+
+	-- If TurnButton (RightButton) is released over a unit (mouseover) then rebinds TurnBUTTON (BUTTON2) to TurnOrActionHijack, avoiding the Interact action.
+	-- Secure wrapper function WorldFrame_OnMouseUp_preBody(self, button, down)
+	local preReleaseBody = [===[
+	print(" WorldFrame_OnMouseUp_preBody("..button..") ")
+	if ReboundTurnBUTTON then  return  end
+
+	if  button == TurnButton  and  UnitExists('mouseover')  and  not IsModifiedClick('Interact')  then
+		local now = owner:GetTime()
+		if DoubleClickInterval < now-(LastTurnClick or 0) then
+			-- ReboundTurnBUTTON = 'TurnOrActionHijack'
+			-- owner:SetBinding(true, TurnBUTTON, ReboundTurnBUTTON)
+			owner:CallMethod('MouselookStop')    -- Hack TurnOrActionStop() into believing it was not pressed.
+		end
+		LastTurnClick = now
+	end
+	]===]
+	-- LastTurnClick is updated for doubleclicks too, so as long as the user lands clicks in 0.3 sec, all clicks will Interact.
+	-- Spamming clicks still works, but a single click is prevented from an accidental pull.
+
+	-- Secure wrapper function WorldFrame_OnMouseUp_postBody(self, button, down)
+	local postReleaseBody = [===[
+	print(" WorldFrame_OnMouseUp_postBody("..button..") ")
+
+	if  button == CameraButton  and  ReboundTurnBUTTON=='AUTORUN'  then
+		ReboundTurnBUTTON = false
+		owner:ClearBinding(TurnBUTTON)
+	end
+
+	if  button == TurnButton  and  ReboundTurnBUTTON=='TurnOrActionHijack'  then
+		ReboundTurnBUTTON = false
+		owner:ClearBinding(TurnBUTTON)
 	end
 	]===]
 
 	-- _G.WorldClickHandler = _G.WorldClickHandler or CreateFrame('Frame', nil, nil, 'SecureHandlerClickTemplate')
-	_G.WorldClickHandler = _G.WorldClickHandler or CreateFrame('Frame', nil, nil, 'SecureHandlerMouseUpDownTemplate')
-	SecureHandlerWrapScript(WorldFrame, 'OnMouseUp'  , WorldClickHandler, preBody, nil)
-	SecureHandlerWrapScript(WorldFrame, 'OnMouseDown', WorldClickHandler, "", postBody)
-	-- WorldClickHandler:WrapScript(WorldFrame, 'OnClick', preBody, postBody)
-	--WorldFrame:WrapScript(WorldFrame, 'OnClick', preBody, postBody)
+	local handler = _G.WorldClickHandler or CreateFrame('Frame', nil, nil, 'SecureHandlerMouseUpDownTemplate')
+	_G.WorldClickHandler = handler
+	-- Init "global" variables in secure environment.
+	handler:SetAttribute('_set', " local name,value=... ; _G[name] = value ")
+	handler:SetAttribute('_init', " CameraButton,TurnButton,TurnBUTTON = ... ")
+	local initSnippet = " CameraButton,TurnButton,TurnBUTTON = ... "
+	handler:Run(initSnippet, 'LeftButton','RightButton','BUTTON2')
+	-- handler:RunSnippet('_init', 'LeftButton','RightButton','BUTTON2')
+	handler.MouselookStop = ImmersiveAction.MouselookStop
+	SecureHandlerWrapScript(WorldFrame, 'OnMouseDown', handler, prePressBody, nil)
+	SecureHandlerWrapScript(WorldFrame, 'OnMouseUp'  , handler, preReleaseBody, postReleaseBody)
+	-- handler:WrapScript(WorldFrame, 'OnClick', preBody, postBody)
+	-- WorldFrame:WrapScript(WorldFrame, 'OnMouseDown', preBody, nil)
+	-- WorldFrame:WrapScript(WorldFrame, 'OnMouseUp', "", postBody)
 end
 
--- ImmersiveAction:RegisterOverrides()
+ImmersiveAction:InitSecureCommandPatches()
 
 --[[
 /dump WorldFrame:HasScript('OnClick'), WorldFrame:HasScript('PreClick'), WorldFrame:HasScript('PostClick'), WorldFrame:HasScript('OnMouseUp'), WorldFrame:HasScript('OnMouseDown')

@@ -212,7 +212,7 @@ function  ImmersiveAction:UpdateMouselook(possibleTransition, event)
 			-- TODO: remove print. Spell targeting does nothing? The improved priority order in ExpectedMouselook() might have fixed this.
 			return
 		end
-		if  expState  then  MouselookStart()  else  MouselookStop()  end
+		if  expState  then  ImmersiveAction.MouselookStart()  else  ImmersiveAction.MouselookStop()  end
 		--self.lastMouselookSet= expState
 	end
 end
@@ -262,7 +262,7 @@ function ImmersiveAction:ExpectedMouselook()
 
 	-- MoveAndSteer,TargetScanEnemy,TargetNearestEnemy takes precedence over WindowsOnScreen, SpellIsTargeting and CursorPickedUp.
 	-- Maybe all Move,Strafe bound to mouse button should do so. In that case extra logic is needed to detect when Move is caused by a mouse button.
-	if  cstate.Mouselook  then  return true, "Mouselook:"..cstate.Mouselook  end		-- 'MoveAndSteer, ScanEnemy'  end
+	if  cstate.Mouselook  then  return true, "Mouselook:"..cstate.Mouselook  end		-- 'MoveAndSteer, ScanEnemy', addons using MouselookStart()  end
 
 	if  cstate.enableModPressed   then  return true,  'enableModPressed'   end
 	if  cstate.disableModPressed  then  return false, 'disableModPressed'  end

@@ -75,213 +75,22 @@ local Log = ImmersiveAction.Log or {}  ;  ImmersiveAction.Log = Log
 
 
 
-
--- Init state:
--- ImmersiveAction.commandState.ActionMode= nil
--- ImmersiveAction.commandState.ActionModeRecent= nil
-ImmersiveAction.BoundCommand= 'TARGETNEARESTFRIEND'  -- default action for INTERACTNEAREST: INTERACTTARGET or TARGETNEARESTFRIEND
-
-
-
-
----------------------------
--- Log: print state transitions, commands, etc.
----------------------------
-
---[[
--- logging:
-/run ImmersiveAction.logging.all= false
-/run ImmersiveAction.logging.Anomaly= false
-/run ImmersiveAction.logging.State= false
-/run ImmersiveAction.logging.Update= true
-/run ImmersiveAction.logging.Command= true
--- set to true or false  to override individual event settings
-/run ImmersiveAction.logging.Event.all= false
--- individual events
-/run ImmersiveAction.logging.Event.CURSOR_UPDATE= false
-/run ImmersiveAction.logging.Event.PLAYER_TARGET_CHANGED= false
-/run ImmersiveAction.logging.Event.PET_BAR_UPDATE= false
-/run ImmersiveAction.logging.Event.ACTIONBAR_UPDATE_STATE= false
-/run ImmersiveAction.logging.Event.QUEST_PROGRESS= false
-/run ImmersiveAction.logging.Event.QUEST_FINISHED= false
---]]
-ImmersiveAction.logging= {
-	-- all= false,		-- set to false/true to override individual event settings.
-	-- all= true,
-	State= false,
-	Update= false,
-	Command= false,
-	-- Anomaly= false,
-	Anomaly= true,
-	Init= false,
-	Frame= false,
-}
-ImmersiveAction.logging.Event= {
-	all= false,		-- set to false/true to override individual event settings.
-	-- all= true,
-	CURSOR_UPDATE= false,
-	PLAYER_TARGET_CHANGED= true,
-	-- PET_BAR_UPDATE= true,
-	-- ACTIONBAR_UPDATE_STATE= false,
-	QUEST_PROGRESS= true,
-	QUEST_FINISHED= true,
-}
-
-
-local function makeLogFunc(Log, logging, categ)
-	Log[categ] =  function(...)  if logging:_on(categ) then print(...) end  end
-end
-function ImmersiveAction.logging:_on(categ)
-	return  self.all~=false  and  (self[categ] or self.all)
-end
-
-ImmersiveAction.logging.Event._on = ImmersiveAction.logging._on
-function ImmersiveAction.logging:_onevent(event)
-	return  self.all ~= false  and  self.Event  and  self.Event:_on(event)
-end
-
-makeLogFunc(Log, ImmersiveAction.logging, 'State')
-makeLogFunc(Log, ImmersiveAction.logging, 'Update')
-makeLogFunc(Log, ImmersiveAction.logging, 'Command')
-makeLogFunc(Log, ImmersiveAction.logging, 'Anomaly')
-makeLogFunc(Log, ImmersiveAction.logging, 'Init')
-makeLogFunc(Log, ImmersiveAction.logging, 'Frame')
-
-function Log.Event(event, extraMessage)
-	if  ImmersiveAction.logging:_onevent(event)  then
-		print(event ..':  cursor='.. (GetCursorInfo() or 'hand')
-		..' CursorPickedUp()='.. colorBoolStr(CursorPickedUp(),true)
-		..' SpellIsTargeting()='.. colorBoolStr(SpellIsTargeting(),true)
-		.. (extraMessage or '') )
-	end
-end
-
-
-
---[[ Change colors used in logging
-/run ImmersiveAction.colors['nil']= ImmersiveAction.colors.blue
-/run ImmersiveAction.colors[false]= ImmersiveAction.colors.blue
-/run ImmersiveAction.colors[true]= ImmersiveAction.colors.green
---]]
-ImmersiveAction.colors = {
-		black			= "|cFF000000",
-		white			= "|cFFffffff",
-		gray			= "|cFFbeb9b5",
-		blue			= "|cFF00b4ff",
-		lightblue	= "|cFF96c0ff",
-		purple		= "|cFFcc00ff",
-		green			= "|cFF00ff00",
-		green2		= "|cFF66ff00",
-		lightgreen= "|cFF98fb98",
-		darkred		= "|cFFc25b56",
-		red				= "|cFFff0000",
-		orange		= "|cFFff9900",
-		yellow		= "|cFFffff00",
-		parent		= "|cFFbeb9b5",
-		error			= "|cFFff0000",
-		ok				= "|cFF00ff00",
-		restore		= "|r",
-}
-local colors = ImmersiveAction.colors
-colors['nil']			= colors.lightblue
-colors[false]			= colors.lightblue
-colors[true]			= colors.green
-colors.missedup		= colors.orange
-colors.up					= colors.orange
-colors.down				= colors.green		--colors.purple
-colors.show				= colors.green
-colors.hide				= colors.lightblue
-colors.event			= colors.lightgreen
--- colors.ActionMode   = colors.orange
-colors.Mouselook  = colors.yellow
-
-function ImmersiveAction.colorBoolStr(value, withColor)
-	local boolStr=  value == true and 'ON'  or  value == false and 'OFF'  or  tostring(value)
-	if  withColor == true  then  withColor= ImmersiveAction.colors[value == nil  and  'nil'  or  value]  end
-	return  withColor  and  withColor .. boolStr .. ImmersiveAction.colors.restore  or  boolStr
-end
-local colorBoolStr = ImmersiveAction.colorBoolStr
-
-
-
-
----------------------------
--- Default configuration
----------------------------
-
-ImmersiveAction.defaultSettings= {
-	--global = { version = "1.0.0", },
-	profile= {
-		enabledOnLogin= false,
-		enableWithMoveKeys= false,
-		enableAfterBothButtons= true,
-		enableAfterMoveAndSteer= true,
-		disableWithLookAround= true,
-		actionModeMoveWithCameraButton= false,
-		bindingsInGeneral = {},
-		bindingsInActionMode = {},
-		bindings= {  -- 2018-10-21:
-			--['BUTTON1']				= "INTERACTNEAREST",
-			['BUTTON1']				= "CAMERAORSELECTORMOVE",  -- Rotate Camera (LeftButton default),
-			['BUTTON2']				= "TURNORACTION",  -- Turn or Action (RightButton default),
-			['ALT-BUTTON1']		= "MOVEANDSTEER",
-			['ALT-BUTTON2']		= "AUTORUN",
-			['SHIFT-BUTTON1'] = "STRAFELEFT",
-			['SHIFT-BUTTON2'] = "STRAFERIGHT",
-			['CTRL-BUTTON1']	= "INTERACTNEAREST",
-			['CTRL-BUTTON2']	= "INTERACTMOUSEOVER",  -- Does INTERACTTARGET if there is nothing under the mouse (no mouseover)
-			--[[
-			['BUTTON1']				= "MOVEANDSTEER",
-			['BUTTON2']				= "TURNORACTION",
-			['ALT-BUTTON1']		= "CAMERAORSELECTORMOVE",  -- Rotate Camera (LeftButton default),
-			['ALT-BUTTON2']		= "TURNORACTION",  -- Turn or Action (RightButton default),
-			['SHIFT-BUTTON1'] = "TARGETNEARESTFRIEND",
-			['SHIFT-BUTTON2'] = "TARGETNEARESTENEMY",
-			['CTRL-BUTTON1']	= "INTERACTNEAREST",
-			['CTRL-BUTTON2']	= "INTERACTMOUSEOVER",  -- Does INTERACTTARGET if there is nothing under the mouse (no mouseover)
-			--]]
-			--[[
-			['BUTTON1']				= "INTERACTNEAREST",
-			--['BUTTON1']				= "MOVEANDSTEER",
-			['BUTTON2']				= "TARGETSCANENEMY",
-			['ALT-BUTTON1']		= "CAMERAORSELECTORMOVE",  -- Rotate Camera (LeftButton default),
-			['ALT-BUTTON2']		= "TURNORACTION",  -- Turn or Action (RightButton default),
-			['SHIFT-BUTTON1'] = FocusMouseoverBinding,
-			['SHIFT-BUTTON2'] = "TARGETNEARESTENEMY",
-			['CTRL-BUTTON1']	= "INTERACTMOUSEOVER",  -- Does INTERACTTARGET if there is nothing under the mouse (no mouseover)
-			['CTRL-BUTTON2']	= "INTERACTNEAREST",
-			--]]
-			--[[
-			['SHIFT-BUTTON1'] = "TARGETMOUSEOVER",
-			['SHIFT-BUTTON2'] = FocusMouseoverBinding,
-			['SHIFT-BUTTON1'] = "TARGETPREVIOUSFRIEND",
-			['CTRL-BUTTON1']	= "TARGETNEARESTFRIEND",
-			['CTRL-BUTTON2']	= "INTERACTTARGET",
-			--]]
-		},
-		modifiers= {
-		},
-	}
-}
---[[ Dec 5, 2017 by justice7ca
-I had to update the Keybindings again, there were a lot of issues binding Target Friendly to a ctrl+click key, it doesn't have the same affect as putting it on a basic click.
-SO, Left click now selects a friendly target, right click will select an enemy target.  Control or Shift click to interact.  Much simpler, I am still building the ui for the config, that's coming.
---]]
-
-
-
-
 --------------------------
 -- Addon loading events
 --------------------------
 
+-- Initial state:
+-- ImmersiveAction.commandState.ActionMode= nil
+-- ImmersiveAction.commandState.ActionModeRecent= nil
+
+
 function ImmersiveAction:OnInitialize()
-	-- Run on own ADDON_LOADED event
+	-- Run on this addon's ADDON_LOADED event.
 	Log.Init('  ImmersiveAction:OnInitialize()')
 	self.commands:HookCommands()
-	--self:HookUpFrames()		-- is it necessary before OnEnable() calling it again?
-	self:RegisterChatCommand("cm", "ChatCommand")
-	self:RegisterChatCommand("combatmode", "ChatCommand")
+	-- self:HookUpFrames()		-- is it necessary before OnEnable() calling it again?
+	self:RegisterChatCommand("ia", "ChatCommand")
+	self:RegisterChatCommand("immersiveaction", "ChatCommand")
 	
 	--[[
 	Use one profile called 'Default' for all characters originally
@@ -388,12 +197,12 @@ end
 ----------------------
 
 function ImmersiveAction.ResetMouseButton12Bindings()
-	SetBinding('BUTTON1','CAMERAORSELECTORMOVE')
-	SetBinding('BUTTON2','TURNORACTION')
-	SetBinding('ALT-BUTTON1',nil)
-	SetBinding('ALT-BUTTON2',nil)
-	SetBinding('CTRL-BUTTON1',nil)
-	SetBinding('CTRL-BUTTON2',nil)
+	SetBinding('BUTTON1'      ,'CAMERAORSELECTORMOVE')
+	SetBinding('BUTTON2'      ,'TURNORACTION')
+	SetBinding('ALT-BUTTON1'  ,nil)
+	SetBinding('ALT-BUTTON2'  ,nil)
+	SetBinding('CTRL-BUTTON1' ,nil)
+	SetBinding('CTRL-BUTTON2' ,nil)
 	SetBinding('SHIFT-BUTTON1',nil)
 	SetBinding('SHIFT-BUTTON2',nil)
 end
@@ -405,14 +214,14 @@ local function SetBindings(keys, command)
 		SetBinding(key, command)
 	end
 	local name= _G['BINDING_NAME_'.. command]  or  command
-	print('ImmersiveAction updating binding  "'.. name ..'":  '.. table.concat(keys, ', '))
+	print('ImmersiveAction_ updating binding  "'.. name ..'":  '.. table.concat(keys, ', '))
 end
 
 
 
 
 ----------------------
--- Chat command /ia
+-- Chat command  /ia  /immersiveaction
 ----------------------
 
 function ImmersiveAction:ChatCommand(input)
@@ -420,7 +229,7 @@ function ImmersiveAction:ChatCommand(input)
         InterfaceOptionsFrame_OpenToCategory(self.config.optionsFrame)
         InterfaceOptionsFrame_OpenToCategory(self.config.optionsFrame)
     else
-        LibStub("AceConfigCmd-3.0"):HandleCommand("ia", "ImmersiveAction", input)
+        LibStub("AceConfigCmd-3.0"):HandleCommand("ia", "ImmersiveAction_", input)
     end
 end
 
@@ -432,7 +241,34 @@ end
 -- Shared functions
 ----------------------
 
-LibShared.DefineTable.SetScript()
-LibShared.SetScript.OnEvent = LibShared.SetScript.OnEvent  or  function(frame, event, ...)  if frame[event] then  frame[event](frame, event, ...)  end end
+local LibShared = _G.LibShared
+LibShared.SetScript = LibShared.SetScript or {}
+
+--- LibShared.SetScript.OnEvent(frame):  Set a default 'OnEvent' script for the frame.
+-- It dispatches events to methods on the frame with the same name as the event.
+-- Like:  frame:ADDON_LOADED(eventName, addonName)  and  frame:PLAYER_LOGIN('PLAYER_LOGIN')  and so on.
+--
+LibShared.SetScript.OnEvent = LibShared.SetScript.OnEvent  or  function(frame, eventName, ...)  if frame[eventName] then  frame[eventName](frame, eventName, ...)  end end
+
+
+--- CreateMacroButton(name, macrotext, label)
+-- @return a Button that runs macrotext when clicked. Useable to create bindings that run a macro.
+-- @param name  Identifier of binding.
+-- @param macrotext  Macro code to execute when clicked.
+-- @param label  The text visible on the builtin keybinding panel.
+--
+-- Suggested usage (replace the macrotext and the label "Clear target"):
+-- LibShared.Require.CreateMacroButton('ClearTargetButton', '/cleartarget', "Clear target")
+-- Then create a command binding with it in Bindings.xml (replace "ClearTargetButton"):
+-- <Binding name="CLICK ClearTargetButton:LeftButton"></Binding>
+--
+LibShared.Define.CreateMacroButton = function(name, macrotext, label)
+	local button = CreateFrame('Button', name, UIParent, 'SecureActionButtonTemplate')
+	button:Hide()
+	button:SetAttribute('type', 'macro')
+	button:SetAttribute('macrotext', macrotext)
+	button.binding = 'CLICK '..name..':LeftButton'
+	if label then  _G['BINDING_NAME_'..button.binding] = label  end
+end
 
 
