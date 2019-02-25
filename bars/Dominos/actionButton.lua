@@ -13,23 +13,58 @@ ActionButton.unused = {}
 ActionButton.active = {}
 
 
-function ActionButton_LinkClick(self)
-	-- local bindingid = self:GetAttribute('bindingid')
-	-- local action = ActionButton_CalculateAction(self, button)
-	local actionType, id, subType = GetActionInfo(self.action)
+
+local ActionBarChatLink = CreateFrame('Frame', nil, nil, 'SecureHandlerClickTemplate')
+
+function ActionBarChatLink:SendChatLink(actionButton)
+	-- local bindingid = actionButton:GetAttribute('bindingid')
+	local action = actionButton:GetAttribute('action')
+	local actionType, id, subType = _G.GetActionInfo(action)
 
 	local link
-	if  actionType == 'spell'  then  link = GetSpellLink(id)
-	elseif  actionType == 'item'  then  link = select(2, GetItemInfo(id))
-	elseif  actionType == 'companion' and subType == 'MOUNT'  then  link = GetSpellLink(id)
+	if  actionType == 'spell'  then  link = _G.GetSpellLink(id)
+	elseif  actionType == 'item'  then  link = _G.select(2, _G.GetItemInfo(id))
+	elseif  actionType == 'companion' and subType == 'MOUNT'  then  link = _G.GetSpellLink(id)
 	end
 
-	local msg = link or 'type='..tostring(actionType)..' id='..tostring(id)..' subType='..tostring(subType)
-	print('ActionButton_LinkClick(self.action='..math.floor(self.action/12+1)..'.'..tostring(self.action) ..'): '.. msg)
+	local tostring,math = _G.tostring, _G.math
+	local msg = link or "type="..tostring(actionType).." id="..tostring(id).." subType="..tostring(subType)
+	_G.print("ActionBarChatLink:SendChatLink(action="..math.floor(action/12+1).."."..tostring(action) .."): ".. msg)
 	
-	if  link  then  HandleModifiedItemClick(link)  end
-	-- if  link  then  ChatEdit_InsertLink(link)  end
+	-- LootHistoryItemTemplate calls HandleModifiedItemClick() if IsModifiedClick("CHATLINK"), not ChatEdit_InsertLink()
+	-- ChatEdit_InsertLink() called directly:  SetItemRef() (clicking a link),
+	-- QuestSpellTemplate, QuestInfoRewardSpellTemplate, QuestLogTitleButton_OnClick, RaidInfoInstance_OnClick, SpellButton_OnModifiedClick,
+	-- CoreAbilitySpellTemplate, SpellFlyoutButton_OnClick, WatchFrameLinkButtonTemplate_OnClick, ScorePlayer_OnClick
+	if link then  _G.HandleModifiedItemClick(link)  end
+	-- if link then  ChatEdit_InsertLink(link)  end
 end
+
+
+ActionBarChatLink.PreClickSnippet = [===[
+	if not IsModifiedClick('CHATLINK') then  return  end
+	local chatBox = owner:GetFrameRef('ActiveChatBox')
+	if chatBox and chatBox:IsShown() then
+		owner:CallMethod('SendChatLink', self)
+		return true    -- Disable normal button action.
+	end
+]===]
+
+
+-- _G.ACTIVE_CHAT_EDIT_BOX == _G.ChatEdit_GetActiveWindow()
+function ActionBarChatLink.UpdateActiveChatBox(chatBox)
+	-- In combat it won't track changing the active chat box, the handler will think it's hidden, and do the original action.
+	-- if GetCVar("chatStyle") == "classic" then active chat box never changes.
+	-- if InCombatLockdown() then  AceEvent.Once.PLAYER_REGEN_ENABLED = ActionBarChatLink.UpdateActiveChatBox  end
+	if InCombatLockdown() then  return  end
+	
+	local chatBox = _G.ChatEdit_GetActiveWindow() or _G.DEFAULT_CHAT_FRAME.editBox
+	if ActionBarChatLink.ActiveChatBox ~= chatBox then
+		ActionBarChatLink.ActiveChatBox = chatBox
+		ActionBarChatLink:SetFrameRef('ActiveChatBox', chatBox)
+	end
+end)
+hooksecurefunc('ChatEdit_ActivateChat', ActionBarChatLink.UpdateActiveChatBox)
+
 
 
 --constructor
@@ -37,9 +72,12 @@ function ActionButton:New(id)
 	local b = self:Restore(id) or self:Create(id)
 
 	if b then
+		-- ActionBarChatLink:WrapScript(WorldFrame, 'OnClick', ActionBarChatLink.PreClickSnippet, nil)
 		-- Handle Shift-LeftClick as chatlink.
-		b:SetAttribute("shift-type1", "chatlink")
-		b:SetAttribute("_chatlink", ActionButton_LinkClick)
+		-- local key = GetModifiedClick('CHATLINK'):gsub('BUTTON','type'):lower()
+		b:SetAttribute("shift-type1", "chatlink")    -- Hardwired for the default GetModifiedClick('CHATLINK') == "SHIFT-BUTTON1"
+		b:SetAttribute("_chatlink", function(self)  ActionBarChatLink:SendChatLink(self)  end)
+		
 
 		b:SetAttribute('showgrid', 0)
 		b:SetAttribute('action--base', id)
