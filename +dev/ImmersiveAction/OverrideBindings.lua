@@ -59,7 +59,7 @@ OverridesIn.AutoRun.MOVEANDSTEER = 'TURNORACTION'  -- Note: set priority over Ac
 -- User bindings frame
 ------------------------------
 
-local UserBindings = CreateFrame("Frame")
+local UserBindings = CreateFrame('Frame')
 ImmersiveAction.UserBindings = UserBindings
 UserBindings:Hide()
 UserBindings.cmdKeyMaps = {}
@@ -253,8 +253,7 @@ function OverrideBindings:PLAYER_REGEN_ENABLED(event)
 end
 
 function OverrideBindings:Enable(enable)
-	enable = not not enable
-	if self.enable == enable then  return  end
+	if  not self.enable == not enable  then  return nil  end
 	self.enable = enable
 
 	-- ImmersiveAction.commandState.OverrideBindings = enable
@@ -267,6 +266,7 @@ function OverrideBindings:Enable(enable)
 		self:UnregisterEvent('PLAYER_REGEN_ENABLED')
 		self:PLAYER_REGEN_DISABLED('Enable(false)')
 	end
+	return true
 end
 
 
@@ -307,85 +307,175 @@ end
 
 
 
-
--- Ctrl+LeftClick UP:  what is Ctrl-B1-UP stickycamera??
--- CameraOrSelectOrMoveStop(IsModifiedClick("STICKYCAMERA"));
-
 -------------------------------
 -- Experiment: SecureHandler hooking WorldFrame to capture mouse button commands.
 -- Result:  WorldFrame has no OnClick handler (not a Button), and SecureHandlerClickTemplate don't support OnMouseDown/OnMouseUp handlers.
 -- Trying SecureHandlerMouseUpDownTemplate.
 -------------------------------
 
+---------- Ctrl+LeftClick UP:  what is Ctrl-B1-UP stickycamera??
+---------- CameraOrSelectOrMoveStop(IsModifiedClick("STICKYCAMERA"));
 
-function ImmersiveAction:InitSecureCommandPatches()
-	-- Secure wrapper function WorldFrame_OnMouseDown_preBody(self, button, down)
-	-- If CameraButton (LeftButton) is pressed then rebinds TurnBUTTON (BUTTON2) to AUTORUN.
-	-- In the secure environment:  owner == WorldClickHandler, self == WorldFrame
-	local prePressBody = [===[
-	print(" WorldFrame_OnMouseDown_preBody("..button..") ")
-	if ReboundTurnBUTTON then  return  end
 
-	if  button == CameraButton  then
-		ReboundTurnBUTTON = 'AUTORUN'
-		owner:SetBinding(true, TurnBUTTON, ReboundTurnBUTTON)
+-- Secure wrapper function WorldFrame_OnMouseDown_PreSnippet(self, button, down)
+-- If CameraButton (LeftButton) is pressed then rebinds TurnBUTTON (BUTTON2) to AUTORUN.
+-- In the secure environment:  owner == WorldClickHandler, self == WorldFrame  and  control == owner, i guess, but no code or documentation confirms.
+local WorldFrame_OnMouseDown_PreSnippet = [===[
+	print(" WorldFrame_OnMouseDown_PreSnippet("..button..") ")
+	local key = MapButtonToKey[button]
+	Pressed[#Pressed+1] = key
+	Pressed[key] = #Pressed
+
+	if Rebound[key] then  return  end
+	if  key == TurnBUTTON  and  Pressed[CameraBUTTON]  then
+		Rebound[key] = 'AUTORUN'
+		owner:SetBinding(true, key, 'AUTORUN')
 	end
-	]===]
+end
+]===]
 
-	-- If TurnButton (RightButton) is released over a unit (mouseover) then rebinds TurnBUTTON (BUTTON2) to TurnOrActionHijack, avoiding the Interact action.
-	-- Secure wrapper function WorldFrame_OnMouseUp_preBody(self, button, down)
-	local preReleaseBody = [===[
-	print(" WorldFrame_OnMouseUp_preBody("..button..") ")
-	if ReboundTurnBUTTON then  return  end
 
-	if  button == TurnButton  and  UnitExists('mouseover')  and  not IsModifiedClick('Interact')  then
-		local now = owner:GetTime()
-		if DoubleClickInterval < now-(LastTurnClick or 0) then
-			-- ReboundTurnBUTTON = 'TurnOrActionHijack'
-			-- owner:SetBinding(true, TurnBUTTON, ReboundTurnBUTTON)
-			owner:CallMethod('MouselookStop')    -- Hack TurnOrActionStop() into believing it was not pressed.
-		end
+-- Credits for coming up with a solution to the accidental rightclick go to:
+-- Maunotavast-Zenedar    https://worldofwarcraft.com/en-gb/character/zenedar/Maunotavast
+-- SuppressRightClick addon    https://wow.curseforge.com/projects/src
+-- tynstar9    https://wow.curseforge.com/members/tynstar9    jens dot b at web dot de
+-- Urzulan     https://wow.curseforge.com/members/Urzulan
+--
+-- This combines version 0.2 where rightclick is disabled only over mouseover units - so game objects can be clicked - with:  RegisterStateDriver(.., "[@mouseover,exists]1;0")
+-- And version 0.3 where a second click in DoubleClickDuration allows the rightclick to go through and interact, independent of mouseover.
+-- Also prevents accidental pulls out-of-combat by always disabling single-click RightButton.
+-- To interact:  press Ctrl-RightButton - configurable with:  SetModifiedClick('Interact', 'ALT')  or  'SHIFT'  or  'CTRL-SHIFT'  or so.
+-- Or bind a dedicated button to INTERACTMOUSEOVER:  SetBinding('INTERACTMOUSEOVER', 'CTRL-BUTTON2')
+-- Or doubleclick. Spamming rightclick is also possible: every consecutive click within 0.3 seconds goes through. No clicks are skipped every 0.3 seconds.
+--
+-- How it works:
+-- If TurnButton (RightButton) is released over a unit (mouseover) then
+-- v0.2:  Rebinds TurnBUTTON (BUTTON2) to TurnOrActionHijack, avoiding the Interact action.
+-- This happens before the MouseDown event is mapped to the standard TurnOrAction command. Post-release the hijack is disabled.
+-- v0.3:  Simply calls MouselookStop() - an independent aspect in concept, but it tracks the pressed state of TurnOrAction.
+-- Turning it off makes wow think the button was not pressed, and the release event is just a phantom signal.
+-- Curious thing is the HookScript runs after the builtin OnMouseUp handler, so what comes even later that actually handles the key release?
+-- v4:  Test if simply consuming the MouseDown event with `return true` is sufficient to fix this issue.
+-- MouselookStop() is still necessary, otherwise it gets stuck. UpdateMouselook() can do it, but the trigger of
+-- TurnOrActionStop() is also eliminated, confusing the StateHandler ExpectedMouselook(). Can be replace with  IA:CommandHook('TurnOrAction', false, 'TurnOrActionStop')
+-- Verdict:  MouselookStop() is more compatible with hooking TurnOrActionStop().
+-- This implementation uses the MouselookStop() method. Will work, until bliz fixes the design flaw of TurnOrActionStop(), present since 2004.
+--
+-- Secure wrapper function WorldFrame_OnMouseUp_PreSnippet(self, button, down)
+local WorldFrame_OnMouseUp_PreSnippet = [===[
+	print(" WorldFrame_OnMouseUp_PreSnippet("..button..") ")
+	local key = MapButtonToKey[button]
+	
+	-- Mark key released in Pre snippet:  UP event handlers will see the state as released.
+	local index = Pressed[key]
+	Pressed[key] = nil
+	Pressed[index] = false
+	
+	-- Clear released keys from the end of the list until found a pressed key.
+	if index == #Pressed then  while Pressed[index]==false  do
+		Pressed[index] = nil
+		index = index - 1
+	end end -- if while
+
+	if  key == TurnBUTTON  and  not Rebound[key]  and  UnitExists('mouseover')  and  not IsModifiedClick('Interact')  then
+		local now, last = owner:GetTime(), LastTurnClick
 		LastTurnClick = now
+		if DoubleClickInterval < now-last then
+			-- Rebound[key] = 'TurnOrActionHijack'
+			-- owner:SetBinding(false, key, 'TurnOrActionHijack')
+			owner:CallMethod('MouselookStop')    -- Hack TurnOrActionStop() into believing it was not pressed.
+			-- return true
+		end
 	end
-	]===]
-	-- LastTurnClick is updated for doubleclicks too, so as long as the user lands clicks in 0.3 sec, all clicks will Interact.
-	-- Spamming clicks still works, but a single click is prevented from an accidental pull.
+]===]
+-- LastTurnClick is updated for doubleclicks too, so as long as the user lands clicks in 0.3 sec, all clicks will Interact.
+-- Spamming clicks still works, but a single click is prevented from an accidental pull or targeting.
 
-	-- Secure wrapper function WorldFrame_OnMouseUp_postBody(self, button, down)
-	local postReleaseBody = [===[
-	print(" WorldFrame_OnMouseUp_postBody("..button..") ")
 
-	if  button == CameraButton  and  ReboundTurnBUTTON=='AUTORUN'  then
-		ReboundTurnBUTTON = false
-		owner:ClearBinding(TurnBUTTON)
+-- Secure wrapper function WorldFrame_OnMouseUp_PostSnippet(self, button, down)
+local WorldFrame_OnMouseUp_PostSnippet = [===[
+	print(" WorldFrame_OnMouseUp_PostSnippet("..button..") ")
+
+	local key = MapButtonToKey[button]
+	if Rebound[key] then
+		Rebound[key] = nil
+		owner:ClearBinding(key)
 	end
+]===]
 
-	if  button == TurnButton  and  ReboundTurnBUTTON=='TurnOrActionHijack'  then
-		ReboundTurnBUTTON = false
-		owner:ClearBinding(TurnBUTTON)
-	end
-	]===]
 
-	-- _G.WorldClickHandler = _G.WorldClickHandler or CreateFrame('Frame', nil, nil, 'SecureHandlerClickTemplate')
-	local handler = _G.WorldClickHandler or CreateFrame('Frame', nil, nil, 'SecureHandlerMouseUpDownTemplate')
-	_G.WorldClickHandler = handler
+
+local WorldClickHandler = CreateFrame('Frame', nil, nil, 'SecureHandlerMouseUpDownTemplate')
+ImmersiveAction.WorldClickHandler = WorldClickHandler
+_G.WCH = WorldClickHandler    -- Export for DEBUG.
+
+
+WorldClickHandler.InitSnippet = [===[
+	-- I will definitely forget to initialize this.
+	LastTurnClick, DoubleClickInterval = 0, 0.3
+	Pressed = newtable()
+	Rebound = newtable()
+
+	MapButtonToKey = newtable()
+	MapButtonToKey.LeftButton = BUTTON1
+	MapButtonToKey.RightButton = BUTTON2
+	MapButtonToKey.MiddleButton = BUTTON3
+	for i=4,31 do  MapButtonToKey['Button'..i] = 'BUTTON'..i  end
+]===]
+
+
+function WorldClickHandler:InitSecureHandler()
+	local handler = self    -- For clarity.
 	-- Init "global" variables in secure environment.
-	handler:SetAttribute('_set', " local name,value=... ; _G[name] = value ")
-	handler:SetAttribute('_init', " CameraButton,TurnButton,TurnBUTTON = ... ")
-	local initSnippet = " CameraButton,TurnButton,TurnBUTTON = ... "
-	handler:Run(initSnippet, 'LeftButton','RightButton','BUTTON2')
-	-- handler:RunSnippet('_init', 'LeftButton','RightButton','BUTTON2')
+	-- handler:SetAttribute('_set', " local name,value=... ; _G[name] = value ")
+
 	handler.MouselookStop = ImmersiveAction.MouselookStop
-	SecureHandlerWrapScript(WorldFrame, 'OnMouseDown', handler, prePressBody, nil)
-	SecureHandlerWrapScript(WorldFrame, 'OnMouseUp'  , handler, preReleaseBody, postReleaseBody)
-	-- handler:WrapScript(WorldFrame, 'OnClick', preBody, postBody)
-	-- WorldFrame:WrapScript(WorldFrame, 'OnMouseDown', preBody, nil)
-	-- WorldFrame:WrapScript(WorldFrame, 'OnMouseUp', "", postBody)
+	handler:Execute(WorldClickHandler.InitSnippet)
+	handler.Env = _G.GetManagedEnvironment(handler)
+
+	-- handler:WrapScript(WorldFrame, 'OnMouseDown', prePressBody, nil)
+	-- handler:WrapScript(WorldFrame, 'OnMouseUp'  , preReleaseBody, postReleaseBody)
+	-- Same with less calls:
+	SecureHandlerWrapScript(WorldFrame, 'OnMouseDown', handler, WorldFrame_OnMouseDown_PreSnippet, nil)
+	SecureHandlerWrapScript(WorldFrame, 'OnMouseUp'  , handler, WorldFrame_OnMouseUp_PreSnippet, WorldFrame_OnMouseUp_PostSnippet)
+	
+	handler:UpdateDoubleClickInterval()
+	handler:UpdateOverrideBindings()
 end
 
-ImmersiveAction:InitSecureCommandPatches()
+
+function WorldClickHandler:DisableHandler()
+	self:UnwrapScript(WorldFrame, 'OnMouseDown')
+	self:UnwrapScript(WorldFrame, 'OnMouseUp')
+end
+
+
+function WorldClickHandler:UpdateDoubleClickInterval()
+	handler:Execute(" DoubleClickInterval = ... ", ImmersiveAction.sv.profile.DoubleClickInterval or 0.3)
+end
+
+function WorldClickHandler:UpdateOverrideBindings()
+	-- local CameraBUTTON,TurnBUTTON = 'BUTTON1','BUTTON2'    --'LeftButton','RightButton'
+	-- Only the first binding is handled of each command. It cannot be rebound on the UI,so if a user binds more keys to it, definitely knows what he/she is doing.
+	local CameraBUTTON,TurnBUTTON = GetBindingKey('CAMERAORSELECTORMOVE'), GetBindingKey('TURNORACTION')
+	LibShared.softassert(CameraBUTTON and not CameraBUTTON:match('-'), "CameraBUTTON has modifier in it, AutoRunCombo will not work.")
+	LibShared.softassert(  TurnBUTTON and not   TurnBUTTON:match('-'), "TurnBUTTON has modifier in it, accidental rightclick protection will not work.")
+	handler:Execute(" CameraBUTTON,TurnBUTTON = ... ", CameraBUTTON,TurnBUTTON)
+end
+
+
+function WorldClickHandler:Enable(enable)
+	if  not self.enable == not enable  then  return nil  end
+	self.enable = enable
+
+	if enable then  self:InitSecureHandler()
+	else  self:DisableHandler()  end
+	return true
+end
+
 
 --[[
+/dump WCH.RunAttribute, WCH.RunSnippet, WCH.Run, WCH.CallMethod, WCH.ChildUpdate, WCH.SetFrameRef
 /dump WorldFrame:HasScript('OnClick'), WorldFrame:HasScript('PreClick'), WorldFrame:HasScript('PostClick'), WorldFrame:HasScript('OnMouseUp'), WorldFrame:HasScript('OnMouseDown')
 --]]
 

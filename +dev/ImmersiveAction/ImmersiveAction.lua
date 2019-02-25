@@ -1,3 +1,4 @@
+
 --[[
 	Name alternatives:
 FreeCursorMode (normal) / FreeCameraMode (LeftButton) / MouselookMode (RightButton).
@@ -125,6 +126,7 @@ function ImmersiveAction:OnEnable()
 	-- UpdateOverrideBindings() is called when key bindings change.
 	self:UpdateOverrideBindings()
 	self:RegisterBucketEvent('UPDATE_BINDINGS', 0.3, 'UpdateOverrideBindings')
+	self.WorldClickHandler:Enable(true)
 	self.OverrideBindings:Enable(true)
 	self.InteractNearest:Enable(true)
 
@@ -163,6 +165,7 @@ function ImmersiveAction:OnDisable()
 
 	-- Disable UpdateOverrideBindings().
 	self:UnregisterBucketEvent('UPDATE_BINDINGS')
+	self.WorldClickHandler:Enable(false)
 	self.OverrideBindings:Enable(false)
 	self.InteractNearest:Enable(false)
 end
@@ -186,6 +189,7 @@ end
 
 -- UpdateOverrideBindings() is called when key bindings change.
 function ImmersiveAction:UpdateOverrideBindings(event)
+	self.WorldClickHandler:UpdateOverrideBindings()
 	self.OverrideBindings:UpdateOverrideBindings()
 	self.InteractNearest:UpdateOverrideBindings()
 end

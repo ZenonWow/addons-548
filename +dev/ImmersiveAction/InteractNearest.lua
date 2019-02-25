@@ -10,11 +10,14 @@ local LibShared,CreateFrame,ipairs,GetBindingKey = LibShared,CreateFrame,ipairs,
 -- TargetNearestAndInteractNpc aka. InteractNearest, InteractNearest, SmartTargeting
 ---------------------------------
 
-local InteractNearest = CreateFrame('Frame')
+local InCombatHandler = CreateFrame('Frame', nil, nil, 'SecureHandlerStateTemplate,SecureHandlerAttributeTemplate')
+local InteractNearest = InCombatHandler
+-- local InteractNearest = CreateFrame('Frame')
 ImmersiveAction.InteractNearest = InteractNearest
 LibShared.SetScript.OnEvent(InteractNearest)
 
 InteractNearest:Hide()
+InteractNearest.InCombatHandler = InCombatHandler
 -- InteractNearest.TargetEnemiesToo = 'TARGETNEAREST'
 InteractNearest.TargetCommand = 'TARGETNEARESTFRIEND'
 InteractNearest.InteractRange = 3    -- yards
@@ -80,16 +83,11 @@ The purpose of this is to allow left click to be used for multiple purposes whil
 --- InCombatSnippet(self, stateid, newstate)
 -- Set all keys to a best-effort guess by the StateHandler.
 --
+-- if PlayerInCombat() then  return  end    -- Done with 'ignore' now.
 local InCombatSnippet = [===[
 	if newstate=='ignore' then  return  end
 	if newstate == self:GetAttribute('InteractBinding') then  print("InCombatSnippet(): newstate == InteractBinding == "..newstate)  end
 	self:SetAttribute('InteractBinding', newstate)
-]===]
-
---- AddKey(key, toCmd)
-local AddKey = [===[
-	local key, toCmd = ...
-	DynamicKeys[key] = toCmd
 ]===]
 
 --- OverrideBindingsSnippet(self, name, value)
@@ -111,43 +109,55 @@ local OverrideBindingsSnippet = [===[
 ]===]
 
 
-function InteractNearest:InitProtectedFrame()
+
+function InCombatHandler:InitSecureHandler()
+	local handler = self    -- For clarity.
+
 	local NoCombatCondition = "[nocombat] ignore ; "
 	local MouseOverCondition = "[@mouseover,harm,dead] INTERACTMOUSEOVER ; [@mouseover,noharm,nodead] INTERACTMOUSEOVER ; "
 	local TargetCondition = "[harm,dead] INTERACTTARGET ; [noharm,nodead] INTERACTTARGET"
-	-- SecureStateDriverManager:RegisterEvent("UPDATE_MOUSEOVER_UNIT")  -- necessary?
+	-- _G.SecureStateDriverManager:RegisterEvent("UPDATE_MOUSEOVER_UNIT")  -- necessary?
+	_G.RegisterStateDriver(handler, 'InteractBinding', NoCombatCondition .. MouseOverCondition .. TargetCommand)
 
-	local handler = CreateFrame('Frame', nil, 'SecureHandlerStateTemplate,SecureHandlerAttributeTemplate')
-	self.InCombatHandler = handler
 	handler:SetAttribute('_onstate-'..'InteractBinding', InCombatSnippet)
+	InCombatSnippet = nil
 	handler:SetAttribute('_onattribute-'..'InteractBinding', OverrideBindingsSnippet)
-	-- InCombatHandler:SetAttribute('_onattribute-'..'DynamicKeys', UpdateKeysSnippet)
-	-- InCombatHandler:SetAttribute('_onattribute-'..'TargetCommand', UpdateKeysSnippet)
+	OverrideBindingsSnippet = nil
+	-- handler:SetAttribute('_onattribute-'..'DynamicKeys', UpdateKeysSnippet)
+	-- handler:SetAttribute('_onattribute-'..'TargetCommand', UpdateKeysSnippet)
 	
 	-- Createthe "globals" available to the snippets in the protected environment.
 	-- DynamicKeys (key->toCmd) restricted table:
-	handler:Run(" DynamicKeys = newtable() ")
-	handler.Env = GetManagedEnvironment(handler)
-	-- TargetCommand:  copy of InteractNearest.TargetCommand
-	handler:SetAttribute('_setTargetCommand', " TargetCommand = ... ")
-	handler:SetAttribute('_set', " local name,value=... ; _G[name] = value ")
-	handler:SetAttribute('_addKey', " local key,toCmd=... ; DynamicKeys[key] = toCmd ")
-	-- handler.Env.TargetCommand = self.TargetCommand
-	handler:RunSnippet('_setTargetCommand', self.TargetCommand)
+	handler:Execute(" DynamicKeys = newtable() ")
+	handler.Env = _G.GetManagedEnvironment(handler)
 
-	_G.RegisterStateDriver(InCombatHandler, 'InteractBinding', NoCombatCondition .. MouseOverCondition .. TargetCommand)
-	self.InitProtectedFrame = nil
+	-- TargetCommand:  copy of InteractNearest.TargetCommand
+	-- handler:SetAttribute('_setTargetCommand', " TargetCommand = ... ")
+	-- handler:SetAttribute('_set',    " local name,value=... ; _G[name] = value ")
+	-- handler:SetAttribute('_addKey', " local key,toCmd=... ; DynamicKeys[key] = toCmd ")
+
+	-- handler.Env.TargetCommand = self.TargetCommand
+	-- handler:RunAttribute('_setTargetCommand', self.TargetCommand)
+	-- handler:RunSnippet('_setTargetCommand', self.TargetCommand)
+	handler:Execute(" TargetCommand = ... ", self.TargetCommand)
+
+	self.InitSecureHandler = nil
 end
 
 
 -- Upload the managed keys from the insecure table to the secure (restricted) DynamicKeys table.
-function InteractNearest.InCombatHandler:UploadKeys(insecureKeys)
+function InCombatHandler:UploadKeys(insecureKeys)
+	local handler = self    -- For clarity.
+
 	print("InCombatHandler:UploadKeys()")
-	handler:Run(" wipe(DynamicKeys) ")
+	handler:Execute(" wipe(DynamicKeys) ")
 	for key,toCmd in pairs(insecureKeys) do
+		-- handler:RunAttribute('_addKey', key, toCmd)
 		-- handler:RunSnippet('_addKey', key, toCmd)
-		-- RunSnippet() is not found on Earth, or in any code. Only "Iriel’s Field Guide to Secure Handlers" mentions it, but not how to set tje snippets.
-		handler:Run(" local key,toCmd=... ; DynamicKeys[key] = toCmd ", key, toCmd)
+		-- RunSnippet() is not found on Earth, or in any code. Only "Iriel’s Field Guide to Secure Handlers" mentions it, but not how to set the snippets.
+		-- handler:Execute(" local key,toCmd=... ; DynamicKeys[key] = toCmd ", key, toCmd)
+		handler:Execute(" DynamicKeys['"..key.."'] = '"..toCmd.."' ")
+		-- handler:Execute(" DynamicKeys."..key.." = '"..toCmd.."' ")
 	end
 end
 
@@ -204,10 +214,13 @@ function InteractNearest:PLAYER_REGEN_ENABLED(event)
 	-- Try to do  /targetlastenemy  after leaving combat.
 	if event == 'PLAYER_REGEN_ENABLED' then  self.TargetLastHostile = 'TARGETLASTHOSTILE'  end
 
+	local handler = self.InCombatHandler
 	-- Update TargetCommand in protected environment in case :SetTargetEnemiesToo() was called.
 	-- Before OverrideBindings(), that will use it.
-	-- self.InCombatHandler.Env.TargetCommand = self.TargetCommand
-	self.InCombatHandler:RunSnippet('_setTargetCommand', self.TargetCommand)
+	-- handler.Env.TargetCommand = self.TargetCommand
+	-- handler:RunAttribute('_setTargetCommand', self.TargetCommand)
+	-- handler:RunSnippet('_setTargetCommand', self.TargetCommand)
+	handler:Execute(" TargetCommand = ... ", self.TargetCommand)
 	
 	self:StartTacking()
 end
@@ -239,7 +252,7 @@ end
 
 function InteractNearest:Activate()
 	local active =  self.enabled  and  nil~=next(self.keyOverrides)
-	if self.active == active then  return nil  end
+	if  not self.active == not active  then  return nil  end
 	self.active = active
 	ImmersiveAction.commandState.InteractNearest = active
 
@@ -261,13 +274,19 @@ end
 function InteractNearest:UpdateOverrideBindings()
 	local keyOverrides = self.CaptureBindings(self.Overrides)
 	self.keyOverrides = keyOverrides
-	self.InCombatHandler:UploadKeys(self.keyOverrides)
+
+	local handler = self.InCombatHandler
+	if handler.InitSecureHandler then  handler:InitSecureHandler()  end
+	handler:UploadKeys(keyOverrides)
+
 	self:Activate()
 end
 
 function InteractNearest:Enable(enable)
+	if  not self.enable == not enable  then  return nil  end
 	self.enabled = not not enable
 	self:Activate()
+	return true
 end
 
 
@@ -280,6 +299,7 @@ function InteractNearest.CaptureBindings(overrides)
 			keyOverrides[key] = toCmd
 		end
 	end
+	return keyOverrides
 end
 
 

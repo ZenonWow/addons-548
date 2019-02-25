@@ -29,10 +29,11 @@
 Logging.lua
 ImmersiveAction.lua
 CommandHooks.lua
-Config.lua
 InteractNearest.lua
 OverrideBindings.lua
 StateHandler.lua
+UIShortcuts.lua
+Settings.lua
 WindowList.lua
 WindowHooks.lua
 
