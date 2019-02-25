@@ -175,5 +175,9 @@ local function IsModClick(id)
 
 
 
+--[[
+/console taintLog 2
+/run local x,y=GetPlayerMapPosition("player"); print(string.format("/way %.2f %.2f", x*100, y*100))
+--]]
 
 
