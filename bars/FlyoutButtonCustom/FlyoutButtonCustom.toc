@@ -1,0 +1,25 @@
+## Interface: 50400
+## Title: FlyoutButtonCustom
+## Author: another
+## Version: 2.61
+## Notes: Custom flyout buttons support
+## SavedVariables: FlyoutButtonCustom_Settings_Global
+## SavedVariablesPerCharacter: FlyoutButtonCustom_Settings
+## OptionalDeps: Ace3, ButtonFacade, Bartender4, ButtonForge, Dominos, ElvUI, TinyExtraBars
+
+# libs\libstub\LibStub.lua
+libs\EasyStorage\EasyStorage.lua
+# libs\CallBackHandler-1.0\CallbackHandler-1.0.lua
+libs\LibKeyBound-1.0\lib.xml
+libs\Glow\Glow.xml
+libs\Glow\Glow.lua
+libs\MacroText\IconSelection.xml
+libs\MacroText\MacroText_Customize.xml
+
+Common.lua
+FlyoutButtonCustom.xml
+Settings.xml
+FlyoutListButton.lua
+FlyoutArrowButton.lua
+FlyoutListFrame.lua
+FlyoutButtonCustom.lua
