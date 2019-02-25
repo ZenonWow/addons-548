@@ -1,15 +1,15 @@
--- Methods for event handling, commandState update of ImmersiveAction, Mouselook, SmartTargeting
+-- Methods for event handling, commandState update of IA, Mouselook, SmartTargeting
 local _G, ADDON_NAME, _ADDON = _G, ...
-local ImmersiveAction = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = ImmersiveAction
-local Log = ImmersiveAction.Log or {}  ;  ImmersiveAction.Log = Log
-local colorBoolStr = ImmersiveAction.colorBoolStr
-local colors = ImmersiveAction.colors
+local IA = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = IA
+local Log = IA.Log or {}  ;  IA.Log = Log
+local colorBoolStr = IA.colorBoolStr
+local colors = IA.colors
 
-ImmersiveAction.commandState = {}
+IA.commandState = {}
 
 --[[
 -- commandGroups:  `false` value here means 'not pressed'
-ImmersiveAction.commandGroups = {
+IA.commandGroups = {
 	Turn       = { TurnLeft=false, TurnRight=false },
 	Pitch      = { PitchUp=false, PitchDown=false },
 	MoveKeys   = { MoveForward=false, MoveBackward=false, StrafeLeft=false, StrafeRight=false },
@@ -17,7 +17,7 @@ ImmersiveAction.commandGroups = {
 }
 --]]
 -- commandGroups:  `nil` is 'not pressed'
-ImmersiveAction.commandGroups = {
+IA.commandGroups = {
 	Turn       = {},
 	Pitch      = {},
 	MoveKeys   = {},
@@ -55,7 +55,7 @@ ImmersiveAction.commandGroups = {
 -- Enable state
 ------------------
 
-function ImmersiveAction:SetActionMode(enable)
+function IA:SetActionMode(enable)
 	local cstate = self.commandState
 	if cstate.ActionModeRecent == enable then  return  end
 	cstate.ActionModeRecent = enable
@@ -66,7 +66,7 @@ end
 
 
 
-function  ImmersiveAction:ResetState()
+function  IA:ResetState()
 	Log.State(colors.red .. 'RESETing|r keypress state')
 	
 	-- A command might be stuck in pressed state, reset state to free mouse
@@ -94,7 +94,7 @@ end
 -- State handling `business` logic --
 -------------------------------------
 
-function ImmersiveAction:SetCommandState(cmdName, pressed)
+function IA:SetCommandState(cmdName, pressed)
 	-- Do not accept multiple keys bound to the same command to be pressed at the same time.
 	-- That results in multiple calls with same cmdName, pressed. Press 2 buttons, release 1,
 	-- and the client thinks both are released.
@@ -108,14 +108,14 @@ function ImmersiveAction:SetCommandState(cmdName, pressed)
 		-- Patch MoveAndSteer press + MouselookOverrideBinding(MoveAndSteer->MoveForward) + MoveForward release
 		-- to stop Mouselook started by MoveAndSteer.
 		if cmdName == 'MoveForward' and cstate.MoveAndSteer then
-			Log.Anomaly("  CM - SetCommandState(".. ImmersiveAction.colors[keystate] .. cmdName .." ".. keystate:upper() .."|r) - patched to MoveAndSteer")
+			Log.Anomaly("  CM - SetCommandState(".. IA.colors[keystate] .. cmdName .." ".. keystate:upper() .."|r) - patched to MoveAndSteer")
 			cmdName = 'MoveAndSteer'
 		else
 			return false
 		end
 	else
 		if cmdName == 'MoveForward' and GetMouseButtonClicked() then
-			Log.Anomaly("  CM - SetCommandState(".. ImmersiveAction.colors[keystate] .. cmdName .." ".. keystate:upper() .."|r) - patched to MoveAndSteer")
+			Log.Anomaly("  CM - SetCommandState(".. IA.colors[keystate] .. cmdName .." ".. keystate:upper() .."|r) - patched to MoveAndSteer")
 			cmdName = 'MoveAndSteer'
 		end
   end
@@ -123,7 +123,7 @@ function ImmersiveAction:SetCommandState(cmdName, pressed)
 	-- TurnOrAction inverts the previous Mouselook state (the state before it was pressed).
 	if cmdName == 'TurnOrAction' then
 		if pressed
-		then  cstate.TurnOrActionForcesState = not ImmersiveAction.lastMouselook
+		then  cstate.TurnOrActionForcesState = not IA.lastMouselook
 		else  cstate.TurnOrActionForcesState = nil
 		end
 		-- Note: This is the secure hook ran after TurnOrActionStart(), which just enabled Mouselook,
@@ -132,23 +132,23 @@ function ImmersiveAction:SetCommandState(cmdName, pressed)
 
 	-- Update ActionMode to retain lastMouselook after specific buttons were pressed.
 	if not pressed then
-		if not ImmersiveAction.lastMouselook then
+		if not IA.lastMouselook then
 			-- Clicking LeftButton (turning the camera away from the direction your character looks) will disable ActionMode.
-			if  cmdName=='CameraOrSelectOrMove'  and  ImmersiveAction.disableWithLookAround  then  ImmersiveAction:SetActionMode(false)  end
+			if  cmdName=='CameraOrSelectOrMove'  and  IA.disableWithLookAround  then  IA:SetActionMode(false)  end
 		else
 			-- After pressing MoveAndSteer:  ActionMode will stay enabled.
-			if  cmdName=='MoveAndSteer' and  ImmersiveAction.enableAfterMoveAndSteer  then  ImmersiveAction:SetActionMode(true)  end
+			if  cmdName=='MoveAndSteer' and  IA.enableAfterMoveAndSteer  then  IA:SetActionMode(true)  end
 			-- After pressing LeftButton and RightButton together:  ActionMode will stay enabled.
 			-- Rule:  one button released while the other is pressed.
-			if ImmersiveAction.enableAfterBothButtons then
+			if IA.enableAfterBothButtons then
 				if  cmdName=='CameraOrSelectOrMove' and self.TurnOrAction
 				or  cmdName=='TurnOrAction' and self.CameraOrSelectOrMove
-				then  ImmersiveAction:SetActionMode(true)  end
+				then  IA:SetActionMode(true)  end
 			end
 		end
 	end
 	
-	-- Set command pressed state. This changes the result of ImmersiveAction:ExpectedMouselook().
+	-- Set command pressed state. This changes the result of IA:ExpectedMouselook().
 	cstate[cmdName]= pressed
 
 	-- Update group state.
@@ -156,13 +156,13 @@ function ImmersiveAction:SetCommandState(cmdName, pressed)
 	if  groupName  then  self:SetGroupCommand(groupName, cmdName, pressed)  end
 
 	-- Update bindings.
-	if cmdName=='AutoRun' then  ImmersiveAction:OverrideCommandsIn(cmdName, pressed)  end
+	if cmdName=='AutoRun' then  IA:OverrideCommandsIn(cmdName, pressed)  end
 
 	return true
 end
 
 
-function ImmersiveAction:SetGroupCommand(groupName, cmdName, pressed)
+function IA:SetGroupCommand(groupName, cmdName, pressed)
 	local group= self.commandGroups[groupName]
 	group[cmdName] = pressed or nil
 	cstate[groupName] = next(group)
@@ -175,7 +175,7 @@ end
 -- Control and debug new Mouselook state --
 -------------------------------------------
 
-function  ImmersiveAction:UpdateMouselook(possibleTransition, event)
+function  IA:UpdateMouselook(possibleTransition, event)
 	event= event  or  'nil'
 	local currentState= not not IsMouselooking()
 	local outsideChange= self.lastMouselook ~= currentState
@@ -212,18 +212,18 @@ function  ImmersiveAction:UpdateMouselook(possibleTransition, event)
 			-- TODO: remove print. Spell targeting does nothing? The improved priority order in ExpectedMouselook() might have fixed this.
 			return
 		end
-		if  expState  then  ImmersiveAction.MouselookStart()  else  ImmersiveAction.MouselookStop()  end
+		if  expState  then  IA.MouselookStart()  else  IA.MouselookStop()  end
 		--self.lastMouselookSet= expState
 	end
 end
 
-ImmersiveAction.lastMouselook= not not IsMouselooking()
---ImmersiveAction.lastMouselookSet= false
+IA.lastMouselook= not not IsMouselooking()
+--IA.lastMouselookSet= false
 
 
 
 -------------------------------------
---- ImmersiveAction:ExpectedMouselook() implements the brainstem of ImmersiveAction:
+--- IA:ExpectedMouselook() implements the brainstem of ImmersiveAction:
 -- 
 -- Calculates the effective Mouselook state in a declarative manner,
 -- based on 13 game state parameters collected from user actions and game events.
@@ -232,7 +232,7 @@ ImmersiveAction.lastMouselook= not not IsMouselooking()
 -- include many corner cases and quirks of the wow client.
 -- In one word: it can be broken by looking at it the wrong way.
 --
-function ImmersiveAction:ExpectedMouselook()
+function IA:ExpectedMouselook()
 	-- local groups = self.commandGroups
 	local cstate = self.commandState
 	
@@ -277,7 +277,7 @@ function ImmersiveAction:ExpectedMouselook()
 
 	-- WindowsOnScreen are higher priority than  enableWithMoveKeys:Move,Strafe.
 	-- if  self:CheckForFramesOnScreen()  then  return false, 'WindowsOnScreen'  end
-	if  0 < #ImmersiveAction.WindowsOnScreen  then  return false, 'WindowsOnScreen:'..(ImmersiveAction.WindowsOnScreen[1]:GetName() or "<noname>")  end
+	if  0 < #IA.WindowsOnScreen  then  return false, 'WindowsOnScreen:'..(IA.WindowsOnScreen[1]:GetName() or "<noname>")  end
 
 	-- Move,Strafe commands enable if enableWithMoveKeys and no WindowsOnScreen.
 	if  self.db.profile.enableWithMoveKeys  and  cstate.MoveKeys  then

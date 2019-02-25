@@ -1,7 +1,6 @@
 local _G, ADDON_NAME, _ADDON = _G, ...
-local ImmersiveAction = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = ImmersiveAction
-local Log = ImmersiveAction.Log
-local Log = ImmersiveAction.Log or {}  ;  ImmersiveAction.Log = Log
+local IA = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = IA
+local Log = IA.Log or {}  ;  IA.Log = Log
 
 
 -- TODO: pet battle handling
@@ -28,10 +27,10 @@ BINDING_NAME_TURNORACTION 				= "Turn or Interact (RightButton default)"
 ------------------------------------------
 
 -- Save original MouselookStart, then securehook the global to catch addon usage.
-ImmersiveAction.MouselookStart = _G.MouselookStart
-ImmersiveAction.MouselookStop  = _G.MouselookStop
+IA.MouselookStart = _G.MouselookStart
+IA.MouselookStop  = _G.MouselookStop
 
-ImmersiveAction.commandsHooked = {
+IA.commandsHooked = {
 	TurnLeft			= 'Turn',
 	TurnRight			= 'Turn',
 	PitchUp				= 'Pitch',
@@ -69,7 +68,7 @@ All other functions altering Mouselook will be logged as anomaly.
 Sidenote:  when  ActionMode == true  then we want Mouselook to stay ON after releasing these keys,
 therefore UpdateMouselook() will override the effect of the Stop functions.
 --]]
-ImmersiveAction.commandsChangingMouselook = {
+IA.commandsChangingMouselook = {
 	TurnOrActionStart	= true,
 	TurnOrActionStop	= false,
 	MoveAndSteerStart	= true,
@@ -87,12 +86,12 @@ ImmersiveAction.commandsChangingMouselook = {
 ----------------------------------
 
 local UniqueHooks = {}
-function UniqueHooks.ToggleAutoRun()  ImmersiveAction:SetCommandState('AutoRun', not ImmersiveAction.commandState.AutoRun)  end
-function UniqueHooks.StartAutoRun()  ImmersiveAction:SetCommandState('AutoRun', true)  end
-function UniqueHooks.StopAutoRun()  ImmersiveAction:SetCommandState('AutoRun', false)  end
+function UniqueHooks.ToggleAutoRun()  IA:SetCommandState('AutoRun', not IA.commandState.AutoRun)  end
+function UniqueHooks.StartAutoRun()  IA:SetCommandState('AutoRun', true)  end
+function UniqueHooks.StopAutoRun()  IA:SetCommandState('AutoRun', false)  end
 
 
-function ImmersiveAction:CommandHook(cmdName, pressed, event)
+function IA:CommandHook(cmdName, pressed, event)
 	if  StopsAutoRun[event]  then  self:SetCommandState('AutoRun', false)  end
 	
 	local stateOk = self:SetCommandState(cmdName, pressed)
@@ -108,7 +107,7 @@ function ImmersiveAction:CommandHook(cmdName, pressed, event)
 	-- if self.commandsHooked[cmdName]=='Mouselook' then  possibleTransition = pressed  else  possibleTransition = not pressed  end
 
 	-- Do MouselookStart/Stop as necessary
-  ImmersiveAction:UpdateMouselook(nil, event)
+  IA:UpdateMouselook(nil, event)
 end
 
 
@@ -118,13 +117,13 @@ end
 -- Hooking --
 -------------
 
-local function HookCommandPrefixed(ImmersiveAction, cmdName, funcStart, funcStop)
-	hooksecurefunc(funcStart, function ()  ImmersiveAction:CommandHook(cmdName, true,  funcStart )  end)
-	hooksecurefunc(funcStop , function ()  ImmersiveAction:CommandHook(cmdName, false, funcStop  )  end)
+local function HookCommandPrefixed(IA, cmdName, funcStart, funcStop)
+	hooksecurefunc(funcStart, function ()  IA:CommandHook(cmdName, true,  funcStart )  end)
+	hooksecurefunc(funcStop , function ()  IA:CommandHook(cmdName, false, funcStop  )  end)
 end
 
 
-function ImmersiveAction:HookCommands()
+function IA:HookCommands()
 	Log.Init('CM - HookCommands()')
 	
 	for  cmdName,group  in  pairs(self.commandsHooked)  do
@@ -139,20 +138,20 @@ function ImmersiveAction:HookCommands()
 		end
 	end
 
-	hooksecurefunc('MouselookStart', ImmersiveAction.NotifyMouselookUsage)
+	hooksecurefunc('MouselookStart', IA.NotifyMouselookUsage)
 	
 	-- Release this function, ensure it's not called again.
 	self.HookCommands = nil
 end
 
 
-function ImmersiveAction.NotifyMouselookUsage()
-	if  ImmersiveAction.notifiedMouselook  or  ImmersiveAction.db.global.dontNotify  then  return  end
-	ImmersiveAction.notifiedMouselook = true
+function IA.NotifyMouselookUsage()
+	if  IA.notifiedMouselook  or  IA.db.global.dontNotify  then  return  end
+	IA.notifiedMouselook = true
 	local callerFrame = 3  -- 0:debugstack, 1:this function, 2:MouselookStart (the hooked one), 3:caller (or another hook added later)
 	local callerStack = _G.debugstack(callerFrame,3,0)  -- read 3 frames to allow for tailcails (no filepath in those)
 	local callerPath = callerStack and callerStack:match("^(.-): ")
-	local msg = ImmersiveAction.colors.yellow.."ImmersiveAction|r:  another addon also uses MouselookStart(). If you experience unexpected mouse beaviour then consider disabling one addon. The call seems to originate from:  "..callerPath
+	local msg = IA.colors.yellow.."ImmersiveAction|r:  another addon also uses MouselookStart(). If you experience unexpected mouse beaviour then consider disabling one addon. The call seems to originate from:  "..callerPath
 	print(msg)
 	LibShared.softassert(false, msg)
 end
@@ -163,7 +162,7 @@ end
 -- Bindings.xml implementation --
 ---------------------------------
 
-function ImmersiveAction:ToggleActionMode(toState)
+function IA:ToggleActionMode(toState)
 	-- Invert current state if called without argument.
 	if toState==nil then  toState = not IsMouselooking()  end
 	-- local inverseState= not self:ExpectedMouselook()
@@ -174,7 +173,7 @@ function ImmersiveAction:ToggleActionMode(toState)
 end
 
 
-function ImmersiveAction:TurnOrActionHijack(pressed)
+function IA:TurnOrActionHijack(pressed)
 	-- TurnOrAction was pressed, then hijacked just before being released to avoid Interacting. Act as if TurnOrAction was released.
 	self:SetCommandState('TurnOrAction', pressed)
 	self:UpdateMouselook(nil, 'TurnOrActionHijack')
@@ -193,7 +192,7 @@ local isModifierPressedFunc= {
 	ALT = IsAltKeyPressed,
 }
 
-function ImmersiveAction:MODIFIER_STATE_CHANGED(event)
+function IA:MODIFIER_STATE_CHANGED(event)
 	local modifiers = self.db.profile.modifiers
 	local IsEnableModPressed  = isModifierPressedFunc[ modifiers.enableModifier ]
 	local IsDisableModPressed = isModifierPressedFunc[ modifiers.disableModifier ]
@@ -210,7 +209,7 @@ end
 
 
 
-function ImmersiveAction:CURSOR_UPDATE(event, ...)
+function IA:CURSOR_UPDATE(event, ...)
 	--[[ CURSOR_UPDATE sent when
 	1. cursor is shown (as hand) after being hidden for CameraOrSelectOrMove, TurnOrAction, MoveAndSteer, Mouselook
 	2. before UPDATE_MOUSEOVER_UNIT:  cursor changes over actionable object to  bubble (gossip) / sword (enemy) / dragon (flightmaster) / mail (mailbox) / satchel (vendor,bank,auction) / hearthstone (innkeeper) / what else?
@@ -226,7 +225,7 @@ function ImmersiveAction:CURSOR_UPDATE(event, ...)
 	cstate.SpellIsTargeting = SpellIsTargeting()
 	cstate.CursorObjectOrSpellTargeting = cstate.CursorPickedUp or cstate.SpellIsTargeting
 
-	Log.Event(event, '  -> cursorAction=' .. ImmersiveAction.colorBoolStr(cstate.CursorObjectOrSpellTargeting, false))
+	Log.Event(event, '  -> cursorAction=' .. IA.colorBoolStr(cstate.CursorObjectOrSpellTargeting, false))
 	if not lastState ~= not cstate.CursorObjectOrSpellTargeting then
 		cstate.ActionModeRecent = nil    -- There is a more recent event now.
 		self:UpdateMouselook(not cstate.CursorObjectOrSpellTargeting, 'CURSOR_UPDATE')
@@ -236,7 +235,7 @@ end
 
 --[[
 -- ranged spell targeting starts/ends
-function ImmersiveAction:CURRENT_SPELL_CAST_CHANGED()
+function IA:CURRENT_SPELL_CAST_CHANGED()
 	-- start:
 	--CURSOR_UPDATE
 	--CURRENT_SPELL_CAST_CHANGED
@@ -260,7 +259,7 @@ end
 --]]
 
 --[[ No need for these to my best knowledge. CURSOR_UPDATE handles it.
-function ImmersiveAction:PET_BAR_UPDATE(event)
+function IA:PET_BAR_UPDATE(event)
 	if  self.commandState.CursorObjectOrSpellTargeting  then
 		Log.Event(event, '  -> ResetCursor()')
 		ResetCursor()
@@ -268,7 +267,7 @@ function ImmersiveAction:PET_BAR_UPDATE(event)
 	end
 end
 
-function ImmersiveAction:ACTIONBAR_UPDATE_STATE(event)
+function IA:ACTIONBAR_UPDATE_STATE(event)
 	if  self.commandState.CursorObjectOrSpellTargeting  then
 		Log.Event(event, '  -> ResetCursor()')
 		ResetCursor()

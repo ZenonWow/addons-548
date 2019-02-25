@@ -1,7 +1,6 @@
 local _G, ADDON_NAME, _ADDON = _G, ...
-local ImmersiveAction = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = ImmersiveAction
-local Log = ImmersiveAction.Log
-local Log = ImmersiveAction.Log or {}  ;  ImmersiveAction.Log = Log
+local IA = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = IA
+local Log = IA.Log or {}  ;  IA.Log = Log
 
 local LibShared,CreateFrame,ipairs,GetBindingKey = LibShared,CreateFrame,ipairs,GetBindingKey
 
@@ -13,7 +12,7 @@ local LibShared,CreateFrame,ipairs,GetBindingKey = LibShared,CreateFrame,ipairs,
 local InCombatHandler = CreateFrame('Frame', nil, nil, 'SecureHandlerStateTemplate,SecureHandlerAttributeTemplate')
 local InteractNearest = InCombatHandler
 -- local InteractNearest = CreateFrame('Frame')
-ImmersiveAction.InteractNearest = InteractNearest
+IA.InteractNearest = InteractNearest
 LibShared.SetScript.OnEvent(InteractNearest)
 
 InteractNearest:Hide()
@@ -168,7 +167,7 @@ end
 
 InteractNearest.sinceLastCheck = 0
 
--- OnUpdate() runs if  ==  ImmersiveAction.InteractNearest:IsShown()  ==  ImmersiveAction.DynamicKeys and not InCombatLockdown()
+-- OnUpdate() runs if  ==  IA.InteractNearest:IsShown()  ==  IA.DynamicKeys and not InCombatLockdown()
 function InteractNearest:OnUpdate(elapsed)
 	-- Periodic update every frame (per 33ms at 30fps). Skip frames until CheckInterval passed.
 	self.sinceLastCheck = self.sinceLastCheck + elapsed
@@ -254,7 +253,7 @@ function InteractNearest:Activate()
 	local active =  self.enabled  and  nil~=next(self.keyOverrides)
 	if  not self.active == not active  then  return nil  end
 	self.active = active
-	ImmersiveAction.commandState.InteractNearest = active
+	IA.commandState.InteractNearest = active
 
 	if active then
 		self:RegisterEvent('PLAYER_REGEN_DISABLED')

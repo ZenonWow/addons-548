@@ -1,7 +1,7 @@
 local _G, ADDON_NAME, _ADDON = _G, ...
-local ImmersiveAction = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = ImmersiveAction
--- local Log = ImmersiveAction.Log
--- local Log = ImmersiveAction.Log or {}  ;  ImmersiveAction.Log = Log
+local IA = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = IA
+-- local Log = IA.Log
+-- local Log = IA.Log or {}  ;  IA.Log = Log
 
 local indexOf = _G.LibShared.Require.indexOf
 
@@ -11,7 +11,7 @@ local indexOf = _G.LibShared.Require.indexOf
 -- Default configuration
 ---------------------------
 
-ImmersiveAction.defaultSettings= {
+IA.defaultSettings= {
 	--global = { version = "1.0.0", },
 	profile= {
 		enabledOnLogin= false,
@@ -74,7 +74,7 @@ ImmersiveAction.defaultSettings= {
 -------------------
 
 local Config = {}
-ImmersiveAction.Config = Config
+IA.Config = Config
 Config.modifierKeys = { '', 'SHIFT', 'CTRL', 'ALT' }
 
 --[[ Commands vocabulary:
@@ -182,13 +182,13 @@ local function opt(key, name, desc, defValues)
 		--width = "full",
 		values = defValues or Config:InitCommandLabels(),
 		get = function()
-			local value= ImmersiveAction.db.profile.bindings[key]
+			local value= IA.db.profile.bindings[key]
 			return  indexOf(Config.commands, value)
 		end,
 		set = function(info, idx)
 			local value= Config.commands[idx]
 			if value=='' then  value = nil  end
-			ImmersiveAction:SetUserBinding('General', key, value)
+			IA:SetUserBinding('General', key, value)
 		end,
 	}
 	Config.optionsTable.args[key]= optInfo
@@ -205,12 +205,12 @@ local function optMod(action, name, desc, defValues)
 		--width = "full",
 		values = Config.modifierKeys,
 		get = function()
-			local value= ImmersiveAction.db.profile.modifiers[action]
+			local value= IA.db.profile.modifiers[action]
 			return  indexOf(Config.modifierKeys, value)
 		end,
 		set = function(info, idx)
 			--if  value == ''  or  value == 'NONE'  then  value= nil  end
-			ImmersiveAction.db.profile.modifiers[action]= Config.modifierKeys[idx]
+			IA.db.profile.modifiers[action]= Config.modifierKeys[idx]
 		end,
 	}
 	Config.optionsTable.args[action]= optInfo
@@ -226,9 +226,9 @@ local function optToggle(key, name, desc)
 		type = "toggle",
 		--width = "full",
 		-- setting = link(db).profile[key],
-		get = function()  return ImmersiveAction.db.profile[key]  end,
+		get = function()  return IA.db.profile[key]  end,
 		set = function(info, value)
-			ImmersiveAction.db.profile[key]= value
+			IA.db.profile[key]= value
 		end,
 	}
 	Config.optionsTable.args[key]= optInfo
@@ -238,7 +238,7 @@ end
 
 Config.optionsTable = { 
 	name = "Immersive Action Settings",
-	handler = ImmersiveAction,
+	handler = IA,
 	type = "group",
 	args = {},
 }

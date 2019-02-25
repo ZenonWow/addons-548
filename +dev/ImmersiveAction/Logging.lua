@@ -1,6 +1,6 @@
 local _G, ADDON_NAME, _ADDON = _G, ...
-local ImmersiveAction = _G.ImmersiveAction or {}
-local Log = ImmersiveAction.Log or {}  ;  ImmersiveAction.Log = Log
+local IA = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = IA
+local Log = IA.Log or {}  ;  IA.Log = Log
 
 
 ---------------------------
@@ -24,7 +24,7 @@ local Log = ImmersiveAction.Log or {}  ;  ImmersiveAction.Log = Log
 /run ImmersiveAction.logging.Event.QUEST_PROGRESS= false
 /run ImmersiveAction.logging.Event.QUEST_FINISHED= false
 --]]
-ImmersiveAction.logging= {
+IA.logging= {
 	-- all= false,		-- set to false/true to override individual event settings.
 	-- all= true,
 	State= false,
@@ -35,7 +35,7 @@ ImmersiveAction.logging= {
 	Init= false,
 	Frame= false,
 }
-ImmersiveAction.logging.Event= {
+IA.logging.Event= {
 	all= false,		-- set to false/true to override individual event settings.
 	-- all= true,
 	CURSOR_UPDATE= false,
@@ -50,27 +50,27 @@ ImmersiveAction.logging.Event= {
 local function makeLogFunc(Log, logging, categ)
 	Log[categ] =  function(...)  if logging:_on(categ) then print(...) end  end
 end
-function ImmersiveAction.logging:_on(categ)
+function IA.logging:_on(categ)
 	return  self.all~=false  and  (self[categ] or self.all)
 end
 
-ImmersiveAction.logging.Event._on = ImmersiveAction.logging._on
-function ImmersiveAction.logging:_onevent(event)
+IA.logging.Event._on = IA.logging._on
+function IA.logging:_onevent(event)
 	return  self.all ~= false  and  self.Event  and  self.Event:_on(event)
 end
 
-makeLogFunc(Log, ImmersiveAction.logging, 'State')
-makeLogFunc(Log, ImmersiveAction.logging, 'Update')
-makeLogFunc(Log, ImmersiveAction.logging, 'Command')
-makeLogFunc(Log, ImmersiveAction.logging, 'Anomaly')
-makeLogFunc(Log, ImmersiveAction.logging, 'Init')
-makeLogFunc(Log, ImmersiveAction.logging, 'Frame')
+makeLogFunc(Log, IA.logging, 'State')
+makeLogFunc(Log, IA.logging, 'Update')
+makeLogFunc(Log, IA.logging, 'Command')
+makeLogFunc(Log, IA.logging, 'Anomaly')
+makeLogFunc(Log, IA.logging, 'Init')
+makeLogFunc(Log, IA.logging, 'Frame')
 
 function Log.Event(event, extraMessage)
-	if  ImmersiveAction.logging:_onevent(event)  then
+	if  IA.logging:_onevent(event)  then
 		print(event ..':  cursor='.. (GetCursorInfo() or 'hand')
-		..' CursorPickedUp()='.. ImmersiveAction.colorBoolStr(CursorPickedUp(),true)
-		..' SpellIsTargeting()='.. ImmersiveAction.colorBoolStr(SpellIsTargeting(),true)
+		..' CursorPickedUp()='.. IA.colorBoolStr(CursorPickedUp(),true)
+		..' SpellIsTargeting()='.. IA.colorBoolStr(SpellIsTargeting(),true)
 		.. (extraMessage or '') )
 	end
 end
@@ -101,7 +101,7 @@ local colors = {
 		ok				= "|cFF00ff00",
 		restore		= "|r",
 }
-ImmersiveAction.colors = colors
+IA.colors = colors
 colors['nil']			= colors.lightblue
 colors[false]			= colors.lightblue
 colors[true]			= colors.green
@@ -115,12 +115,12 @@ colors.event			= colors.lightgreen
 colors.Mouselook  = colors.yellow
 
 
-function ImmersiveAction.colorBoolStr(value, withColor)
+function IA.colorBoolStr(value, withColor)
 	local boolStr=  value == true and 'ON'  or  value == false and 'OFF'  or  tostring(value)
-	if  withColor == true  then  withColor= ImmersiveAction.colors[value == nil  and  'nil'  or  value]  end
-	return  withColor  and  withColor .. boolStr .. ImmersiveAction.colors.restore  or  boolStr
+	if  withColor == true  then  withColor= IA.colors[value == nil  and  'nil'  or  value]  end
+	return  withColor  and  withColor .. boolStr .. IA.colors.restore  or  boolStr
 end
-local colorBoolStr = ImmersiveAction.colorBoolStr
+local colorBoolStr = IA.colorBoolStr
 
 
 

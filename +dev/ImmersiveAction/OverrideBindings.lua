@@ -1,10 +1,10 @@
 local _G, ADDON_NAME, _ADDON = _G, ...
-local ImmersiveAction = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = ImmersiveAction
-local Log = ImmersiveAction.Log
-local Log = ImmersiveAction.Log or {}  ;  ImmersiveAction.Log = Log
+local IA = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = IA
+local Log = IA.Log
+local Log = IA.Log or {}  ;  IA.Log = Log
 
 -- Used from LibShared:
-local ipairsOrOne,packOrOne,pairsOrNil = LibShared.Import('ipairsOrOne,packOrOne,pairsOrNil,', ImmersiveAction)
+local ipairsOrOne,packOrOne,pairsOrNil = LibShared.Import('ipairsOrOne,packOrOne,pairsOrNil,', IA)
 
 
 
@@ -15,7 +15,7 @@ local ipairsOrOne,packOrOne,pairsOrNil = LibShared.Import('ipairsOrOne,packOrOne
 ------------------------------
 
 local OverridesIn = { ActionMode = {}, AutoRun = {}, InteractNearest = {}, Mouselook = {}, General = {} }
-ImmersiveAction.OverridesIn = OverridesIn
+IA.OverridesIn = OverridesIn
 
 --- INTERACTMOUSEOVER --> TURNORACTION -- Invert Mouselook.
 -- InteractMouseover is useless without cursor (in Mouselook mode).
@@ -60,12 +60,12 @@ OverridesIn.AutoRun.MOVEANDSTEER = 'TURNORACTION'  -- Note: set priority over Ac
 ------------------------------
 
 local UserBindings = CreateFrame('Frame')
-ImmersiveAction.UserBindings = UserBindings
+IA.UserBindings = UserBindings
 UserBindings:Hide()
 UserBindings.cmdKeyMaps = {}
 
 
-function ImmersiveAction:SetUserBinding(mode, key, command)
+function IA:SetUserBinding(mode, key, command)
 	self.db.profile['bindingsIn'..mode][key] = value
 	UserBindings:OverrideOneBinding(mode, key, command)
 end
@@ -104,12 +104,12 @@ end
 
 
 
-function ImmersiveAction:OverrideUserBindings(mode)
+function IA:OverrideUserBindings(mode)
 	UserBindings:OverrideBindings(mode, self.db.profile['bindingsIn'..mode])
 end
 
 
-function ImmersiveAction:UpdateUserBindings()
+function IA:UpdateUserBindings()
 	print("ImmersiveAction:UpdateUserBindings()")
 	-- First happens in response to ADDON_LOADED. Later on ProfileChanged()  and  when a binding is changed in Config.
 	--[[
@@ -123,7 +123,7 @@ function ImmersiveAction:UpdateUserBindings()
 		-- Log.Anomaly('ImmersiveAction:UpdateUserBindings() while IsMouselooking() could cause stuck keys, not updating bindings.')
 		-- return
 		Log.Anomaly('ImmersiveAction:UpdateUserBindings() while IsMouselooking() could cause stuck keys, temporarily disabling Mouselook.')
-		ImmersiveAction.MouselookStop()
+		IA.MouselookStop()
 	end
 
 	ClearOverrideBindings(UserBindings)
@@ -136,7 +136,7 @@ function ImmersiveAction:UpdateUserBindings()
 	-- SetModifiedClick('ActionModeDisable', profile.modifiers.disableModifier)
 
 	-- self:ResetState()
-	if wasMouselooking then  ImmersiveAction.MouselookStart()  end
+	if wasMouselooking then  IA.MouselookStart()  end
 end
 
 
@@ -149,7 +149,7 @@ end
 -------------------------------
 
 local OverrideBindings = CreateFrame('Frame')
-ImmersiveAction.OverrideBindings = OverrideBindings
+IA.OverrideBindings = OverrideBindings
 LibShared.SetScript.OnEvent(OverrideBindings)
 
 OverrideBindings:Hide()
@@ -228,8 +228,8 @@ end
 -- Enable the overrides in specific modes.
 ------------------------------
 
-function ImmersiveAction:OverrideCommandsIn(mode, enable)
-	print('  ImmersiveAction:OverrideCommandsIn('..mode..', '..ImmersiveAction.colorBoolStr(enable, true)..')')
+function IA:OverrideCommandsIn(mode, enable)
+	print('  ImmersiveAction:OverrideCommandsIn('..mode..', '..IA.colorBoolStr(enable, true)..')')
 	if InCombatLockdown() then
 		Log.State("ImmersiveAction:OverrideCommandsIn() ignored:  Can't update bindings when InCombatLockdown()")
 	else
@@ -246,7 +246,7 @@ function OverrideBindings:PLAYER_REGEN_DISABLED(event)
 	self:OverrideCommandsIn('AutoRun'      , false)
 end
 
--- Enable OverrideBindings after combat, depending on ImmersiveAction.commandState[mode].
+-- Enable OverrideBindings after combat, depending on IA.commandState[mode].
 function OverrideBindings:PLAYER_REGEN_ENABLED(event)
 	self:OverrideCommandsIn('ActionMode')
 	self:OverrideCommandsIn('AutoRun')
@@ -256,7 +256,7 @@ function OverrideBindings:Enable(enable)
 	if  not self.enable == not enable  then  return nil  end
 	self.enable = enable
 
-	-- ImmersiveAction.commandState.OverrideBindings = enable
+	-- IA.commandState.OverrideBindings = enable
 	if enable then
 		self:RegisterEvent('PLAYER_REGEN_DISABLED')
 		self:RegisterEvent('PLAYER_REGEN_ENABLED')
@@ -406,12 +406,12 @@ local WorldFrame_OnMouseUp_PostSnippet = [===[
 
 
 local WorldClickHandler = CreateFrame('Frame', nil, nil, 'SecureHandlerMouseUpDownTemplate')
-ImmersiveAction.WorldClickHandler = WorldClickHandler
+IA.WorldClickHandler = WorldClickHandler
 _G.WCH = WorldClickHandler    -- Export for DEBUG.
 
 
 WorldClickHandler.InitSnippet = [===[
-	-- I will definitely forget to initialize this.
+	-- I will definitely forget to initialize this:
 	LastTurnClick, DoubleClickInterval = 0, 0.3
 	Pressed = newtable()
 	Rebound = newtable()
@@ -429,7 +429,7 @@ function WorldClickHandler:InitSecureHandler()
 	-- Init "global" variables in secure environment.
 	-- handler:SetAttribute('_set', " local name,value=... ; _G[name] = value ")
 
-	handler.MouselookStop = ImmersiveAction.MouselookStop
+	handler.MouselookStop = IA.MouselookStop
 	handler:Execute(WorldClickHandler.InitSnippet)
 	handler.Env = _G.GetManagedEnvironment(handler)
 
@@ -451,7 +451,7 @@ end
 
 
 function WorldClickHandler:UpdateDoubleClickInterval()
-	handler:Execute(" DoubleClickInterval = ... ", ImmersiveAction.sv.profile.DoubleClickInterval or 0.3)
+	handler:Execute(" DoubleClickInterval = ... ", IA.sv.profile.DoubleClickInterval or 0.3)
 end
 
 function WorldClickHandler:UpdateOverrideBindings()

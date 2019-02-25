@@ -1,15 +1,15 @@
 local _G, ADDON_NAME, _ADDON = _G, ...
-local ImmersiveAction = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = ImmersiveAction
-local Log = ImmersiveAction.Log
-local Log = ImmersiveAction.Log or {}  ;  ImmersiveAction.Log = Log
+local IA = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = IA
+local Log = IA.Log or {}  ;  IA.Log = Log
+
 assert(_ADDON.WindowList, "Include WindowList.lua before WindowHooks.lua")
 local getSubField = assert(_ADDON.getSubField, "getSubField() missing from WindowList.lua")
 local tDeleteItem = _G.tDeleteItem  -- from FrameXML/Util.lua
-local colors = ImmersiveAction.colors
+local colors = IA.colors
 
-ImmersiveAction.WindowsOnScreen = {}
-ImmersiveAction.HookedFrames = {}
-ImmersiveAction.FramesToHook = nil
+IA.WindowsOnScreen = {}
+IA.HookedFrames = {}
+IA.FramesToHook = nil
 local FramesToHookMap = {}
 
 -- Monitor windows/frames that need the mousecursor.
@@ -50,19 +50,19 @@ end
 local function FrameOnShow(frame)
 	Log.Frame('  CM_FrameOnShow('.. colors.show .. frame:GetName() ..'|r)')
 	-- if already visible do nothing
-	if  not setInsertLast(ImmersiveAction.WindowsOnScreen, frame)  then  return  end
+	if  not setInsertLast(IA.WindowsOnScreen, frame)  then  return  end
 
 	self.commandState.ActionModeRecent = nil    -- There is a more recent event now.
-	ImmersiveAction:UpdateMouselook(false, 'FrameOnShow')
+	IA:UpdateMouselook(false, 'FrameOnShow')
 end
 
 
 local function FrameOnHide(frame)
 	Log.Frame('  CM_FrameOnHide('.. colors.hide .. frame:GetName() ..'|r)')
-	local removed= removeFirst(ImmersiveAction.WindowsOnScreen, frame)
+	local removed= removeFirst(IA.WindowsOnScreen, frame)
 	if  not removed  then  return  end
 	
-	ImmersiveAction:UpdateMouselook(true, 'FrameOnHide')
+	IA:UpdateMouselook(true, 'FrameOnHide')
 end
 
 
@@ -71,7 +71,7 @@ end
 -- Hook OnShow OnHide on a frame --
 -----------------------------------
 
-function  ImmersiveAction:HookFrame(frameName)
+function  IA:HookFrame(frameName)
 	local frame
 	-- _G[frameName] and getglobal(frameName) does not work for child frames like "MovieFrame.CloseDialog"
 	if type(frameName)=='string' then  frame = _G[frameName]  or  getSubField(_G, frameName)
@@ -88,7 +88,7 @@ function  ImmersiveAction:HookFrame(frameName)
 	
 	if  frame:IsShown()  then
 		Log.Frame('  CM:HookUpFrames():  '.. colors.show .. frame:GetName() ..'|r is already visible')
-		setInsertLast(ImmersiveAction.WindowsOnScreen, frame)
+		setInsertLast(IA.WindowsOnScreen, frame)
 	end
 	
 	return frame
@@ -100,7 +100,7 @@ end
 -- Hook all frames --
 ---------------------
 
-function  ImmersiveAction:HookUpFrames()
+function  IA:HookUpFrames()
 	Log.Init('ImmersiveAction:HookUpFrames()')
 
 	if _ADDON.WindowList and not self.FramesToHook then
@@ -150,10 +150,10 @@ end
 hooksecurefunc('CreateFrame', function(frameType, frameName, ...)
 	if  not FramesToHookMap[frameName]  then  return  end
 	
-	local frame = ImmersiveAction:HookFrame(frameName)
+	local frame = IA:HookFrame(frameName)
   if  frame  then
 		FramesToHookMap[frameName] = nil
-		tDeleteItem(ImmersiveAction.FramesToHook, frameName)
+		tDeleteItem(IA.FramesToHook, frameName)
 	end
 end)
 
@@ -164,7 +164,7 @@ end)
 -- Listen for quest events. These fire even if Immersion addon hides the QuestFrame.
 ------------------------------
 
-function ImmersiveAction:QUEST_PROGRESS(event)
+function IA:QUEST_PROGRESS(event)
 	-- Event QUEST_PROGRESS received as the quest frame is shown when talking to an npc
 	Log.Event(colors.show .. event .. colors.restore)
 	setInsertLast(self.WindowsOnScreen, 'QUEST_PROGRESS')
@@ -172,7 +172,7 @@ function ImmersiveAction:QUEST_PROGRESS(event)
 	self:UpdateMouselook(false, event)
 end
 
-function ImmersiveAction:QUEST_FINISHED(event)
+function IA:QUEST_FINISHED(event)
 	-- Event QUEST_FINISHED received as the quest frame is closed after talking to an npc
 	Log.Event(colors.hide .. event .. colors.restore)
 	removeFirst(self.WindowsOnScreen, 'QUEST_PROGRESS')
@@ -186,7 +186,7 @@ end
 -- Return an onscreen frame --
 ------------------------------
 
-function ImmersiveAction:CheckForFramesOnScreen()
+function IA:CheckForFramesOnScreen()
 	return  self.WindowsOnScreen[1]
 end
 

@@ -66,9 +66,9 @@ Debug:
 
 -- _ADDON main: Ace libs, initialization, settings, bindings
 local _G, ADDON_NAME, _ADDON = _G, ...
-local ImmersiveAction = _G.ImmersiveAction or {}
-_G.ImmersiveAction = LibStub("AceAddon-3.0"):NewAddon(ImmersiveAction, "ImmersiveAction", "AceConsole-3.0", "AceEvent-3.0", "AceBucket-3.0")
-local Log = ImmersiveAction.Log or {}  ;  ImmersiveAction.Log = Log
+local IA = _G.ImmersiveAction or {}
+_G.ImmersiveAction = LibStub("AceAddon-3.0"):NewAddon(IA, "ImmersiveAction", "AceConsole-3.0", "AceEvent-3.0", "AceBucket-3.0")
+local Log = IA.Log or {}  ;  IA.Log = Log
 
 -- GLOBALS:
 -- Upvalued Lua globals: 
@@ -81,11 +81,11 @@ local Log = ImmersiveAction.Log or {}  ;  ImmersiveAction.Log = Log
 --------------------------
 
 -- Initial state:
--- ImmersiveAction.commandState.ActionMode= nil
--- ImmersiveAction.commandState.ActionModeRecent= nil
+-- IA.commandState.ActionMode= nil
+-- IA.commandState.ActionModeRecent= nil
 
 
-function ImmersiveAction:OnInitialize()
+function IA:OnInitialize()
 	-- Run on this addon's ADDON_LOADED event.
 	Log.Init('  ImmersiveAction:OnInitialize()')
 	self.commands:HookCommands()
@@ -118,7 +118,7 @@ function ImmersiveAction:OnInitialize()
 end	
 
 
-function ImmersiveAction:OnEnable()
+function IA:OnEnable()
 	-- Run on PLAYER_LOGIN, before PLAYER_ENTERING_WORLD
 	-- frame sizes and positions are loaded before this event
 	Log.Init('  ImmersiveAction:OnEnable()')
@@ -147,7 +147,7 @@ function ImmersiveAction:OnEnable()
 end
 
 
-function ImmersiveAction:OnDisable()
+function IA:OnDisable()
 	Log.Init('  ImmersiveAction:OnDisable()')
 	-- Called when the addon is disabled
 
@@ -171,7 +171,7 @@ function ImmersiveAction:OnDisable()
 end
 
 
-function ImmersiveAction:ADDON_LOADED(event, addonName)
+function IA:ADDON_LOADED(event, addonName)
 	-- registered for event after PLAYER_LOGIN fires:
 	-- static loaded addons already received it
 	-- only delay-loaded addons will trigger
@@ -181,14 +181,14 @@ function ImmersiveAction:ADDON_LOADED(event, addonName)
 end
 
 
-function ImmersiveAction:ProfileChanged()
+function IA:ProfileChanged()
 	-- Update loaded user binding overrides.
 	self:UpdateUserBindings()
 end
 
 
 -- UpdateOverrideBindings() is called when key bindings change.
-function ImmersiveAction:UpdateOverrideBindings(event)
+function IA:UpdateOverrideBindings(event)
 	self.WorldClickHandler:UpdateOverrideBindings()
 	self.OverrideBindings:UpdateOverrideBindings()
 	self.InteractNearest:UpdateOverrideBindings()
@@ -200,7 +200,7 @@ end
 -- Binding settings
 ----------------------
 
-function ImmersiveAction.ResetMouseButton12Bindings()
+function IA.ResetMouseButton12Bindings()
 	SetBinding('BUTTON1'      ,'CAMERAORSELECTORMOVE')
 	SetBinding('BUTTON2'      ,'TURNORACTION')
 	SetBinding('ALT-BUTTON1'  ,nil)
@@ -218,7 +218,7 @@ local function SetBindings(keys, command)
 		SetBinding(key, command)
 	end
 	local name= _G['BINDING_NAME_'.. command]  or  command
-	print('ImmersiveAction_ updating binding  "'.. name ..'":  '.. table.concat(keys, ', '))
+	print('ImmersiveAction updating binding  "'.. name ..'":  '.. table.concat(keys, ', '))
 end
 
 
@@ -228,12 +228,12 @@ end
 -- Chat command  /ia  /immersiveaction
 ----------------------
 
-function ImmersiveAction:ChatCommand(input)
+function IA:ChatCommand(input)
     if not input or input:trim() == "" then
         InterfaceOptionsFrame_OpenToCategory(self.config.optionsFrame)
         InterfaceOptionsFrame_OpenToCategory(self.config.optionsFrame)
     else
-        LibStub("AceConfigCmd-3.0"):HandleCommand("ia", "ImmersiveAction_", input)
+        LibStub("AceConfigCmd-3.0"):HandleCommand("ia", "ImmersiveAction", input)
     end
 end
 
