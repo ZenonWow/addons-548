@@ -62,9 +62,10 @@ function MultiActionBarGridFixer:Load()
 
 	--[[ handle events ]]--
 
-	self:SetAttribute('_onstate-update', [[ self:RunAttribute('updateGrid') ]])	
-	self:SetAttribute('_onstate-alwaysShow', [[ self:RunAttribute('updateGrid') ]])	
-	self:SetAttribute('_onstate-showGrid', [[ self:RunAttribute('updateGrid') ]])	
+	local runUpdateSnippet = " self:RunAttribute('updateGrid') "
+	self:SetAttribute('_onstate-update', runUpdateSnippet)
+	self:SetAttribute('_onstate-alwaysShow', runUpdateSnippet)
+	self:SetAttribute('_onstate-showGrid', runUpdateSnippet)
 
 	self:SetAttribute('updateGrid', [[
 		local showgrid = (self:GetAttribute('state-alwaysShow') or self:GetAttribute('state-showGrid')) and 1 or 0

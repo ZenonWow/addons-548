@@ -35,25 +35,12 @@ function Frame:Create(id)
 
 	f.header:SetAttribute('id', id)
 	
-	f.header:SetAttribute('_onstate-overrideui', [[
-		self:RunAttribute('updateShown')
-	]])
-	
-	f.header:SetAttribute('_onstate-showinoverrideui', [[
-		self:RunAttribute('updateShown')
-	]])
-	
-	f.header:SetAttribute('_onstate-petbattleui', [[
-		self:RunAttribute('updateShown')
-	]])
-	
-	f.header:SetAttribute('_onstate-showinpetbattleui', [[
-		self:RunAttribute('updateShown')
-	]])
-	
-	f.header:SetAttribute('_onstate-display', [[
-		self:RunAttribute('updateShown')
-	]])
+	local runUpdateSnippet = " self:RunAttribute('updateShown') "
+	f.header:SetAttribute('_onstate-overrideui', runUpdateSnippet)
+	f.header:SetAttribute('_onstate-showinoverrideui', runUpdateSnippet)
+	f.header:SetAttribute('_onstate-petbattleui', runUpdateSnippet)
+	f.header:SetAttribute('_onstate-showinpetbattleui', runUpdateSnippet)
+	f.header:SetAttribute('_onstate-display', runUpdateSnippet)
 	
 	f.header:SetAttribute('updateShown', [[
 		local isOverrideUIShown = self:GetAttribute('state-overrideui') and true or false

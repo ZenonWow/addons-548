@@ -28,15 +28,10 @@ function OverrideController:Load()
 		self:GetFrameRef('controller'):SetAttribute('state-isoverrideuishown', false)
 	]])
 	
+	local runUpdateSnippet = " self:RunAttribute('updateOverrideUI') "
+	self:SetAttribute('_onstate-isoverrideuishown', runUpdateSnippet)
+	self:SetAttribute('_onstate-useoverrideui', runUpdateSnippet)
 	
-	self:SetAttribute('_onstate-isoverrideuishown', [[ 
-		self:RunAttribute('updateOverrideUI') 
-	]])
-
-	self:SetAttribute('_onstate-useoverrideui', [[ 
-		self:RunAttribute('updateOverrideUI') 
-	]])
-
 	self:SetAttribute('_onstate-overrideui', [[	
 		for i, frame in pairs(myFrames) do
 			frame:SetAttribute('state-overrideui', newstate)
