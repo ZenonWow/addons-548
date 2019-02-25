@@ -1,0 +1,38 @@
+Moreover, the _ondragstartand _onreceivedrag snippets may use a return
+statement to have the game load the cursor with something new or exchange
+its current contents. For instance, if you want to write a button that uses
+the action slots to store its content much like the stock buttons do, you
+can have the button inherit from both SecureActionButtonTemplate and
+SecureHandlerDragTemplate, and use the following snippet in the button’s
+_ondragstart and _onreceivedrag attributes:
+local pickupAction = [[return “action“, self:GetAttribute(“action“)]]
+button:SetAttribute(“_ondragstart“, pickupAction)
+button:SetAttribute(“_onreceivedrag“, pickupAction)
+
+Your drag handlers can return any of the following sequences:
+return “action“, actionSlot
+return “bag“, equippedBag
+return “bagslot“, bagID, slotNumber
+return “inventory“, inventorySlot
+return “item“, name or itemID
+return “macro“, name or macroIndex
+return “petaction“, petSlot
+return “spell“, index, “BOOK“ or “PET“
+return “spell“, name or spellID
+return “companion“, “MOUNT“ or “CRITTER“, index
+return “equipmentset“, name
+return “money“, amount
+return “merchant“, slot
+
+You can also add “clear“ to the beginning of any of these lists to clear the
+cursor first, such as to pick up the contents of an action slot without dropping
+anything into it that was already on the cursor. For instance, you might change
+the drag-start handler to
+button:SetAttribute(“_ondragstart“, [[return “clear“, “action“, i
+self:GetAttribute(“action“)]])
+The last group of templates are intended to react to changes in frame
+visibility or attribute values. These changes can be triggered by other snippets
+acting on frames securely, or by state drivers that you have registered for the
+frame (discussed in more detail later in the chapter).
+
+
