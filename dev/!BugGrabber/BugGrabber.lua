@@ -207,9 +207,9 @@ end
 local StoreError, SendError
 
 -- local
-function StoreError(errorMessage, err)
+function StoreError(originalMessage, err)
 	-- Add to errorMessage map
-	sessionMessages[errorMessage] = err
+	sessionMessages[originalMessage] = err
 	sessionDB[#sessionDB+1] = err
 	
 	-- Save only the last MAX_BUGGRABBER_ERRORS errors (otherwise the SV gets too big)
@@ -222,15 +222,15 @@ function StoreError(errorMessage, err)
 		allErrors[#allErrors+1] = errorObject
 	end
 	
-	SendError(errorMessage, err)
+	SendError(originalMessage, err)
 end
 
 -- local
-function SendError(errorMessage, err)
+function SendError(originalMessage, err)
 	-- Notify listeners (callbacks) in next OnUpdate()
-	if  not errorsToSend[errorMessage]  then
+	if  not errorsToSend[originalMessage]  then
 		errorsToSend[#errorsToSend+1] = err
-		errorsToSend[errorMessage] = err
+		errorsToSend[originalMessage] = err
 		-- Show frame to run OnUpdate() on next framedraw, that will notifiy callbacks.
 		original.pcall(frame.Show, frame)
 	end
@@ -322,14 +322,18 @@ do
 		local parentError = grabbingError
 		grabbingError = errorMessage
 
+		-- Merge the same error raised in different files.
+		-- Cut the filename prepended by the Lua runtime to get back the original message.
+		local originalMessage =  errorMessage:match(":%d+: (.*)")  or  errorMessage
+
 		-- Get previous error with same message from the database.
-		local err = sessionMessages[errorMessage]
+		local err = sessionMessages[originalMessage]
 		if  err  then
 			err.counter = err.counter + 1
 			-- Notify listeners (callbacks) in next OnUpdate()
-			if  not errorsToSend[errorMessage]  then
+			if  not errorsToSend[originalMessage]  then
 				errorsToSend[#errorsToSend+1] = err
-				errorsToSend[errorMessage] = err
+				errorsToSend[originalMessage] = err
 				frame:Show()
 			end
 			-- Repeated errorMessage handled.
@@ -388,7 +392,7 @@ do
 		end
 
 		-- Save to DB
-		StoreError(errorMessage, err)
+		StoreError(originalMessage, err)
 
 		-- If this function is aborted by an error then  grabbingError  is not cleared.
 		grabbingError = parentError
@@ -959,9 +963,19 @@ registerAddonActionEvents()
 -- Slash handler
 --
 
+local categMap = { a='all', c='current', p='previous', [""]='all' }
+
 local function slashHandler(indexStr)
-	local index =  indexStr  and  tonumber(indexStr)  or  #sessionDB
-	local err = type(index) == "number" and sessionDB[index]
+	print("/bug:  '"..indexStr.."'")
+	local categStr = indexStr:match("re?s?e?t?%s*(%S?)")
+	if categStr then
+		local categ = categMap[categStr]
+		if not categ then  print("Usage:  /bug reset [a[ll]] / c[urrent] / p[revious]") ;  return  end
+		BugGrabber:Reset(categ)
+		return
+	end
+	local index =  tonumber(indexStr)  or  #sessionDB
+	local err = index and sessionDB[index]
 	if  not err  then
 		print(MESSAGE_COLOR..L.USAGE:format(#sessionDB).."|r")
 		return
