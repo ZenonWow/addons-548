@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibCloseOneWindow-1.0", 5040801 -- 5.4.8 v1 / increase manually on changes
+local MAJOR, MINOR = "LibCloseOneWindow", 10 -- 5.4.8 v10 / increase manually on changes
 if  LibCloseOneWindow  and  LibCloseOneWindow.minor >= MINOR  then  return  end
 LibCloseOneWindow = { minor = MINOR }
 
@@ -74,8 +74,8 @@ end
 -- Make frames nicely print their name for tostring(frame). Basic for debugging, shouldn't be?
 -- Any frame will do here, or an unnecessarily allocating CreateFrame(), if we want to be on the safe side.
 getmetatable(CharacterFrame).__tostring = function(f)
-  local name = f:GetName()  ;  if name then  return name  end
-  name = "Some "..f:GetObjectType()
+  local name = f.GetName and f:GetName()  ;  if name then  return name  end
+  name = f.GetObjectType and "ObjectType "..f:GetObjectType() or "Some "..type(f)
   if f.GetID then  name = name.." with ID="..tostring(f:GetID())  end
   local parent = f.GetParent and f:GetParent()
   if parent then  name = name.." with Parent: "..tostring(parent)  end

@@ -32,6 +32,6 @@ function DominosSwap()
 	end
 end
 
-LibStubs.AceEvent30.RegisterEvent("DominosSwap", "PLAYER_LOGIN", DominosSwap)
+LibStub("AceEvent-3.0").RegisterEvent("DominosSwap", "PLAYER_LOGIN", DominosSwap)
 -- TODO: LibStubs.AceEvent30:RegisterEvent("PLAYER_LOGIN", DominosSwap)
 

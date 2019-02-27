@@ -1,3 +1,4 @@
+BINDING_HEADER_ZenTools = "ZenTools"
 BINDING_NAME_PRINTUNITAURAS = "Print mouseover / target / focus unit's auras to General chat frame"
 
 

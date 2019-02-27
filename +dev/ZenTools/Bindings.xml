@@ -1,18 +1,12 @@
 <Bindings>
 	
-	<!-- UI Panels header="INTERFACE" -->
-	
-	
-	<Binding name="TOGGLEBLACKMARKET"
-		header="ZenTools"
-    >
+	<Binding name="TOGGLEBLACKMARKET" header="ZenTools" >
 		-- description="Show/hide the Black Market without updating auctions"
 		ToggleBlackMarket()
 	</Binding>
 	
 	
-	<Binding name="PRINTUNITAURAS"
-		>
+	<Binding name="PRINTUNITAURAS" >
 		-- description="Print mouseover / target / focus unit's auras to General chat frame"
 		PrintUnitAuras()
 	</Binding>
