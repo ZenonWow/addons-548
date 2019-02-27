@@ -1,0 +1,13 @@
+Regexes for code normalization. 1st line goes to  Find what:  2nd goes to  Replace with:
+
+identifier= value  ->  identifier = value:
+--
+([^\s~=])=
+\1=
+
+
+Simple replaces:
+--
+_G -> GL    _ADDON -> ADDON    -- Then fix the initialization usually at the beginning of the file to reference the original global _G. Or getfenv(1) if you like, but that's more advanced and broken in Lua 5.2.
+
+
