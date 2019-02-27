@@ -27,4 +27,4 @@ castbar.lua
 castwarnings.lua
 combopoints.lua
 
-custom.lua
+# custom.lua
