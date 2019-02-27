@@ -1,0 +1,16 @@
+------------------------------------------------------------------------
+r38 | Phanx | 2014-08-27 16:38:19 +0000 (Wed, 27 Aug 2014) | 2 lines
+Changed paths:
+   M /trunk
+   M /trunk/.pkgmeta
+   M /trunk/BetterBlizzOptions.toc
+
+- Fix packaging to include LibStub
+- Bump the TOC while I'm here
+------------------------------------------------------------------------
+r37 | torhal | 2012-01-08 00:08:15 +0000 (Sun, 08 Jan 2012) | 1 line
+Changed paths:
+   M /trunk/BetterBlizzOptions.toc
+
+Updated ToC Interface to 40300
+------------------------------------------------------------------------

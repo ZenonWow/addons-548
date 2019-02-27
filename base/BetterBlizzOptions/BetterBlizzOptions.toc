@@ -1,0 +1,14 @@
+## Interface: 50400
+## Title: BetterBlizOptions
+## Notes: Makes the Blizzard options frame movable and resizable
+## Author: Antiarc
+## OptionalDeps: LibBetterBlizzOptions-1.0
+## X-Curse-Packaged-Version: r38
+## X-Curse-Project-Name: BetterBlizzOptions
+## X-Curse-Project-ID: better-blizz-options
+## X-Curse-Repository-ID: wow/better-blizz-options/mainline
+
+#@no-lib-strip@
+LibStub\LibStub.lua
+LibBetterBlizzOptions-1.0\LibBetterBlizzOptions-1.0.lua
+#@end-no-lib-strip@
