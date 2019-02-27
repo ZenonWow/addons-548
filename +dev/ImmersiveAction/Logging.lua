@@ -81,6 +81,8 @@ end
 /run ImmersiveAction.colors['nil']= ImmersiveAction.colors.blue
 /run ImmersiveAction.colors[false]= ImmersiveAction.colors.blue
 /run ImmersiveAction.colors[true]= ImmersiveAction.colors.green
+
+/run ImmersiveAction.colors.up = ImmersiveAction.colors.gray
 --]]
 local colors = {
 		black			= "|cFF000000",
@@ -102,23 +104,28 @@ local colors = {
 		restore		= "|r",
 }
 IA.colors = colors
-colors['nil']			= colors.lightblue
-colors[false]			= colors.lightblue
-colors[true]			= colors.green
+colors['nil']			= colors.gray
+colors[false]			= colors.gray
+colors.up					= colors.gray
+colors[true]			= colors.lightblue
+colors.down				= colors.lightblue		--colors.purple
 colors.missedup		= colors.orange
-colors.up					= colors.orange
-colors.down				= colors.green		--colors.purple
-colors.show				= colors.green
-colors.hide				= colors.lightblue
+colors.show				= colors.lightblue
+colors.hide				= colors.blue
 colors.event			= colors.lightgreen
--- colors.ActionMode   = colors.orange
+colors.ActionMode = colors.orange
+colors.AutoRun    = colors.orange
 colors.Mouselook  = colors.yellow
 
+function IA.coloredKey(cmdName, pressed)
+	local keystate = pressed and "DOWN" or "UP"
+	return colors[pressed]..cmdName.." "..keystate.."|r"
+end
 
 function IA.colorBoolStr(value, withColor)
 	local boolStr=  value == true and 'ON'  or  value == false and 'OFF'  or  tostring(value)
-	if  withColor == true  then  withColor= IA.colors[value == nil  and  'nil'  or  value]  end
-	return  withColor  and  withColor .. boolStr .. IA.colors.restore  or  boolStr
+	if  withColor == true  then  withColor= colors[value == nil  and  'nil'  or  value]  end
+	return  withColor  and  withColor .. boolStr .. colors.restore  or  boolStr
 end
 local colorBoolStr = IA.colorBoolStr
 

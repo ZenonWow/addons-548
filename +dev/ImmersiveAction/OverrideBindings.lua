@@ -1,10 +1,9 @@
 local _G, ADDON_NAME, _ADDON = _G, ...
 local IA = _G.ImmersiveAction or {}  ;  _G.ImmersiveAction = IA
-local Log = IA.Log
 local Log = IA.Log or {}  ;  IA.Log = Log
 
 -- Used from LibShared:
-local ipairsOrOne,packOrOne,pairsOrNil = LibShared.Import('ipairsOrOne,packOrOne,pairsOrNil,', IA)
+local ipairsOrOne,packOrOne,pairsOrNil = LibShared:Import('ipairsOrOne,packOrOne,pairsOrNil,', IA)
 
 
 
@@ -65,9 +64,9 @@ UserBindings:Hide()
 UserBindings.cmdKeyMaps = {}
 
 
-function IA:SetUserBinding(mode, key, command)
-	self.db.profile['bindingsIn'..mode][key] = value
-	UserBindings:OverrideOneBinding(mode, key, command)
+function UserBindings:SetUserBinding(mode, key, command)
+	IA.db.profile['bindingsIn'..mode][key] = value
+	self:OverrideOneBinding(mode, key, command)
 end
 
 
@@ -104,13 +103,13 @@ end
 
 
 
-function IA:OverrideUserBindings(mode)
-	UserBindings:OverrideBindings(mode, self.db.profile['bindingsIn'..mode])
+function UserBindings:OverrideUserBindings(mode)
+	self:OverrideBindings(mode, IA.db.profile['bindingsIn'..mode])
 end
 
 
-function IA:UpdateUserBindings()
-	print("ImmersiveAction:UpdateUserBindings()")
+function UserBindings:UpdateUserBindings()
+	print("UserBindings:UpdateUserBindings()")
 	-- First happens in response to ADDON_LOADED. Later on ProfileChanged()  and  when a binding is changed in Config.
 	--[[
 	MouselookStop() won't interrupt command keys that are pressed, i.e. received "down" event, but not "up"
@@ -120,9 +119,9 @@ function IA:UpdateUserBindings()
 	--]]
 	local wasMouselooking = _G.IsMouselooking()
 	if wasMouselooking then
-		-- Log.Anomaly('ImmersiveAction:UpdateUserBindings() while IsMouselooking() could cause stuck keys, not updating bindings.')
+		-- Log.Anomaly('UserBindings:UpdateUserBindings() while IsMouselooking() could cause stuck keys, not updating bindings.')
 		-- return
-		Log.Anomaly('ImmersiveAction:UpdateUserBindings() while IsMouselooking() could cause stuck keys, temporarily disabling Mouselook.')
+		Log.Anomaly('UserBindings:UpdateUserBindings() while IsMouselooking() could cause stuck keys, temporarily disabling Mouselook.')
 		IA.MouselookStop()
 	end
 
@@ -228,14 +227,14 @@ end
 -- Enable the overrides in specific modes.
 ------------------------------
 
-function IA:OverrideCommandsIn(mode, enable)
+function OverrideBindings:OverrideCommandsIn(mode, enable)
 	print('  ImmersiveAction:OverrideCommandsIn('..mode..', '..IA.colorBoolStr(enable, true)..')')
 	if InCombatLockdown() then
 		Log.State("ImmersiveAction:OverrideCommandsIn() ignored:  Can't update bindings when InCombatLockdown()")
 	else
-		if enable==nil then  enable = self.commandState[mode]  end
-		OverrideBindings:OverrideCommands(OverridesIn[mode], enable)
-		if mode=='ActionMode' then  self:OverrideUserBindings(mode, enable)  end
+		if enable==nil then  enable = IA.commandState[mode]  end
+		self:OverrideCommands(OverridesIn[mode], enable)
+		if mode=='ActionMode' then  IA.UserBindings:OverrideUserBindings(mode, enable)  end
 	end
 end
 
@@ -284,7 +283,7 @@ function OverrideBindings:UpdateOverrideBindings(event)
 
 	-- Capture bindings of commands for later overriding.
 	for mode,overrides in pairs(OverridesIn) do
-		OverrideBindings.CaptureBindings(mode, overrides)
+		OverrideBindings:CaptureBindings(mode, overrides)
 	end
 
 	-- Mouselook bindings are activated by the game.
@@ -307,6 +306,162 @@ end
 
 
 
+
+LibShared.MapButtonToKey = LibShared.MapButtonToKey  or  setmetatable({
+	-- Necessary special cases:
+	LeftButton   = 'BUTTON1',
+	RightButton  = 'BUTTON2',
+	MiddleButton = 'BUTTON3',
+	-- Common:
+	Button4 = 'BUTTON4',
+	Button5 = 'BUTTON5',
+	-- 8 fields are preallocated, these are free in terms of memory:
+	-- BUTTON6 = 'Button6',
+	-- BUTTON7 = 'Button7',
+	-- BUTTON8 = 'Button8',
+},{
+	__index = function(self, Button)  return 'BUTTON'..Button:sub(7)  end
+	-- __index = function(self, Button)  return Button:upper()  end
+})
+
+local MapButtonToKey = LibShared.MapButtonToKey
+-- for i=4,8 do  MapButtonToKey['Button'..i] = 'BUTTON'..i  end
+-- for i=4,16 do  MapButtonToKey['Button'..i] = 'BUTTON'..i  end
+-- for i=4,31 do  MapButtonToKey['Button'..i] = 'BUTTON'..i  end
+
+
+
+
+--[[
+/run ImmersiveAction.FixB2 = false
+/run ImmersiveAction.FixB2 = true
+/run WorldFrame:HookScript('OnMouseUp', ImmersiveAction.WorldClickHandler.FixAccidentalRightClick)
+/run WorldFrame:HookScript('OnMouseUp', error)
+/run UIParent:HookScript('OnMouseUp', ImmersiveAction.WorldClickHandler.FixAccidentalRightClick)
+/run WorldFrame:SetScript('OnMouseUp', ImmersiveAction.WorldClickHandler.FixAccidentalRightClick)
+/run UIParent:SetScript('OnMouseUp', ImmersiveAction.WorldClickHandler.FixAccidentalRightClick)
+/dump ImmersiveAction.WorldClickHandler.FixAccidentalRightClick
+/dump UIParent:GetScript('OnMouseUp') == ImmersiveAction.WorldClickHandler.FixAccidentalRightClick
+/dump GetModifiedClick('Interact')
+/dump IsModifiedClick('Interact')
+--]]
+-------------------------------
+local WorldClickHandler = CreateFrame('Frame', nil, nil, 'SecureHandlerMouseUpDownTemplate')
+IA.WorldClickHandler = WorldClickHandler
+_G.WCH = WorldClickHandler    -- Export to _G for DEBUG.
+
+-- Last GetTime() when the mouse was over a unit.
+WorldClickHandler.LastMouseoverTime = 0
+-- Last GetTime() when the TurnButton (RightButton by default) was clicked.
+WorldClickHandler.LastTurnClick = 0
+
+-- Scripts before being hooked.
+WorldClickHandler.original = { [WorldFrame] = {}, [UIParent] = {} }
+-- Scripts after being hooked. These are secure wrapper closures generated
+-- by frame.HookScript(script, postHook) which calls, in order:  original[frame][script]  and  postHook.
+WorldClickHandler.hooked = { [WorldFrame] = {}, [UIParent] = {} }
+
+
+function WorldClickHandler.UIOnMouseDown(frame, button)
+	print("UIParent", IA.coloredKey(button, true))
+end
+
+function WorldClickHandler.UIOnMouseUp(frame, button)
+	print("UIParent", IA.coloredKey(button, false))
+end
+
+function WorldClickHandler.OnMouseDown(frame, button)
+	local self = WorldClickHandler
+	-- If the OnMouseUp hook runs before TurnOrActionStop(),
+	-- then similarly OnMouseDown runs before TurnOrActionStart(), right?  (before hiding the mouseover)
+	self.wasMouseover = UnitExists('mouseover')
+	-- self.wasMouseover = self.lastMouseoverEvent
+	-- self.wasMouseover =  GetTime() - self.LastMouseoverTime < 0.3  -- Lost mouseover just before?
+	print()
+	self.counter = (self.counter or 0) + 1
+	print("", self.counter, IA.coloredKey(button, true))
+
+	if self.prevClickToMove then  SetCVar("AutoInteract", self.prevClickToMove) ; self.prevClickToMove = nil  end
+end
+
+
+function WorldClickHandler.OnMouseUp(frame, button)
+	print("", self.counter, IA.coloredKey(button, false) )
+	local self = WorldClickHandler
+	local key = MapButtonToKey[button]
+	if  key == self.BUTTONs.Turn  then
+	-- if button == 'RightButton' then
+		WorldClickHandler.FixRightClick(frame, button)
+	end
+end
+
+
+function WorldClickHandler.FixRightClick(frame, button)
+	if IA.commandState.ActionMode then
+		-- In ActionMode pressing TurnOrAction (RightButton) will show the cursor, and when released
+		-- it will Interact with anything under the cursor. This needs some trickery, perhaps:
+		-- Enable Mouselook early, _before_ the button release is processed, so it counts as a RightButton released after Mouselooking,
+		-- that translates to an Interact action. Will work until bliz changes its handling of bindings.
+		-- Thought:  rightclick interacts if and only if its pressed for a short time, some ClickInterval.
+		-- What starts the timer? MouselookStart? Then this will work with 0 pressed time.
+		-- Or TurnOrActionStart? That happened long ago, the user was targeting with the cursor, certainly longer than say 0.3 sec.
+		-- In that case targeting + doubleclick will do the 2nd click within the time limit. Quirky.
+		IA.MouselookStart()
+	else
+		-- CursorMode
+		WorldClickHandler:FixAccidentalRightClick(frame, button)
+	end
+end
+
+
+WorldClickHandler.PreventAllSingleClicks = false
+WorldClickHandler.RunToDoubleClickGround = true
+WorldClickHandler.RunToDoubleClickMouseover = true
+
+function WorldClickHandler:FixAccidentalRightClick(frame, button)
+	if IA.FixB2 == false then  return  end
+	if not IsMouselooking() then  return  end
+	if IsModifiedClick('Interact') then  return  end
+
+	local DoubleClickInterval = IA.db.profile.DoubleClickInterval or 0.3
+	local now, last = GetTime(), self.LastTurnClick
+	self.LastTurnClick = now
+
+	-- local mouseover = UnitExists('mouseover')  --  Always nil: mouseover is hidden when IsMouselooking()
+
+	if self.prevClickToMove then  SetCVar("AutoInteract", self.prevClickToMove) ; self.prevClickToMove = nil  end
+
+	if  now-last > DoubleClickInterval then
+		-- NOT DoubleClick
+		if self.wasMouseover or self.PreventAllSingleClicks then
+			print("IA.FixB2: MouselookStop()")
+			IA.MouselookStop()    -- Trick TurnOrActionStop() into believing it was not pressed.
+		end
+  elseif  self.RunToDoubleClickMouseover  and  self.wasMouseover
+	or  self.RunToDoubleClickGround  and  not self.wasMouseover
+  then  --  and not InCombatLockdown() then
+		print("IA.FixB2: RunToDoubleClick")
+		local prevClickToMove= GetCVar("AutoInteract")    --  Adequately named cvar.
+		if  prevClickToMove ~= 1  then  SetCVar("AutoInteract", 1) ; self.prevClickToMove = prevClickToMove  end
+	else
+		print("IA.FixB2: Interact")
+	end
+end
+
+
+function WorldClickHandler:UPDATE_MOUSEOVER_UNIT(event, ...)
+	local mouseover = UnitExists('mouseover')
+	if  mouseover  or  self.lastMouseoverEvent  then
+		-- Hovering over mouseover unit,  or just lost the mouseover before this event.
+		self.LastMouseoverTime = GetTime()
+	end
+	
+	self.lastMouseoverEvent = mouseover
+end
+
+
+
+
 -------------------------------
 -- Experiment: SecureHandler hooking WorldFrame to capture mouse button commands.
 -- Result:  WorldFrame has no OnClick handler (not a Button), and SecureHandlerClickTemplate don't support OnMouseDown/OnMouseUp handlers.
@@ -317,7 +472,7 @@ end
 ---------- CameraOrSelectOrMoveStop(IsModifiedClick("STICKYCAMERA"));
 
 
--- Secure wrapper function WorldFrame_OnMouseDown_PreSnippet(self, button, down)
+-- Secure wrapper function WorldFrame_OnMouseDown_PreSnippet(self, button)
 -- If CameraButton (LeftButton) is pressed then rebinds TurnBUTTON (BUTTON2) to AUTORUN.
 -- In the secure environment:  owner == WorldClickHandler, self == WorldFrame  and  control == owner, i guess, but no code or documentation confirms.
 local WorldFrame_OnMouseDown_PreSnippet = [===[
@@ -361,7 +516,7 @@ end
 -- Verdict:  MouselookStop() is more compatible with hooking TurnOrActionStop().
 -- This implementation uses the MouselookStop() method. Will work, until bliz fixes the design flaw of TurnOrActionStop(), present since 2004.
 --
--- Secure wrapper function WorldFrame_OnMouseUp_PreSnippet(self, button, down)
+-- Secure wrapper function WorldFrame_OnMouseUp_PreSnippet(self, button)
 local WorldFrame_OnMouseUp_PreSnippet = [===[
 	print(" WorldFrame_OnMouseUp_PreSnippet("..button..") ")
 	local key = MapButtonToKey[button]
@@ -392,7 +547,7 @@ local WorldFrame_OnMouseUp_PreSnippet = [===[
 -- Spamming clicks still works, but a single click is prevented from an accidental pull or targeting.
 
 
--- Secure wrapper function WorldFrame_OnMouseUp_PostSnippet(self, button, down)
+-- Secure wrapper function WorldFrame_OnMouseUp_PostSnippet(self, button)
 local WorldFrame_OnMouseUp_PostSnippet = [===[
 	print(" WorldFrame_OnMouseUp_PostSnippet("..button..") ")
 
@@ -405,9 +560,18 @@ local WorldFrame_OnMouseUp_PostSnippet = [===[
 
 
 
-local WorldClickHandler = CreateFrame('Frame', nil, nil, 'SecureHandlerMouseUpDownTemplate')
-IA.WorldClickHandler = WorldClickHandler
-_G.WCH = WorldClickHandler    -- Export for DEBUG.
+-- Secure wrapper function UIParent_OnClick_PreSnippet(self, button, down)
+local UIParent_OnClick_PreSnippet = [===[
+	print(" UIParent_OnClick_PreSnippet("..button..", down="..tostring(down)..") ")
+]===]
+
+
+
+-- Secure wrapper function UIParent_OnClick_PostSnippet(self, button, down)
+local UIParent_OnClick_PostSnippet = [===[
+	print(" UIParent_OnClick_PostSnippet("..button..", down="..tostring(down)..") ")
+]===]
+
 
 
 WorldClickHandler.InitSnippet = [===[
@@ -436,8 +600,29 @@ function WorldClickHandler:InitSecureHandler()
 	-- handler:WrapScript(WorldFrame, 'OnMouseDown', prePressBody, nil)
 	-- handler:WrapScript(WorldFrame, 'OnMouseUp'  , preReleaseBody, postReleaseBody)
 	-- Same with less calls:
-	SecureHandlerWrapScript(WorldFrame, 'OnMouseDown', handler, WorldFrame_OnMouseDown_PreSnippet, nil)
-	SecureHandlerWrapScript(WorldFrame, 'OnMouseUp'  , handler, WorldFrame_OnMouseUp_PreSnippet, WorldFrame_OnMouseUp_PostSnippet)
+	-- SecureHandlerWrapScript(WorldFrame, 'OnMouseDown', handler, WorldFrame_OnMouseDown_PreSnippet, nil)
+	-- SecureHandlerWrapScript(WorldFrame, 'OnMouseUp'  , handler, WorldFrame_OnMouseUp_PreSnippet, WorldFrame_OnMouseUp_PostSnippet)
+
+	-- SecureHandlerWrapScript(WorldFrame, 'OnClick', handler, WorldFrame_OnClick_PreSnippet, WorldFrame_OnClick_PostSnippet)
+	-- WorldFrame has no OnClick script... splendid.
+  -- OnMouseDown/OnMouseUp cannot be wrapped, therefore altered by a third-party.
+	-- Only insecure, post-handler is possible with HookScript('OnMouseDown'). This cannot alter bindings in combat.
+	if not self.hooked[WorldFrame].OnMouseUp then
+		self.original[WorldFrame].OnMouseDown = WorldFrame:GetScript('OnMouseDown')
+		self.original[WorldFrame].OnMouseUp   = WorldFrame:GetScript('OnMouseUp')
+		self.original[UIParent].OnMouseDown = UIParent:GetScript('OnMouseDown')
+		self.original[UIParent].OnMouseUp   = UIParent:GetScript('OnMouseUp')
+		WorldFrame:HookScript('OnMouseDown', self.OnMouseDown)
+		WorldFrame:HookScript('OnMouseUp', self.OnMouseUp)
+		UIParent:HookScript('OnMouseDown', self.OnMouseDown)
+		UIParent:HookScript('OnMouseUp', self.OnMouseUp)
+		self.hooked[WorldFrame].OnMouseDown = WorldFrame:GetScript('OnMouseDown')
+		self.hooked[WorldFrame].OnMouseUp   = WorldFrame:GetScript('OnMouseUp')
+		self.hooked[UIParent].OnMouseDown = UIParent:GetScript('OnMouseDown')
+		self.hooked[UIParent].OnMouseUp   = UIParent:GetScript('OnMouseUp')
+	end
+
+	-- SecureHandlerWrapScript(UIParent, 'OnClick', handler, UIParent_OnClick_PreSnippet, UIParent_OnClick_PostSnippet)
 	
 	handler:UpdateDoubleClickInterval()
 	handler:UpdateOverrideBindings()
@@ -445,31 +630,59 @@ end
 
 
 function WorldClickHandler:DisableHandler()
-	self:UnwrapScript(WorldFrame, 'OnMouseDown')
-	self:UnwrapScript(WorldFrame, 'OnMouseUp')
+	-- self:UnwrapScript(WorldFrame, 'OnMouseDown')
+	-- self:UnwrapScript(WorldFrame, 'OnMouseUp')
+	-- self:UnwrapScript(UIParent, 'OnClick')
+
+	if self.hooked[WorldFrame].OnMouseDown == WorldFrame:GetScript('OnMouseDown')
+	then  WorldFrame:SetScript('OnMouseDown', self.original[WorldFrame].OnMouseDown)  end
+	if self.hooked[WorldFrame].OnMouseUp == WorldFrame:GetScript('OnMouseUp')
+	then  WorldFrame:SetScript('OnMouseUp', self.original[WorldFrame].OnMouseUp)  end
+	if self.hooked[UIParent].OnMouseDown == UIParent:GetScript('OnMouseDown')
+	then  UIParent:SetScript('OnMouseDown', self.original[UIParent].OnMouseDown)  end
+	if self.hooked[UIParent].OnMouseUp == UIParent:GetScript('OnMouseUp')
+	then  UIParent:SetScript('OnMouseUp', self.original[UIParent].OnMouseUp)  end
 end
 
 
 function WorldClickHandler:UpdateDoubleClickInterval()
-	handler:Execute(" DoubleClickInterval = ... ", IA.sv.profile.DoubleClickInterval or 0.3)
+	self:Execute(" DoubleClickInterval = "..(IA.db.profile.DoubleClickInterval or 0.3) )
 end
 
 function WorldClickHandler:UpdateOverrideBindings()
 	-- local CameraBUTTON,TurnBUTTON = 'BUTTON1','BUTTON2'    --'LeftButton','RightButton'
 	-- Only the first binding is handled of each command. It cannot be rebound on the UI,so if a user binds more keys to it, definitely knows what he/she is doing.
+	local BUTTONs = {}
+	WorldClickHandler.BUTTONs = BUTTONs
+	BUTTONs.Camera = GetBindingKey('CAMERAORSELECTORMOVE')
+	BUTTONs.Turn   = GetBindingKey('TURNORACTION')
+	LibShared.softassert(BUTTONs.Camera and not BUTTONs.Camera:match('-'), "BUTTONs.Camera has modifier in it, AutoRunCombo will not work.")
+	LibShared.softassert(  BUTTONs.Turn and not   BUTTONs.Turn:match('-'), "BUTTONs.Turn has modifier in it, accidental rightclick protection will not work.")
+	self:Execute(" CameraBUTTON,TurnBUTTON = '"..BUTTONs.Camera.."','"..BUTTONs.Turn.."' ")
+end
+
+--[[
+function WorldClickHandler:UpdateOverrideBindings2()
+	-- local CameraBUTTON,TurnBUTTON = 'BUTTON1','BUTTON2'    --'LeftButton','RightButton'
+	-- Only the first binding is handled of each command. It cannot be rebound on the UI,so if a user binds more keys to it, definitely knows what he/she is doing.
 	local CameraBUTTON,TurnBUTTON = GetBindingKey('CAMERAORSELECTORMOVE'), GetBindingKey('TURNORACTION')
 	LibShared.softassert(CameraBUTTON and not CameraBUTTON:match('-'), "CameraBUTTON has modifier in it, AutoRunCombo will not work.")
 	LibShared.softassert(  TurnBUTTON and not   TurnBUTTON:match('-'), "TurnBUTTON has modifier in it, accidental rightclick protection will not work.")
-	handler:Execute(" CameraBUTTON,TurnBUTTON = ... ", CameraBUTTON,TurnBUTTON)
+	self:Execute(" CameraBUTTON,TurnBUTTON = '"..CameraBUTTON.."','"..TurnBUTTON.."' ")
 end
-
+--]]
 
 function WorldClickHandler:Enable(enable)
 	if  not self.enable == not enable  then  return nil  end
 	self.enable = enable
 
-	if enable then  self:InitSecureHandler()
-	else  self:DisableHandler()  end
+	if enable then
+		self:RegisterEvent('UPDATE_MOUSEOVER_UNIT')
+		self:InitSecureHandler()
+	else
+		self:UnregisterEvent('UPDATE_MOUSEOVER_UNIT')
+		self:DisableHandler()
+  end
 	return true
 end
 
@@ -483,8 +696,8 @@ end
 
 
 --[[
-/run ImmersiveAction:OverrideCommandsIn('ActionMode', true)
-/run ImmersiveAction:OverrideCommandsIn('AutoRun', true)
+/run ImmersiveAction.OverrideBindings:OverrideCommandsIn('ActionMode', true)
+/run ImmersiveAction.OverrideBindings:OverrideCommandsIn('AutoRun', true)
 /run SetOverrideBinding(ImmersiveAction.UserBindings, false, 'BUTTON1', nil) ; SetOverrideBinding(ImmersiveAction.UserBindings, false, 'BUTTON2', nil)
 
 /dump  ImmersiveAction.UserBindings.keyMap
@@ -498,8 +711,8 @@ end
 /run  SetOverrideBinding(ImmersiveAction.OverrideBindings, false, 'BUTTON2', nil)
 /run  SetMouselookOverrideBinding('X')
 
-/run  ImmersiveAction:OverrideCommandsIn('ActionMode',true)
-/run  ImmersiveAction:OverrideCommandsIn('AutoRun',true)
+/run  ImmersiveAction.OverrideBindings:OverrideCommandsIn('ActionMode',true)
+/run  ImmersiveAction.OverrideBindings:OverrideCommandsIn('AutoRun',true)
 --]]
 
 
