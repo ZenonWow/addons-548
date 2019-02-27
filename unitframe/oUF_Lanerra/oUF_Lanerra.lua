@@ -56,10 +56,27 @@ local colors = oUF.colors
 local playerClass = select(2, UnitClass('player'))
 local isHealer = (playerClass == 'DRUID' or playerClass == 'PALADIN' or playerClass == 'PRIEST' or playerClass == 'SHAMAN')
 
+local function IsAddOnEnabled(addon)
+	local name, title, notes, loadable, reason, security, newVersion = GetAddOnInfo(addon)
+	-- Patch 6.0.2 (Wod) added GetAddOnEnableState() == 0/1/2, 0 == disabled, 1 == enabled for some characers, 2 == enabled
+	if GetAddOnEnableState then  return  loadable  and  0 ~= GetAddOnEnableState(addon)  end
+	-- Until Mop there was an extra `enabled` return before loadable.
+	return loadable  -- was `enabled` return until Mop.
+end
+
+local function LoadExtension(addon)
+	if  IsAddOnEnabled(addon)  and  not IsAddOnLoaded(addon)  then  LoadAddOn(addon)  end
+end
+
 local Loader = CreateFrame('Frame')
 Loader:RegisterEvent('ADDON_LOADED')
 Loader:SetScript('OnEvent', function(self, event, addon)
 	if addon ~= 'oUF_Lanerra' then return end
+
+	-- Load after us, so it finds _G.oUF.  ## OptionalDeps in .toc would load it before this addon's embedded oUF.
+	LoadExtension('oUF_MovableFrames')
+	LoadExtension('oUF_DebuffHighlight')
+	LoadExtension('oUF_RuneBar')
 
 	oUFLanAura = oUFLanAura or {}
 	UpdateAuraList()

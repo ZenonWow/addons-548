@@ -4,8 +4,10 @@
 ## Version: 5.36
 ## Notes: oUF layout.
 ## Credits:Haste, Freebaser, Monolit, Haleth, Phanx, Tukz, p3lim
-## --Dependencies: oUF
-## OptionalDeps: Aurora, oUF_MovableFrames
+
+##-- Dependencies: oUF
+## OptionalDeps: Aurora
+##- SavedVariables: oUF_MlightSV
 ## SavedVariablesPerCharacter: oUF_MlightDB
 
 ##- LoadManagers: AddonLoader
