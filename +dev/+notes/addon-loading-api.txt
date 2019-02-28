@@ -1,3 +1,9 @@
+https://www.wowinterface.com/forums/showthread.php?t=49500
+--
+Wod API Changes
+
+
+
 https://wow.gamepedia.com/API_GetAddOnEnableState
 --
 Patch changes

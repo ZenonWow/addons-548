@@ -56,16 +56,19 @@ local colors = oUF.colors
 local playerClass = select(2, UnitClass('player'))
 local isHealer = (playerClass == 'DRUID' or playerClass == 'PALADIN' or playerClass == 'PRIEST' or playerClass == 'SHAMAN')
 
-local function IsAddOnEnabled(addon)
-	local name, title, notes, loadable, reason, security, newVersion = GetAddOnInfo(addon)
-	-- Patch 6.0.2 (Wod) added GetAddOnEnableState() == 0/1/2, 0 == disabled, 1 == enabled for some characers, 2 == enabled
-	if GetAddOnEnableState then  return  loadable  and  0 ~= GetAddOnEnableState(addon)  end
-	-- Until Mop there was an extra `enabled` return before loadable.
-	return loadable  -- was `enabled` return until Mop.
+-----------------------------
+--- LibShared. IsAddOnLoadable(addonName):  Test if addon is loadable.
+-- @param addonName - name of addon (name of addon folder and .toc file),  or the index in the addon list.
+-- @return trueish  if loadable.
+--
+local function IsAddOnLoadable(addonName)
+	-- Note:  Until 5.4.8 (Mop) there was an extra `enabled` return before loadable.
+	local name, title, notes, loadable, reason, security, newVersion = GetAddOnInfo(addonName)
+	return loadable
 end
 
 local function LoadExtension(addon)
-	if  IsAddOnEnabled(addon)  and  not IsAddOnLoaded(addon)  then  LoadAddOn(addon)  end
+	if  IsAddOnLoadable(addon)  and  not IsAddOnLoaded(addon)  then  LoadAddOn(addon)  end
 end
 
 local Loader = CreateFrame('Frame')

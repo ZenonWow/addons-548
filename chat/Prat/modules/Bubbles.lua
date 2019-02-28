@@ -233,7 +233,8 @@ Prat:AddModuleToLoad(function()
   )
   --@end-non-debug@
 
-  local module = Prat:NewModule(PRAT_MODULE):SetAddonEnv(ADDON_NAME)
+  local module = Prat:NewModule(PRAT_MODULE)
+  if module.SetRealAddonName then  module:SetRealAddonName(ADDON_NAME)  end
 
   Prat:SetModuleDefaults(module.name, {
     profile = {
