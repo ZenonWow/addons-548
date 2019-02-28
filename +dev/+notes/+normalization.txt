@@ -1,6 +1,6 @@
 Regexes for code normalization. 1st line goes to  Find what:  2nd goes to  Replace with:
 
-identifier= value  ->  identifier = value:
+identifier= value  ->  identifier = value:    ([^\s~=])=  -> \1 = 
 --
 ([^\s~=])=
 \1=
