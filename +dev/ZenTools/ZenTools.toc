@@ -27,7 +27,7 @@ WhoMonitor.lua
 # DebugTools.lua
 
 MacroClicks.lua
-# MouseWheelHandlers.lua
+MouseWheelHandlers.lua
 
 # taints logout in 7.3.5?
 #LinkClicks.lua

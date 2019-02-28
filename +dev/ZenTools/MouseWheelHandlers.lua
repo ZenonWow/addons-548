@@ -92,17 +92,45 @@ frame:WrapScript(SpellBookFrame, 'OnMouseWheel', SpellBookFrame_PreOnMouseWheel,
 -- MOUSEWHEELUP, MOUSEWHEELDOWN
 -- HANDLE:SetBinding(priority, key, action)
 -- Secure wrapper  function  SpellBookFrameMouseOver_OnEnter(self, button, down)
-local SpellBookFrameMouseOver_OnEnter = [===[
-	print("SpellBookFrameMouseOver_OnEnter()")
+local SpellBookFrame_OnEnter = [===[
+	print("SpellBookFrame_OnEnter()")
 	self:SetBinding(true, 'MOUSEWHEELUP',   'CLICK SpellBookPrevPageButton')
 	self:SetBinding(true, 'MOUSEWHEELDOWN', 'CLICK SpellBookNextPageButton')
+	-- Let the OnMouseWheel event through to UIParent to trigger MOUSEWHEELUP/MOUSEWHEELDOWN binding.
+	-- SpellBookFrame:EnableMouse(false)
 ]===]
+-- return nil, true
 
-local SpellBookFrameMouseOver_OnLeave = [===[
-	print("SpellBookFrameMouseOver_OnLeave()")
+local SpellBookFrame_OnLeave = [===[
+	print("SpellBookFrame_OnLeave()")
 	self:ClearBinding('MOUSEWHEELUP')
 	self:ClearBinding('MOUSEWHEELDOWN')
+	-- SpellBookFrame:EnableMouse(true)
 ]===]
+
+-- local handler = CreateFrame('Frame', 'SpellBookFrameWheelie', SpellBookFrame, 'SecureHandlerMouseWheelTemplate')
+local handler = CreateFrame('Frame', 'SpellBookFrameWheelie', SpellBookFrame, 'SecureHandlerEnterLeaveTemplate')
+handler:SetFrameRef('SpellBookFrame', SpellBookFrame)
+handler:WrapScript(SpellBookFrame, 'OnEnter', SpellBookFrame_OnEnter)
+handler:WrapScript(SpellBookFrame, 'OnLeave', SpellBookFrame_OnLeave)
+handler:Execute(" SpellBookFrame = self:GetFrameRef('SpellBookFrame') ")
+SpellBookFrame:EnableMouseWheel(false)
+-- SpellBookFrame:EnableMouse(false)
+
+--[[
+/run SetOverrideBinding( SpellBookFrameWheelie , false, 'MOUSEWHEELUP'  , 'CLICK SpellBookPrevPageButton')
+/run SetOverrideBinding( SpellBookFrameWheelie , false, 'MOUSEWHEELDOWN', 'CLICK SpellBookNextPageButton')
+/run SetOverrideBindingMacro( SpellBookFrameWheelie , false, 'MOUSEWHEELUP'  , '/click SpellBookPrevPageButton')
+/run SetOverrideBindingMacro( SpellBookFrameWheelie , false, 'MOUSEWHEELDOWN', '/click SpellBookNextPageButton')
+/run SetOverrideBinding( SpellBookFrameWheelie , false, 'MOUSEWHEELUP'  , nil)
+/run SetOverrideBinding( SpellBookFrameWheelie , false, 'MOUSEWHEELDOWN', nil)
+/run ChatFrame1:Clear()
+/click SpellBookNextPageButton
+
+/run SetBinding( 'MOUSEWHEELDOWN', 'CLICK SpellBookNextPageButton')
+/run SetBinding( 'MOUSEWHEELDOWN', 'CAMERAZOOMOUT')
+/dump GetBindingByKey('MOUSEWHEELUP'), GetBindingByKey('MOUSEWHEELDOWN'), GetBindingByKey('MOVEANDSTEER'), GetBindingByKey('MOVEFORWARD')
+
 
 local frame = CreateFrame("Frame", "SpellBookFrameMouseOver", SpellBookFrame, "SecureHandlerEnterLeaveTemplate")
 frame:SetAttribute('_onenter', SpellBookFrameMouseOver_OnEnter)

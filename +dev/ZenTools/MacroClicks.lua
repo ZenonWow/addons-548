@@ -18,7 +18,7 @@ local UpdateMacroIDSnippet = [===[
 	local id = self:GetID()
 	local macroID =  id~=0  and  macroBase+id  or  selectedMacro
 	-- if id~=0 then  selectedMacro = macroID  end
-	print("UpdateMacroIDSnippet: ", id, macroID)
+	print("UpdateMacroIDSnippet: ", macroBase.."+"..id.."=", macroID)
 	self:SetAttribute('macro', id)
 ]===]
 
@@ -41,11 +41,14 @@ local function OverlayMacroButton(name, handler)
 	local id = origButton:GetID()
 	local button = CreateFrame('Button', name..'Run', origButton, 'SecureActionButtonTemplate')
 	button:SetID(id)
+	button:RegisterForClicks('AnyUp')
 
 	-- Pass on normal clicks to original macro button.
 	button:SetAttribute('*type*', 'click')
-	button:SetAttribute('clickbutton', origName)
-	-- button:SetAttribute('macro', id)    -- Disabled to test whether UpdateMacroIDSnippet actually sets it.
+	button:SetAttribute('clickbutton', name)
+	function button:IsForbidden()  end
+	-- button.IsForbidden = GL.SpellCanTargetItem
+	button:SetAttribute('macro', id)    -- Disabled to test whether UpdateMacroIDSnippet actually sets it.
 
 	-- Catch RightButton clicks to run macro.
 	button:SetAttribute('type2', 'macro')
@@ -66,6 +69,12 @@ local function OverlayMacroButton(name, handler)
 	return button
 end
 
+--[[
+/run MacroClicks.buttons[1]:SetAttribute('type2', nil)
+/run MacroClicks.buttons[1]:RegisterForClicks('AnyUp')
+/run MacroClicks.buttons[1]:SetScript('PreClick', function(frame, button, down) print(frame, button, down) end)
+/run getmetatable(UIParent).__tostring = function(frame)  return frame:GetName()  end
+--]]
 
 function MacroClicks.MacroButtonContainer_Upgrade(self, handler)
 	local buttons = {}

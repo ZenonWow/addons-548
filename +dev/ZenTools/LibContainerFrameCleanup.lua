@@ -1,6 +1,6 @@
-local MAJOR, MINOR = "LibContainerFrameCleanup-1.0", 5040801 -- 5.4.8 v1 / increase manually on changes
-if  LibContainerFrameCleanup  and  LibContainerFrameCleanup.minor >= MINOR  then  return  end
-LibContainerFrameCleanup = { minor = MINOR }
+local LIB_NAME, LIB_REVISION = "LibContainerFrameCleanup-1.0", 5040801 -- 5.4.8 v1 / increase manually on changes
+if  LibContainerFrameCleanup  and  LibContainerFrameCleanup.revision >= LIB_REVISION  then  return  end
+LibContainerFrameCleanup = { revision = LIB_REVISION }
 
 
 --[[

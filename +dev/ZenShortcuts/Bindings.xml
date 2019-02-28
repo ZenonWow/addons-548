@@ -6,7 +6,7 @@
 		-- CLICKs the ClearTargetButton without any code here.
 	</Binding>
 	
-	<Binding name="DELETEOREJECT" >
+	<Binding name="DELETEOREJECT" header="ZenShortcuts" >
 		-- description="Delete item on cursor  or  eject passengers"
 		UIShortcuts.DeleteItemOrEjectPassengers()
 	</Binding>
