@@ -16,9 +16,13 @@ ActionButton.active = {}
 
 local ActionBarChatLink = CreateFrame('Frame', nil, nil, 'SecureHandlerClickTemplate')
 
-function ActionBarChatLink:SendChatLink(actionButton)
+function ActionBarChatLink:SendChatLink(action, actionButton)
+	if not actionButton then
+		-- actionButton = self:GetFrameRef('actionButton')
+		actionButton = self:GetAttribute('frameref-actionButton')
+	end
 	-- local bindingid = actionButton:GetAttribute('bindingid')
-	local action = actionButton:GetAttribute('action')
+	-- local action = actionButton:GetAttribute('action')
 	local actionType, id, subType = _G.GetActionInfo(action)
 
 	local link
@@ -44,8 +48,11 @@ ActionBarChatLink.PreClickSnippet = [===[
 	if not IsModifiedClick('CHATLINK') then  return  end
 	local chatBox = owner:GetFrameRef('ActiveChatBox')
 	if chatBox and chatBox:IsShown() then
-		owner:CallMethod('SendChatLink', self)
-		return true    -- Disable normal button action.
+		-- owner:SetFrameRef('actionButton', self)
+		owner:SetAttribute('frameref-actionButton', self)
+		local action = self:GetAttribute('action')
+		owner:CallMethod('SendChatLink', action, self)
+		return false    -- Disable normal button action.
 	end
 ]===]
 
@@ -62,7 +69,7 @@ function ActionBarChatLink.UpdateActiveChatBox(chatBox)
 		ActionBarChatLink.ActiveChatBox = chatBox
 		ActionBarChatLink:SetFrameRef('ActiveChatBox', chatBox)
 	end
-end)
+end
 hooksecurefunc('ChatEdit_ActivateChat', ActionBarChatLink.UpdateActiveChatBox)
 
 
@@ -72,11 +79,11 @@ function ActionButton:New(id)
 	local b = self:Restore(id) or self:Create(id)
 
 	if b then
-		-- ActionBarChatLink:WrapScript(WorldFrame, 'OnClick', ActionBarChatLink.PreClickSnippet, nil)
+		ActionBarChatLink:WrapScript(b, 'OnClick', ActionBarChatLink.PreClickSnippet, nil)
 		-- Handle Shift-LeftClick as chatlink.
 		-- local key = GetModifiedClick('CHATLINK'):gsub('BUTTON','type'):lower()
-		b:SetAttribute("shift-type1", "chatlink")    -- Hardwired for the default GetModifiedClick('CHATLINK') == "SHIFT-BUTTON1"
-		b:SetAttribute("_chatlink", function(self)  ActionBarChatLink:SendChatLink(self)  end)
+		-- b:SetAttribute("shift-type1", "chatlink")    -- Hardwired for the default GetModifiedClick('CHATLINK') == "SHIFT-BUTTON1"
+		-- b:SetAttribute("_chatlink", function(self)  ActionBarChatLink:SendChatLink(self)  end)
 		
 
 		b:SetAttribute('showgrid', 0)

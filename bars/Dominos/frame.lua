@@ -6,6 +6,8 @@
 local Frame = Dominos:CreateClass('Frame')
 Dominos.Frame = Frame
 
+local FlyPaper = LibStub('FlyPaper')
+
 local FadeManager = Dominos.FadeManager
 local active = {}
 local unused = {}

@@ -11,9 +11,12 @@ local CURRENT_VERSION = GetAddOnMetadata('Dominos', 'Version')
 
 --[[ Startup ]]--
 
+local AceDB
+
 function Dominos:OnInitialize()
 	--register database events
-	self.db = LibStub('AceDB-3.0'):New('DominosDB', self:GetDefaults(), true)
+	AceDB = LibStub('AceDB-3.0')
+	self.db = AceDB:New('DominosDB', self:GetDefaults(), true)
 	self.db.RegisterCallback(self, 'OnNewProfile')
 	self.db.RegisterCallback(self, 'OnProfileChanged')
 	self.db.RegisterCallback(self, 'OnProfileCopied')
@@ -129,6 +132,7 @@ function Dominos:GetDefaults()
 			},
 
 			frames = {},
+		}
 	}
 	return defaultSettings
 end
