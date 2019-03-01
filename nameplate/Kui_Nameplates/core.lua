@@ -4,6 +4,7 @@
 -- All rights reserved
 ]]
 local addon = LibStub('AceAddon-3.0'):NewAddon('KuiNameplates', 'AceEvent-3.0', 'AceTimer-3.0')
+if addon.SetRealAddonName then  addon:SetRealAddonName(...)  end
 local kui = LibStub('Kui-1.0')
 local LSM = LibStub('LibSharedMedia-3.0')
 
