@@ -121,9 +121,11 @@ SpellBookFrame:EnableMouseWheel(false)
 /run SetOverrideBinding( SpellBookFrameWheelie , false, 'MOUSEWHEELUP'  , 'CLICK SpellBookPrevPageButton')
 /run SetOverrideBinding( SpellBookFrameWheelie , false, 'MOUSEWHEELDOWN', 'CLICK SpellBookNextPageButton')
 /run SetOverrideBindingMacro( SpellBookFrameWheelie , false, 'MOUSEWHEELUP'  , '/click SpellBookPrevPageButton')
+/run SetOverrideBindingMacro( SpellBookFrameWheelie , false, 'MOUSEWHEELUP'  , '/run print(1)')
 /run SetOverrideBindingMacro( SpellBookFrameWheelie , false, 'MOUSEWHEELDOWN', '/click SpellBookNextPageButton')
 /run SetOverrideBinding( SpellBookFrameWheelie , false, 'MOUSEWHEELUP'  , nil)
 /run SetOverrideBinding( SpellBookFrameWheelie , false, 'MOUSEWHEELDOWN', nil)
+/run SpellBookNextPageButton:Click()
 /run ChatFrame1:Clear()
 /click SpellBookNextPageButton
 

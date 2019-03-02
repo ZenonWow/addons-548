@@ -9,6 +9,6 @@
 ## X-Curse-Repository-ID: wow/better-blizz-options/mainline
 
 #@no-lib-strip@
-LibStub\LibStub.lua
+# LibStub\LibStub.lua
 LibBetterBlizzOptions-1.0\LibBetterBlizzOptions-1.0.lua
 #@end-no-lib-strip@

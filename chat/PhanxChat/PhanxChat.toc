@@ -24,7 +24,7 @@
 ## OptionalDependencies: LibAboutPanel, PhanxConfigWidgets, LibChatAnims
 ## SavedVariables: PhanxChatDB
 
-Libs\LibStub\LibStub.lua
+# Libs\LibStub\LibStub.lua
 Libs\LibAboutPanel\LibAboutPanel.lua
 Libs\PhanxConfig-Checkbox\PhanxConfig-Checkbox.lua
 Libs\PhanxConfig-Dropdown\PhanxConfig-Dropdown.lua
