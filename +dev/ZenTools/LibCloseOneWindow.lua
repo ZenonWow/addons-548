@@ -63,8 +63,11 @@ _G.CloseAllBags = CloseAllBagsLinear
 _G._Original.CloseAllWindows = _G.CloseAllWindows
 function _G.CloseAllWindows(ignoreCenter, ...)
 	-- if  not called from ToggleGameMenu()  then  return  end			-- do nothing
-	print("  CloseAllWindows() called from:", _G.debugstack(2,3,0) )
-	if  ignoreCenter  then  return  end			-- don't close windows after PLAYER_DEAD, PLAYER_ENTERING_WORLD, PLAYER_CONTROL_LOST
+	-- Don't close windows after PLAYER_DEAD, PLAYER_ENTERING_WORLD, PLAYER_CONTROL_LOST.
+	if  ignoreCenter  then
+		print("  CloseAllWindows("..tostring(ignoreCenter)..") called from:", _G.debugstack(2,3,0) )
+		return
+  end
 	local res =  CloseOneWindow()  or  CloseAllBagsLinear()  or  _G._Original.CloseAllWindows(ignoreCenter, ...)
 	print("  CloseOneWindow/_Original.CloseAllWindows() ->", res)
 	-- Table returned would be silently dropped by securecall(), returning nil...
