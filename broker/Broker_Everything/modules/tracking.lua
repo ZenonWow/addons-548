@@ -138,7 +138,7 @@ module.onclick = function(display, button)
 		local OnEnter = display:GetScript('OnEnter')
 		assert(OnEnter, "BE.modules.tracking.onclick():  Broker display did not set OnEnter script.")
 		OnEnter(display)
-	elseif module.tooltip then
+	elseif module.tooltip and module.tooltip:IsShown() and module.tooltip:GetOwner() == display then
 		-- ns.hideTooltip(module.tooltip, nil, true)
 		module.tooltip:Hide()
 		module.tooltip = nil

@@ -10,7 +10,7 @@ mailDB = {}
 -- module own local variables and local cached functions --
 -----------------------------------------------------------
 local name = "Mail" -- L["Mail"]
-local tooltip, tt, player_realm
+local player_realm
 local icons = {}
 do for i=1, 22 do local _ = ("inv_letter_%02d"):format(i) icons[_] = "|Tinterface\\icons\\".._..":16:16:0:0|t" end end
 

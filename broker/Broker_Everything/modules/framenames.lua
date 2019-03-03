@@ -149,7 +149,7 @@ module.onenter = function(display) end -- prevent displaying tooltip
 module.onleave = function(display) end -- prevent hiding tooltip
 
 module.onclick = function(display, button)
-	if  module.tooltip  then
+	if module.tooltip and module.tooltip:IsShown() and module.tooltip:GetOwner() == display then
 		ns.defaultOnLeave(module, display)
 	else
 		ns.defaultOnEnter(module, display)

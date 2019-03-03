@@ -144,6 +144,7 @@ end
 function ns.defaultOnTooltipShow(module, tooltip)
 	module.ontooltip(tooltip)
 	ns.attachTooltip(module, tooltip)
+	tooltip:Show()
 end
 
 
@@ -164,15 +165,21 @@ function ns.attachTooltip(module, tooltip)
 	if  prevOnHide  then  prevOnHide(tooltip)  end
 	--]]
 	tooltip:Hide()
-	if  tooltip:GetScript('OnHide')  then  print("BE.attachTooltip('"..module.name.."', '"..(tooltip.key or tooltip:GetName() or "?").."'): OnHide script is expected to unregister itself.")  end
+	local wasOnHide = tooltip:GetScript('OnHide')
+	if wasOnHide then
+		-- GameTooltip has its own OnHide script. Not touching it.
+		-- print("BE.attachTooltip('"..module.name.."', '"..(tooltip.key or tooltip:GetName() or "?").."'): OnHide script is expected to unregister itself. Watch the error for the culprit.")
+		-- Call with  self == nil  to generate an error.
+		-- xpcall(wasOnHide, _G.geterrorhandler())
+	else
+		tooltip:SetScript('OnHide', function (tooltip)
+			-- print("modules['"..module.name.."'].tooltip:OnHide()")
+			tooltip:SetScript('OnHide', nil)
+			if  module.tooltip == tooltip  then  module.tooltip = nil  end
+		end)
+	end
 
 	module.tooltip = tooltip
-
-	tooltip:SetScript('OnHide', function (tooltip)
-		-- print("modules['"..module.name.."'].tooltip:OnHide()")
-		tooltip:SetScript('OnHide', nil)
-		if  module.tooltip == tooltip  then  module.tooltip = nil  end
-	end)
 end
 
 
