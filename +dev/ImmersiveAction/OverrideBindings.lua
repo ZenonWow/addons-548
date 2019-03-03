@@ -73,7 +73,7 @@ UserBindings:Hide()
 function UserBindings:SetUserBinding(mode, key, toCmd)
 	-- local wasCmd = IA.db.profile['bindingsIn'..mode][key]
 	IA.db.profile['bindingsIn'..mode][key] = toCmd
-	-- print("UserBindings:, key, "   ==>   ", toCmd)
+	-- print("UserBindings:", key, "   ==>   ", toCmd)
 	SetOverrideBinding(self, false, key, toCmd)
 end
 
@@ -84,7 +84,6 @@ function UserBindings:ApplyBindings(keyBindings)
 
 	-- Set new overrides.
 	for key,toCmd in pairs(keyBindings) do  if toCmd~='' then
-		if key=='' then  key = nil  end
 		-- print("UserBindings:, key, "   ==>   ", toCmd)
 		SetOverrideBinding(self, false, key, toCmd)
 	end end -- for if
@@ -127,6 +126,22 @@ function UserBindings:UpdateUserBindings()
 end
 
 
+function UserBindings:UpdateActionModeBindings()
+	local ActionMode = IA.activeCommands.ActionMode
+	local keyBindings = IA.db.profile['bindingsIn'..'ActionMode']
+	local keyBindingsGeneral = IA.db.profile['bindingsIn'..'General']
+	if not keyBindings then  return  end
+
+	-- Set new overrides.
+	for key,toCmd in pairs(keyBindings) do  if toCmd~='' then
+		if not ActionMode then  toCmd = keyBindingsGeneral[key]  end
+		if toCmd == '' then  toCmd = nil  end
+		print("UpdateActionModeBindings():", key, "   ==>   ", toCmd)
+		SetOverrideBinding(self, false, key, toCmd)
+	end end -- for if
+end
+
+
 
 
 
@@ -155,12 +170,16 @@ function OverrideBindings:CaptureBindings(mode, overrides)
 end
 
 
+function OverrideBindings:OverrideCommand(fromCmd, toCmd)
+	for i,key in ipairsOrOne(self.cmdKeys[fromCmd]) do
+		SetOverrideBinding(self, false, key, toCmd)
+	end
+end
+
 function OverrideBindings:OverrideCommands(overrides, enable, priority)
 	for fromCmd,toCmd in pairs(overrides) do
 		if not enable then  toCmd = nil  end
-		for i,key in ipairsOrOne(self.cmdKeys[fromCmd]) do
-			SetOverrideBinding(self, priority, key, toCmd)
-		end
+		self:OverrideCommand(fromCmd, toCmd)
 	end
 end
 
@@ -226,11 +245,15 @@ function OverrideBindings:UpdateOverrides(enable)
 	else
 		print("OverrideBindings:UpdateOverrides("..IA.colorBoolStr(enable, true)..")")
 		if enable==nil then  enable = true  end
-		UserBindings:UpdateUserBindings()
-		if enable then  self:OverrideCommandsIn('General', enable)  end
-		self:OverrideCommandsIn('AutoRun', enable)
-		self:OverrideCommandsIn('MoveAndSteer', enable)
-		self:OverrideCommandsIn('ActionMode', enable)
+		local AutoRun =  enable~=false  and  IA.activeCommands.AutoRun
+		self:OverrideCommand('MOVEANDSTEER', AutoRun and 'TurnWithoutInteract' or 'MOVEFORWARD')
+		self:OverrideCommand('AUTORUN', AutoRun and 'TurnWithoutInteract' or nil)
+
+		-- UserBindings:UpdateUserBindings()
+		-- if enable then  self:OverrideCommandsIn('General', enable)  end
+		-- self:OverrideCommandsIn('AutoRun', enable)
+		-- self:OverrideCommandsIn('MoveAndSteer', enable)
+		-- self:OverrideCommandsIn('ActionMode', enable)
 	end
 end
 
