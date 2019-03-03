@@ -27,7 +27,7 @@ OverridesIn.Mouselook.INTERACTMOUSEOVER = 'TURNORACTION'
 -- Override at all times, losing Mouselook, and patch it back in  :SetCommandState()
 OverridesIn.General.MOVEANDSTEER = 'MOVEFORWARD'
 -- Override to TurnOrAction in AutoRun mode to avoid this annoyance. This is effective even out of ActionMode.
-OverridesIn.AutoRun.MOVEANDSTEER = 'TURNORACTION'         -- Note: override the General override.
+OverridesIn.AutoRun.MOVEANDSTEER = 'TurnWithoutInteract'         -- Note: override the General override.
 -- OverridesIn.AutoRun.TURNORACTION = 'TurnWithoutInteract'    -- This is not priority.
 OverridesIn.AutoRun.AUTORUN = 'TurnWithoutInteract'
 -- OverridesIn.MoveAndSteer.TURNORACTION = 'AUTORUN'         -- MoveAndSteer + RightButton -> AutoRun not working. AUTORUN does nothing on B1,B2
@@ -226,7 +226,7 @@ function OverrideBindings:UpdateOverrides(enable)
 	else
 		print("OverrideBindings:UpdateOverrides("..IA.colorBoolStr(enable, true)..")")
 		if enable==nil then  enable = true  end
-		IA.UserBindings:UpdateUserBindings()
+		UserBindings:UpdateUserBindings()
 		if enable then  self:OverrideCommandsIn('General', enable)  end
 		self:OverrideCommandsIn('AutoRun', enable)
 		self:OverrideCommandsIn('MoveAndSteer', enable)
@@ -479,7 +479,7 @@ function WorldClickHandler.OnMouseDown(frame, button)
 
 	print()
 	self.counter = (self.counter or 0) + 1
-	print("        ", self.counter, frame:GetName(), IA.coloredKey(button, true), mod..key, stuck and IA.colors.red.."STUCK key:|r "..stuck or "")
+	print("        ", self.counter, frame:GetName(), IA.coloredKey(button, true), mod..key, command, stuck and IA.colors.red.."STUCK key:|r "..stuck or "")
 
 	if self.prevClickToMove then  SetCVar("AutoInteract", self.prevClickToMove) ; self.prevClickToMove = nil  end
 	
@@ -555,7 +555,7 @@ function WorldClickHandler:FixAccidentalRightClick(frame, button)
 	if not IsMouselooking() then  return  end
 	if IsModifiedClick('Interact') then  return  end
 
-	local DoubleClickInterval = IA.db.profile.DoubleClickInterval or 0.3
+	local doubleClickInterval = IA.db.profile.doubleClickInterval or 0.3
 	local now, last = GetTime(), self.LastTurnClick
 	self.LastTurnClick = now
 
@@ -563,13 +563,13 @@ function WorldClickHandler:FixAccidentalRightClick(frame, button)
 
 	if self.prevClickToMove then  SetCVar("AutoInteract", self.prevClickToMove) ; self.prevClickToMove = nil  end
 
-	if  now-last > DoubleClickInterval then
+	if  now-last > doubleClickInterval then
 		-- NOT DoubleClick
-		if  self.wasMouseover and self.db.profile.preventSingleClickMouseover  or  self.db.profile.preventSingleClick  then
+		if  self.wasMouseover and IA.db.profile.preventSingleClickMouseover  or  IA.db.profile.preventSingleClick  then
 			print("IA.FixRightClick: MouselookStop()")
 			IA.MouselookStop()    -- Trick TurnOrActionStop() into believing it was not pressed.
 		end
-  elseif  self.db.profile.runToDoubleClickMouseover  and  self.wasMouseover
+  elseif  IA.db.profile.runToDoubleClickMouseover  and  self.wasMouseover
 	or  self.RunToDoubleClickGround  and  not self.wasMouseover
   then  --  and not InCombatLockdown() then
 		print("IA.FixRightClick: runToDoubleClickMouseover")

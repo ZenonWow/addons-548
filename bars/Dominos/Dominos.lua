@@ -11,11 +11,10 @@ local CURRENT_VERSION = GetAddOnMetadata('Dominos', 'Version')
 
 --[[ Startup ]]--
 
-local AceDB
+local AceDB = LibStub('AceDB-3.0')
 
 function Dominos:OnInitialize()
 	--register database events
-	AceDB = LibStub('AceDB-3.0')
 	self.db = AceDB:New('DominosDB', self:GetDefaults(), true)
 	self.db.RegisterCallback(self, 'OnNewProfile')
 	self.db.RegisterCallback(self, 'OnProfileChanged')
@@ -50,11 +49,12 @@ function Dominos:OnInitialize()
 	kb.RegisterCallback(self, 'LIBKEYBOUND_DISABLED')
 
 	self:CreateDataBrokerPlugin()
-	
-	self:ReplaceBlizzard()
+
+	-- Replace the bliz ui right after ADDON_LOADED. Don't wait till PLAYER_LOGIN (after the loading screen), so the user is greeted with Dominos UI.
+	self:Enable()
 end
 
-function Dominos:ReplaceBlizzard()
+function Dominos:OnEnable()
 	self:HideBlizzard()
 	self:Load()
 	self.MultiActionBarGridFixer:SetShowGrid(self:ShowGrid())
@@ -110,7 +110,7 @@ end
 --[[ Version Updating ]]--
 
 function Dominos:GetDefaults()
-	local defaultSettings = {
+	return {
 		profile = {
 			possessBar = 1,
 
@@ -131,10 +131,9 @@ function Dominos:GetDefaults()
 				showgrid = true,
 			},
 
-			frames = {},
+			frames = {}
 		}
 	}
-	return defaultSettings
 end
 
 function Dominos:UpdateSettings(major, minor, bugfix)
@@ -180,7 +179,8 @@ end
 
 --shamelessly pulled from Bartender4
 function Dominos:HideBlizzard()
-	local uiHider = CreateFrame('Frame', nil, _G['UIParent'], 'SecureFrameTemplate'); uiHider:Hide()
+	local uiHider = CreateFrame('Frame', nil, _G.UIParent, 'SecureFrameTemplate')
+	uiHider:Hide()
 	self.uiHider = uiHider
 
 	local disableFrame = function(frameName, unregisterEvents)
