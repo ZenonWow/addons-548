@@ -32,6 +32,15 @@ end
 local window = CreateFrame("Frame", "BugSackFrame", UIParent)
 BugSack.window = window
 window:Hide()
+-- area = "center" closes UIGameMenu on auto-popup. A problem, if you want to get to interace options to disable auto-popup.
+-- UIPanelWindows.BugSackFrame = { area = "center", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
+UIPanelWindows.BugSackFrame = { area = "right", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
+-- Fix that bliz buzz too.
+UIPanelWindows.ScriptErrorsFrame = { area = "right", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
+-- Or disable auto-layout altogether, but still close when pressing Esc.
+-- UISpecialFrames[#UISpecialFrames+1] = 'ScriptErrorsFrame'    -- Builtin annoyance is persistent even after Esc
+-- UISpecialFrames[#UISpecialFrames+1] = window:GetName()
+
 
 function window:UpdateErrors(selectExistingError)
 	-- Delay update until next ShowUIPanel(window)
@@ -186,14 +195,6 @@ function window:Init()
 	window.Init = nil
 	window:SetScript('OnShow', window.OnShow)
 	window:SetScript('OnHide', window.OnHide)
-
-	-- To be in the center of attention it closed UIGameMenu on auto-popup. A problem, if you wanted to get to interace options to disable auto-popup.
-	-- UIPanelWindows.BugSackFrame = { area = "center", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
-	UIPanelWindows.BugSackFrame = { area = "right", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
-	UIPanelWindows.ScriptErrorsFrame = { area = "right", pushable = 1, whileDead = 1, allowOtherPanels = 1 }
-	-- Or disable auto-layout altogether, but still close when pressing Esc.
-	-- UISpecialFrames[#UISpecialFrames+1] = 'ScriptErrorsFrame'    -- Builtin annoyance is persistent even after Esc
-	-- UISpecialFrames[#UISpecialFrames+1] = window:GetName()
 
 	-- HideUIPanel(window)
 	window:SetFrameStrata("HIGH")
@@ -484,11 +485,8 @@ window:SetScript('OnShow', window.Init)
 
 
 
-function window:Toggle()
-	-- return  self:IsShown()  and  _G.HideUIPanel(self)  or  _G.ShowUIPanel(self)
-	-- Same:
-	return _G.ToggleFrame(self)
-end
+window.Toggle = _G.ToggleFrame
+
 
 function window:SelectError(errorObject)
 	if  not errorObject  then  return false  end
