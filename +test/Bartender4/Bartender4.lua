@@ -434,10 +434,9 @@ function Bartender4.modulePrototype:ToggleModule(info, value)
 	else
 		value = self.db.profile.enabled
 	end
-	if value and not self:IsEnabled() then
-		self:Enable()
-	elseif not value and self:IsEnabled() then
-		self:Disable()
+	if value
+	then self:Enable()
+	else self:Disable()
 	end
 end
 
