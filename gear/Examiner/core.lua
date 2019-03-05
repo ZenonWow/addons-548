@@ -627,10 +627,10 @@ end
 -- Inspect Ready
 function ex:InspectReady(guid, event)
 	-- if (self:ValidateUnit()) then
-	if  guid == UnitGUID(self.unit)  then
-		local unit = self.unit;
+	local unit = self.unit
+	if  unit  and  guid == UnitGUID(unit)  then
 		-- Guild Vars -- Returns zeros for unguilded people
-		local info = self.info;
+		local info = self.info
 		if (info.guild) then
 			--info.guildID, info.guildLevel, info.guildXP, info.guildMembers = GetInspectGuildInfo(unit);	-- Az: move this into guild.lua? -- Old Pre-MoP
 			info.guildLevel, info.guildXP, info.guildMembers = GetInspectGuildInfo(unit);	-- MoP: No more guildID as first return -- Az: move this into guild.lua?
