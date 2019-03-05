@@ -27,7 +27,7 @@ function Frame:New(id, tooltipText)
 end
 
 function Frame:Create(id)
-	local f = self:Bind(CreateFrame('Frame', format('DominosFrame%s', id), UIParent))
+	local f = self:Bind( CreateFrame('Frame', 'DominosFrame'..id, UIParent) )
 	f:SetClampedToScreen(true)
 	f:SetMovable(true)
 	f.id = id

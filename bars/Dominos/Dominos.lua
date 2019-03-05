@@ -49,9 +49,6 @@ function Dominos:OnInitialize()
 	kb.RegisterCallback(self, 'LIBKEYBOUND_DISABLED')
 
 	self:CreateDataBrokerPlugin()
-
-	-- Replace the bliz ui right after ADDON_LOADED. Don't wait till PLAYER_LOGIN (after the loading screen), so the user is greeted with Dominos UI.
-	self:Enable()
 end
 
 function Dominos:OnEnable()
@@ -59,6 +56,13 @@ function Dominos:OnEnable()
 	self:Load()
 	self.MultiActionBarGridFixer:SetShowGrid(self:ShowGrid())
 end
+
+function Dominos:OnDisable()
+	self.MultiActionBarGridFixer:SetShowGrid(false)
+	self:Unload()
+	self:HideBlizzard(false)
+end
+
 
 function Dominos:CreateDataBrokerPlugin()
 	local dataObject = LibStub:GetLibrary('LibDataBroker-1.1'):NewDataObject('Dominos', {
@@ -156,8 +160,25 @@ function Dominos:UpdateVersion()
 end
 
 
+
+
+local function ModuleOnEnable(moduleObj)
+	moduleObj:Load()
+	Dominos.Frame:ForAll('Reanchor')
+end
+
+function Dominos:OnModuleCreated(moduleObj)
+	-- Delay-loaded modules need to be initialized on their own, as Dominos:Load() ran before this has been loaded.
+	if not self.loaded then  return  end
+	-- moduleObj:Load() is not defined at this point, a lookup (that runs later) is necessary in ModuleOnEnable().
+	moduleObj.OnEnable = ModuleOnEnable
+end
+
+
+
 --Load is called  when the addon is first enabled, and also whenever a profile is loaded
 function Dominos:Load()
+	self.loaded = true
 	for i, module in self:IterateModules() do
 		module:Load()
 	end
@@ -168,6 +189,7 @@ end
 
 --unload is called when we're switching profiles
 function Dominos:Unload()
+	self.loaded = false
 	--unload any module stuff
 	for i, module in self:IterateModules() do
 		module:Unload()
@@ -178,10 +200,12 @@ end
 --[[ Blizzard Stuff Hiding ]]--
 
 --shamelessly pulled from Bartender4
-function Dominos:HideBlizzard()
-	local uiHider = CreateFrame('Frame', nil, _G.UIParent, 'SecureFrameTemplate')
-	uiHider:Hide()
+function Dominos:HideBlizzard(dominosRule)
+	if dominosRule == nil then  dominosRule = true  end
+	local UIParent = _G.UIParent
+	local uiHider = self.uiHider or CreateFrame('Frame', nil, UIParent, 'SecureFrameTemplate')
 	self.uiHider = uiHider
+	uiHider:SetShown(not dominosRule)
 
 	local disableFrame = function(frameName, unregisterEvents)
 		local frame = _G[frameName]
@@ -189,8 +213,8 @@ function Dominos:HideBlizzard()
 			self:Print('Unknown Frame', frameName)
 		end
 
-		frame:SetParent(uiHider) 
-		frame.ignoreFramePositionManager = true	
+		frame:SetParent(dominosRule and uiHider or UIParent)
+		frame.ignoreFramePositionManager = dominosRule or nil
 
 		if unregisterEvents then
 			frame:UnregisterAllEvents()
@@ -199,8 +223,8 @@ function Dominos:HideBlizzard()
 
 	--[[ disable, but don't hide the menu bar ]]--
 
-	_G['MainMenuBar']:EnableMouse(false)
-	_G['MainMenuBar'].ignoreFramePositionManager = true
+	_G['MainMenuBar']:EnableMouse(not dominosRule)
+	_G['MainMenuBar'].ignoreFramePositionManager = dominosRule or nil
 
 	disableFrame('MultiBarBottomLeft')
 	disableFrame('MultiBarBottomRight')
@@ -218,7 +242,7 @@ function Dominos:HideBlizzard()
 
 	--[[ disable override bar transition animations ]]--
 
-	do
+	if dominosRule then
 		local animations = {_G['MainMenuBar'].slideOut:GetAnimations()}
 		animations[1]:SetOffset(0, 0)
 
@@ -226,7 +250,7 @@ function Dominos:HideBlizzard()
 		animations[1]:SetOffset(0, 0)	
 	end
 
-	self:UpdateUseOverrideUI()
+	self:UpdateUseOverrideUI(dominosRule)
 end
 
 function Dominos:SetUseOverrideUI(enable)
@@ -238,8 +262,8 @@ function Dominos:UsingOverrideUI()
 	return self.db.profile.useOverrideUI 
 end
 
-function Dominos:UpdateUseOverrideUI()
-	local usingOverrideUI = self:UsingOverrideUI()
+function Dominos:UpdateUseOverrideUI(enabled)
+	local usingOverrideUI = enabled~=false and self:UsingOverrideUI()
 	
 	self.OverrideController:SetAttribute('state-useoverrideui', usingOverrideUI)
 	
