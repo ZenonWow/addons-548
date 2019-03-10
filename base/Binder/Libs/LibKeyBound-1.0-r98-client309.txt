@@ -1,2 +1,0 @@
-LibKeyBound-1.0  r98    released: May 15, 2011    for client: 3.0.9
-included in Binder 2.4.0
