@@ -1,0 +1,30 @@
+## Interface: 50001
+
+## Title: Squeenix
+## Notes: Square Minimap and more
+## Notes-koKR: 사각 미니맵과 기타 기능
+## Author: Tekkub Stoutwrithe
+## Version: Alpha
+## X-Website: http://www.tekkub.net/
+## X-Email: tekkub-wow@googlegroups.com
+## X-Category: Map
+## X-Icon: Interface\Icons\INV_Gizmo_BronzeFramework_01
+
+### LoadManagers: AddonLoader
+## X-LoadOn-Always: delayed
+## X-LoadOn-InterfaceOptions: Squeenix
+
+## SavedVariables: SqueenixDB2
+
+tekKonfig\tekKonfig.xml
+# CallbackHandler-1.0.lua
+# LibDataBroker-1.1\LibDataBroker-1.1.lua
+
+Squeenix.lua
+Config.lua
+Border.lua
+Hidebuttons.lua
+Move.lua
+NESW.lua
+Scale.lua
+Scrollzoom.lua
