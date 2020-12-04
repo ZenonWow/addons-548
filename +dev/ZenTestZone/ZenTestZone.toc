@@ -1,7 +1,7 @@
 ## Interface: 50400
 ## Title: ZenTestZone
 ## Notes: Definitely tainting
-## Author: Mongusious
+## Author: Zenon
 ## X-Email: 
 
 ## X-NoComma

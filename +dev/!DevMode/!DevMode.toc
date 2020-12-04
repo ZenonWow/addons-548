@@ -1,6 +1,6 @@
 ## Interface: 50400
 ## Title: DevMode
-## Author: Mongusius
+## Author: Zenon
 ## Notes: Installs debugging hooks early to monitor addon loading process.
 
 ## X-License: GPL v2 or later.

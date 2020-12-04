@@ -3,7 +3,7 @@
 ## X-Compatible-With: 50400
 ## Version: 1.0.0
 ## Notes: Action-combat style mouse controls - like pressing the RightButton all the time - with ground targeting, button rebinding (mouse move, DAoC profile).
-## Author: Mongusius
+## Author: Zenon
 ## X-Category: Interface Enhancements
 
 ## SavedVariables: ImmersiveActionSV, ImmersiveActionDB

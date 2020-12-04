@@ -2,7 +2,7 @@
 ## Interface: 50400
 ## Title: ZenTools
 ## Notes: Personal development addon
-## Author: Mongusious
+## Author: Zenon
 ## X-Email: 
 
 ## SavedVariables: BlackMarketTrackerAuctionData, BlackMarketTrackerArchive, NoLoginMusicDB, UnitAurasDB

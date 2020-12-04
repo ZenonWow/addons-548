@@ -1,7 +1,7 @@
 ## Interface: 50400
 ## Title: ZenShortcuts
 ## Notes: Usability bindings
-## Author: Mongusious
+## Author: Zenon
 ## X-Email: 
 
 #Bindings.xml  -- implicit
